@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat 2.0 - Edición de ID</title>
+  <title>WaveChat 2.0 - Con Pantalla Compartida</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -197,7 +197,7 @@
       outline: none;
     }
 
-    /* --- VIDEOLLAMADA --- */
+    /* --- VIDEO / PANTALLA --- */
     .call-overlay {
       display: none;
       position: absolute;
@@ -207,7 +207,7 @@
       flex-direction: column;
     }
 
-    #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
+    #remoteVideo { width: 100%; height: 100%; object-fit: contain; background: #111; }
     #localVideo {
       position: absolute;
       top: 20px; right: 20px;
@@ -259,9 +259,10 @@
         <i class="fa-solid fa-arrow-left" onclick="irAListaChats()" style="cursor:pointer"></i>
         <div id="activeChatName" style="font-weight: bold;">Nombre</div>
       </div>
-      <div style="display:flex; gap: 15px;">
+      <div style="display:flex; gap: 15px; align-items: center;">
         <i class="fa-solid fa-trash" onclick="confirmarBorrarHistorial()" style="color:var(--text-dim); cursor:pointer"></i>
-        <i class="fa-solid fa-video" onclick="iniciarLlamada()" style="color:var(--accent); cursor:pointer"></i>
+        <i class="fa-solid fa-desktop" onclick="iniciarLlamada(true)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Compartir Pantalla"></i>
+        <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Videollamada de Cámara"></i>
       </div>
     </header>
     
@@ -361,10 +362,16 @@
     });
 
     peer.on('call', async (call) => {
-      if(confirm("¿Contestar llamada de " + call.peer.replace('wave-','').toUpperCase() + "?")) {
-        localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+      if(confirm("¿Recibir transmisión de " + call.peer.replace('wave-','').toUpperCase() + "?")) {
+        // Al recibir videollamada normal intentamos habilitar cámara para bidireccional,
+        // pero si ellos solo nos comparten pantalla, no obligamos a prender la nuestra.
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+          document.getElementById('localVideo').srcObject = localStream;
+        } catch(e) {
+          console.log("No se pudo iniciar cámara local, solo recibiendo señal.");
+        }
         document.getElementById('callOverlay').style.display = 'flex';
-        document.getElementById('localVideo').srcObject = localStream;
         call.answer(localStream);
         call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
       }
@@ -513,17 +520,37 @@
     }
   }
 
-  // --- VIDEOLLAMADA ---
-  async function iniciarLlamada() {
-    localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-    document.getElementById('callOverlay').style.display = 'flex';
-    document.getElementById('localVideo').srcObject = localStream;
-    
-    const call = peer.call(activePeerId, localStream);
-    call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
+  // --- VIDEOLLAMADA / COMPARTIR PANTALLA ---
+  async function iniciarLlamada(compartirPantalla = false) {
+    try {
+      if (compartirPantalla) {
+        // Lógica de capturar pantalla
+        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+      } else {
+        // Lógica normal de capturar cámara
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      }
+      
+      document.getElementById('callOverlay').style.display = 'flex';
+      document.getElementById('localVideo').srcObject = localStream;
+      
+      const call = peer.call(activePeerId, localStream);
+      call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
+      
+      // Si se detiene la captura de pantalla por el botón nativo del navegador
+      if(compartirPantalla) {
+        localStream.getVideoTracks()[0].onended = () => colgarLlamada();
+      }
+    } catch(err) {
+      console.error("Error al iniciar stream: ", err);
+      alert("No se pudo iniciar la transmisión. Asegúrate de dar los permisos.");
+    }
   }
 
   function colgarLlamada() {
+    if(localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+    }
     location.reload(); 
   }
 </script>
