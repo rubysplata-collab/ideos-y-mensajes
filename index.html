@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat - Tu Espacio de Mensajería</title>
+  <title>WaveChat - Mensajería con Video Real</title>
   <style>
-    /* --- Paleta de Colores Exclusiva --- */
     :root {
       --bg-principal: #0b0e14;
       --bg-tarjeta: #151d26;
       --verde-neon: #00e676;
+      --rojo-neon: #ff1744;
       --verde-oscuro: #054735;
       --texto-blanco: #f5f5f7;
       --texto-mutado: #8b9bb4;
@@ -33,7 +33,6 @@
       align-items: center;
     }
 
-    /* --- Contenedor Principal (Simulación de Móvil) --- */
     .app-container {
       width: 100%;
       max-width: 420px;
@@ -48,7 +47,6 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
     }
 
-    /* --- PANTALLAS PRINCIPALES --- */
     .screen {
       display: none;
       flex-direction: column;
@@ -60,7 +58,6 @@
       display: flex;
     }
 
-    /* --- CABECERA ESTILO WAVECHAT --- */
     .app-header {
       padding: 15px 20px;
       background-color: #1f2c34;
@@ -68,7 +65,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      z-index: 10;
     }
 
     .app-header h2 {
@@ -77,57 +73,7 @@
       font-weight: 700;
     }
 
-    .header-actions {
-      display: flex;
-      gap: 15px;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
-
-    /* --- SECCIÓN DE ESTADOS / HISTORIAS --- */
-    .stories-container {
-      padding: 15px;
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      background-color: #121b22;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    }
-
-    .stories-container::-webkit-scrollbar {
-      display: none; /* Ocultar scrollbar */
-    }
-
-    .story-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.75rem;
-      color: var(--texto-mutado);
-      min-width: 60px;
-      cursor: pointer;
-    }
-
-    .story-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 2px solid var(--verde-neon);
-      padding: 2px;
-      background-color: var(--bg-tarjeta);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-    }
-
-    .story-item.my-story .story-avatar {
-      border: 2px dashed var(--texto-mutado);
-    }
-
-    /* --- LISTA DE CHATS --- */
+    /* Lista de Chats */
     .chat-list {
       flex: 1;
       overflow-y: auto;
@@ -141,11 +87,6 @@
       padding: 15px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       cursor: pointer;
-      transition: background-color 0.2s;
-    }
-
-    .chat-item:hover {
-      background-color: rgba(255, 255, 255, 0.02);
     }
 
     .chat-avatar {
@@ -157,7 +98,6 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 1.1rem;
     }
 
     .chat-info {
@@ -171,33 +111,17 @@
       margin-bottom: 5px;
     }
 
-    .chat-info-top h4 {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .chat-time {
-      font-size: 0.75rem;
-      color: var(--texto-mutado);
-    }
-
     .chat-preview {
       font-size: 0.85rem;
       color: var(--texto-mutado);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 250px;
     }
 
-    /* --- CHAT ACTIVO --- */
+    /* Chat Activo */
     .chat-active-container {
       display: flex;
       flex-direction: column;
       height: 100%;
       background-color: #0b141a;
-      background-image: radial-gradient(rgba(0, 230, 118, 0.03) 1px, transparent 0);
-      background-size: 24px 24px;
     }
 
     .chat-active-header {
@@ -230,8 +154,6 @@
       padding: 8px 12px;
       border-radius: 12px;
       font-size: 0.9rem;
-      line-height: 1.4;
-      position: relative;
     }
 
     .message-bubble.sent {
@@ -246,14 +168,6 @@
       border-top-left-radius: 0px;
     }
 
-    .message-img {
-      max-width: 100%;
-      border-radius: 8px;
-      margin-top: 5px;
-      display: block;
-    }
-
-    /* Entrada de Mensaje */
     .chat-input-bar {
       padding: 10px 15px;
       background-color: #1f2c34;
@@ -270,11 +184,6 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: white;
       outline: none;
-      font-size: 0.9rem;
-    }
-
-    .chat-input:focus {
-      border-color: var(--verde-neon);
     }
 
     .icon-btn {
@@ -285,62 +194,92 @@
       border: none;
     }
 
-    /* --- PANTALLA AJUSTES / PERFIL --- */
-    .profile-screen {
-      padding: 30px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      background-color: #121b22;
+    /* --- PANTALLA LLAMADA ACTIVA (WebRTC Real Video) --- */
+    .call-screen {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
+      background-color: #000;
+      z-index: 200;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px 20px;
     }
 
-    .profile-avatar-large {
-      width: 120px;
-      height: 120px;
+    /* Contenedor de Video de Cámara Real */
+    .video-call-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .local-video-element {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scaleX(-1); /* Efecto espejo natural para selfie */
+    }
+
+    .call-overlay-info {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+      margin-top: 40px;
+    }
+
+    .call-overlay-info h3 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+
+    .call-timer {
+      font-size: 1.1rem;
+      color: var(--verde-neon);
+      font-weight: bold;
+    }
+
+    .call-controls {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      gap: 25px;
+      margin-bottom: 20px;
+    }
+
+    .control-btn {
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background: linear-gradient(135deg, var(--verde-neon), var(--verde-oscuro));
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 3rem;
-      font-weight: bold;
-      border: 3px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
-    .profile-field {
-      width: 100%;
-      background-color: #1f2c34;
-      padding: 15px;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
+    .control-btn.decline {
+      background-color: var(--rojo-neon);
     }
 
-    .profile-field label {
-      font-size: 0.75rem;
-      color: var(--verde-neon);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .control-btn.active-control {
+      background-color: var(--verde-neon);
+      color: black;
     }
 
-    .profile-field input {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1rem;
-      outline: none;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-      padding-bottom: 5px;
-    }
-
-    .profile-field input:focus {
-      border-bottom-color: var(--verde-neon);
-    }
-
-    /* --- BARRA DE NAVEGACIÓN --- */
+    /* Navigation Bar */
     .app-nav {
       height: 70px;
       background-color: #1f2c34;
@@ -348,7 +287,6 @@
       display: flex;
       justify-content: space-around;
       align-items: center;
-      z-index: 10;
     }
 
     .nav-btn {
@@ -361,7 +299,6 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      transition: color 0.2s;
     }
 
     .nav-btn.active {
@@ -373,50 +310,37 @@
 
   <div class="app-container">
 
+    <div class="call-screen" id="callScreen">
+      <div class="video-call-container">
+        <video id="localVideoFeed" class="local-video-element" autoplay playsinline muted></video>
+      </div>
+
+      <div class="call-overlay-info">
+        <h3 id="callContactName">Contacto</h3>
+        <div class="call-timer" id="callTimer">Marcando...</div>
+      </div>
+
+      <div class="call-controls">
+        <button class="control-btn" id="muteBtn" onclick="toggleMute()">🎙️</button>
+        <button class="control-btn decline" onclick="colgarLlamada()">📞</button>
+        <button class="control-btn" id="videoToggleBtn" onclick="toggleVideoCamera()">📷</button>
+      </div>
+    </div>
+
     <div class="screen active" id="chatsScreen">
       <header class="app-header">
         <h2>WaveChat</h2>
-        <div class="header-actions">
-          <span onclick="alert('Buscando...')">🔍</span>
-          <span onclick="changeTab('profile')">⚙️</span>
-        </div>
       </header>
 
-      <div class="stories-container">
-        <div class="story-item my-story">
-          <div class="story-avatar">Mi</div>
-          <span>Mi Estado</span>
-        </div>
-        <div class="story-item" onclick="alert('Viendo estado de Fer')">
-          <div class="story-avatar" style="border-color: #e91e63;">F</div>
-          <span>Fer ✨</span>
-        </div>
-        <div class="story-item" onclick="alert('Viendo estado de Lucas')">
-          <div class="story-avatar" style="border-color: #00bcd4;">L</div>
-          <span>Lucas</span>
-        </div>
-      </div>
-
       <div class="chat-list">
-        <div class="chat-item" onclick="abrirChat('Fer ✨', 'F', '#e91e63', '¿Viste el nuevo video que subí?')">
+        <div class="chat-item" onclick="abrirChat('Fer ✨', 'F', '#e91e63')">
           <div class="chat-avatar" style="background-color: #e91e63;">F</div>
           <div class="chat-info">
             <div class="chat-info-top">
               <h4>Fer ✨</h4>
-              <span class="chat-time">12:30 PM</span>
+              <span style="font-size: 0.75rem; color: var(--texto-mutado);">12:30 PM</span>
             </div>
-            <p class="chat-preview">¿Viste el nuevo video que subí?</p>
-          </div>
-        </div>
-
-        <div class="chat-item" onclick="abrirChat('Lucas', 'L', '#00bcd4', 'Dale, nos vemos al rato 🚀')">
-          <div class="chat-avatar" style="background-color: #00bcd4;">L</div>
-          <div class="chat-info">
-            <div class="chat-info-top">
-              <h4>Lucas</h4>
-              <span class="chat-time">Ayer</span>
-            </div>
-            <p class="chat-preview">Dale, nos vemos al rato 🚀</p>
+            <p class="chat-preview">¡Haz clic para chatear o llamarme!</p>
           </div>
         </div>
       </div>
@@ -431,88 +355,63 @@
             <h4 id="activeContactName" style="font-size: 1rem;">Nombre</h4>
             <span style="font-size: 0.75rem; color: var(--verde-neon);">En línea</span>
           </div>
+          <button class="icon-btn" onclick="iniciarLlamadaVideoReal()">📞</button>
         </header>
 
         <div class="chat-messages-box" id="chatMessagesBox">
-          <div class="message-bubble received" id="chatInitialMsg">¡Hola! ¿Cómo va el proyecto?</div>
+          <div class="message-bubble received">¡Hola! Presiona el icono de arriba para iniciar una videollamada real con tu cámara.</div>
         </div>
 
         <div class="chat-input-bar">
-          <label class="icon-btn" title="Adjuntar foto">
-            📷
-            <input type="file" id="chatFileInput" accept="image/*" style="display: none;" onchange="enviarImagenChat()">
-          </label>
           <input type="text" id="chatInputMessage" class="chat-input" placeholder="Escribe un mensaje...">
           <button class="icon-btn" onclick="enviarMensajeTexto()">➤</button>
         </div>
       </div>
     </div>
 
-    <div class="screen" id="profileScreen">
-      <header class="app-header">
-        <h2>Ajustes de Perfil</h2>
-      </header>
-      <div class="profile-screen">
-        <div class="profile-avatar-large" id="profileAvatarLarge">U</div>
-        
-        <div class="profile-field">
-          <label>Tu Nombre</label>
-          <input type="text" id="inputProfileName" value="Tu Usuario" oninput="actualizarPerfil()">
-        </div>
-
-        <div class="profile-field">
-          <label>Info. Estado</label>
-          <input type="text" id="inputProfileStatus" value="Disponible en WaveChat 🚀" oninput="actualizarPerfil()">
-        </div>
-      </div>
-    </div>
-
     <nav class="app-nav" id="mainNavBar">
-      <button class="nav-btn active" id="navChats" onclick="changeTab('chats')">💬<span>Chats</span></button>
-      <button class="nav-btn" id="navProfile" onclick="changeTab('profile')">👤<span>Perfil</span></button>
+      <button class="nav-btn active" onclick="changeTab('chats')">💬<span>Chats</span></button>
     </nav>
 
   </div>
 
   <script>
-    // --- NAVEGACIÓN ENTRE SECCIONES ---
-    function changeTab(tab) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    let streamLocal = null;
+    let callInterval;
+    let seconds = 0;
+    let audioMuted = false;
+    let videoMuted = false;
+    let contactoActual = { nombre: '', inicial: '', color: '' };
 
+    function changeTab(tab) {
       if (tab === 'chats') {
         document.getElementById('chatsScreen').classList.add('active');
-        document.getElementById('navChats').classList.add('active');
-        document.getElementById('mainNavBar').style.display = 'flex';
-      } else if (tab === 'profile') {
-        document.getElementById('profileScreen').classList.add('active');
-        document.getElementById('navProfile').classList.add('active');
+        document.getElementById('activeChatScreen').classList.remove('active');
         document.getElementById('mainNavBar').style.display = 'flex';
       }
     }
 
-    // --- INTERACTIVIDAD DEL CHAT ---
-    function abrirChat(nombre, inicial, color, primerMensaje) {
-      // Ocultar la navegación principal dentro de un chat activo
+    function abrirChat(nombre, inicial, color) {
+      contactoActual = { nombre, inicial, color };
       document.getElementById('mainNavBar').style.display = 'none';
-      
       document.getElementById('chatsScreen').classList.remove('active');
       document.getElementById('activeChatScreen').classList.add('active');
 
       const avatar = document.getElementById('activeAvatar');
       avatar.innerText = inicial;
       avatar.style.backgroundColor = color;
-      
       document.getElementById('activeContactName').innerText = nombre;
-      
-      // Limpiar y cargar mensaje inicial simulado
-      const chatBox = document.getElementById('chatMessagesBox');
-      chatBox.innerHTML = `<div class="message-bubble received">${primerMensaje}</div>`;
+    }
+
+    function cerrarChat() {
+      cerrarChat();
+      changeTab('chats');
     }
 
     function cerrarChat() {
       document.getElementById('activeChatScreen').classList.remove('active');
-      changeTab('chats');
+      document.getElementById('mainNavBar').style.display = 'flex';
+      document.getElementById('chatsScreen').classList.add('active');
     }
 
     function enviarMensajeTexto() {
@@ -521,52 +420,79 @@
       if (!text) return;
 
       const chatBox = document.getElementById('chatMessagesBox');
-      
-      // Agregar mensaje enviado
       chatBox.innerHTML += `<div class="message-bubble sent">${text}</div>`;
       input.value = "";
       chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-      // Respuesta automática de prueba para dinamismo
-      setTimeout(() => {
-        chatBox.innerHTML += `<div class="message-bubble received">¡Listo! Recibido correctamente. 👍</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+    // --- ACCESO A HARDWARE REAL (CÁMARA Y MICROFONO) ---
+    async function iniciarLlamadaVideoReal() {
+      document.getElementById('callContactName').innerText = contactoActual.nombre;
+      document.getElementById('callScreen').style.display = 'flex';
+      document.getElementById('callTimer').innerText = "Accediendo a cámara...";
+
+      try {
+        // Solicitar permisos nativos de Audio y Video al navegador
+        streamLocal = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" }, // Utiliza la cámara frontal/selfie
+          audio: true
+        });
+
+        // Conectar el flujo de video al elemento <video> en el HTML
+        const videoElement = document.getElementById('localVideoFeed');
+        videoElement.srcObject = streamLocal;
+
+        // Iniciar cronómetro de llamada una vez obtenida la cámara
+        iniciarTemporizador();
+
+      } catch (error) {
+        console.error("Error al acceder a los dispositivos de medios:", error);
+        document.getElementById('callTimer').innerText = "Error: Sin permisos de cámara";
+        alert("No se pudo acceder a la cámara. Asegúrate de dar permisos de video y audio en tu navegador.");
+      }
+    }
+
+    function iniciarTemporizador() {
+      seconds = 0;
+      document.getElementById('callTimer').innerText = "00:00";
+      
+      callInterval = setInterval(() => {
+        seconds++;
+        let mins = Math.floor(seconds / 60);
+        let secs = seconds % 60;
+        document.getElementById('callTimer').innerText = 
+          (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
       }, 1000);
     }
 
-    function enviarImagenChat() {
-      const fileInput = document.getElementById('chatFileInput');
-      if (fileInput.files.length === 0) return;
+    function colgarLlamada() {
+      clearInterval(callInterval);
+      
+      // Apagar la cámara física y el micrófono para ahorrar batería y respetar privacidad
+      if (streamLocal) {
+        streamLocal.getTracks().forEach(track => track.stop());
+        streamLocal = null;
+      }
 
-      const file = fileInput.files[0];
-      const imageUrl = URL.createObjectURL(file);
-      const chatBox = document.getElementById('chatMessagesBox');
-
-      // Agregar burbuja con la imagen cargada de forma local
-      chatBox.innerHTML += `
-        <div class="message-bubble sent">
-          <img src="${imageUrl}" class="message-img" alt="Imagen enviada">
-        </div>
-      `;
-
-      fileInput.value = ""; // Limpiar input file
-      chatBox.scrollTop = chatBox.scrollHeight;
+      document.getElementById('localVideoFeed').srcObject = null;
+      document.getElementById('callScreen').style.display = 'none';
     }
 
-    // Escuchar la tecla Enter en la barra de texto
-    document.getElementById('chatInputMessage').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        enviarMensajeTexto();
+    function toggleMute() {
+      if (streamLocal) {
+        audioMuted = !audioMuted;
+        // Apaga o enciende el track de audio real
+        streamLocal.getAudioTracks().forEach(track => track.enabled = !audioMuted);
+        document.getElementById('muteBtn').classList.toggle('active-control', audioMuted);
       }
-    });
+    }
 
-    // --- LÓGICA DE PERFIL ---
-    function actualizarPerfil() {
-      const name = document.getElementById('inputProfileName').value;
-      const avatarLarge = document.getElementById('profileAvatarLarge');
-      
-      if (name.trim() !== "") {
-        avatarLarge.innerText = name.charAt(0).toUpperCase();
+    function toggleVideoCamera() {
+      if (streamLocal) {
+        videoMuted = !videoMuted;
+        // Apaga o enciende el track de video real de la cámara
+        streamLocal.getVideoTracks().forEach(track => track.enabled = !videoMuted);
+        document.getElementById('videoToggleBtn').classList.toggle('active-control', videoMuted);
       }
     }
   </script>
