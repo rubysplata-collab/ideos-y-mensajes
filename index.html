@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat - Mensajería con Video Real</title>
+  <title>WaveChat - P2P Real (Chats, Fotos y Videollamadas)</title>
+  
+  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+
   <style>
     :root {
       --bg-principal: #0b0e14;
@@ -31,12 +34,13 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 10px;
     }
 
     .app-container {
       width: 100%;
       max-width: 420px;
-      height: 850px;
+      height: 820px;
       background-color: var(--bg-tarjeta);
       border: 1px solid rgba(0, 230, 118, 0.2);
       border-radius: 24px;
@@ -73,11 +77,66 @@
       font-weight: 700;
     }
 
-    /* Lista de Chats */
+    /* Configuración de Conexión */
+    .connection-box {
+      background-color: #121b22;
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .my-id-display {
+      font-size: 0.85rem;
+      color: var(--texto-mutado);
+    }
+
+    .my-id-display strong {
+      color: var(--verde-neon);
+      background-color: rgba(0, 230, 118, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .connect-input-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .connect-input {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0,0,0,0.2);
+      color: white;
+      outline: none;
+      font-size: 0.85rem;
+    }
+
+    .connect-btn {
+      padding: 8px 16px;
+      background-color: var(--verde-neon);
+      color: black;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Lista de chats activos */
     .chat-list {
       flex: 1;
       overflow-y: auto;
       background-color: #121b22;
+    }
+
+    .no-connections {
+      padding: 40px 20px;
+      text-align: center;
+      color: var(--texto-mutado);
+      font-size: 0.9rem;
     }
 
     .chat-item {
@@ -104,19 +163,12 @@
       flex: 1;
     }
 
-    .chat-info-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 5px;
-    }
-
     .chat-preview {
       font-size: 0.85rem;
       color: var(--texto-mutado);
     }
 
-    /* Chat Activo */
+    /* Interfaz de Chat Activo */
     .chat-active-container {
       display: flex;
       flex-direction: column;
@@ -154,6 +206,8 @@
       padding: 8px 12px;
       border-radius: 12px;
       font-size: 0.9rem;
+      line-height: 1.4;
+      word-break: break-word;
     }
 
     .message-bubble.sent {
@@ -166,6 +220,13 @@
       background-color: var(--burbuja-recibido);
       align-self: flex-start;
       border-top-left-radius: 0px;
+    }
+
+    .message-media {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 5px;
+      display: block;
     }
 
     .chat-input-bar {
@@ -194,7 +255,7 @@
       border: none;
     }
 
-    /* --- PANTALLA LLAMADA ACTIVA (WebRTC Real Video) --- */
+    /* --- PANTALLA VIDEOLLAMADA REAL --- */
     .call-screen {
       display: none;
       position: absolute;
@@ -210,22 +271,34 @@
       padding: 40px 20px;
     }
 
-    /* Contenedor de Video de Cámara Real */
-    .video-call-container {
+    .video-call-grid {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
       z-index: 1;
-      overflow: hidden;
     }
 
-    .local-video-element {
+    /* Video del otro en pantalla completa */
+    .remote-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transform: scaleX(-1); /* Efecto espejo natural para selfie */
+    }
+
+    /* Tu propio video en miniatura flotante */
+    .local-video {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 110px;
+      height: 160px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 2px solid var(--verde-neon);
+      z-index: 10;
+      transform: scaleX(-1);
     }
 
     .call-overlay-info {
@@ -233,18 +306,7 @@
       z-index: 10;
       text-align: center;
       text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-      margin-top: 40px;
-    }
-
-    .call-overlay-info h3 {
-      font-size: 1.8rem;
-      margin-bottom: 5px;
-    }
-
-    .call-timer {
-      font-size: 1.1rem;
-      color: var(--verde-neon);
-      font-weight: bold;
+      margin-top: 180px;
     }
 
     .call-controls {
@@ -273,37 +335,6 @@
     .control-btn.decline {
       background-color: var(--rojo-neon);
     }
-
-    .control-btn.active-control {
-      background-color: var(--verde-neon);
-      color: black;
-    }
-
-    /* Navigation Bar */
-    .app-nav {
-      height: 70px;
-      background-color: #1f2c34;
-      border-top: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-
-    .nav-btn {
-      color: var(--texto-mutado);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 1.1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .nav-btn.active {
-      color: var(--verde-neon);
-    }
   </style>
 </head>
 <body>
@@ -311,37 +342,37 @@
   <div class="app-container">
 
     <div class="call-screen" id="callScreen">
-      <div class="video-call-container">
-        <video id="localVideoFeed" class="local-video-element" autoplay playsinline muted></video>
+      <div class="video-call-grid">
+        <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
       </div>
 
       <div class="call-overlay-info">
-        <h3 id="callContactName">Contacto</h3>
-        <div class="call-timer" id="callTimer">Marcando...</div>
+        <h3 id="callContactName">Conectando...</h3>
+        <div id="callTimer" style="color: var(--verde-neon); font-weight: bold;">Llamada en progreso</div>
       </div>
 
       <div class="call-controls">
-        <button class="control-btn" id="muteBtn" onclick="toggleMute()">🎙️</button>
-        <button class="control-btn decline" onclick="colgarLlamada()">📞</button>
-        <button class="control-btn" id="videoToggleBtn" onclick="toggleVideoCamera()">📷</button>
+        <button class="control-btn decline" onclick="colgarLlamadaReal()">📞</button>
       </div>
     </div>
 
     <div class="screen active" id="chatsScreen">
       <header class="app-header">
-        <h2>WaveChat</h2>
+        <h2>WaveChat P2P</h2>
       </header>
 
-      <div class="chat-list">
-        <div class="chat-item" onclick="abrirChat('Fer ✨', 'F', '#e91e63')">
-          <div class="chat-avatar" style="background-color: #e91e63;">F</div>
-          <div class="chat-info">
-            <div class="chat-info-top">
-              <h4>Fer ✨</h4>
-              <span style="font-size: 0.75rem; color: var(--texto-mutado);">12:30 PM</span>
-            </div>
-            <p class="chat-preview">¡Haz clic para chatear o llamarme!</p>
-          </div>
+      <div class="connection-box">
+        <div class="my-id-display">Tu ID para compartir: <strong id="myPeerId">Generando...</strong></div>
+        <div class="connect-input-group">
+          <input type="text" id="destPeerId" class="connect-input" placeholder="Ingresa el ID de tu amigo">
+          <button class="connect-btn" onclick="conectarConAmigo()">Conectar</button>
+        </div>
+      </div>
+
+      <div class="chat-list" id="activeChatsList">
+        <div class="no-connections" id="noConnectionsText">
+          No tienes chats activos.<br>Comparte tu ID o ingresa el de un amigo para empezar.
         </div>
       </div>
     </div>
@@ -349,75 +380,164 @@
     <div class="screen" id="activeChatScreen">
       <div class="chat-active-container">
         <header class="chat-active-header">
-          <button class="back-btn" onclick="cerrarChat()">◀</button>
-          <div class="chat-avatar" id="activeAvatar" style="width: 38px; height: 38px; font-size: 1rem;">C</div>
+          <button class="back-btn" onclick="volverAChats()">◀</button>
+          <div class="chat-avatar" id="activeAvatar" style="width: 38px; height: 38px; font-size: 1rem; background-color: var(--verde-oscuro);">U</div>
           <div style="flex: 1;">
-            <h4 id="activeContactName" style="font-size: 1rem;">Nombre</h4>
-            <span style="font-size: 0.75rem; color: var(--verde-neon);">En línea</span>
+            <h4 id="activeContactName" style="font-size: 1rem;">Amigo</h4>
+            <span style="font-size: 0.75rem; color: var(--verde-neon);">P2P Conectado</span>
           </div>
-          <button class="icon-btn" onclick="iniciarLlamadaVideoReal()">📞</button>
+          <button class="icon-btn" onclick="iniciarLlamadaReal()">📹</button>
         </header>
 
-        <div class="chat-messages-box" id="chatMessagesBox">
-          <div class="message-bubble received">¡Hola! Presiona el icono de arriba para iniciar una videollamada real con tu cámara.</div>
-        </div>
+        <div class="chat-messages-box" id="chatMessagesBox"></div>
 
         <div class="chat-input-bar">
+          <label class="icon-btn" title="Enviar Foto/Video">
+            📁
+            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="enviarArchivoP2P()">
+          </label>
           <input type="text" id="chatInputMessage" class="chat-input" placeholder="Escribe un mensaje...">
-          <button class="icon-btn" onclick="enviarMensajeTexto()">➤</button>
+          <button class="icon-btn" onclick="enviarMensajeTextoReal()">➤</button>
         </div>
       </div>
     </div>
 
-    <nav class="app-nav" id="mainNavBar">
-      <button class="nav-btn active" onclick="changeTab('chats')">💬<span>Chats</span></button>
-    </nav>
-
   </div>
 
   <script>
-    let streamLocal = null;
-    let callInterval;
-    let seconds = 0;
-    let audioMuted = false;
-    let videoMuted = false;
-    let contactoActual = { nombre: '', inicial: '', color: '' };
+    let peer;
+    let dataConnection = null;
+    let mediaCall = null;
+    let localStream = null;
+    let amigoIdActual = "";
 
-    function changeTab(tab) {
-      if (tab === 'chats') {
-        document.getElementById('chatsScreen').classList.add('active');
-        document.getElementById('activeChatScreen').classList.remove('active');
-        document.getElementById('mainNavBar').style.display = 'flex';
+    // --- INICIALIZAR PEERJS (Conexión Real) ---
+    // Generamos un ID amigable basado en 'wave-'
+    const randomId = 'wave-' + Math.floor(1000 + Math.random() * 9000);
+    
+    peer = new Peer(randomId);
+
+    peer.on('open', (id) => {
+      document.getElementById('myPeerId').innerText = id;
+    });
+
+    // Escuchar conexiones de datos entrantes (mensajes, fotos, videos)
+    peer.on('connection', (conn) => {
+      dataConnection = conn;
+      amigoIdActual = conn.peer;
+      configurarEventosConexion();
+      agregarChatALaLista(conn.peer);
+    });
+
+    // Escuchar llamadas de video entrantes
+    peer.on('call', async (call) => {
+      if (confirm(`¿Contestar videollamada de ${call.peer}?`)) {
+        mediaCall = call;
+        try {
+          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          document.getElementById('localVideo').srcObject = localStream;
+          
+          call.answer(localStream);
+          document.getElementById('callScreen').style.display = 'flex';
+          document.getElementById('callContactName').innerText = call.peer;
+
+          call.on('stream', (remoteStream) => {
+            document.getElementById('remoteVideo').srcObject = remoteStream;
+          });
+        } catch (err) {
+          alert("Error al acceder a la cámara/micrófono para contestar.");
+        }
+      } else {
+        call.close();
       }
+    });
+
+    // --- ENLAZAR DE FORMA ACTIVA CON UN AMIGO ---
+    function conectarConAmigo() {
+      const destId = document.getElementById('destPeerId').value.trim();
+      if (!destId) return alert("Por favor ingresa un ID válido.");
+      if (destId === peer.id) return alert("No puedes conectarte a ti mismo.");
+
+      dataConnection = peer.connect(destId);
+      amigoIdActual = destId;
+      configurarEventosConexion();
+      agregarChatALaLista(destId);
     }
 
-    function abrirChat(nombre, inicial, color) {
-      contactoActual = { nombre, inicial, color };
-      document.getElementById('mainNavBar').style.display = 'none';
+    function configurarEventosConexion() {
+      dataConnection.on('open', () => {
+        // Abrimos automáticamente la pantalla de chat una vez enlazados
+        abrirChatPantalla(amigoIdActual);
+      });
+
+      dataConnection.on('data', (data) => {
+        const chatBox = document.getElementById('chatMessagesBox');
+        
+        if (data.type === 'text') {
+          chatBox.innerHTML += `<div class="message-bubble received">${data.content}</div>`;
+        } else if (data.type === 'file') {
+          // Crear un enlace blob real para mostrar la foto o reproducir el video recibido
+          const blob = new Blob([data.fileData], { type: data.fileType });
+          const url = URL.createObjectURL(blob);
+          
+          if (data.fileType.startsWith('image/')) {
+            chatBox.innerHTML += `
+              <div class="message-bubble received">
+                <img src="${url}" class="message-media" alt="Imagen P2P">
+              </div>`;
+          } else if (data.fileType.startsWith('video/')) {
+            chatBox.innerHTML += `
+              <div class="message-bubble received">
+                <video src="${url}" class="message-media" controls></video>
+              </div>`;
+          }
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+    }
+
+    // --- BANDEJA DE ENTRADA ---
+    function agregarChatALaLista(peerId) {
+      document.getElementById('noConnectionsText').style.display = 'none';
+      const list = document.getElementById('activeChatsList');
+      
+      // Evitar duplicados en la lista de chats
+      if (document.getElementById(`chat-item-${peerId}`)) return;
+
+      list.innerHTML = `
+        <div class="chat-item" id="chat-item-${peerId}" onclick="abrirChatPantalla('${peerId}')">
+          <div class="chat-avatar">👤</div>
+          <div class="chat-info">
+            <h4>${peerId}</h4>
+            <p class="chat-preview">¡Conexión establecida! Toca para hablar.</p>
+          </div>
+        </div>
+      ` + list.innerHTML;
+    }
+
+    function abrirChatPantalla(peerId) {
       document.getElementById('chatsScreen').classList.remove('active');
       document.getElementById('activeChatScreen').classList.add('active');
-
-      const avatar = document.getElementById('activeAvatar');
-      avatar.innerText = inicial;
-      avatar.style.backgroundColor = color;
-      document.getElementById('activeContactName').innerText = nombre;
+      document.getElementById('activeContactName').innerText = peerId;
+      document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; color:var(--texto-mutado); font-size:0.8rem;">Cifrado de extremo a extremo activo</div>`;
     }
 
-    function cerrarChat() {
-      cerrarChat();
-      changeTab('chats');
-    }
-
-    function cerrarChat() {
+    function volverAChats() {
       document.getElementById('activeChatScreen').classList.remove('active');
-      document.getElementById('mainNavBar').style.display = 'flex';
       document.getElementById('chatsScreen').classList.add('active');
     }
 
-    function enviarMensajeTexto() {
+    // --- ENVIAR MENSAJES DE TEXTO REALES ---
+    function enviarMensajeTextoReal() {
       const input = document.getElementById('chatInputMessage');
       const text = input.value.trim();
-      if (!text) return;
+      if (!text || !dataConnection) return;
+
+      // Enviar datos vía PeerJS DataChannel
+      dataConnection.send({
+        type: 'text',
+        content: text
+      });
 
       const chatBox = document.getElementById('chatMessagesBox');
       chatBox.innerHTML += `<div class="message-bubble sent">${text}</div>`;
@@ -425,75 +545,92 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // --- ACCESO A HARDWARE REAL (CÁMARA Y MICROFONO) ---
-    async function iniciarLlamadaVideoReal() {
-      document.getElementById('callContactName').innerText = contactoActual.nombre;
-      document.getElementById('callScreen').style.display = 'flex';
-      document.getElementById('callTimer').innerText = "Accediendo a cámara...";
+    // --- ENVIAR FOTOS Y VIDEOS REALES ---
+    function enviarArchivoP2P() {
+      const fileInput = document.getElementById('mediaInput');
+      if (fileInput.files.length === 0) return;
 
-      try {
-        // Solicitar permisos nativos de Audio y Video al navegador
-        streamLocal = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" }, // Utiliza la cámara frontal/selfie
-          audio: true
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+
+      reader.onload = function(event) {
+        const fileData = event.target.result;
+        
+        // Enviar el archivo binario completo directamente por la conexión WebRTC
+        dataConnection.send({
+          type: 'file',
+          fileData: fileData,
+          fileName: file.name,
+          fileType: file.type
         });
 
-        // Conectar el flujo de video al elemento <video> en el HTML
-        const videoElement = document.getElementById('localVideoFeed');
-        videoElement.srcObject = streamLocal;
+        // Mostrarlo localmente en nuestra pantalla
+        const url = URL.createObjectURL(file);
+        const chatBox = document.getElementById('chatMessagesBox');
+        
+        if (file.type.startsWith('image/')) {
+          chatBox.innerHTML += `
+            <div class="message-bubble sent">
+              <img src="${url}" class="message-media" alt="Enviado">
+            </div>`;
+        } else if (file.type.startsWith('video/')) {
+          chatBox.innerHTML += `
+            <div class="message-bubble sent">
+              <video src="${url}" class="message-media" controls></video>
+            </div>`;
+        }
+        
+        fileInput.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+      };
 
-        // Iniciar cronómetro de llamada una vez obtenida la cámara
-        iniciarTemporizador();
+      reader.readAsArrayBuffer(file);
+    }
 
-      } catch (error) {
-        console.error("Error al acceder a los dispositivos de medios:", error);
-        document.getElementById('callTimer').innerText = "Error: Sin permisos de cámara";
-        alert("No se pudo acceder a la cámara. Asegúrate de dar permisos de video y audio en tu navegador.");
+    // Escuchar la tecla Enter
+    document.getElementById('chatInputMessage').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') enviarMensajeTextoReal();
+    });
+
+    // --- LLAMADAS DE VIDEO REALES (WebRTC) ---
+    async function iniciarLlamadaReal() {
+      if (!amigoIdActual) return;
+
+      document.getElementById('callScreen').style.display = 'flex';
+      document.getElementById('callContactName').innerText = amigoIdActual;
+
+      try {
+        // Capturar medios locales
+        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        document.getElementById('localVideo').srcObject = localStream;
+
+        // Llamar al peer destino mandándole tu stream
+        mediaCall = peer.call(amigoIdActual, localStream);
+
+        // Recibir el video del amigo
+        mediaCall.on('stream', (remoteStream) => {
+          document.getElementById('remoteVideo').srcObject = remoteStream;
+        });
+
+      } catch (err) {
+        console.error(err);
+        alert("No se pudo acceder a tu cámara o micrófono.");
+        colgarLlamadaReal();
       }
     }
 
-    function iniciarTemporizador() {
-      seconds = 0;
-      document.getElementById('callTimer').innerText = "00:00";
-      
-      callInterval = setInterval(() => {
-        seconds++;
-        let mins = Math.floor(seconds / 60);
-        let secs = seconds % 60;
-        document.getElementById('callTimer').innerText = 
-          (mins < 10 ? "0" + mins : mins) + ":" + (secs < 10 ? "0" + secs : secs);
-      }, 1000);
-    }
-
-    function colgarLlamada() {
-      clearInterval(callInterval);
-      
-      // Apagar la cámara física y el micrófono para ahorrar batería y respetar privacidad
-      if (streamLocal) {
-        streamLocal.getTracks().forEach(track => track.stop());
-        streamLocal = null;
+    function colgarLlamadaReal() {
+      if (mediaCall) {
+        mediaCall.close();
+        mediaCall = null;
       }
-
-      document.getElementById('localVideoFeed').srcObject = null;
+      if (localStream) {
+        localStream.getTracks().forEach(track => track.stop());
+        localStream = null;
+      }
+      document.getElementById('localVideo').srcObject = null;
+      document.getElementById('remoteVideo').srcObject = null;
       document.getElementById('callScreen').style.display = 'none';
-    }
-
-    function toggleMute() {
-      if (streamLocal) {
-        audioMuted = !audioMuted;
-        // Apaga o enciende el track de audio real
-        streamLocal.getAudioTracks().forEach(track => track.enabled = !audioMuted);
-        document.getElementById('muteBtn').classList.toggle('active-control', audioMuted);
-      }
-    }
-
-    function toggleVideoCamera() {
-      if (streamLocal) {
-        videoMuted = !videoMuted;
-        // Apaga o enciende el track de video real de la cámara
-        streamLocal.getVideoTracks().forEach(track => track.enabled = !videoMuted);
-        document.getElementById('videoToggleBtn').classList.toggle('active-control', videoMuted);
-      }
     }
   </script>
 </body>
