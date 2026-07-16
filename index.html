@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat - P2P Real (Chats, Fotos y Videollamadas)</title>
+  <title>WaveChat - Mensajería P2P Real</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
@@ -13,11 +13,10 @@
       --bg-tarjeta: #151d26;
       --verde-neon: #00e676;
       --rojo-neon: #ff1744;
-      --verde-oscuro: #054735;
       --texto-blanco: #f5f5f7;
       --texto-mutado: #8b9bb4;
-      --burbuja-enviado: #056162;
-      --burbuja-recibido: #1f2c34;
+      --burbuja-enviado: #002d62; /* Color de tus mensajes en la captura */
+      --burbuja-recibido: #1f2c34; /* Color de los mensajes de Fer */
     }
 
     * {
@@ -62,8 +61,9 @@
       display: flex;
     }
 
+    /* --- PANTALLA PRINCIPAL: CONEXIÓN --- */
     .app-header {
-      padding: 15px 20px;
+      padding: 18px 20px;
       background-color: #1f2c34;
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
@@ -77,98 +77,71 @@
       font-weight: 700;
     }
 
-    /* Configuración de Conexión */
-    .connection-box {
-      background-color: #121b22;
-      padding: 15px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    .setup-box {
+      padding: 30px 20px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 20px;
+      flex: 1;
+      background-color: #121b22;
+      justify-content: center;
     }
 
-    .my-id-display {
-      font-size: 0.85rem;
+    .id-card {
+      background-color: rgba(255,255,255,0.03);
+      border: 1px dashed rgba(0, 230, 118, 0.3);
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+    }
+
+    .id-card p {
       color: var(--texto-mutado);
+      font-size: 0.9rem;
+      margin-bottom: 8px;
     }
 
-    .my-id-display strong {
+    .id-card strong {
+      font-size: 1.4rem;
       color: var(--verde-neon);
-      background-color: rgba(0, 230, 118, 0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
+      letter-spacing: 1px;
     }
 
-    .connect-input-group {
+    .connect-form {
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 10px;
     }
 
     .connect-input {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 14px 16px;
+      border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       background-color: rgba(0,0,0,0.2);
       color: white;
       outline: none;
-      font-size: 0.85rem;
+      font-size: 0.95rem;
+      text-align: center;
     }
 
     .connect-btn {
-      padding: 8px 16px;
+      padding: 14px;
       background-color: var(--verde-neon);
       color: black;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
+      transition: background 0.2s;
     }
 
-    /* Lista de chats activos */
-    .chat-list {
-      flex: 1;
-      overflow-y: auto;
-      background-color: #121b22;
+    .connect-btn:hover {
+      background-color: #00b359;
     }
 
-    .no-connections {
-      padding: 40px 20px;
-      text-align: center;
-      color: var(--texto-mutado);
-      font-size: 0.9rem;
-    }
-
-    .chat-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      cursor: pointer;
-    }
-
-    .chat-avatar {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: var(--verde-oscuro);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-    }
-
-    .chat-info {
-      flex: 1;
-    }
-
-    .chat-preview {
-      font-size: 0.85rem;
-      color: var(--texto-mutado);
-    }
-
-    /* Interfaz de Chat Activo */
+    /* --- PANTALLA DE CHAT ESTILO TIKTOK --- */
     .chat-active-container {
       display: flex;
       flex-direction: column;
@@ -192,6 +165,18 @@
       cursor: pointer;
     }
 
+    .chat-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: #e91e63;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+
     .chat-messages-box {
       flex: 1;
       padding: 20px;
@@ -203,9 +188,9 @@
 
     .message-bubble {
       max-width: 80%;
-      padding: 8px 12px;
-      border-radius: 12px;
-      font-size: 0.9rem;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 0.92rem;
       line-height: 1.4;
       word-break: break-word;
     }
@@ -213,18 +198,18 @@
     .message-bubble.sent {
       background-color: var(--burbuja-enviado);
       align-self: flex-end;
-      border-top-right-radius: 0px;
+      border-bottom-right-radius: 4px;
     }
 
     .message-bubble.received {
       background-color: var(--burbuja-recibido);
       align-self: flex-start;
-      border-top-left-radius: 0px;
+      border-bottom-left-radius: 4px;
     }
 
     .message-media {
       max-width: 100%;
-      border-radius: 8px;
+      border-radius: 12px;
       margin-top: 5px;
       display: block;
     }
@@ -255,7 +240,7 @@
       border: none;
     }
 
-    /* --- PANTALLA VIDEOLLAMADA REAL --- */
+    /* --- PANTALLA DE VIDEOLLAMADA --- */
     .call-screen {
       display: none;
       position: absolute;
@@ -280,14 +265,12 @@
       z-index: 1;
     }
 
-    /* Video del otro en pantalla completa */
     .remote-video {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    /* Tu propio video en miniatura flotante */
     .local-video {
       position: absolute;
       top: 20px;
@@ -299,14 +282,6 @@
       border: 2px solid var(--verde-neon);
       z-index: 10;
       transform: scaleX(-1);
-    }
-
-    .call-overlay-info {
-      position: relative;
-      z-index: 10;
-      text-align: center;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
-      margin-top: 180px;
     }
 
     .call-controls {
@@ -346,33 +321,29 @@
         <video id="localVideo" class="local-video" autoplay playsinline muted></video>
         <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
       </div>
-
-      <div class="call-overlay-info">
-        <h3 id="callContactName">Conectando...</h3>
-        <div id="callTimer" style="color: var(--verde-neon); font-weight: bold;">Llamada en progreso</div>
+      <div style="position: relative; z-index: 10; text-align: center; margin-top: 180px;">
+        <h3 id="callContactName" style="text-shadow: 0 2px 10px #000;">Conectando...</h3>
       </div>
-
       <div class="call-controls">
-        <button class="control-btn decline" onclick="colgarLlamadaReal()">📞</button>
+        <button class="control-btn decline" onclick="colgarLlamada()">📞</button>
       </div>
     </div>
 
-    <div class="screen active" id="chatsScreen">
+    <div class="screen active" id="setupScreen">
       <header class="app-header">
-        <h2>WaveChat P2P</h2>
+        <h2>WaveChat Real</h2>
       </header>
 
-      <div class="connection-box">
-        <div class="my-id-display">Tu ID para compartir: <strong id="myPeerId">Generando...</strong></div>
-        <div class="connect-input-group">
-          <input type="text" id="destPeerId" class="connect-input" placeholder="Ingresa el ID de tu amigo">
-          <button class="connect-btn" onclick="conectarConAmigo()">Conectar</button>
+      <div class="setup-box">
+        <div class="id-card">
+          <p>Tu código único para que te agreguen:</p>
+          <strong id="myPeerId">Generando código...</strong>
         </div>
-      </div>
 
-      <div class="chat-list" id="activeChatsList">
-        <div class="no-connections" id="noConnectionsText">
-          No tienes chats activos.<br>Comparte tu ID o ingresa el de un amigo para empezar.
+        <div class="connect-form">
+          <p style="font-size: 0.85rem; color: var(--texto-mutado); text-align: center;">O pon aquí el código de tu amigo:</p>
+          <input type="text" id="destPeerId" class="connect-input" placeholder="Pegar código wave-XXXX">
+          <button class="connect-btn" onclick="conectarConAmigo()">Empezar a Chatear</button>
         </div>
       </div>
     </div>
@@ -380,24 +351,28 @@
     <div class="screen" id="activeChatScreen">
       <div class="chat-active-container">
         <header class="chat-active-header">
-          <button class="back-btn" onclick="volverAChats()">◀</button>
-          <div class="chat-avatar" id="activeAvatar" style="width: 38px; height: 38px; font-size: 1rem; background-color: var(--verde-oscuro);">U</div>
+          <button class="back-btn" onclick="regresarAlInicio()">◀</button>
+          <div class="chat-avatar" id="activeAvatar">U</div>
           <div style="flex: 1;">
             <h4 id="activeContactName" style="font-size: 1rem;">Amigo</h4>
-            <span style="font-size: 0.75rem; color: var(--verde-neon);">P2P Conectado</span>
+            <span style="font-size: 0.75rem; color: var(--verde-neon);">En línea (P2P Seguro)</span>
           </div>
-          <button class="icon-btn" onclick="iniciarLlamadaReal()">📹</button>
+          <button class="icon-btn" onclick="iniciarLlamada()">📹</button>
         </header>
 
-        <div class="chat-messages-box" id="chatMessagesBox"></div>
+        <div class="chat-messages-box" id="chatMessagesBox">
+          <div style="text-align:center; color:var(--texto-mutado); font-size:0.8rem;">
+            Conectados directamente de extremo a extremo.
+          </div>
+        </div>
 
         <div class="chat-input-bar">
-          <label class="icon-btn" title="Enviar Foto/Video">
-            📁
-            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="enviarArchivoP2P()">
+          <label class="icon-btn" title="Mandar Foto o Video">
+            📷
+            <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;" onchange="enviarArchivo()">
           </label>
-          <input type="text" id="chatInputMessage" class="chat-input" placeholder="Escribe un mensaje...">
-          <button class="icon-btn" onclick="enviarMensajeTextoReal()">➤</button>
+          <input type="text" id="chatInputMessage" class="chat-input" placeholder="Enviar un mensaje...">
+          <button class="icon-btn" onclick="enviarMensajeTexto()">➤</button>
         </div>
       </div>
     </div>
@@ -409,27 +384,25 @@
     let dataConnection = null;
     let mediaCall = null;
     let localStream = null;
-    let amigoIdActual = "";
+    let amigoId = "";
 
-    // --- INICIALIZAR PEERJS (Conexión Real) ---
-    // Generamos un ID amigable basado en 'wave-'
-    const randomId = 'wave-' + Math.floor(1000 + Math.random() * 9000);
-    
-    peer = new Peer(randomId);
+    // Generar un código único aleatorio amigable
+    const randomCode = 'wave-' + Math.floor(1000 + Math.random() * 9000);
+    peer = new Peer(randomCode);
 
     peer.on('open', (id) => {
       document.getElementById('myPeerId').innerText = id;
     });
 
-    // Escuchar conexiones de datos entrantes (mensajes, fotos, videos)
+    // Escuchar cuando alguien se conecta a nosotros usando nuestro código
     peer.on('connection', (conn) => {
       dataConnection = conn;
-      amigoIdActual = conn.peer;
-      configurarEventosConexion();
-      agregarChatALaLista(conn.peer);
+      amigoId = conn.peer;
+      configurarEventosChat();
+      abrirPantallaDeChat(amigoId);
     });
 
-    // Escuchar llamadas de video entrantes
+    // Escuchar videollamadas entrantes
     peer.on('call', async (call) => {
       if (confirm(`¿Contestar videollamada de ${call.peer}?`)) {
         mediaCall = call;
@@ -445,45 +418,42 @@
             document.getElementById('remoteVideo').srcObject = remoteStream;
           });
         } catch (err) {
-          alert("Error al acceder a la cámara/micrófono para contestar.");
+          alert("No se pudo iniciar la cámara/micrófono para contestar.");
         }
       } else {
         call.close();
       }
     });
 
-    // --- ENLAZAR DE FORMA ACTIVA CON UN AMIGO ---
+    // Conectarnos de forma activa usando el código de un amigo
     function conectarConAmigo() {
       const destId = document.getElementById('destPeerId').value.trim();
-      if (!destId) return alert("Por favor ingresa un ID válido.");
+      if (!destId) return alert("Ingresa un código válido.");
       if (destId === peer.id) return alert("No puedes conectarte a ti mismo.");
 
       dataConnection = peer.connect(destId);
-      amigoIdActual = destId;
-      configurarEventosConexion();
-      agregarChatALaLista(destId);
+      amigoId = destId;
+      
+      dataConnection.on('open', () => {
+        configurarEventosChat();
+        abrirPantallaDeChat(destId);
+      });
     }
 
-    function configurarEventosConexion() {
-      dataConnection.on('open', () => {
-        // Abrimos automáticamente la pantalla de chat una vez enlazados
-        abrirChatPantalla(amigoIdActual);
-      });
-
+    function configurarEventosChat() {
       dataConnection.on('data', (data) => {
         const chatBox = document.getElementById('chatMessagesBox');
         
         if (data.type === 'text') {
           chatBox.innerHTML += `<div class="message-bubble received">${data.content}</div>`;
         } else if (data.type === 'file') {
-          // Crear un enlace blob real para mostrar la foto o reproducir el video recibido
           const blob = new Blob([data.fileData], { type: data.fileType });
           const url = URL.createObjectURL(blob);
           
           if (data.fileType.startsWith('image/')) {
             chatBox.innerHTML += `
               <div class="message-bubble received">
-                <img src="${url}" class="message-media" alt="Imagen P2P">
+                <img src="${url}" class="message-media" alt="Foto recibida">
               </div>`;
           } else if (data.fileType.startsWith('video/')) {
             chatBox.innerHTML += `
@@ -496,57 +466,39 @@
       });
     }
 
-    // --- BANDEJA DE ENTRADA ---
-    function agregarChatALaLista(peerId) {
-      document.getElementById('noConnectionsText').style.display = 'none';
-      const list = document.getElementById('activeChatsList');
-      
-      // Evitar duplicados en la lista de chats
-      if (document.getElementById(`chat-item-${peerId}`)) return;
-
-      list.innerHTML = `
-        <div class="chat-item" id="chat-item-${peerId}" onclick="abrirChatPantalla('${peerId}')">
-          <div class="chat-avatar">👤</div>
-          <div class="chat-info">
-            <h4>${peerId}</h4>
-            <p class="chat-preview">¡Conexión establecida! Toca para hablar.</p>
-          </div>
-        </div>
-      ` + list.innerHTML;
-    }
-
-    function abrirChatPantalla(peerId) {
-      document.getElementById('chatsScreen').classList.remove('active');
+    function abrirPantallaDeChat(peerId) {
+      document.getElementById('setupScreen').classList.remove('active');
       document.getElementById('activeChatScreen').classList.add('active');
       document.getElementById('activeContactName').innerText = peerId;
-      document.getElementById('chatMessagesBox').innerHTML = `<div style="text-align:center; color:var(--texto-mutado); font-size:0.8rem;">Cifrado de extremo a extremo activo</div>`;
+      document.getElementById('activeAvatar').innerText = peerId.substring(5, 7).toUpperCase();
     }
 
-    function volverAChats() {
+    function regresarAlInicio() {
       document.getElementById('activeChatScreen').classList.remove('active');
-      document.getElementById('chatsScreen').classList.add('active');
+      document.getElementById('setupScreen').classList.add('active');
     }
 
-    // --- ENVIAR MENSAJES DE TEXTO REALES ---
-    function enviarMensajeTextoReal() {
+    // --- ENVIAR MENSAJES REALES ---
+    function enviarMensajeTexto() {
       const input = document.getElementById('chatInputMessage');
       const text = input.value.trim();
       if (!text || !dataConnection) return;
 
-      // Enviar datos vía PeerJS DataChannel
+      // Enviar el mensaje al amigo
       dataConnection.send({
         type: 'text',
         content: text
       });
 
+      // Pintarlo en nuestra pantalla (Estilo enviado: azul)
       const chatBox = document.getElementById('chatMessagesBox');
       chatBox.innerHTML += `<div class="message-bubble sent">${text}</div>`;
       input.value = "";
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // --- ENVIAR FOTOS Y VIDEOS REALES ---
-    function enviarArchivoP2P() {
+    // --- ENVIAR FOTOS/VIDEOS REALES ---
+    function enviarArchivo() {
       const fileInput = document.getElementById('mediaInput');
       if (fileInput.files.length === 0) return;
 
@@ -556,7 +508,7 @@
       reader.onload = function(event) {
         const fileData = event.target.result;
         
-        // Enviar el archivo binario completo directamente por la conexión WebRTC
+        // Enviamos el archivo completo a través de la conexión directa
         dataConnection.send({
           type: 'file',
           fileData: fileData,
@@ -564,14 +516,14 @@
           fileType: file.type
         });
 
-        // Mostrarlo localmente en nuestra pantalla
+        // Mostrarlo en nuestra pantalla localmente
         const url = URL.createObjectURL(file);
         const chatBox = document.getElementById('chatMessagesBox');
         
         if (file.type.startsWith('image/')) {
           chatBox.innerHTML += `
             <div class="message-bubble sent">
-              <img src="${url}" class="message-media" alt="Enviado">
+              <img src="${url}" class="message-media" alt="Foto">
             </div>`;
         } else if (file.type.startsWith('video/')) {
           chatBox.innerHTML += `
@@ -587,39 +539,34 @@
       reader.readAsArrayBuffer(file);
     }
 
-    // Escuchar la tecla Enter
     document.getElementById('chatInputMessage').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') enviarMensajeTextoReal();
+      if (e.key === 'Enter') enviarMensajeTexto();
     });
 
-    // --- LLAMADAS DE VIDEO REALES (WebRTC) ---
-    async function iniciarLlamadaReal() {
-      if (!amigoIdActual) return;
+    // --- VIDEOLLAMADAS REALES ---
+    async function iniciarLlamada() {
+      if (!amigoId) return;
 
       document.getElementById('callScreen').style.display = 'flex';
-      document.getElementById('callContactName').innerText = amigoIdActual;
+      document.getElementById('callContactName').innerText = amigoId;
 
       try {
-        // Capturar medios locales
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         document.getElementById('localVideo').srcObject = localStream;
 
-        // Llamar al peer destino mandándole tu stream
-        mediaCall = peer.call(amigoIdActual, localStream);
+        mediaCall = peer.call(amigoId, localStream);
 
-        // Recibir el video del amigo
         mediaCall.on('stream', (remoteStream) => {
           document.getElementById('remoteVideo').srcObject = remoteStream;
         });
 
       } catch (err) {
-        console.error(err);
-        alert("No se pudo acceder a tu cámara o micrófono.");
-        colgarLlamadaReal();
+        alert("Error al abrir cámara o micrófono.");
+        colgarLlamada();
       }
     }
 
-    function colgarLlamadaReal() {
+    function colgarLlamada() {
       if (mediaCall) {
         mediaCall.close();
         mediaCall = null;
