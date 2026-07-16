@@ -1,930 +1,574 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok Premium - Red Social Completa</title>
-    <style>
-        /* Estilos base */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
-            background-color: #0b0b0b; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            padding: 10px; 
-        }
-        
-        .phone-container { 
-            width: 100%; 
-            max-width: 410px; 
-            height: 820px; 
-            background: #000; 
-            border: 10px solid #222; 
-            border-radius: 40px; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.9); 
-            display: flex; 
-            flex-direction: column; 
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WaveChat - Tu Espacio de Mensajería</title>
+  <style>
+    /* --- Paleta de Colores Exclusiva --- */
+    :root {
+      --bg-principal: #0b0e14;
+      --bg-tarjeta: #151d26;
+      --verde-neon: #00e676;
+      --verde-oscuro: #054735;
+      --texto-blanco: #f5f5f7;
+      --texto-mutado: #8b9bb4;
+      --burbuja-enviado: #056162;
+      --burbuja-recibido: #1f2c34;
+    }
 
-        /* Feed de Video */
-        .video-feed { 
-            position: relative;
-            width: 100%; 
-            height: calc(100% - 60px); 
-            background: #000; 
-            overflow: hidden; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            cursor: pointer;
-        }
-        
-        .main-video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            background: #000;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
-        /* Aviso de Video Expirado/Error */
-        .video-error-msg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 20px;
-            z-index: 5;
-            color: #aaa;
-        }
-        .video-error-msg h4 { color: #fe2c55; margin-bottom: 8px; font-size: 18px; }
+    body {
+      background-color: var(--bg-principal);
+      color: var(--texto-blanco);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .top-nav-tiktok {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            z-index: 15;
-            font-size: 16px;
-            font-weight: bold;
-            text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
-        }
-        .top-nav-item { cursor: pointer; color: rgba(255,255,255,0.6); }
-        .top-nav-item.active { color: #fff; border-bottom: 2px solid #fff; padding-bottom: 4px; }
+    /* --- Contenedor Principal (Simulación de Móvil) --- */
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      height: 850px;
+      background-color: var(--bg-tarjeta);
+      border: 1px solid rgba(0, 230, 118, 0.2);
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+    }
 
-        /* Iconos Flotantes Derecha */
-        .side-icons { 
-            position: absolute; 
-            right: 12px; 
-            bottom: 30px; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            gap: 15px; 
-            z-index: 10; 
-        }
-        
-        .profile-wrapper { 
-            position: relative; 
-            width: 50px; 
-            height: 50px; 
-            cursor: pointer; 
-        }
-        .profile-pic { 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 50%; 
-            border: 2px solid #fff; 
-            object-fit: cover; 
-        }
-        .follow-btn-add { 
-            position: absolute; 
-            bottom: -5px; 
-            left: 50%;
-            transform: translateX(-50%);
-            background: #fe2c55; 
-            color: white; 
-            width: 18px; 
-            height: 18px; 
-            border-radius: 50%; 
-            font-size: 12px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-weight: bold; 
-            border: 1.5px solid #000; 
-        }
+    /* --- PANTALLAS PRINCIPALES --- */
+    .screen {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      width: 100%;
+    }
 
-        .icon-btn { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            font-size: 12px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8); 
-        }
-        .icon-symbol { font-size: 28px; margin-bottom: 2px; }
+    .screen.active {
+      display: flex;
+    }
 
-        /* Info del Video */
-        .video-info { 
-            position: absolute; 
-            left: 15px; 
-            bottom: 30px; 
-            z-index: 10; 
-            max-width: 270px; 
-        }
-        .video-info h3 { font-size: 16px; margin-bottom: 4px; font-weight: bold; cursor: pointer; display: inline-block; }
-        .follow-text-indicator { background: rgba(254, 44, 85, 0.9); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; font-weight: bold; vertical-align: middle; }
-        .video-info p { font-size: 14px; line-height: 1.3; margin-bottom: 8px;}
-        .video-filter-tag { background: #25f4ee; color: black; font-size: 10px; font-weight: bold; padding: 1px 5px; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
+    /* --- CABECERA ESTILO WAVECHAT --- */
+    .app-header {
+      padding: 15px 20px;
+      background-color: #1f2c34;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
 
-        /* COMENTARIOS PÚBLICOS */
-        .comments-panel {
-            position: absolute;
-            bottom: 60px; 
-            left: 0;
-            width: 100%;
-            height: 400px;
-            background: rgba(20, 20, 20, 0.98);
-            border-top: 1px solid #292929;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            z-index: 40;
-            display: flex;
-            flex-direction: column;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-            backdrop-filter: blur(10px);
-            padding: 15px;
-        }
-        .comments-panel.open { transform: translateY(0); }
-        .comments-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: bold; }
-        .scrollable-list { flex-grow: 1; overflow-y: auto; margin-bottom: 10px; }
-        .input-bar { display: flex; gap: 8px; align-items: center; }
-        .input-bar input { flex-grow: 1; padding: 10px 15px; border-radius: 20px; border: none; background: #2b2b2b; color: white; font-size: 13px; }
-        .btn-send { background: #fe2c55; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .app-header h2 {
+      font-size: 1.3rem;
+      color: var(--verde-neon);
+      font-weight: 700;
+    }
 
-        /* CHAT PRIVADO ESTILO WHATSAPP */
-        .whatsapp-chat {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 60px);
-            background: #0b141a;
-            z-index: 80;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.3s ease-out;
-        }
-        .whatsapp-chat.open { transform: translateX(0); }
-        
-        .wa-header {
-            background: #075e54;
-            padding: 15px 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-        .wa-header-left { display: flex; align-items: center; gap: 10px; }
-        .wa-back-btn { font-size: 20px; cursor: pointer; }
-        .wa-user-info { display: flex; flex-direction: column; }
-        .wa-username { font-weight: bold; font-size: 15px; }
-        .wa-status { font-size: 11px; color: #25d366; }
-        .wa-header-icons { display: flex; gap: 15px; font-size: 18px; cursor: pointer; }
+    .header-actions {
+      display: flex;
+      gap: 15px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
 
-        .wa-messages-area {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
-            background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-            background-color: #0b141a;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+    /* --- SECCIÓN DE ESTADOS / HISTORIAS --- */
+    .stories-container {
+      padding: 15px;
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      background-color: #121b22;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
 
-        /* Globos de Mensajes */
-        .wa-bubble {
-            max-width: 75%;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            line-height: 1.4;
-            position: relative;
-            word-wrap: break-word;
-        }
-        .wa-bubble.received {
-            background: #202c33;
-            color: white;
-            align-self: flex-start;
-            border-top-left-radius: 0;
-        }
-        .wa-bubble.sent {
-            background: #005c4b;
-            color: white;
-            align-self: flex-end;
-            border-top-right-radius: 0;
-        }
-        .wa-time {
-            font-size: 9px;
-            color: rgba(255,255,255,0.6);
-            display: block;
-            text-align: right;
-            margin-top: 3px;
-        }
-        .wa-img-msg {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 5px;
-            display: block;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+    .stories-container::-webkit-scrollbar {
+      display: none; /* Ocultar scrollbar */
+    }
 
-        .wa-input-bar {
-            background: #1f2c34;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .wa-input-box {
-            flex-grow: 1;
-            background: #2a3942;
-            border: none;
-            border-radius: 20px;
-            padding: 10px 15px;
-            color: white;
-            font-size: 14px;
-            outline: none;
-        }
-        .wa-btn-icon { font-size: 20px; cursor: pointer; color: #8696a0; }
-        .wa-send-btn {
-            background: #00a884;
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
+    .story-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.75rem;
+      color: var(--texto-mutado);
+      min-width: 60px;
+      cursor: pointer;
+    }
 
-        /* PANTALLA BANDEJA DE ENTRADA Y AMISTAD */
-        .friend-panel {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: calc(100% - 60px);
-            background: #121212;
-            z-index: 75;
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-        }
-        .friend-panel.open { display: flex; }
-        .friend-panel h2 { font-size: 20px; margin-bottom: 15px; text-align: center; color: #fe2c55; }
-        
-        .search-friend-box { display: flex; gap: 8px; margin-bottom: 20px; }
-        .search-friend-box input { flex-grow: 1; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #222; color: white; }
-        .btn-search-add { background: #fe2c55; border: none; padding: 10px 15px; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; }
+    .story-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 2px solid var(--verde-neon);
+      padding: 2px;
+      background-color: var(--bg-tarjeta);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
 
-        .request-item { background: #1f1f1f; padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .request-user { font-weight: bold; font-size: 14px; }
-        .request-actions { display: flex; gap: 8px; }
-        .btn-action-req { border: none; padding: 6px 12px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .btn-req-accept { background: #00a884; color: white; }
-        .btn-req-decline { background: #f44336; color: white; }
+    .story-item.my-story .story-avatar {
+      border: 2px dashed var(--texto-mutado);
+    }
 
-        /* MODAL REGISTRO OBLIGATORIO DE USUARIO ÚNICO */
-        .register-overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 500;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 30px;
-        }
-        .register-overlay.open { display: flex; }
-        .register-card { background: #1e1e1e; padding: 25px; border-radius: 20px; width: 100%; border: 1.5px solid #fe2c55; text-align: center; }
-        .register-card h2 { color: #fe2c55; margin-bottom: 10px; }
-        .register-card p { font-size: 13px; color: #aaa; margin-bottom: 20px; }
-        .register-card input { width: 100%; padding: 12px; background: #2b2b2b; border: 1px solid #444; color: white; border-radius: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; }
-        .btn-register-submit { width: 100%; background: #fe2c55; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; }
+    /* --- LISTA DE CHATS --- */
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
+      background-color: #121b22;
+    }
 
-        /* Mensajes de Chat y Comentarios */
-        .msg { margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px; }
-        .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
-        .msg-content { display: flex; flex-direction: column; }
-        .msg-user { color: #8a8b91; font-weight: bold; font-size: 11px; }
+    .chat-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
 
-        /* Barra Inferior */
-        .tiktok-nav { 
-            background: #000; height: 60px; display: flex; justify-content: space-around; align-items: center; border-top: 1px solid #161616; position: absolute; bottom: 0; left: 0; width: 100%; z-index: 50; 
-        }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #8a8b91; cursor: pointer; }
-        .nav-item.active { color: white; }
-        .nav-icon { font-size: 20px; margin-bottom: 2px; }
-        
-        .plus-btn-container { position: relative; width: 45px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .plus-btn-background { position: absolute; width: 100%; height: 100%; border-radius: 8px; background: linear-gradient(90deg, #25f4ee 0%, #fe2c55 100%); z-index: 1; }
-        .plus-btn-foreground { position: absolute; width: 37px; height: 100%; border-radius: 8px; background: #fff; z-index: 2; display: flex; align-items: center; justify-content: center; color: black; font-size: 18px; font-weight: bold; }
+    .chat-item:hover {
+      background-color: rgba(255, 255, 255, 0.02);
+    }
 
-        .nav-arrow { position: absolute; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; z-index: 15; font-weight: bold; }
-        .nav-arrow-up { top: 70px; }
-        .nav-arrow-down { bottom: 80px; }
-    </style>
+    .chat-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: var(--verde-oscuro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .chat-info {
+      flex: 1;
+    }
+
+    .chat-info-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .chat-info-top h4 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .chat-time {
+      font-size: 0.75rem;
+      color: var(--texto-mutado);
+    }
+
+    .chat-preview {
+      font-size: 0.85rem;
+      color: var(--texto-mutado);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 250px;
+    }
+
+    /* --- CHAT ACTIVO --- */
+    .chat-active-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background-color: #0b141a;
+      background-image: radial-gradient(rgba(0, 230, 118, 0.03) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+
+    .chat-active-header {
+      padding: 12px 15px;
+      background-color: #1f2c34;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .chat-messages-box {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message-bubble {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .message-bubble.sent {
+      background-color: var(--burbuja-enviado);
+      align-self: flex-end;
+      border-top-right-radius: 0px;
+    }
+
+    .message-bubble.received {
+      background-color: var(--burbuja-recibido);
+      align-self: flex-start;
+      border-top-left-radius: 0px;
+    }
+
+    .message-img {
+      max-width: 100%;
+      border-radius: 8px;
+      margin-top: 5px;
+      display: block;
+    }
+
+    /* Entrada de Mensaje */
+    .chat-input-bar {
+      padding: 10px 15px;
+      background-color: #1f2c34;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 10px 15px;
+      border-radius: 20px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .chat-input:focus {
+      border-color: var(--verde-neon);
+    }
+
+    .icon-btn {
+      font-size: 1.3rem;
+      color: var(--verde-neon);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    /* --- PANTALLA AJUSTES / PERFIL --- */
+    .profile-screen {
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background-color: #121b22;
+      height: 100%;
+    }
+
+    .profile-avatar-large {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--verde-neon), var(--verde-oscuro));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      font-weight: bold;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .profile-field {
+      width: 100%;
+      background-color: #1f2c34;
+      padding: 15px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .profile-field label {
+      font-size: 0.75rem;
+      color: var(--verde-neon);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .profile-field input {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 5px;
+    }
+
+    .profile-field input:focus {
+      border-bottom-color: var(--verde-neon);
+    }
+
+    /* --- BARRA DE NAVEGACIÓN --- */
+    .app-nav {
+      height: 70px;
+      background-color: #1f2c34;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .nav-btn {
+      color: var(--texto-mutado);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.2s;
+    }
+
+    .nav-btn.active {
+      color: var(--verde-neon);
+    }
+  </style>
 </head>
 <body>
 
-    <div class="phone-container">
-        <div class="video-feed" onclick="toggleReproduccionVideo()">
-            <video id="reproductorVideo" class="main-video" loop autoplay muted playsinline></video>
-            
-            <div id="videoErrorMsg" class="video-error-msg">
-                <h4>Video Expirado o No Disponible</h4>
-                <p>El enlace de este video ya no responde.</p>
+  <div class="app-container">
+
+    <div class="screen active" id="chatsScreen">
+      <header class="app-header">
+        <h2>WaveChat</h2>
+        <div class="header-actions">
+          <span onclick="alert('Buscando...')">🔍</span>
+          <span onclick="changeTab('profile')">⚙️</span>
+        </div>
+      </header>
+
+      <div class="stories-container">
+        <div class="story-item my-story">
+          <div class="story-avatar">Mi</div>
+          <span>Mi Estado</span>
+        </div>
+        <div class="story-item" onclick="alert('Viendo estado de Fer')">
+          <div class="story-avatar" style="border-color: #e91e63;">F</div>
+          <span>Fer ✨</span>
+        </div>
+        <div class="story-item" onclick="alert('Viendo estado de Lucas')">
+          <div class="story-avatar" style="border-color: #00bcd4;">L</div>
+          <span>Lucas</span>
+        </div>
+      </div>
+
+      <div class="chat-list">
+        <div class="chat-item" onclick="abrirChat('Fer ✨', 'F', '#e91e63', '¿Viste el nuevo video que subí?')">
+          <div class="chat-avatar" style="background-color: #e91e63;">F</div>
+          <div class="chat-info">
+            <div class="chat-info-top">
+              <h4>Fer ✨</h4>
+              <span class="chat-time">12:30 PM</span>
             </div>
-
-            <div class="top-nav-tiktok">
-                <span class="top-nav-item">Siguiendo</span>
-                <span class="top-nav-item active">Para ti</span>
-            </div>
-
-            <button class="nav-arrow nav-arrow-up" onclick="event.stopPropagation(); videoAnterior()">▲ Anterior</button>
-            <button class="nav-arrow nav-arrow-down" onclick="event.stopPropagation(); siguienteVideo()">▼ Siguiente</button>
-
-            <div class="video-info">
-                <span id="filterTag" class="video-filter-tag" style="display: none;"></span>
-                <div>
-                    <h3 id="autorVideo">@usuario</h3>
-                    <span id="seguirIndicador" class="follow-text-indicator" style="display: none;">Siguiendo</span>
-                </div>
-                <p id="descVideo">Cargando descripción del video...</p>
-            </div>
-
-            <div class="side-icons" onclick="event.stopPropagation();">
-                <div class="profile-wrapper" onclick="toggleSeguirCreador()">
-                    <img id="fotoCreador" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="profile-pic">
-                    <div id="badgeSeguir" class="follow-btn-add">+</div>
-                </div>
-
-                <div class="icon-btn" onclick="darLike()">
-                    <span id="iconLike" class="icon-symbol">🤍</span>
-                    <span id="numLikes">0</span>
-                </div>
-
-                <div class="icon-btn" onclick="toggleComentarios(true)">
-                    <span class="icon-symbol">💬</span>
-                    <span id="numComentarios">0</span>
-                </div>
-            </div>
+            <p class="chat-preview">¿Viste el nuevo video que subí?</p>
+          </div>
         </div>
 
-        <div id="commentsPanel" class="comments-panel">
-            <div class="comments-header">
-                <span>Comentarios</span>
-                <span style="cursor: pointer;" onclick="toggleComentarios(false)">✕</span>
+        <div class="chat-item" onclick="abrirChat('Lucas', 'L', '#00bcd4', 'Dale, nos vemos al rato 🚀')">
+          <div class="chat-avatar" style="background-color: #00bcd4;">L</div>
+          <div class="chat-info">
+            <div class="chat-info-top">
+              <h4>Lucas</h4>
+              <span class="chat-time">Ayer</span>
             </div>
-            <div id="chatBox" class="scrollable-list"></div>
-            <div class="input-bar">
-                <input id="inputComentario" type="text" placeholder="Añadir comentario...">
-                <button class="btn-send" onclick="enviarComentario()">➤</button>
-            </div>
+            <p class="chat-preview">Dale, nos vemos al rato 🚀</p>
+          </div>
         </div>
-
-        <div id="friendPanel" class="friend-panel">
-            <h2>Bandeja de Entrada</h2>
-            <div class="search-friend-box">
-                <input id="inputSearchFriend" type="text" placeholder="Buscar usuario para agregar...">
-                <button class="btn-search-add" onclick="enviarSolicitudAmistad()">Agregar</button>
-            </div>
-            <h3 style="font-size: 14px; margin-bottom: 10px; color: #aaa;">Solicitudes Pendientes</h3>
-            <div id="requestList" class="scrollable-list"></div>
-        </div>
-
-        <div id="whatsappChat" class="whatsapp-chat">
-            <div class="wa-header">
-                <div class="wa-header-left">
-                    <span class="wa-back-btn" onclick="toggleChatWA(false)">←</span>
-                    <div class="wa-user-info">
-                        <span class="wa-username">Chat Privado</span>
-                        <input id="chatDestinatarioWA" type="text" placeholder="Escribe @usuario o 'todos'" style="background: transparent; border: none; color: white; font-size: 12px; outline: none;">
-                    </div>
-                </div>
-            </div>
-            <div id="waMessagesArea" class="wa-messages-area"></div>
-            <div class="wa-input-bar">
-                <label class="wa-btn-icon">
-                    📷
-                    <input type="file" accept="image/*" style="display: none;" onchange="subirFotoChat(this)">
-                </label>
-                <input id="inputMensajeWA" class="wa-input-box" type="text" placeholder="Escribe un mensaje privado...">
-                <button class="wa-send-btn" onclick="enviarMensajeWA()">➤</button>
-            </div>
-        </div>
-
-        <div class="tiktok-nav">
-            <div class="nav-item active" onclick="mostrarPantalla('feed')">
-                <span class="nav-icon">🏠</span>
-                <span>Inicio</span>
-            </div>
-            <div class="nav-item" onclick="mostrarPantalla('amigos')">
-                <span class="nav-icon">👥</span>
-                <span>Amigos</span>
-            </div>
-            <div class="plus-btn-container">
-                <div class="plus-btn-background"></div>
-                <div class="plus-btn-foreground">+</div>
-            </div>
-            <div class="nav-item" onclick="toggleChatWA(true)">
-                <span class="nav-icon">💬</span>
-                <span>Bandeja</span>
-            </div>
-            <div class="nav-item">
-                <span class="nav-icon">👤</span>
-                <span>Perfil</span>
-            </div>
-        </div>
-
-        <div id="registerOverlay" class="register-overlay">
-            <div class="register-card">
-                <h2>Crea tu Perfil</h2>
-                <p>Elige un nombre de usuario único para identificarte en la red.</p>
-                <input id="registerUserName" type="text" placeholder="Ej: rubysplata">
-                <button class="btn-register-submit" onclick="completarRegistroUnico()">Registrarse</button>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <div class="screen" id="activeChatScreen">
+      <div class="chat-active-container">
+        <header class="chat-active-header">
+          <button class="back-btn" onclick="cerrarChat()">◀</button>
+          <div class="chat-avatar" id="activeAvatar" style="width: 38px; height: 38px; font-size: 1rem;">C</div>
+          <div style="flex: 1;">
+            <h4 id="activeContactName" style="font-size: 1rem;">Nombre</h4>
+            <span style="font-size: 0.75rem; color: var(--verde-neon);">En línea</span>
+          </div>
+        </header>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA",
-            authDomain: "mensajes-tiktokk.firebaseapp.com",
-            projectId: "mensajes-tiktokk",
-            storageBucket: "mensajes-tiktokk.firebasestorage.app",
-            messagingSenderId: "1079940811085",
-            appId: "1:1079940811085:web:6ab00b6476ef4d85908f04"
-        };
+        <div class="chat-messages-box" id="chatMessagesBox">
+          <div class="message-bubble received" id="chatInitialMsg">¡Hola! ¿Cómo va el proyecto?</div>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        <div class="chat-input-bar">
+          <label class="icon-btn" title="Adjuntar foto">
+            📷
+            <input type="file" id="chatFileInput" accept="image/*" style="display: none;" onchange="enviarImagenChat()">
+          </label>
+          <input type="text" id="chatInputMessage" class="chat-input" placeholder="Escribe un mensaje...">
+          <button class="icon-btn" onclick="enviarMensajeTexto()">➤</button>
+        </div>
+      </div>
+    </div>
 
-        // Variables Globales de Usuario
-        let miUsuario = localStorage.getItem('nombreUsuario') || "";
-        let miAvatar = localStorage.getItem('avatarBase64') || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
+    <div class="screen" id="profileScreen">
+      <header class="app-header">
+        <h2>Ajustes de Perfil</h2>
+      </header>
+      <div class="profile-screen">
+        <div class="profile-avatar-large" id="profileAvatarLarge">U</div>
+        
+        <div class="profile-field">
+          <label>Tu Nombre</label>
+          <input type="text" id="inputProfileName" value="Tu Usuario" oninput="actualizarPerfil()">
+        </div>
 
-        let videosGlobales = [];
-        let indiceVideoActual = 0;
+        <div class="profile-field">
+          <label>Info. Estado</label>
+          <input type="text" id="inputProfileStatus" value="Disponible en WaveChat 🚀" oninput="actualizarPerfil()">
+        </div>
+      </div>
+    </div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            configurarManejadoresDeVideo();
-            if (!miUsuario) {
-                document.getElementById('registerOverlay').classList.add('open');
-            } else {
-                escucharSolicitudesDeAmistad();
-            }
-        });
+    <nav class="app-nav" id="mainNavBar">
+      <button class="nav-btn active" id="navChats" onclick="changeTab('chats')">💬<span>Chats</span></button>
+      <button class="nav-btn" id="navProfile" onclick="changeTab('profile')">👤<span>Perfil</span></button>
+    </nav>
 
-        window.completarRegistroUnico = async function() {
-            const inputName = document.getElementById('registerUserName').value.trim();
-            if (!inputName) return alert("Por favor ingresa un nombre.");
-            
-            const filtrado = inputName.startsWith('@') ? inputName : '@' + inputName;
-            
-            const userRef = doc(db, "usuarios_perfil", filtrado);
-            const userSnap = await getDoc(userRef);
+  </div>
 
-            if (userSnap.exists()) {
-                alert("Este nombre de usuario ya está en uso. ¡Elige otro único!");
-            } else {
-                await setDoc(userRef, {
-                    usuario: filtrado,
-                    avatar: miAvatar,
-                    seguidores: [],
-                    siguiendo: [],
-                    amigos: []
-                });
-                miUsuario = filtrado;
-                localStorage.setItem('nombreUsuario', miUsuario);
-                document.getElementById('registerOverlay').classList.remove('open');
-                escucharSolicitudesDeAmistad();
-                mostrarVideoActual();
-            }
-        }
+  <script>
+    // --- NAVEGACIÓN ENTRE SECCIONES ---
+    function changeTab(tab) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
 
-        // --- SISTEMA DE VIDEOS ---
-        const videosCol = collection(db, "videos");
-        const qVideos = query(videosCol, orderBy("fecha", "desc"));
+      if (tab === 'chats') {
+        document.getElementById('chatsScreen').classList.add('active');
+        document.getElementById('navChats').classList.add('active');
+        document.getElementById('mainNavBar').style.display = 'flex';
+      } else if (tab === 'profile') {
+        document.getElementById('profileScreen').classList.add('active');
+        document.getElementById('navProfile').classList.add('active');
+        document.getElementById('mainNavBar').style.display = 'flex';
+      }
+    }
 
-        onSnapshot(qVideos, (snapshot) => {
-            videosGlobales = [];
-            snapshot.forEach((doc) => {
-                videosGlobales.push({ id: doc.id, ...doc.data() });
-            });
-            
-            if (videosGlobales.length === 0) {
-                videosGlobales.push({
-                    id: "demo",
-                    usuario: "@TikTok_Demo",
-                    videoUrl: "https://assets.mixkit.co/videos/preview/mixkit-girl-in-neon-sign-light-40092-large.mp4",
-                    descripcion: "¡Bienvenido! Sube tu primer video para empezar la diversión.",
-                    fecha: Date.now(),
-                    comentarios: [],
-                    likes: []
-                });
-            }
-            mostrarVideoActual();
-        });
+    // --- INTERACTIVIDAD DEL CHAT ---
+    function abrirChat(nombre, inicial, color, primerMensaje) {
+      // Ocultar la navegación principal dentro de un chat activo
+      document.getElementById('mainNavBar').style.display = 'none';
+      
+      document.getElementById('chatsScreen').classList.remove('active');
+      document.getElementById('activeChatScreen').classList.add('active');
 
-        function configurarManejadoresDeVideo() {
-            const videoElement = document.getElementById('reproductorVideo');
-            const errorOverlay = document.getElementById('videoErrorMsg');
+      const avatar = document.getElementById('activeAvatar');
+      avatar.innerText = inicial;
+      avatar.style.backgroundColor = color;
+      
+      document.getElementById('activeContactName').innerText = nombre;
+      
+      // Limpiar y cargar mensaje inicial simulado
+      const chatBox = document.getElementById('chatMessagesBox');
+      chatBox.innerHTML = `<div class="message-bubble received">${primerMensaje}</div>`;
+    }
 
-            videoElement.onerror = () => {
-                errorOverlay.style.display = "flex";
-            };
+    function cerrarChat() {
+      document.getElementById('activeChatScreen').classList.remove('active');
+      changeTab('chats');
+    }
 
-            videoElement.onplaying = () => {
-                errorOverlay.style.display = "none";
-            };
-        }
+    function enviarMensajeTexto() {
+      const input = document.getElementById('chatInputMessage');
+      const text = input.value.trim();
+      if (!text) return;
 
-        async function mostrarVideoActual() {
-            if (videosGlobales.length === 0) return;
-            const videoData = videosGlobales[indiceVideoActual];
-            const videoElement = document.getElementById('reproductorVideo');
-            const errorOverlay = document.getElementById('videoErrorMsg');
+      const chatBox = document.getElementById('chatMessagesBox');
+      
+      // Agregar mensaje enviado
+      chatBox.innerHTML += `<div class="message-bubble sent">${text}</div>`;
+      input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
 
-            errorOverlay.style.display = "none";
-            videoElement.pause();
-            
-            videoElement.src = videoData.videoUrl;
-            videoElement.load();
+      // Respuesta automática de prueba para dinamismo
+      setTimeout(() => {
+        chatBox.innerHTML += `<div class="message-bubble received">¡Listo! Recibido correctamente. 👍</div>`;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 1000);
+    }
 
-            const playPromise = videoElement.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("El autoplay requiere interacción del usuario primero.");
-                });
-            }
+    function enviarImagenChat() {
+      const fileInput = document.getElementById('chatFileInput');
+      if (fileInput.files.length === 0) return;
 
-            videoElement.style.filter = videoData.filtro || "none";
+      const file = fileInput.files[0];
+      const imageUrl = URL.createObjectURL(file);
+      const chatBox = document.getElementById('chatMessagesBox');
 
-            document.getElementById('autorVideo').innerText = videoData.usuario;
-            document.getElementById('descVideo').innerText = videoData.descripcion;
-            document.getElementById('numComentarios').innerText = videoData.comentarios ? videoData.comentarios.length : 0;
-            
-            const filterTag = document.getElementById('filterTag');
-            if (videoData.filtroName && videoData.filtroName !== "Normal") {
-                filterTag.innerText = `Filtro: ${videoData.filtroName}`;
-                filterTag.style.display = "inline-block";
-            } else {
-                filterTag.style.display = "none";
-            }
+      // Agregar burbuja con la imagen cargada de forma local
+      chatBox.innerHTML += `
+        <div class="message-bubble sent">
+          <img src="${imageUrl}" class="message-img" alt="Imagen enviada">
+        </div>
+      `;
 
-            // Likes Reales
-            const listaLikes = videoData.likes || [];
-            document.getElementById('numLikes').innerText = listaLikes.length;
-            const corazon = document.getElementById('iconLike');
-            if (miUsuario && listaLikes.includes(miUsuario)) {
-                corazon.innerText = "❤️";
-                corazon.style.color = "#fe2c55";
-            } else {
-                corazon.innerText = "🤍";
-                corazon.style.color = "white";
-            }
+      fileInput.value = ""; // Limpiar input file
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-            // Validar Seguidor
-            const creadorRef = doc(db, "usuarios_perfil", videoData.usuario);
-            const creadorSnap = await getDoc(creadorRef);
-            const badgeSeguir = document.getElementById('badgeSeguir');
-            const seguirIndicador = document.getElementById('seguirIndicador');
-            
-            if (creadorSnap.exists() && creadorSnap.data().seguidores && miUsuario && creadorSnap.data().seguidores.includes(miUsuario)) {
-                badgeSeguir.style.display = "none";
-                seguirIndicador.style.display = "inline-block";
-            } else {
-                badgeSeguir.style.display = "flex";
-                seguirIndicador.style.display = "none";
-            }
+    // Escuchar la tecla Enter en la barra de texto
+    document.getElementById('chatInputMessage').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        enviarMensajeTexto();
+      }
+    });
 
-            renderizarComentarios(videoData.comentarios || []);
-        }
-
-        window.siguienteVideo = function() {
-            if (indiceVideoActual < videosGlobales.length - 1) {
-                indiceVideoActual++;
-                mostrarVideoActual();
-            }
-        }
-
-        window.videoAnterior = function() {
-            if (indiceVideoActual > 0) {
-                indiceVideoActual--;
-                mostrarVideoActual();
-            }
-        }
-
-        window.toggleReproduccionVideo = function() {
-            const videoElement = document.getElementById('reproductorVideo');
-            if (videoElement.paused) {
-                videoElement.play().catch(() => {});
-            } else {
-                videoElement.pause();
-            }
-        }
-
-        // --- ACCIONES DE VIDEOS ---
-        window.darLike = async function() {
-            if (!miUsuario) return;
-            const videoActual = videosGlobales[indiceVideoActual];
-            if (!videoActual || videoActual.id === "demo") return;
-
-            const videoDocRef = doc(db, "videos", videoActual.id);
-            const listaLikes = videoActual.likes || [];
-
-            if (listaLikes.includes(miUsuario)) {
-                await updateDoc(videoDocRef, { likes: arrayRemove(miUsuario) });
-            } else {
-                await updateDoc(videoDocRef, { likes: arrayUnion(miUsuario) });
-            }
-        }
-
-        window.toggleSeguirCreador = async function() {
-            if (!miUsuario) return;
-            const videoActual = videosGlobales[indiceVideoActual];
-            if (!videoActual || videoActual.id === "demo") return;
-
-            const creadorRef = doc(db, "usuarios_perfil", videoActual.usuario);
-            const miPerfilRef = doc(db, "usuarios_perfil", miUsuario);
-            const creadorSnap = await getDoc(creadorRef);
-
-            if (creadorSnap.exists()) {
-                const seguidores = creadorSnap.data().seguidores || [];
-                if (seguidores.includes(miUsuario)) {
-                    await updateDoc(creadorRef, { seguidores: arrayRemove(miUsuario) });
-                    await updateDoc(miPerfilRef, { siguiendo: arrayRemove(videoActual.usuario) });
-                } else {
-                    await updateDoc(creadorRef, { seguidores: arrayUnion(miUsuario) });
-                    await updateDoc(miPerfilRef, { siguiendo: arrayUnion(videoActual.usuario) });
-                }
-                mostrarVideoActual();
-            }
-        }
-
-        // --- SISTEMA DE COMENTARIOS ---
-        function renderizarComentarios(comentarios) {
-            const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML = "";
-            comentarios.forEach(c => {
-                chatBox.innerHTML += `
-                    <div class="msg">
-                        <img src="${c.avatar}" class="msg-avatar">
-                        <div class="msg-content">
-                            <span class="msg-user">${c.autor}</span>
-                            <span class="msg-text">${c.texto}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        window.enviarComentario = async function() {
-            if (!miUsuario) return;
-            const input = document.getElementById('inputComentario');
-            const texto = input.value.trim();
-            if (!texto) return;
-
-            const videoActual = videosGlobales[indiceVideoActual];
-            if (videoActual.id === "demo") return alert("No se pueden comentar videos de prueba.");
-            const videoDocRef = doc(db, "videos", videoActual.id);
-
-            await updateDoc(videoDocRef, {
-                comentarios: arrayUnion({
-                    autor: miUsuario,
-                    avatar: miAvatar,
-                    texto: texto,
-                    fecha: Date.now()
-                })
-            });
-            input.value = "";
-        }
-
-        window.toggleComentarios = function(mostrar) {
-            const panel = document.getElementById('commentsPanel');
-            if (mostrar) {
-                panel.classList.add('open');
-            } else {
-                panel.classList.remove('open');
-            }
-        }
-
-        // --- SOLICITUDES DE AMISTAD ---
-        const solicitudesCol = collection(db, "solicitudes_amistad");
-
-        window.enviarSolicitudAmistad = async function() {
-            if (!miUsuario) return;
-            const inputBusqueda = document.getElementById('inputSearchFriend').value.trim();
-            const destino = inputBusqueda.startsWith('@') ? inputBusqueda : '@' + inputBusqueda;
-
-            if (destino === miUsuario) return alert("No puedes enviarte una solicitud a ti mismo.");
-
-            const userRef = doc(db, "usuarios_perfil", destino);
-            const userSnap = await getDoc(userRef);
-
-            if (!userSnap.exists()) {
-                return alert("El usuario no existe. Asegúrate de escribirlo correctamente.");
-            }
-
-            await addDoc(solicitudesCol, {
-                de: miUsuario,
-                para: destino,
-                estado: "pendiente",
-                fecha: Date.now()
-            });
-
-            alert("¡Solicitud enviada con éxito a " + destino + "!");
-            document.getElementById('inputSearchFriend').value = "";
-        }
-
-        function escucharSolicitudesDeAmistad() {
-            onSnapshot(solicitudesCol, (snapshot) => {
-                const reqList = document.getElementById('requestList');
-                reqList.innerHTML = "";
-
-                snapshot.forEach((docSnap) => {
-                    const req = docSnap.data();
-                    if (req.para === miUsuario && req.estado === "pendiente") {
-                        reqList.innerHTML += `
-                            <div class="request-item">
-                                <span class="request-user">Solicitud de: ${req.de}</span>
-                                <div class="request-actions">
-                                    <button class="btn-action-req btn-req-accept" onclick="responderSolicitud('${docSnap.id}', '${req.de}', 'aceptar')">✓</button>
-                                    <button class="btn-action-req btn-req-decline" onclick="responderSolicitud('${docSnap.id}', '${req.de}', 'rechazar')">✗</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                if (reqList.innerHTML === "") {
-                    reqList.innerHTML = "<div style='text-align:center;color:#aaa;'>No tienes solicitudes pendientes.</div>";
-                }
-            });
-        }
-
-        window.responderSolicitud = async function(solicitudId, solicitante, accion) {
-            const solDocRef = doc(db, "solicitudes_amistad", solicitudId);
-
-            if (accion === 'aceptar') {
-                await updateDoc(solDocRef, { estado: "aceptado" });
-                
-                const miPerfilRef = doc(db, "usuarios_perfil", miUsuario);
-                const suPerfilRef = doc(db, "usuarios_perfil", solicitante);
-
-                await updateDoc(miPerfilRef, { amigos: arrayUnion(solicitante) });
-                await updateDoc(suPerfilRef, { amigos: arrayUnion(miUsuario) });
-
-                alert("¡Ahora eres amigo de " + solicitante + "!");
-            } else {
-                await updateDoc(solDocRef, { estado: "rechazado" });
-                alert("Solicitud rechazada.");
-            }
-        }
-
-        // --- WHATSAPP CHAT PRIVADO ---
-        const chatsCol = collection(db, "chats_privados");
-        const qChats = query(chatsCol, orderBy("fecha", "asc"));
-
-        onSnapshot(qChats, (snapshot) => {
-            const areaMensajes = document.getElementById('waMessagesArea');
-            areaMensajes.innerHTML = "";
-            snapshot.forEach((doc) => {
-                const mensaje = doc.data();
-                if (mensaje.de === miUsuario || mensaje.para === miUsuario || mensaje.para === "todos") {
-                    const tipoBurbuja = mensaje.de === miUsuario ? 'sent' : 'received';
-                    const fechaTxt = new Date(mensaje.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                    
-                    let htmlContenido = `<span class="wa-user-info" style="font-size:10px; color:#8596a0; font-weight:bold; display:block; margin-bottom:2px;">${mensaje.de}</span>`;
-                    
-                    if (mensaje.imagenUrl) {
-                        htmlContenido += `<img src="${mensaje.imagenUrl}" class="wa-img-msg">`;
-                    }
-                    if (mensaje.texto) {
-                        htmlContenido += `<div>${mensaje.texto}</div>`;
-                    }
-
-                    areaMensajes.innerHTML += `
-                        <div class="wa-bubble ${tipoBurbuja}">
-                            ${htmlContenido}
-                            <span class="wa-time">${fechaTxt}</span>
-                        </div>
-                    `;
-                }
-            });
-            areaMensajes.scrollTop = areaMensajes.scrollHeight;
-        });
-
-        window.enviarMensajeWA = async function() {
-            const inputPara = document.getElementById('chatDestinatarioWA');
-            const inputTexto = document.getElementById('inputMensajeWA');
-            const para = inputPara.value.trim() || "todos";
-            const texto = inputTexto.value.trim();
-
-            if (!texto) return;
-
-            if (para !== "todos") {
-                const miRef = doc(db, "usuarios_perfil", miUsuario);
-                const miSnap = await getDoc(miRef);
-                const misAmigos = miSnap.data().amigos || [];
-                if (!misAmigos.includes(para)) {
-                    return alert("Solo puedes chatear de forma privada con tus amigos agregados.");
-                }
-            }
-
-            await addDoc(chatsCol, {
-                de: miUsuario,
-                para: para,
-                texto: texto,
-                fecha: Date.now()
-            });
-
-            inputTexto.value = "";
-        }
-
-        // Enviar Imagenes en Chat Privado
-        window.subirFotoChat = async function(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const inputPara = document.getElementById('chatDestinatarioWA');
-            const para = inputPara.value.trim() || "todos";
-
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = async function() {
-                const base64Img = reader.result;
-                await addDoc(chatsCol, {
-                    de: miUsuario,
-                    para: para,
-                    imagenUrl: base64Img,
-                    fecha: Date.now()
-                });
-            };
-        }
-
-        window.toggleChatWA = function(mostrar) {
-            const panel = document.getElementById('whatsappChat');
-            if (mostrar) {
-                panel.classList.add('open');
-            } else {
-                panel.classList.remove('open');
-            }
-        }
-
-        // --- SISTEMA DE PANTALLAS ---
-        window.mostrarPantalla = function(pantalla) {
-            const feed = document.querySelector('.video-feed');
-            const feedNav = document.querySelector('.tiktok-nav');
-            const friendPanel = document.getElementById('friendPanel');
-            const menuItems = document.querySelectorAll('.nav-item');
-
-            // Resetear estados activos del menú
-            menuItems.forEach(item => item.classList.remove('active'));
-
-            if (pantalla === 'feed') {
-                friendPanel.classList.remove('open');
-                menuItems[0].classList.add('active');
-            } else if (pantalla === 'amigos') {
-                friendPanel.classList.add('open');
-                menuItems[1].classList.add('active');
-            }
-        }
-    </script>
+    // --- LÓGICA DE PERFIL ---
+    function actualizarPerfil() {
+      const name = document.getElementById('inputProfileName').value;
+      const avatarLarge = document.getElementById('profileAvatarLarge');
+      
+      if (name.trim() !== "") {
+        avatarLarge.innerText = name.charAt(0).toUpperCase();
+      }
+    }
+  </script>
 </body>
 </html>
