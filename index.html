@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TikTok P2P Platform</title>
+    <title>TikTok P2P Platform + Interactive Calls</title>
     <style>
         /* Reset de estilos básicos */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -13,16 +13,25 @@
         .phone-container { width: 100%; max-width: 410px; height: 850px; background: #000; border: 8px solid #333; border-radius: 36px; position: relative; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.8); display: flex; flex-direction: column; }
         .phone-container::-webkit-scrollbar { display: none; }
 
-        /* FEED DE VIDEO */
-        .video-feed { width: 100%; height: 480px; position: relative; background: #111; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        /* FEED DE VIDEO TIKTOK */
+        .video-feed { width: 100%; height: 440px; position: relative; background: #111; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .main-video { width: 100%; height: 100%; object-fit: cover; }
         .play-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; color: rgba(255,255,255,0.7); pointer-events: none; opacity: 0; transition: opacity 0.2s; }
         .video-feed:hover .play-overlay { opacity: 1; }
 
-        /* Iconos Flotantes */
-        .side-icons { position: absolute; right: 12px; bottom: 60px; display: flex; flex-direction: column; align-items: center; gap: 18px; z-index: 10; }
+        /* MINI PANTALLA FLOTANTE PARA LA VIDEOLLAMADA */
+        .call-overlay { position: absolute; top: 15px; left: 15px; width: 110px; height: 160px; background: #222; border-radius: 12px; border: 2px solid #25f4ee; overflow: hidden; z-index: 30; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .call-video { width: 100%; height: 100%; object-fit: cover; }
         
-        /* Foto de perfil editable */
+        /* Barra de herramientas flotante de la videollamada */
+        .call-controls-overlay { position: absolute; bottom: 5px; left: 0; width: 100%; display: flex; justify-content: space-around; padding: 0 5px; z-index: 31; }
+        .call-btn-action { background: rgba(0, 0, 0, 0.6); border: 1px solid #555; border-radius: 50%; width: 28px; height: 28px; color: white; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .call-btn-action:hover { background: rgba(255, 255, 255, 0.2); }
+        .call-btn-action.active-off { background: #fe2c55; border-color: #fe2c55; } /* Rojo cuando está apagado */
+        .call-btn-hangup { background: #fe2c55; border: none; }
+
+        /* Iconos Flotantes de TikTok */
+        .side-icons { position: absolute; right: 12px; bottom: 40px; display: flex; flex-direction: column; align-items: center; gap: 18px; z-index: 10; }
         .profile-wrapper { position: relative; width: 50px; height: 50px; cursor: pointer; }
         .profile-pic { width: 50px; height: 50px; border-radius: 50%; border: 2px solid #fe2c55; object-fit: cover; }
         .edit-badge { position: absolute; bottom: -2px; right: -2px; background: #fe2c55; color: white; width: 16px; height: 16px; border-radius: 50%; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #000; }
@@ -36,7 +45,7 @@
         .video-info h3 { font-size: 15px; margin-bottom: 5px; color: #fe2c55; cursor: pointer; }
         .video-info p { font-size: 13px; line-height: 1.3; }
 
-        /* PANEL DE CONTROLES DE LA PLATAFORMA (Subir Videos) */
+        /* BARRA SUPERIOR */
         .platform-controls { background: #1a1a1a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .upload-video-label { background: #25f4ee; color: black; font-weight: bold; padding: 6px 12px; border-radius: 20px; font-size: 11px; cursor: pointer; display: inline-block; }
         #subirVideoLocal { display: none; }
@@ -46,7 +55,7 @@
         .p2p-panel { background: #1e1e1e; padding: 10px; border-radius: 10px; margin-bottom: 8px; font-size: 11px; }
         .p2p-panel input { width: 100%; padding: 6px; margin: 5px 0; border: none; border-radius: 4px; background: #333; color: white; font-size: 12px; }
         
-        .chat-box { background: #1a1a1a; padding: 10px; border-radius: 8px; height: 130px; overflow-y: auto; margin-bottom: 10px; font-size: 13px; text-align: left; border: 1px solid #222; }
+        .chat-box { background: #1a1a1a; padding: 10px; border-radius: 8px; height: 110px; overflow-y: auto; margin-bottom: 10px; font-size: 13px; text-align: left; border: 1px solid #222; }
         .msg { margin-bottom: 8px; }
         .msg-user { color: #fe2c55; font-weight: bold; }
         .chat-img { max-width: 120px; border-radius: 6px; display: block; margin-top: 5px; }
@@ -58,6 +67,7 @@
         
         .btn-tiktok { background: #fe2c55; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; flex-grow: 1; font-size: 13px; }
         .btn-secondary { background: #444; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; font-size: 11px; text-align: center; }
+        .btn-call { background: #4CAF50; color: white; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 11px; }
         #archivoLocal { display: none; }
 
         /* NAV INFERIOR */
@@ -81,6 +91,16 @@
         </div>
 
         <div class="video-feed">
+            <div id="callOverlay" class="call-overlay">
+                <video id="remoteVideo" class="call-video" autoplay playsinline></video>
+                
+                <div class="call-controls-overlay">
+                    <button id="toggleMicBtn" class="call-btn-action" onclick="toggleMic()">🎤</button>
+                    <button id="toggleCamBtn" class="call-btn-action" onclick="toggleCam()">📷</button>
+                    <button class="call-btn-action call-btn-hangup" onclick="terminarLlamada()">❌</button>
+                </div>
+            </div>
+
             <video id="reproductorVideo" class="main-video" loop autoplay muted playsinline onclick="togglePlay(this)">
                 <source id="fuenteVideo" src="https://v1.assets.tcgd.controlshift.club/mov_bbb.mp4" type="video/mp4">
             </video>
@@ -88,7 +108,7 @@
 
             <div class="video-info">
                 <h3 id="miUsuario" onclick="cambiarNombre()">@tu_usuario</h3>
-                <p id="videoDesc">¡Subí este video directamente desde mi galería! Sube el tuyo arriba. #plataforma #P2P</p>
+                <p id="videoDesc">¡Toca "Llamar" abajo para iniciar una videollamada con tu amigo!</p>
             </div>
 
             <div class="side-icons">
@@ -98,17 +118,13 @@
                 </div>
                 <input type="file" id="inputFotoPerfil" accept="image/*" onchange="actualizarFotoPerfil(this)">
 
-                <div class="icon-btn" onclick="alert('¡Le diste Me Gusta!')">
+                <div class="icon-btn" onclick="alert('❤️ Me Gusta')">
                     <span class="icon-symbol">❤️</span>
                     <span>1.2M</span>
                 </div>
-                <div class="icon-btn" onclick="alert('Comentarios próximamente...')">
+                <div class="icon-btn" onclick="alert('💬 Comentarios próximamente')">
                     <span class="icon-symbol">💬</span>
                     <span>45K</span>
-                </div>
-                <div class="icon-btn" onclick="alert('Enlace copiado')">
-                    <span class="icon-symbol">↪️</span>
-                    <span>Share</span>
                 </div>
             </div>
         </div>
@@ -117,19 +133,22 @@
             <div class="p2p-panel">
                 <div style="font-size: 11px; color:#aaa; margin-bottom:4px;">Tu código: <span id="mi-id" style="color:#25f4ee; font-weight:bold;">Generando...</span></div>
                 <input type="text" id="id-amigo" placeholder="Pega el código de tu amigo aquí">
-                <button class="btn-secondary" onclick="conectarConAmigo()" style="width: 100%;">Enlazar con Amigo</button>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-secondary" onclick="conectarConAmigo()" style="flex-grow: 2;">Enlazar</button>
+                    <button class="btn-call" id="callBtn" onclick="iniciarLlamada()">📞 Llamar</button>
+                </div>
                 <p id="estado-conexion" style="font-size: 10px; color:#ffeb3b; margin-top:5px; text-align:center;">Estado: Desconectado</p>
             </div>
 
             <div class="chat-box" id="chatBox">
-                <div class="msg"><span class="msg-user">Sistema:</span> Edita tu nombre, cambia tu foto, sube un video o mándale un archivo a tu amigo.</div>
+                <div class="msg"><span class="msg-user">Sistema:</span> ¡Enlázate con tu amigo para desbloquear el botón de llamada!</div>
             </div>
 
             <div class="chat-controls">
                 <input type="text" id="mensajeTexto" placeholder="Escribe un mensaje privado...">
                 
                 <div class="chat-btns-row">
-                    <label for="archivoLocal" class="btn-secondary" style="display:flex; align-items:center; justify-content:center; flex-grow:1; text-align:center; cursor:pointer; font-size:11px;">📁 Adjuntar Archivo</label>
+                    <label for="archivoLocal" class="btn-secondary" style="display:flex; align-items:center; justify-content:center; flex-grow:1; cursor:pointer; font-size:11px;">📁 Archivo</label>
                     <input type="file" id="archivoLocal">
                     <button class="btn-tiktok" onclick="enviarMensaje()">Enviar</button>
                 </div>
@@ -168,13 +187,18 @@
         let avatarBase64 = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150";
         
         let archivoAdjunto = { base64: "", nombre: "", tipo: "" };
+        let localStream = null;
+        let llamadaActiva = null;
+
+        let micActivo = true;
+        let camActiva = true;
 
         // Inicializar PeerJS
         peer = new Peer();
 
         peer.on('open', function(id) {
             document.getElementById('mi-id').innerText = id;
-            document.getElementById('estado-conexion').innerText = "Estado: Listo para conectar.";
+            document.getElementById('estado-conexion').innerText = "Estado: Listo.";
         });
 
         peer.on('connection', function(conn) {
@@ -182,7 +206,116 @@
             configurarEventosConexion();
         });
 
-        // 1. Conectar con amigo
+        // ESCUCHAR LLAMADAS ENTRANTES
+        peer.on('call', function(call) {
+            const contestar = confirm("¿Quieres contestar la videollamada entrante?");
+            if (contestar) {
+                navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function(stream) {
+                    localStream = stream;
+                    call.answer(stream); // Contestar con nuestra cámara/micro
+                    llamadaActiva = call;
+                    
+                    document.getElementById('callOverlay').style.display = "block";
+                    resetBotonesControles();
+                    
+                    call.on('stream', function(remoteStream) {
+                        document.getElementById('remoteVideo').srcObject = remoteStream;
+                    });
+                }).catch(function(err) {
+                    alert("No se pudo acceder a la cámara/micrófono: " + err);
+                });
+            } else {
+                call.close();
+            }
+        });
+
+        // 1. Iniciar Llamada saliente
+        function iniciarLlamada() {
+            const idAmigo = document.getElementById('id-amigo').value.trim();
+            if (!conexion) {
+                alert("Primero debes estar enlazado con tu amigo.");
+                return;
+            }
+
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then(function(stream) {
+                localStream = stream;
+                document.getElementById('callOverlay').style.display = "block";
+                resetBotonesControles();
+                
+                // Llamar al ID del amigo
+                const call = peer.call(idAmigo, stream);
+                llamadaActiva = call;
+
+                call.on('stream', function(remoteStream) {
+                    document.getElementById('remoteVideo').srcObject = remoteStream;
+                });
+            }).catch(function(err) {
+                alert("Error al abrir cámara o micrófono: " + err);
+            });
+        }
+
+        // FUNCIONES DE CONTROL DE LLAMADA (MUTEAR/CAMARA)
+        function toggleMic() {
+            if (localStream) {
+                micActivo = !micActivo;
+                // Activar/desactivar el track de audio
+                localStream.getAudioTracks().forEach(track => track.enabled = micActivo);
+                
+                const btn = document.getElementById('toggleMicBtn');
+                if (micActivo) {
+                    btn.innerText = "🎤";
+                    btn.classList.remove('active-off');
+                } else {
+                    btn.innerText = "🔇";
+                    btn.classList.add('active-off');
+                }
+            }
+        }
+
+        function toggleCam() {
+            if (localStream) {
+                camActiva = !camActiva;
+                // Activar/desactivar el track de video
+                localStream.getVideoTracks().forEach(track => track.enabled = camActiva);
+                
+                const btn = document.getElementById('toggleCamBtn');
+                if (camActiva) {
+                    btn.innerText = "📷";
+                    btn.classList.remove('active-off');
+                } else {
+                    btn.innerText = "🚫";
+                    btn.classList.add('active-off');
+                }
+            }
+        }
+
+        function resetBotonesControles() {
+            micActivo = true;
+            camActiva = true;
+            const micBtn = document.getElementById('toggleMicBtn');
+            const camBtn = document.getElementById('toggleCamBtn');
+            micBtn.innerText = "🎤";
+            micBtn.classList.remove('active-off');
+            camBtn.innerText = "📷";
+            camBtn.classList.remove('active-off');
+        }
+
+        // Terminar la llamada
+        function terminarLlamada() {
+            if (llamadaActiva) {
+                llamadaActiva.close();
+            }
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('callOverlay').style.display = "none";
+            document.getElementById('remoteVideo').srcObject = null;
+            alert("Llamada finalizada.");
+        }
+
+        // Conectar P2P para chat
         function conectarConAmigo() {
             const idAmigo = document.getElementById('id-amigo').value.trim();
             if (idAmigo !== "") {
@@ -192,37 +325,27 @@
             }
         }
 
-        // Configurar los eventos de la conexión para recibir datos
         function configurarEventosConexion() {
             conexion.on('open', function() {
-                document.getElementById('estado-conexion').innerText = "¡Conectado exitosamente!";
-                agregarMensajeAlChat("Sistema", "Conexión en vivo establecida.");
-                
-                // Al conectarnos, le mandamos inmediatamente nuestro perfil y video para que se sincronice
+                document.getElementById('estado-conexion').innerText = "¡Enlazados con éxito!";
+                agregarMensajeAlChat("Sistema", "Enlazados en vivo. ¡Ya pueden llamarse!");
                 enviarSincronizacion();
             });
 
             conexion.on('data', function(data) {
-                // Si el paquete es de tipo 'actualizacion' de perfil o video
                 if (data.tipoTransmision === 'sincronizar') {
-                    if (data.usuario) {
-                        document.getElementById('miUsuario').innerText = data.usuario;
-                    }
-                    if (data.avatar) {
-                        document.getElementById('avatar').src = data.avatar;
-                    }
+                    if (data.usuario) document.getElementById('miUsuario').innerText = data.usuario;
+                    if (data.avatar) document.getElementById('avatar').src = data.avatar;
                     if (data.video) {
                         actualizarVideoPantalla(data.video);
-                        document.getElementById('videoDesc').innerText = "Video compartido en vivo por tu amigo.";
+                        document.getElementById('videoDesc').innerText = "Video compartido por tu amigo.";
                     }
                 } else {
-                    // Si es un mensaje normal de chat
                     agregarMensajeAlChat(data.usuario, data.texto, data.archivo);
                 }
             });
         }
 
-        // Función para sincronizar cambios en tiempo real
         function enviarSincronizacion(videoBase64 = null) {
             if (conexion && conexion.open) {
                 conexion.send({
@@ -234,17 +357,17 @@
             }
         }
 
-        // 2. Cambiar nombre de usuario
+        // Cambiar nombre
         function cambiarNombre() {
-            const nuevoUser = prompt("Ingresa tu nuevo nombre de usuario:", nombreUsuario);
+            const nuevoUser = prompt("Nuevo nombre:", nombreUsuario);
             if(nuevoUser && nuevoUser.trim() !== "") {
                 nombreUsuario = nuevoUser.trim().startsWith('@') ? nuevoUser.trim() : '@' + nuevoUser.trim();
                 document.getElementById('miUsuario').innerText = nombreUsuario;
-                enviarSincronizacion(); // Sincroniza el cambio con tu amigo
+                enviarSincronizacion();
             }
         }
 
-        // 3. Cambiar foto de perfil
+        // Cambiar foto perfil
         function abrirSelectorFotoPerfil() {
             document.getElementById('inputFotoPerfil').click();
         }
@@ -256,23 +379,23 @@
                 lector.onload = function(e) {
                     avatarBase64 = e.target.result;
                     document.getElementById('avatar').src = avatarBase64;
-                    enviarSincronizacion(); // Sincroniza tu foto de perfil con tu amigo
+                    enviarSincronizacion();
                 };
                 lector.readAsDataURL(archivo);
             }
         }
 
-        // 4. Subir y publicar video nuevo en la plataforma
+        // Subir Video
         function publicarVideoNuevo(input) {
             const archivo = input.files[0];
             if (archivo) {
                 const lector = new FileReader();
-                document.getElementById('videoDesc').innerText = "Procesando y cargando video...";
+                document.getElementById('videoDesc').innerText = "Enviando video...";
                 lector.onload = function(e) {
                     const videoBase64 = e.target.result;
                     actualizarVideoPantalla(videoBase64);
-                    document.getElementById('videoDesc').innerText = "¡Acabas de publicar un nuevo video en la plataforma! 🎬";
-                    enviarSincronizacion(videoBase64); // Envía el video en vivo a tu amigo
+                    document.getElementById('videoDesc').innerText = "¡Acabas de subir un video! 🎬";
+                    enviarSincronizacion(videoBase64);
                 };
                 lector.readAsDataURL(archivo);
             }
@@ -283,14 +406,14 @@
             video.pause();
             video.src = fuenteData;
             video.load();
-            video.play().catch(err => console.log("Auto-play prevenido por el navegador. Haz clic para reproducir."));
+            video.play().catch(err => console.log(err));
         }
 
-        // 5. Adjuntar cualquier tipo de archivo para el chat
+        // Adjuntar archivos
         document.getElementById('archivoLocal').addEventListener('change', function(e) {
             const archivo = e.target.files[0];
             if (archivo) {
-                document.getElementById('nombre-archivo').innerText = "Adjunto: " + archivo.name;
+                document.getElementById('nombre-archivo').innerText = "Listo: " + archivo.name;
                 const lector = new FileReader();
                 lector.onload = function(evento) {
                     archivoAdjunto = {
@@ -303,13 +426,13 @@
             }
         });
 
-        // Enviar Mensaje de Chat con archivo
+        // Enviar Chat
         function enviarMensaje() {
             const inputTexto = document.getElementById('mensajeTexto');
             const texto = inputTexto.value.trim();
 
             if (!conexion) {
-                alert("Primero enlázate con tu amigo usando el código.");
+                alert("Enlázate primero.");
                 return;
             }
 
@@ -323,7 +446,6 @@
                 conexion.send(paqueteDatos);
                 agregarMensajeAlChat("Tú", texto, paqueteDatos.archivo);
 
-                // Limpiar campos
                 inputTexto.value = '';
                 document.getElementById('archivoLocal').value = '';
                 document.getElementById('nombre-archivo').innerText = '';
@@ -331,17 +453,14 @@
             }
         }
 
-        // Mostrar mensajes en el chat (soporta imágenes y descargas de otros formatos)
         function agregarMensajeAlChat(usuario, texto, archivo) {
             const chatBox = document.getElementById('chatBox');
             let mensajeHTML = `<div class="msg"><span class="msg-user">${usuario}:</span> ${texto}`;
             
             if (archivo && archivo.base64 !== "") {
-                // Si es una imagen, la mostramos directamente
                 if (archivo.tipo.startsWith('image/')) {
                     mensajeHTML += `<img src="${archivo.base64}" class="chat-img">`;
                 } else {
-                    // Si es cualquier otro tipo de archivo (PDF, Word, etc.), creamos un enlace de descarga
                     mensajeHTML += `<br><a href="${archivo.base64}" download="${archivo.nombre}" class="download-btn">📥 Descargar ${archivo.nombre}</a>`;
                 }
             }
@@ -351,7 +470,6 @@
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Controlar play/pausa del video al tocarlo
         function togglePlay(videoElement) {
             const overlay = document.querySelector('.play-overlay');
             if (videoElement.paused) {
