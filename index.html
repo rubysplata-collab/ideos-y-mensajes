@@ -14,10 +14,15 @@
         .section { margin: 20px 0; padding: 15px; border-bottom: 1px solid #333; text-align: left; }
         input[type="text"] { width: 95%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; background: #333; color: white; }
         
-        .chat-box { background: #2b2b2b; padding: 15px; border-radius: 8px; height: 200px; overflow-y: auto; margin-bottom: 10px; }
+        .chat-box { background: #2b2b2b; padding: 15px; border-radius: 8px; height: 230px; overflow-y: auto; margin-bottom: 10px; }
         .msg { margin-bottom: 12px; font-size: 14px; word-wrap: break-word; }
         .msg-user { color: #fe2c55; font-weight: bold; }
-        .chat-img { max-width: 150px; border-radius: 8px; display: block; margin-top: 5px; }
+        .chat-img { max-width: 200px; border-radius: 8px; display: block; margin-top: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+        
+        /* Botón bonito para adjuntar archivos */
+        .file-label { display: inline-block; background: #333; color: #fff; padding: 10px; border-radius: 5px; cursor: pointer; font-size: 13px; text-align: center; width: 95%; margin-top: 5px; border: 1px dashed #555; }
+        .file-label:hover { background: #444; }
+        #fotoLocal { display: none; }
     </style>
 
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
@@ -49,7 +54,9 @@
 
             <input type="text" id="mensajeTexto" placeholder="Escribe un mensaje privado...">
             
-            <input type="text" id="fotoUrl" placeholder="Pega enlace de foto de internet (opcional)...">
+            <label class="file-label" for="fotoLocal">📷 Seleccionar Foto de la Galería</label>
+            <input type="file" id="fotoLocal" accept="image/*">
+            <span id="nombre-archivo" style="font-size: 11px; color: #fe2c55; display:block; margin-top:5px; font-weight:bold;"></span>
 
             <button class="btn" onclick="enviarMensaje()">Enviar Mensaje</button>
         </div>
@@ -59,17 +66,15 @@
         let peer;
         let conexion;
         let nombreUsuario = "@usuario_anonimo";
+        let fotoBase64 = ""; // Aquí guardaremos la foto local convertida en texto
 
-        // Inicializar PeerJS (crea la conexión de red)
         peer = new Peer();
 
-        // Cuando la red nos asigna nuestro código único
         peer.on('open', function(id) {
             document.getElementById('mi-id').innerText = id;
-            document.getElementById('estado-conexion').innerText = "Estado: Listo. Comparte tu código con tu amigo.";
+            document.getElementById('estado-conexion').innerText = "Estado: Listo. Comparte tu código.";
         });
 
-        // Escuchar si alguien se conecta a nosotros
         peer.on('connection', function(conn) {
             conexion = conn;
             configurarEventosConexion();
@@ -83,7 +88,6 @@
             }
         }
 
-        // Conectar manualmente usando el código del amigo
         function conectarConAmigo() {
             const idAmigo = document.getElementById('id-amigo').value.trim();
             if (idAmigo !== "") {
@@ -93,58 +97,64 @@
             }
         }
 
-        // Qué pasa una vez conectados
         function configurarEventosConexion() {
             conexion.on('open', function() {
                 document.getElementById('estado-conexion').innerText = "¡Conectado exitosamente!";
-                agregarMensajeAlChat("Sistema", "Conexión establecida con éxito.");
+                agregarMensajeAlChat("Sistema", "Conexión establecida.");
             });
 
-            // Escuchar los mensajes y fotos que nos llegan
             conexion.on('data', function(data) {
                 agregarMensajeAlChat(data.usuario, data.texto, data.foto);
             });
         }
 
-        // Enviar mensaje a nuestro amigo
+        // Lee el archivo de imagen de tu celular/computadora y lo prepara
+        document.getElementById('fotoLocal').addEventListener('change', function(e) {
+            const archivo = e.target.files[0];
+            if (archivo) {
+                document.getElementById('nombre-archivo').innerText = "Foto seleccionada: " + archivo.name;
+                
+                const lector = new FileReader();
+                lector.onload = function(evento) {
+                    fotoBase64 = evento.target.result; // Convierte la foto en código de texto
+                };
+                lector.readAsDataURL(archivo);
+            }
+        });
+
         function enviarMensaje() {
             const inputTexto = document.getElementById('mensajeTexto');
-            const inputFotoUrl = document.getElementById('fotoUrl');
-
             const texto = inputTexto.value.trim();
-            const foto = inputFotoUrl.value.trim();
 
             if (!conexion) {
-                alert("Primero debes conectarte con un amigo usando su código.");
+                alert("Primero debes conectarte con tu amigo usando su código.");
                 return;
             }
 
-            if (texto !== "" || foto !== "") {
+            if (texto !== "" || fotoBase64 !== "") {
                 const paqueteDatos = {
                     usuario: nombreUsuario,
                     texto: texto,
-                    foto: foto
+                    foto: fotoBase64 // Se envía la foto real convertida
                 };
 
-                // Enviamos los datos directamente por la conexión
                 conexion.send(paqueteDatos);
+                agregarMensajeAlChat("Tú", texto, fotoBase64);
 
-                // También lo mostramos en nuestra propia pantalla
-                agregarMensajeAlChat("Tú", texto, foto);
-
-                // Limpiamos campos
+                // Limpiar campos
                 inputTexto.value = '';
-                inputFotoUrl.value = '';
+                document.getElementById('fotoLocal').value = '';
+                document.getElementById('nombre-archivo').innerText = '';
+                fotoBase64 = ""; // Resetear variable
             }
         }
 
-        // Mostrar los mensajes en la caja de chat
-        function agregarMensajeAlChat(usuario, texto, fotoUrl) {
+        function agregarMensajeAlChat(usuario, texto, fotoData) {
             const chatBox = document.getElementById('chatBox');
             let mensajeHTML = `<div class="msg"><span class="msg-user">${usuario}:</span> ${texto}`;
             
-            if (fotoUrl && fotoUrl.trim() !== "") {
-                mensajeHTML += `<img src="${fotoUrl}" class="chat-img">`;
+            if (fotoData && fotoData.trim() !== "") {
+                mensajeHTML += `<img src="${fotoData}" class="chat-img">`;
             }
             
             mensajeHTML += `</div>`;
