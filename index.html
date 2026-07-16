@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat - ID Permanente P2P</title>
+  <title>WaveChat - ID Permanente con Compartir Pantalla Real</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
@@ -429,19 +429,17 @@
     window.addEventListener('load', () => {
       const savedUsername = localStorage.getItem('wavechat_username');
       if (savedUsername) {
-        // Si ya hay un usuario registrado, saltamos la pantalla de registro
         inicializarPeer(savedUsername);
       } else {
-        // Si es la primera vez, mostramos la pantalla para registrarse
         mostrarPantalla('registerScreen');
       }
     });
 
     function guardarNombreUsuario() {
       const input = document.getElementById('usernameInput');
-      const rawName = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, ''); // Limpiar caracteres raros
+      const rawName = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
 
-      if (!rawName) return alert("Por favor, introduce un nombre de usuario válido (letras y números únicamente).");
+      if (!rawName) return alert("Por favor, introduce un nombre de usuario válido.");
 
       const finalID = 'wave-' + rawName;
       localStorage.setItem('wavechat_username', finalID);
@@ -460,7 +458,6 @@
       document.getElementById('myPeerId').innerText = userId;
       mostrarPantalla('setupScreen');
 
-      // Inicializar PeerJS con el ID Permanente guardado
       peer = new Peer(userId);
 
       peer.on('error', (err) => {
@@ -472,7 +469,6 @@
         }
       });
 
-      // Escuchar conexión entrante
       peer.on('connection', (conn) => {
         dataConnection = conn;
         amigoId = conn.peer;
@@ -480,7 +476,6 @@
         abrirPantallaDeChat(amigoId);
       });
 
-      // Escuchar videollamada entrante
       peer.on('call', async (call) => {
         if (confirm(`¿Contestar videollamada de ${call.peer}?`)) {
           mediaCall = call;
@@ -490,13 +485,13 @@
             
             call.answer(localStream);
             document.getElementById('callScreen').style.display = 'flex';
-            document.getElementById('callContactName').innerText = call.peer;
+            document.getElementById('callContactName').innerText = call.peer.replace('wave-', '').toUpperCase();
 
             call.on('stream', (remoteStream) => {
               document.getElementById('remoteVideo').srcObject = remoteStream;
             });
           } catch (err) {
-            alert("Error al acceder a la cámara/micrófono.");
+            alert("Error al acceder a la cámara o micrófono.");
           }
         } else {
           call.close();
@@ -509,12 +504,10 @@
       document.getElementById(screenId).classList.add('active');
     }
 
-    // Conectarnos de forma activa usando el código de un amigo
     function conectarConAmigo() {
       let destId = document.getElementById('destPeerId').value.trim().toLowerCase();
       if (!destId) return alert("Ingresa un código válido.");
 
-      // Si el usuario no escribe "wave-", se lo añadimos automáticamente por comodidad
       if (!destId.startsWith('wave-')) {
         destId = 'wave-' + destId;
       }
@@ -558,7 +551,6 @@
 
     function abrirPantallaDeChat(peerId) {
       mostrarPantalla('activeChatScreen');
-      // Mostrar solo el nombre limpio sin el "wave-" en la cabecera
       const displayName = peerId.replace('wave-', '').toUpperCase();
       document.getElementById('activeContactName').innerText = displayName;
       document.getElementById('activeAvatar').innerText = displayName.substring(0, 2);
@@ -631,7 +623,7 @@
           document.getElementById('remoteVideo').srcObject = remoteStream;
         });
       } catch (err) {
-        alert("Error al iniciar llamada.");
+        alert("Error al iniciar llamada. Revisa los permisos de cámara.");
         colgarLlamada();
       }
     }
@@ -643,20 +635,23 @@
 
       if (!compartiendoPantalla) {
         try {
+          // Solicitar captura de pantalla real al sistema operativo/navegador
           screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
           
           const videoTrack = screenStream.getVideoTracks()[0];
           const sender = mediaCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
           if (sender) sender.replaceTrack(videoTrack);
 
+          // Mostrar localmente nuestra pantalla
           localVideoElem.srcObject = screenStream;
           localVideoElem.classList.remove('mirror');
           compartiendoPantalla = true;
 
+          // Si dejas de compartir desde el cartel del navegador, vuelve a la cámara
           videoTrack.onended = () => detenerCompartirPantalla();
 
         } catch (err) {
-          console.error("Error al compartir pantalla: ", err);
+          console.error("No se pudo compartir pantalla: ", err);
         }
       } else {
         detenerCompartirPantalla();
