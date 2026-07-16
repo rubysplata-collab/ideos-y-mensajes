@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat - Mensajería P2P Real</title>
+  <title>WaveChat - P2P Completo con Compartir Pantalla</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
@@ -15,8 +15,8 @@
       --rojo-neon: #ff1744;
       --texto-blanco: #f5f5f7;
       --texto-mutado: #8b9bb4;
-      --burbuja-enviado: #002d62; /* Color de tus mensajes en la captura */
-      --burbuja-recibido: #1f2c34; /* Color de los mensajes de Fer */
+      --burbuja-enviado: #002d62;
+      --burbuja-recibido: #1f2c34;
     }
 
     * {
@@ -61,7 +61,7 @@
       display: flex;
     }
 
-    /* --- PANTALLA PRINCIPAL: CONEXIÓN --- */
+    /* --- INICIO / CONEXIÓN --- */
     .app-header {
       padding: 18px 20px;
       background-color: #1f2c34;
@@ -134,14 +134,9 @@
       font-weight: bold;
       font-size: 1rem;
       cursor: pointer;
-      transition: background 0.2s;
     }
 
-    .connect-btn:hover {
-      background-color: #00b359;
-    }
-
-    /* --- PANTALLA DE CHAT ESTILO TIKTOK --- */
+    /* --- CHAT --- */
     .chat-active-container {
       display: flex;
       flex-direction: column;
@@ -240,7 +235,7 @@
       border: none;
     }
 
-    /* --- PANTALLA DE VIDEOLLAMADA --- */
+    /* --- PANTALLA LLAMADA --- */
     .call-screen {
       display: none;
       position: absolute;
@@ -281,6 +276,10 @@
       object-fit: cover;
       border: 2px solid var(--verde-neon);
       z-index: 10;
+    }
+
+    /* Estilo espejo para la cámara propia, pero no para compartir pantalla */
+    .mirror {
       transform: scaleX(-1);
     }
 
@@ -288,17 +287,17 @@
       position: relative;
       z-index: 10;
       display: flex;
-      gap: 25px;
+      gap: 20px;
       margin-bottom: 20px;
     }
 
     .control-btn {
-      width: 60px;
-      height: 60px;
+      width: 55px;
+      height: 55px;
       border-radius: 50%;
       border: none;
       color: white;
-      font-size: 1.5rem;
+      font-size: 1.3rem;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -318,13 +317,15 @@
 
     <div class="call-screen" id="callScreen">
       <div class="video-call-grid">
-        <video id="localVideo" class="local-video" autoplay playsinline muted></video>
+        <video id="localVideo" class="local-video mirror" autoplay playsinline muted></video>
         <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
       </div>
       <div style="position: relative; z-index: 10; text-align: center; margin-top: 180px;">
         <h3 id="callContactName" style="text-shadow: 0 2px 10px #000;">Conectando...</h3>
       </div>
+      
       <div class="call-controls">
+        <button class="control-btn" onclick="alternarCompartirPantalla()" title="Compartir Pantalla">📺</button>
         <button class="control-btn decline" onclick="colgarLlamada()">📞</button>
       </div>
     </div>
@@ -362,7 +363,7 @@
 
         <div class="chat-messages-box" id="chatMessagesBox">
           <div style="text-align:center; color:var(--texto-mutado); font-size:0.8rem;">
-            Conectados directamente de extremo a extremo.
+            Conectados de extremo a extremo de forma real.
           </div>
         </div>
 
@@ -384,9 +385,11 @@
     let dataConnection = null;
     let mediaCall = null;
     let localStream = null;
+    let screenStream = null;
     let amigoId = "";
+    let compartiendoPantalla = false;
 
-    // Generar un código único aleatorio amigable
+    // Generar ID
     const randomCode = 'wave-' + Math.floor(1000 + Math.random() * 9000);
     peer = new Peer(randomCode);
 
@@ -394,7 +397,7 @@
       document.getElementById('myPeerId').innerText = id;
     });
 
-    // Escuchar cuando alguien se conecta a nosotros usando nuestro código
+    // Conexión entrante de chat
     peer.on('connection', (conn) => {
       dataConnection = conn;
       amigoId = conn.peer;
@@ -402,7 +405,7 @@
       abrirPantallaDeChat(amigoId);
     });
 
-    // Escuchar videollamadas entrantes
+    // Llamada entrante
     peer.on('call', async (call) => {
       if (confirm(`¿Contestar videollamada de ${call.peer}?`)) {
         mediaCall = call;
@@ -418,14 +421,13 @@
             document.getElementById('remoteVideo').srcObject = remoteStream;
           });
         } catch (err) {
-          alert("No se pudo iniciar la cámara/micrófono para contestar.");
+          alert("Error al acceder a la cámara/micrófono.");
         }
       } else {
         call.close();
       }
     });
 
-    // Conectarnos de forma activa usando el código de un amigo
     function conectarConAmigo() {
       const destId = document.getElementById('destPeerId').value.trim();
       if (!destId) return alert("Ingresa un código válido.");
@@ -453,7 +455,7 @@
           if (data.fileType.startsWith('image/')) {
             chatBox.innerHTML += `
               <div class="message-bubble received">
-                <img src="${url}" class="message-media" alt="Foto recibida">
+                <img src="${url}" class="message-media" alt="Foto">
               </div>`;
           } else if (data.fileType.startsWith('video/')) {
             chatBox.innerHTML += `
@@ -478,26 +480,20 @@
       document.getElementById('setupScreen').classList.add('active');
     }
 
-    // --- ENVIAR MENSAJES REALES ---
+    // --- ENVIAR ARCHIVOS Y TEXTO ---
     function enviarMensajeTexto() {
       const input = document.getElementById('chatInputMessage');
       const text = input.value.trim();
       if (!text || !dataConnection) return;
 
-      // Enviar el mensaje al amigo
-      dataConnection.send({
-        type: 'text',
-        content: text
-      });
+      dataConnection.send({ type: 'text', content: text });
 
-      // Pintarlo en nuestra pantalla (Estilo enviado: azul)
       const chatBox = document.getElementById('chatMessagesBox');
       chatBox.innerHTML += `<div class="message-bubble sent">${text}</div>`;
       input.value = "";
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // --- ENVIAR FOTOS/VIDEOS REALES ---
     function enviarArchivo() {
       const fileInput = document.getElementById('mediaInput');
       if (fileInput.files.length === 0) return;
@@ -506,36 +502,24 @@
       const reader = new FileReader();
 
       reader.onload = function(event) {
-        const fileData = event.target.result;
-        
-        // Enviamos el archivo completo a través de la conexión directa
         dataConnection.send({
           type: 'file',
-          fileData: fileData,
+          fileData: event.target.result,
           fileName: file.name,
           fileType: file.type
         });
 
-        // Mostrarlo en nuestra pantalla localmente
         const url = URL.createObjectURL(file);
         const chatBox = document.getElementById('chatMessagesBox');
         
         if (file.type.startsWith('image/')) {
-          chatBox.innerHTML += `
-            <div class="message-bubble sent">
-              <img src="${url}" class="message-media" alt="Foto">
-            </div>`;
+          chatBox.innerHTML += `<div class="message-bubble sent"><img src="${url}" class="message-media"></div>`;
         } else if (file.type.startsWith('video/')) {
-          chatBox.innerHTML += `
-            <div class="message-bubble sent">
-              <video src="${url}" class="message-media" controls></video>
-            </div>`;
+          chatBox.innerHTML += `<div class="message-bubble sent"><video src="${url}" class="message-media" controls></video></div>`;
         }
-        
         fileInput.value = "";
         chatBox.scrollTop = chatBox.scrollHeight;
       };
-
       reader.readAsArrayBuffer(file);
     }
 
@@ -543,27 +527,79 @@
       if (e.key === 'Enter') enviarMensajeTexto();
     });
 
-    // --- VIDEOLLAMADAS REALES ---
+    // --- LLAMAR Y COMPARTIR PANTALLA ---
     async function iniciarLlamada() {
       if (!amigoId) return;
-
       document.getElementById('callScreen').style.display = 'flex';
       document.getElementById('callContactName').innerText = amigoId;
 
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         document.getElementById('localVideo').srcObject = localStream;
+        document.getElementById('localVideo').classList.add('mirror');
 
         mediaCall = peer.call(amigoId, localStream);
-
         mediaCall.on('stream', (remoteStream) => {
           document.getElementById('remoteVideo').srcObject = remoteStream;
         });
-
       } catch (err) {
-        alert("Error al abrir cámara o micrófono.");
+        alert("Error al iniciar llamada.");
         colgarLlamada();
       }
+    }
+
+    async function alternarCompartirPantalla() {
+      if (!mediaCall) return;
+
+      const localVideoElem = document.getElementById('localVideo');
+
+      if (!compartiendoPantalla) {
+        try {
+          // Solicitar captura de pantalla al navegador
+          screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+          
+          // Reemplazar la pista de video que estamos enviando al amigo
+          const videoTrack = screenStream.getVideoTracks()[0];
+          const sender = mediaCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+          if (sender) sender.replaceTrack(videoTrack);
+
+          // Mostrar nuestra propia pantalla en la miniatura (sin efecto espejo)
+          localVideoElem.srcObject = screenStream;
+          localVideoElem.classList.remove('mirror');
+          compartiendoPantalla = true;
+
+          // Si el usuario deja de compartir desde el botón del navegador
+          videoTrack.onended = () => detenerCompartirPantalla();
+
+        } catch (err) {
+          console.error("Error al compartir pantalla: ", err);
+        }
+      } else {
+        detenerCompartirPantalla();
+      }
+    }
+
+    async function detenerCompartirPantalla() {
+      if (!mediaCall || !compartiendoPantalla) return;
+
+      const localVideoElem = document.getElementById('localVideo');
+
+      // Volver a la cámara normal
+      const cameraTracks = localStream.getVideoTracks();
+      if (cameraTracks.length > 0) {
+        const sender = mediaCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
+        if (sender) sender.replaceTrack(cameraTracks[0]);
+      }
+
+      // Cerrar transmisión de pantalla
+      if (screenStream) {
+        screenStream.getTracks().forEach(track => track.stop());
+        screenStream = null;
+      }
+
+      localVideoElem.srcObject = localStream;
+      localVideoElem.classList.add('mirror');
+      compartiendoPantalla = false;
     }
 
     function colgarLlamada() {
@@ -571,6 +607,7 @@
         mediaCall.close();
         mediaCall = null;
       }
+      detenerCompartirPantalla();
       if (localStream) {
         localStream.getTracks().forEach(track => track.stop());
         localStream = null;
