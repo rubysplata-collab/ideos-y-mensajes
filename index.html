@@ -332,56 +332,6 @@
         .register-card input { width: 100%; padding: 12px; background: #2b2b2b; border: 1px solid #444; color: white; border-radius: 10px; text-align: center; font-size: 16px; margin-bottom: 15px; }
         .btn-register-submit { width: 100%; background: #fe2c55; color: white; border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
-        /* MODAL DE LLAMADAS REALES */
-        .call-screen {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #111e25;
-            z-index: 150;
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 50px 20px;
-        }
-        .call-screen.active { display: flex; }
-        .caller-info { text-align: center; margin-top: 40px; }
-        .caller-avatar { width: 100px; height: 100px; border-radius: 50%; border: 3px solid #00a884; object-fit: cover; margin-bottom: 15px; }
-        .caller-name { font-size: 22px; font-weight: bold; }
-        .call-status { font-size: 14px; color: #00a884; margin-top: 5px; }
-
-        .video-call-box {
-            width: 90%;
-            height: 300px;
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            border: 2px solid #222;
-        }
-        .local-video-preview {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transform: scaleX(-1);
-        }
-        .video-muted-placeholder {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #777;
-        }
-
-        .call-controls { display: flex; gap: 20px; margin-bottom: 30px; }
-        .btn-call-control {
-            width: 55px; height: 55px; border-radius: 50%; border: none; font-size: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: white;
-        }
-        .btn-hangup { background: #f44336; }
-
         /* Mensajes de Chat y Comentarios */
         .msg { margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px; }
         .msg-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
@@ -404,6 +354,128 @@
         .nav-arrow-up { top: 70px; }
         .nav-arrow-down { bottom: 80px; }
     </style>
+</head>
+<body>
+
+    <div class="phone-container">
+        <div class="video-feed" onclick="toggleReproduccionVideo()">
+            <video id="reproductorVideo" class="main-video" loop autoplay muted playsinline></video>
+            
+            <div id="videoErrorMsg" class="video-error-msg">
+                <h4>Video Expirado o No Disponible</h4>
+                <p>El enlace de este video ya no responde.</p>
+            </div>
+
+            <div class="top-nav-tiktok">
+                <span class="top-nav-item">Siguiendo</span>
+                <span class="top-nav-item active">Para ti</span>
+            </div>
+
+            <button class="nav-arrow nav-arrow-up" onclick="event.stopPropagation(); videoAnterior()">▲ Anterior</button>
+            <button class="nav-arrow nav-arrow-down" onclick="event.stopPropagation(); siguienteVideo()">▼ Siguiente</button>
+
+            <div class="video-info">
+                <span id="filterTag" class="video-filter-tag" style="display: none;"></span>
+                <div>
+                    <h3 id="autorVideo">@usuario</h3>
+                    <span id="seguirIndicador" class="follow-text-indicator" style="display: none;">Siguiendo</span>
+                </div>
+                <p id="descVideo">Cargando descripción del video...</p>
+            </div>
+
+            <div class="side-icons" onclick="event.stopPropagation();">
+                <div class="profile-wrapper" onclick="toggleSeguirCreador()">
+                    <img id="fotoCreador" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="profile-pic">
+                    <div id="badgeSeguir" class="follow-btn-add">+</div>
+                </div>
+
+                <div class="icon-btn" onclick="darLike()">
+                    <span id="iconLike" class="icon-symbol">🤍</span>
+                    <span id="numLikes">0</span>
+                </div>
+
+                <div class="icon-btn" onclick="toggleComentarios(true)">
+                    <span class="icon-symbol">💬</span>
+                    <span id="numComentarios">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="commentsPanel" class="comments-panel">
+            <div class="comments-header">
+                <span>Comentarios</span>
+                <span style="cursor: pointer;" onclick="toggleComentarios(false)">✕</span>
+            </div>
+            <div id="chatBox" class="scrollable-list"></div>
+            <div class="input-bar">
+                <input id="inputComentario" type="text" placeholder="Añadir comentario...">
+                <button class="btn-send" onclick="enviarComentario()">➤</button>
+            </div>
+        </div>
+
+        <div id="friendPanel" class="friend-panel">
+            <h2>Bandeja de Entrada</h2>
+            <div class="search-friend-box">
+                <input id="inputSearchFriend" type="text" placeholder="Buscar usuario para agregar...">
+                <button class="btn-search-add" onclick="enviarSolicitudAmistad()">Agregar</button>
+            </div>
+            <h3 style="font-size: 14px; margin-bottom: 10px; color: #aaa;">Solicitudes Pendientes</h3>
+            <div id="requestList" class="scrollable-list"></div>
+        </div>
+
+        <div id="whatsappChat" class="whatsapp-chat">
+            <div class="wa-header">
+                <div class="wa-header-left">
+                    <span class="wa-back-btn" onclick="toggleChatWA(false)">←</span>
+                    <div class="wa-user-info">
+                        <span class="wa-username">Chat Privado</span>
+                        <input id="chatDestinatarioWA" type="text" placeholder="Escribe @usuario o 'todos'" style="background: transparent; border: none; color: white; font-size: 12px; outline: none;">
+                    </div>
+                </div>
+            </div>
+            <div id="waMessagesArea" class="wa-messages-area"></div>
+            <div class="wa-input-bar">
+                <label class="wa-btn-icon">
+                    📷
+                    <input type="file" accept="image/*" style="display: none;" onchange="subirFotoChat(this)">
+                </label>
+                <input id="inputMensajeWA" class="wa-input-box" type="text" placeholder="Escribe un mensaje privado...">
+                <button class="wa-send-btn" onclick="enviarMensajeWA()">➤</button>
+            </div>
+        </div>
+
+        <div class="tiktok-nav">
+            <div class="nav-item active" onclick="mostrarPantalla('feed')">
+                <span class="nav-icon">🏠</span>
+                <span>Inicio</span>
+            </div>
+            <div class="nav-item" onclick="mostrarPantalla('amigos')">
+                <span class="nav-icon">👥</span>
+                <span>Amigos</span>
+            </div>
+            <div class="plus-btn-container">
+                <div class="plus-btn-background"></div>
+                <div class="plus-btn-foreground">+</div>
+            </div>
+            <div class="nav-item" onclick="toggleChatWA(true)">
+                <span class="nav-icon">💬</span>
+                <span>Bandeja</span>
+            </div>
+            <div class="nav-item">
+                <span class="nav-icon">👤</span>
+                <span>Perfil</span>
+            </div>
+        </div>
+
+        <div id="registerOverlay" class="register-overlay">
+            <div class="register-card">
+                <h2>Crea tu Perfil</h2>
+                <p>Elige un nombre de usuario único para identificarte en la red.</p>
+                <input id="registerUserName" type="text" placeholder="Ej: rubysplata">
+                <button class="btn-register-submit" onclick="completarRegistroUnico()">Registrarse</button>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -427,9 +499,7 @@
 
         let videosGlobales = [];
         let indiceVideoActual = 0;
-        let localStream = null;
 
-        // --- SISTEMA DE REGISTRO DE USUARIO ÚNICO ---
         window.addEventListener('DOMContentLoaded', () => {
             configurarManejadoresDeVideo();
             if (!miUsuario) {
@@ -476,7 +546,6 @@
                 videosGlobales.push({ id: doc.id, ...doc.data() });
             });
             
-            // Si la base de datos está vacía, añadimos uno de respaldo para asegurar que funcione.
             if (videosGlobales.length === 0) {
                 videosGlobales.push({
                     id: "demo",
@@ -495,12 +564,10 @@
             const videoElement = document.getElementById('reproductorVideo');
             const errorOverlay = document.getElementById('videoErrorMsg');
 
-            // Si hay un error cargando el video (como un enlace borrado), avisamos al usuario
             videoElement.onerror = () => {
                 errorOverlay.style.display = "flex";
             };
 
-            // Cuando empieza a reproducir con éxito, ocultamos cualquier aviso de error
             videoElement.onplaying = () => {
                 errorOverlay.style.display = "none";
             };
@@ -512,15 +579,12 @@
             const videoElement = document.getElementById('reproductorVideo');
             const errorOverlay = document.getElementById('videoErrorMsg');
 
-            // Resetear estados del reproductor
             errorOverlay.style.display = "none";
             videoElement.pause();
             
-            // Cambiar fuente del video
             videoElement.src = videoData.videoUrl;
             videoElement.load();
 
-            // Forzar play con soporte a políticas de bloqueo de audio de navegadores
             const playPromise = videoElement.play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
@@ -571,7 +635,20 @@
             renderizarComentarios(videoData.comentarios || []);
         }
 
-        // Control manual de reproducción tocando la pantalla
+        window.siguienteVideo = function() {
+            if (indiceVideoActual < videosGlobales.length - 1) {
+                indiceVideoActual++;
+                mostrarVideoActual();
+            }
+        }
+
+        window.videoAnterior = function() {
+            if (indiceVideoActual > 0) {
+                indiceVideoActual--;
+                mostrarVideoActual();
+            }
+        }
+
         window.toggleReproduccionVideo = function() {
             const videoElement = document.getElementById('reproductorVideo');
             if (videoElement.paused) {
@@ -594,6 +671,28 @@
                 await updateDoc(videoDocRef, { likes: arrayRemove(miUsuario) });
             } else {
                 await updateDoc(videoDocRef, { likes: arrayUnion(miUsuario) });
+            }
+        }
+
+        window.toggleSeguirCreador = async function() {
+            if (!miUsuario) return;
+            const videoActual = videosGlobales[indiceVideoActual];
+            if (!videoActual || videoActual.id === "demo") return;
+
+            const creadorRef = doc(db, "usuarios_perfil", videoActual.usuario);
+            const miPerfilRef = doc(db, "usuarios_perfil", miUsuario);
+            const creadorSnap = await getDoc(creadorRef);
+
+            if (creadorSnap.exists()) {
+                const seguidores = creadorSnap.data().seguidores || [];
+                if (seguidores.includes(miUsuario)) {
+                    await updateDoc(creadorRef, { seguidores: arrayRemove(miUsuario) });
+                    await updateDoc(miPerfilRef, { siguiendo: arrayRemove(videoActual.usuario) });
+                } else {
+                    await updateDoc(creadorRef, { seguidores: arrayUnion(miUsuario) });
+                    await updateDoc(miPerfilRef, { siguiendo: arrayUnion(videoActual.usuario) });
+                }
+                mostrarVideoActual();
             }
         }
 
@@ -634,6 +733,15 @@
                 })
             });
             input.value = "";
+        }
+
+        window.toggleComentarios = function(mostrar) {
+            const panel = document.getElementById('commentsPanel');
+            if (mostrar) {
+                panel.classList.add('open');
+            } else {
+                panel.classList.remove('open');
+            }
         }
 
         // --- SOLICITUDES DE AMISTAD ---
@@ -779,232 +887,44 @@
 
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = async function () {
+            reader.onload = async function() {
                 const base64Img = reader.result;
                 await addDoc(chatsCol, {
                     de: miUsuario,
                     para: para,
-                    texto: "",
                     imagenUrl: base64Img,
                     fecha: Date.now()
                 });
             };
         }
 
-        // --- SISTEMA DE LLAMADAS ---
-        window.iniciarLlamada = async function() {
-            const callScreen = document.getElementById('callScreen');
-            const videoPreview = document.getElementById('localVideoPreview');
-            const placeholder = document.getElementById('videoMutedPlaceholder');
-            
-            callScreen.classList.add('active');
-            
-            const destino = document.getElementById('chatDestinatarioWA').value || "todos";
-            document.getElementById('callerName').innerText = "Llamando a: " + destino;
-
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                videoPreview.srcObject = localStream;
-                videoPreview.style.display = "block";
-                placeholder.style.display = "none";
-            } catch (err) {
-                placeholder.style.display = "flex";
-                placeholder.innerText = "Sin permisos de cámara";
+        window.toggleChatWA = function(mostrar) {
+            const panel = document.getElementById('whatsappChat');
+            if (mostrar) {
+                panel.classList.add('open');
+            } else {
+                panel.classList.remove('open');
             }
         }
 
-        window.colgarLlamada = function() {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            document.getElementById('callScreen').classList.remove('active');
-        }
+        // --- SISTEMA DE PANTALLAS ---
+        window.mostrarPantalla = function(pantalla) {
+            const feed = document.querySelector('.video-feed');
+            const feedNav = document.querySelector('.tiktok-nav');
+            const friendPanel = document.getElementById('friendPanel');
+            const menuItems = document.querySelectorAll('.nav-item');
 
-        // Navegación Básica
-        window.siguienteVideo = function() {
-            if (indiceVideoActual < videosGlobales.length - 1) {
-                indiceVideoActual++;
-                mostrarVideoActual();
-            }
-        }
-        window.anteriorVideo = function() {
-            if (indiceVideoActual > 0) {
-                indiceVideoActual--;
-                mostrarVideoActual();
-            }
-        }
+            // Resetear estados activos del menú
+            menuItems.forEach(item => item.classList.remove('active'));
 
-        window.abrirInboxWA = function() {
-            const targetUser = videosGlobales[indiceVideoActual]?.usuario || "todos";
-            document.getElementById('chatDestinatarioWA').value = targetUser;
-            document.getElementById('whatsappChat').classList.add('open');
-        }
-        window.cerrarInboxWA = function() {
-            document.getElementById('whatsappChat').classList.remove('open');
-        }
-
-        window.toggleBandejaAmistad = function(show) {
-            const panel = document.getElementById('friendPanel');
-            if (show) panel.classList.add('open');
-            else panel.classList.remove('open');
+            if (pantalla === 'feed') {
+                friendPanel.classList.remove('open');
+                menuItems[0].classList.add('active');
+            } else if (pantalla === 'amigos') {
+                friendPanel.classList.add('open');
+                menuItems[1].classList.add('active');
+            }
         }
     </script>
-</head>
-<body>
-
-    <div class="register-overlay" id="registerOverlay">
-        <div class="register-card">
-            <h2>Crea tu cuenta</h2>
-            <p>Elige tu nombre de usuario único. Este nombre identificará tus videos, chats y listas de amigos.</p>
-            <input type="text" id="registerUserName" placeholder="ej: jheiler_premium">
-            <button class="btn-register-submit" onclick="completarRegistroUnico()">Empezar 🚀</button>
-        </div>
-    </div>
-
-    <div class="phone-container">
-        
-        <div class="top-nav-tiktok">
-            <span class="top-nav-item">Siguiendo</span>
-            <span class="top-nav-item active">Para ti</span>
-        </div>
-
-        <button class="nav-arrow nav-arrow-up" onclick="anteriorVideo()">▲ Anterior</button>
-        <button class="nav-arrow nav-arrow-down" onclick="siguienteVideo()">▼ Siguiente</button>
-
-        <div class="video-feed" onclick="toggleReproduccionVideo()">
-            <video id="reproductorVideo" class="main-video" loop autoplay muted playsinline></video>
-
-            <div class="video-error-msg" id="videoErrorMsg">
-                <h4>Video temporal expirado</h4>
-                <p>Este video ha sido eliminado del servidor temporal de almacenamiento debido a los límites gratuitos de tiempo. ¡Sube un nuevo video para verlo aquí!</p>
-            </div>
-
-            <div class="video-info" onclick="event.stopPropagation()">
-                <span class="video-filter-tag" id="filterTag" style="display:none;"></span><br>
-                <h3 id="autorVideo">Cargando...</h3>
-                <span id="seguirIndicador" class="follow-text-indicator" style="display:none;">Siguiendo</span>
-                <p id="descVideo">Cargando...</p>
-                <div style="font-size: 13px;">🎵 Sonido Original de la comunidad</div>
-            </div>
-
-            <div class="side-icons" onclick="event.stopPropagation()">
-                <div class="profile-wrapper">
-                    <img id="avatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="profile-pic">
-                    <div class="follow-btn-add" id="badgeSeguir">+</div>
-                </div>
-
-                <div class="icon-btn" onclick="darLike()">
-                    <span class="icon-symbol" id="iconLike">🤍</span>
-                    <span id="numLikes">0</span>
-                </div>
-
-                <div class="icon-btn" onclick="document.getElementById('commentsPanel').classList.add('open')">
-                    <span class="icon-symbol">💬</span>
-                    <span id="numComentarios">0</span>
-                </div>
-
-                <div class="icon-btn" onclick="abrirInboxWA()">
-                    <span class="icon-symbol">✉️</span>
-                    <span>Chat WA</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="friend-panel" id="friendPanel">
-            <div style="width: 100%; display: flex; justify-content: flex-end;">
-                <span style="font-size: 24px; cursor: pointer; color: #aaa;" onclick="toggleBandejaAmistad(false)">✕</span>
-            </div>
-            <h2>Amigos y Solicitudes</h2>
-            
-            <div class="search-friend-box">
-                <input type="text" id="inputSearchFriend" placeholder="Buscar @usuario...">
-                <button class="btn-search-add" onclick="enviarSolicitudAmistad()">Agregar</button>
-            </div>
-
-            <h3 style="font-size: 14px; margin-bottom: 10px; color:#aaa;">Solicitudes pendientes:</h3>
-            <div id="requestList" style="flex-grow: 1; overflow-y: auto;"></div>
-        </div>
-
-        <div class="whatsapp-chat" id="whatsappChat">
-            <div class="wa-header">
-                <div class="wa-header-left">
-                    <span class="wa-back-btn" onclick="cerrarInboxWA()">⬅️</span>
-                    <div class="wa-user-info">
-                        <span class="wa-username">Bandeja Privada</span>
-                        <input type="text" id="chatDestinatarioWA" placeholder="Para: @usuario" style="background:#2a3942; border:none; padding:4px 8px; color:white; border-radius:5px; font-size:11px; margin-top:2px;">
-                    </div>
-                </div>
-                <div class="wa-header-icons">
-                    <span onclick="iniciarLlamada()">📞</span>
-                </div>
-            </div>
-
-            <div class="wa-messages-area" id="waMessagesArea"></div>
-
-            <div class="wa-input-bar">
-                <span class="wa-btn-icon" onclick="document.getElementById('subirImagenChat').click()">📎</span>
-                <input type="file" id="subirImagenChat" accept="image/*" style="display:none;" onchange="subirFotoChat(this)">
-                
-                <input type="text" id="inputMensajeWA" class="wa-input-box" placeholder="Escribe un mensaje privado...">
-                <button class="wa-send-btn" onclick="enviarMensajeWA()">➜</button>
-            </div>
-        </div>
-
-        <div class="call-screen" id="callScreen">
-            <div class="caller-info">
-                <img id="callerAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="caller-avatar">
-                <div id="callerName" class="caller-name">Llamada en progreso</div>
-                <div class="call-status">Conectado</div>
-            </div>
-
-            <div class="video-call-box">
-                <video id="localVideoPreview" class="local-video-preview" autoplay muted playsinline style="display:none;"></video>
-                <div id="videoMutedPlaceholder" class="video-muted-placeholder">Iniciando cámara...</div>
-            </div>
-
-            <div class="call-controls">
-                <button class="btn-call-control btn-hangup" onclick="colgarLlamada()">📞❌</button>
-            </div>
-        </div>
-
-        <div class="comments-panel" id="commentsPanel">
-            <div class="comments-header">
-                <span>Comentarios Públicos</span>
-                <span style="cursor:pointer;" onclick="document.getElementById('commentsPanel').classList.remove('open')">✕</span>
-            </div>
-            <div class="scrollable-list" id="chatBox"></div>
-            <div class="input-bar">
-                <input type="text" id="inputComentario" placeholder="Escribe un comentario público...">
-                <button class="btn-send" onclick="enviarComentario()">➜</button>
-            </div>
-        </div>
-
-        <div class="tiktok-nav">
-            <div class="nav-item active" onclick="toggleBandejaAmistad(false); cerrarInboxWA();">
-                <span class="nav-icon">🏠</span>
-                <span>Inicio</span>
-            </div>
-            <div class="nav-item" onclick="abrirInboxWA()">
-                <span class="nav-icon">✉️</span>
-                <span>Mensajes</span>
-            </div>
-            <div class="nav-item" style="opacity: 0.5; cursor: not-allowed;">
-                <div class="plus-btn-container">
-                    <div class="plus-btn-background"></div>
-                    <div class="plus-btn-foreground">+</div>
-                </div>
-            </div>
-            <div class="nav-item" onclick="toggleBandejaAmistad(true)">
-                <span class="nav-icon">📥</span>
-                <span>Bandeja</span>
-            </div>
-            <div class="nav-item" style="opacity: 0.5;">
-                <span class="nav-icon">👤</span>
-                <span>Perfil</span>
-            </div>
-        </div>
-
-    </div>
-
 </body>
 </html>
