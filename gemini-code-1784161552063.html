@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi TikTok P2P Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #121212; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 15px; box-shadow: 0px 4px 10px rgba(0,0,0,0.5); }
+        .profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 2px solid #fe2c55; }
+        .btn { background-color: #fe2c55; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px;}
+        .btn:hover { background-color: #e11a3e; }
+        .btn-secundario { background-color: #444; color: white; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-top: 5px; font-size: 12px; }
+        .section { margin: 20px 0; padding: 15px; border-bottom: 1px solid #333; text-align: left; }
+        input[type="text"] { width: 95%; padding: 10px; margin: 10px 0; border-radius: 5px; border: none; background: #333; color: white; }
+        
+        .chat-box { background: #2b2b2b; padding: 15px; border-radius: 8px; height: 200px; overflow-y: auto; margin-bottom: 10px; }
+        .msg { margin-bottom: 12px; font-size: 14px; word-wrap: break-word; }
+        .msg-user { color: #fe2c55; font-weight: bold; }
+        .chat-img { max-width: 150px; border-radius: 8px; display: block; margin-top: 5px; }
+    </style>
+
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="section" style="text-align: center;">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" alt="Foto de perfil" class="profile-pic">
+            <h2 id="miUsuario">@usuario_anonimo</h2>
+            <input type="text" id="cambiarUser" placeholder="Elige tu nombre de usuario..." style="text-align:center;" onchange="actualizarUsuario()">
+        </div>
+
+        <div class="section" style="background-color: #252525; border-radius: 8px;">
+            <h3>Conectar con un amigo</h3>
+            <p style="font-size: 12px; color: #aaa;">Tu código de chat es:</p>
+            <b id="mi-id" style="color: #fe2c55; font-size: 18px;">Cargando código...</b>
+            
+            <input type="text" id="id-amigo" placeholder="Pega el código de tu amigo aquí">
+            <button class="btn-secundario" onclick="conectarConAmigo()">Establecer Conexión Privada</button>
+            <p id="estado-conexion" style="font-size: 12px; color: #ffeb3b; margin-top: 10px;">Estado: Desconectado</p>
+        </div>
+
+        <div class="section">
+            <h3>Mensajes Privados (Chat Directo)</h3>
+            <div class="chat-box" id="chatBox">
+                <div class="msg"><span class="msg-user">Sistema:</span> Escribe tu nombre de usuario arriba para empezar.</div>
+            </div>
+
+            <input type="text" id="mensajeTexto" placeholder="Escribe un mensaje privado...">
+            
+            <input type="text" id="fotoUrl" placeholder="Pega enlace de foto de internet (opcional)...">
+
+            <button class="btn" onclick="enviarMensaje()">Enviar Mensaje</button>
+        </div>
+    </div>
+
+    <script>
+        let peer;
+        let conexion;
+        let nombreUsuario = "@usuario_anonimo";
+
+        // Inicializar PeerJS (crea la conexión de red)
+        peer = new Peer();
+
+        // Cuando la red nos asigna nuestro código único
+        peer.on('open', function(id) {
+            document.getElementById('mi-id').innerText = id;
+            document.getElementById('estado-conexion').innerText = "Estado: Listo. Comparte tu código con tu amigo.";
+        });
+
+        // Escuchar si alguien se conecta a nosotros
+        peer.on('connection', function(conn) {
+            conexion = conn;
+            configurarEventosConexion();
+        });
+
+        function actualizarUsuario() {
+            const nuevoUser = document.getElementById('cambiarUser').value.trim();
+            if(nuevoUser !== "") {
+                nombreUsuario = nuevoUser.startsWith('@') ? nuevoUser : '@' + nuevoUser;
+                document.getElementById('miUsuario').innerText = nombreUsuario;
+            }
+        }
+
+        // Conectar manualmente usando el código del amigo
+        function conectarConAmigo() {
+            const idAmigo = document.getElementById('id-amigo').value.trim();
+            if (idAmigo !== "") {
+                document.getElementById('estado-conexion').innerText = "Conectando...";
+                conexion = peer.connect(idAmigo);
+                configurarEventosConexion();
+            }
+        }
+
+        // Qué pasa una vez conectados
+        function configurarEventosConexion() {
+            conexion.on('open', function() {
+                document.getElementById('estado-conexion').innerText = "¡Conectado exitosamente!";
+                agregarMensajeAlChat("Sistema", "Conexión establecida con éxito.");
+            });
+
+            // Escuchar los mensajes y fotos que nos llegan
+            conexion.on('data', function(data) {
+                agregarMensajeAlChat(data.usuario, data.texto, data.foto);
+            });
+        }
+
+        // Enviar mensaje a nuestro amigo
+        function enviarMensaje() {
+            const inputTexto = document.getElementById('mensajeTexto');
+            const inputFotoUrl = document.getElementById('fotoUrl');
+
+            const texto = inputTexto.value.trim();
+            const foto = inputFotoUrl.value.trim();
+
+            if (!conexion) {
+                alert("Primero debes conectarte con un amigo usando su código.");
+                return;
+            }
+
+            if (texto !== "" || foto !== "") {
+                const paqueteDatos = {
+                    usuario: nombreUsuario,
+                    texto: texto,
+                    foto: foto
+                };
+
+                // Enviamos los datos directamente por la conexión
+                conexion.send(paqueteDatos);
+
+                // También lo mostramos en nuestra propia pantalla
+                agregarMensajeAlChat("Tú", texto, foto);
+
+                // Limpiamos campos
+                inputTexto.value = '';
+                inputFotoUrl.value = '';
+            }
+        }
+
+        // Mostrar los mensajes en la caja de chat
+        function agregarMensajeAlChat(usuario, texto, fotoUrl) {
+            const chatBox = document.getElementById('chatBox');
+            let mensajeHTML = `<div class="msg"><span class="msg-user">${usuario}:</span> ${texto}`;
+            
+            if (fotoUrl && fotoUrl.trim() !== "") {
+                mensajeHTML += `<img src="${fotoUrl}" class="chat-img">`;
+            }
+            
+            mensajeHTML += `</div>`;
+            chatBox.innerHTML += mensajeHTML;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    </script>
+
+</body>
+</html>
