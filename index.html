@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat 2.0 - Real P2P Chat</title>
+  <title>WaveChat 2.0 - Personalizado</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
   <style>
-    /* --- DISEÑO ESTILO DARK WAVE (McKinsey-Inspired) --- */
     :root {
       --bg-dark: #0b0e14;
       --bg-card: #151d26;
@@ -21,19 +20,17 @@
       --danger: #ff1744;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'DM Sans', sans-serif; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
     body {
-      background-color: #1a1a1a;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background-image: url('http://googleusercontent.com/image_collection/image_retrieval/3879763292646050849');
-      background-size: cover;
     }
 
-    /* --- CONTENEDOR PRINCIPAL --- */
     .app-container {
       width: 100%;
       max-width: 420px;
@@ -51,7 +48,19 @@
     .screen { display: none; flex-direction: column; height: 100%; width: 100%; }
     .screen.active { display: flex; }
 
-    /* --- CABECERA (HEADER) --- */
+    /* --- REGISTRO INICIAL --- */
+    .register-box {
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* --- CABECERA --- */
     .header {
       background-color: #1f2c34;
       padding: 20px;
@@ -87,10 +96,7 @@
       padding: 15px 20px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
       cursor: pointer;
-      transition: background 0.2s;
     }
-
-    .chat-item:hover { background-color: rgba(255,255,255,0.02); }
 
     .avatar {
       width: 55px;
@@ -133,11 +139,10 @@
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
 
     .typing-status {
-      font-size: 0.75rem;
+      font-size: 0.8rem;
       color: var(--accent);
-      margin-top: -10px;
-      margin-left: 60px;
-      height: 15px;
+      padding: 5px 20px;
+      background-color: #0b141a;
       display: none;
     }
 
@@ -180,15 +185,16 @@
       border: 1px solid var(--accent);
     }
 
-    .modal input {
+    .modal input, .register-box input {
       width: 100%;
       padding: 12px;
       margin: 15px 0;
       border-radius: 10px;
-      border: none;
+      border: 1px solid rgba(255,255,255,0.1);
       background: #0b0e14;
       color: white;
       text-align: center;
+      outline: none;
     }
 
     /* --- VIDEOLLAMADA --- */
@@ -217,15 +223,28 @@
 
 <div class="app-container">
   
-  <div class="screen active" id="chatsScreen">
+  <div class="screen" id="registerScreen">
+    <div class="register-box">
+      <h2 style="color: var(--accent);">Crea tu ID WaveChat</h2>
+      <p style="color: var(--text-dim); font-size: 0.9rem;">Elige tu nombre (ej. fer, jheiler, juan). Sin espacios ni caracteres raros.</p>
+      <input type="text" id="usernameInput" placeholder="Escribe tu nombre aquí">
+      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="guardarNombreDeUsuario()">
+        Confirmar ID Único
+      </button>
+    </div>
+  </div>
+
+  <div class="screen" id="chatsScreen">
     <header class="header">
       <h2>WaveChat</h2>
       <button class="connect-btn" onclick="abrirModalConexion()">
-        <i class="fa-solid fa-plug"></i> Conectar
+        <i class="fa-solid fa-plus"></i> Conectar
       </button>
     </header>
-    <div class="chat-list" id="chatListContainer">
-      </div>
+    <div class="chat-list" id="chatListContainer"></div>
+    <div style="padding: 10px; text-align: center; background: #121b22; font-size: 0.8rem; color: var(--text-dim);">
+      Tu ID: <strong id="myIdFooter" style="color: var(--accent);">...</strong>
+    </div>
   </div>
 
   <div class="screen" id="activeChatScreen">
@@ -234,14 +253,16 @@
         <i class="fa-solid fa-arrow-left" onclick="irAListaChats()" style="cursor:pointer"></i>
         <div id="activeChatName" style="font-weight: bold;">Nombre</div>
       </div>
-      <i class="fa-solid fa-video" onclick="iniciarLlamada()" style="color:var(--accent); cursor:pointer"></i>
+      <div style="display:flex; gap: 15px;">
+        <i class="fa-solid fa-trash" onclick="confirmarBorrarHistorial()" style="color:var(--text-dim); cursor:pointer"></i>
+        <i class="fa-solid fa-video" onclick="iniciarLlamada()" style="color:var(--accent); cursor:pointer"></i>
+      </div>
     </header>
     
     <div class="messages-box" id="msgBox"></div>
     <div class="typing-status" id="typingLabel">Escribiendo...</div>
 
     <div class="input-bar">
-      <i class="fa-solid fa-plus" style="color:var(--accent)"></i>
       <input type="text" id="chatInput" placeholder="Mensaje..." oninput="detectarEscritura()">
       <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()" style="color:var(--accent); cursor:pointer"></i>
     </div>
@@ -250,8 +271,8 @@
   <div class="modal" id="connectModal">
     <div class="modal-content">
       <h3 style="color:var(--accent)">Nueva Conexión</h3>
-      <p style="font-size: 0.8rem; margin-top:10px">Tu ID: <strong id="myIdDisplay">...</strong></p>
-      <input type="text" id="peerIdInput" placeholder="ID de tu amigo">
+      <p style="font-size: 0.85rem; margin-top:10px; color: var(--text-dim)">Ingresa el ID de tu amigo para agregarlo a tus chats:</p>
+      <input type="text" id="peerIdInput" placeholder="Ejemplo: wave-fer">
       <button class="connect-btn" style="width:100%; justify-content:center" onclick="conectarConPeer()">
         Vincular Chat
       </button>
@@ -278,16 +299,46 @@
   let localStream = null;
   let typingTimeout;
 
-  // --- INICIO: PERSISTENCIA E ID ---
   window.onload = () => {
-    let savedId = localStorage.getItem('wave_my_id') || 'wave-' + Math.floor(Math.random()*9000 + 1000);
-    localStorage.setItem('wave_my_id', savedId);
-    document.getElementById('myIdDisplay').innerText = savedId;
+    const savedId = localStorage.getItem('wave_my_id');
+    if (savedId) {
+      inicializarPeer(savedId);
+    } else {
+      mostrarPantalla('registerScreen');
+    }
+  };
+
+  function mostrarPantalla(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(screenId).classList.add('active');
+  }
+
+  function guardarNombreDeUsuario() {
+    const input = document.getElementById('usernameInput');
+    const rawName = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    if (!rawName) return alert("Por favor, introduce un nombre válido.");
+
+    const finalID = 'wave-' + rawName;
+    localStorage.setItem('wave_my_id', finalID);
+    inicializarPeer(finalID);
+  }
+
+  function inicializarPeer(myId) {
+    document.getElementById('myIdFooter').innerText = myId;
+    mostrarPantalla('chatsScreen');
+    renderizarListaChats();
+
+    peer = new Peer(myId);
     
-    peer = new Peer(savedId);
-    
-    peer.on('open', (id) => console.log('Mi ID es: ' + id));
-    
+    peer.on('error', (err) => {
+      if (err.type === 'unavailable-id') {
+        alert("Ese nombre ya está en uso. Por favor, elige otro.");
+        localStorage.removeItem('wave_my_id');
+        mostrarPantalla('registerScreen');
+      }
+    });
+
     peer.on('connection', (incomingConn) => {
       conn = incomingConn;
       activePeerId = conn.peer;
@@ -296,7 +347,7 @@
     });
 
     peer.on('call', async (call) => {
-      if(confirm("Llamada entrante de " + call.peer)) {
+      if(confirm("¿Contestar llamada de " + call.peer.replace('wave-','').toUpperCase() + "?")) {
         localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
         document.getElementById('callOverlay').style.display = 'flex';
         document.getElementById('localVideo').srcObject = localStream;
@@ -304,17 +355,14 @@
         call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
       }
     });
-
-    renderizarListaChats();
-  };
+  }
 
   // --- NAVEGACIÓN ---
   function abrirModalConexion() { document.getElementById('connectModal').style.display = 'flex'; }
   function cerrarModal() { document.getElementById('connectModal').style.display = 'none'; }
   
   function irAListaChats() {
-    document.getElementById('activeChatScreen').classList.remove('active');
-    document.getElementById('chatsScreen').classList.add('active');
+    mostrarPantalla('chatsScreen');
     activePeerId = null;
     renderizarListaChats();
   }
@@ -325,30 +373,29 @@
     container.innerHTML = '';
     
     if(list.length === 0) {
-      container.innerHTML = '<p style="text-align:center; padding:40px; color:gray">No hay chats aún.</p>';
+      container.innerHTML = '<p style="text-align:center; padding:40px; color:gray">No tienes chats activos todavía. Usa "Conectar" para agregar uno.</p>';
+      return;
     }
 
     list.forEach(id => {
       container.innerHTML += `
         <div class="chat-item" onclick="abrirChat('${id}')">
-          <div class="avatar">${id.substring(5,7).toUpperCase()}</div>
+          <div class="avatar">${id.replace('wave-','').substring(0,2).toUpperCase()}</div>
           <div class="chat-info">
-            <h4>${id.replace('wave-','')}</h4>
-            <p class="chat-preview">Toca para chatear</p>
+            <h4>${id.replace('wave-','').toUpperCase()}</h4>
+            <p class="chat-preview">Historial guardado localmente</p>
           </div>
         </div>
       `;
     });
   }
 
-  // --- LÓGICA DE CHAT ---
+  // --- MANEJO DE CHAT ---
   function abrirChat(id) {
     activePeerId = id;
     document.getElementById('activeChatName').innerText = id.replace('wave-','').toUpperCase();
-    document.getElementById('chatsScreen').classList.remove('active');
-    document.getElementById('activeChatScreen').classList.add('active');
+    mostrarPantalla('activeChatScreen');
     
-    // Si no estamos conectados, intentar conectar al abrir
     if(!conn || conn.peer !== id) {
       conectarConPeer(id);
     }
@@ -357,9 +404,13 @@
   }
 
   function conectarConPeer(idManual) {
-    const id = idManual || document.getElementById('peerIdInput').value.trim();
+    let id = idManual || document.getElementById('peerIdInput').value.trim().toLowerCase();
     if(!id) return;
     
+    if(!id.startsWith('wave-')) {
+      id = 'wave-' + id;
+    }
+
     conn = peer.connect(id);
     vincularEventos();
     registrarChatEnLista(id);
@@ -370,6 +421,8 @@
   function vincularEventos() {
     conn.on('data', (data) => {
       if(data.type === 'typing') {
+        const typingText = activePeerId.replace('wave-','').toUpperCase() + ' está escribiendo...';
+        document.getElementById('typingLabel').innerText = typingText;
         document.getElementById('typingLabel').style.display = data.status ? 'block' : 'none';
       } else if(data.type === 'text') {
         recibirMensaje(data.content);
@@ -385,14 +438,14 @@
     }
   }
 
-  // --- MENSAJERÍA Y TYPING ---
+  // --- ENVIAR Y RECIBIR MENSAJES ---
   function detectarEscritura() {
     if(conn && conn.open) {
       conn.send({ type: 'typing', status: true });
       clearTimeout(typingTimeout);
       typingTimeout = setTimeout(() => {
         conn.send({ type: 'typing', status: false });
-      }, 2000);
+      }, 1500);
     }
   }
 
@@ -409,6 +462,9 @@
     
     input.value = '';
     box.scrollTop = box.scrollHeight;
+    
+    // Apagar estado escribiendo al enviar
+    conn.send({ type: 'typing', status: false });
   }
 
   function recibirMensaje(text) {
@@ -437,7 +493,14 @@
     box.scrollTop = box.scrollHeight;
   }
 
-  // --- LLAMADAS ---
+  function confirmarBorrarHistorial() {
+    if(confirm("¿Borrar historial de este chat? Tu amigo seguirá teniendo su copia.")) {
+      localStorage.removeItem(`hist_${activePeerId}`);
+      cargarHistorial(activePeerId);
+    }
+  }
+
+  // --- VIDEOLLAMADA ---
   async function iniciarLlamada() {
     localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
     document.getElementById('callOverlay').style.display = 'flex';
@@ -448,7 +511,7 @@
   }
 
   function colgarLlamada() {
-    location.reload(); // Forma rápida de limpiar streams
+    location.reload(); 
   }
 </script>
 
