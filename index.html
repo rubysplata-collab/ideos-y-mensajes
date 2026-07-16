@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat - P2P Completo con Compartir Pantalla</title>
+  <title>WaveChat - ID Permanente P2P</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 
@@ -61,7 +61,20 @@
       display: flex;
     }
 
-    /* --- INICIO / CONEXIÓN --- */
+    /* --- REGISTRO DE USUARIO UNICO --- */
+    .register-box {
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background-color: #121b22;
+    }
+
+    /* --- PANTALLA PRINCIPAL: CONEXIÓN --- */
     .app-header {
       padding: 18px 20px;
       background-color: #1f2c34;
@@ -93,6 +106,7 @@
       padding: 20px;
       border-radius: 16px;
       text-align: center;
+      position: relative;
     }
 
     .id-card p {
@@ -105,6 +119,16 @@
       font-size: 1.4rem;
       color: var(--verde-neon);
       letter-spacing: 1px;
+    }
+
+    .change-username-btn {
+      background: none;
+      border: none;
+      color: var(--texto-mutado);
+      font-size: 0.75rem;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 10px;
     }
 
     .connect-form {
@@ -136,7 +160,7 @@
       cursor: pointer;
     }
 
-    /* --- CHAT --- */
+    /* --- PANTALLA DE CHAT ACTIVO --- */
     .chat-active-container {
       display: flex;
       flex-direction: column;
@@ -235,7 +259,7 @@
       border: none;
     }
 
-    /* --- PANTALLA LLAMADA --- */
+    /* --- LLAMADAS Y PANTALLA COMPARTIDA --- */
     .call-screen {
       display: none;
       position: absolute;
@@ -278,7 +302,6 @@
       z-index: 10;
     }
 
-    /* Estilo espejo para la cámara propia, pero no para compartir pantalla */
     .mirror {
       transform: scaleX(-1);
     }
@@ -315,34 +338,32 @@
 
   <div class="app-container">
 
-    <div class="call-screen" id="callScreen">
-      <div class="video-call-grid">
-        <video id="localVideo" class="local-video mirror" autoplay playsinline muted></video>
-        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-      </div>
-      <div style="position: relative; z-index: 10; text-align: center; margin-top: 180px;">
-        <h3 id="callContactName" style="text-shadow: 0 2px 10px #000;">Conectando...</h3>
-      </div>
-      
-      <div class="call-controls">
-        <button class="control-btn" onclick="alternarCompartirPantalla()" title="Compartir Pantalla">📺</button>
-        <button class="control-btn decline" onclick="colgarLlamada()">📞</button>
+    <div class="screen active" id="registerScreen">
+      <div class="register-box">
+        <h2 style="color: var(--verde-neon); margin-bottom: 10px;">Crea tu ID de WaveChat</h2>
+        <p style="color: var(--texto-mutado); font-size: 0.9rem; margin-bottom: 20px;">
+          Este nombre de usuario será tu código único permanente para que tus amigos te agreguen siempre.
+        </p>
+        <input type="text" id="usernameInput" class="connect-input" placeholder="Ejemplo: juan, fer, lucas" style="width: 100%; margin-bottom: 15px;">
+        <button class="connect-btn" style="width: 100%;" onclick="guardarNombreUsuario()">Confirmar mi ID</button>
       </div>
     </div>
 
-    <div class="screen active" id="setupScreen">
+    <div class="screen" id="setupScreen">
       <header class="app-header">
         <h2>WaveChat Real</h2>
       </header>
 
       <div class="setup-box">
         <div class="id-card">
-          <p>Tu código único para que te agreguen:</p>
-          <strong id="myPeerId">Generando código...</strong>
+          <p>Tu código permanente para compartir:</p>
+          <strong id="myPeerId">Cargando ID...</strong>
+          <br>
+          <button class="change-username-btn" onclick="cambiarNombreUsuario()">Cambiar mi nombre de usuario</button>
         </div>
 
         <div class="connect-form">
-          <p style="font-size: 0.85rem; color: var(--texto-mutado); text-align: center;">O pon aquí el código de tu amigo:</p>
+          <p style="font-size: 0.85rem; color: var(--texto-mutado); text-align: center;">Pon aquí el ID permanente de tu amigo:</p>
           <input type="text" id="destPeerId" class="connect-input" placeholder="Pegar código wave-XXXX">
           <button class="connect-btn" onclick="conectarConAmigo()">Empezar a Chatear</button>
         </div>
@@ -378,6 +399,21 @@
       </div>
     </div>
 
+    <div class="call-screen" id="callScreen">
+      <div class="video-call-grid">
+        <video id="localVideo" class="local-video mirror" autoplay playsinline muted></video>
+        <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+      </div>
+      <div style="position: relative; z-index: 10; text-align: center; margin-top: 180px;">
+        <h3 id="callContactName" style="text-shadow: 0 2px 10px #000;">Conectando...</h3>
+      </div>
+      
+      <div class="call-controls">
+        <button class="control-btn" onclick="alternarCompartirPantalla()" title="Compartir Pantalla">📺</button>
+        <button class="control-btn decline" onclick="colgarLlamada()">📞</button>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -389,48 +425,100 @@
     let amigoId = "";
     let compartiendoPantalla = false;
 
-    // Generar ID
-    const randomCode = 'wave-' + Math.floor(1000 + Math.random() * 9000);
-    peer = new Peer(randomCode);
-
-    peer.on('open', (id) => {
-      document.getElementById('myPeerId').innerText = id;
-    });
-
-    // Conexión entrante de chat
-    peer.on('connection', (conn) => {
-      dataConnection = conn;
-      amigoId = conn.peer;
-      configurarEventosChat();
-      abrirPantallaDeChat(amigoId);
-    });
-
-    // Llamada entrante
-    peer.on('call', async (call) => {
-      if (confirm(`¿Contestar videollamada de ${call.peer}?`)) {
-        mediaCall = call;
-        try {
-          localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-          document.getElementById('localVideo').srcObject = localStream;
-          
-          call.answer(localStream);
-          document.getElementById('callScreen').style.display = 'flex';
-          document.getElementById('callContactName').innerText = call.peer;
-
-          call.on('stream', (remoteStream) => {
-            document.getElementById('remoteVideo').srcObject = remoteStream;
-          });
-        } catch (err) {
-          alert("Error al acceder a la cámara/micrófono.");
-        }
+    // Al cargar la página, verificamos si ya existe un ID guardado
+    window.addEventListener('load', () => {
+      const savedUsername = localStorage.getItem('wavechat_username');
+      if (savedUsername) {
+        // Si ya hay un usuario registrado, saltamos la pantalla de registro
+        inicializarPeer(savedUsername);
       } else {
-        call.close();
+        // Si es la primera vez, mostramos la pantalla para registrarse
+        mostrarPantalla('registerScreen');
       }
     });
 
+    function guardarNombreUsuario() {
+      const input = document.getElementById('usernameInput');
+      const rawName = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, ''); // Limpiar caracteres raros
+
+      if (!rawName) return alert("Por favor, introduce un nombre de usuario válido (letras y números únicamente).");
+
+      const finalID = 'wave-' + rawName;
+      localStorage.setItem('wavechat_username', finalID);
+      inicializarPeer(finalID);
+    }
+
+    function cambiarNombreUsuario() {
+      localStorage.removeItem('wavechat_username');
+      if (peer) {
+        peer.destroy();
+      }
+      mostrarPantalla('registerScreen');
+    }
+
+    function inicializarPeer(userId) {
+      document.getElementById('myPeerId').innerText = userId;
+      mostrarPantalla('setupScreen');
+
+      // Inicializar PeerJS con el ID Permanente guardado
+      peer = new Peer(userId);
+
+      peer.on('error', (err) => {
+        if (err.type === 'unavailable-id') {
+          alert("Ese nombre de usuario ya está siendo usado por otra persona activa. Elige otro.");
+          cambiarNombreUsuario();
+        } else {
+          console.error(err);
+        }
+      });
+
+      // Escuchar conexión entrante
+      peer.on('connection', (conn) => {
+        dataConnection = conn;
+        amigoId = conn.peer;
+        configurarEventosChat();
+        abrirPantallaDeChat(amigoId);
+      });
+
+      // Escuchar videollamada entrante
+      peer.on('call', async (call) => {
+        if (confirm(`¿Contestar videollamada de ${call.peer}?`)) {
+          mediaCall = call;
+          try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            document.getElementById('localVideo').srcObject = localStream;
+            
+            call.answer(localStream);
+            document.getElementById('callScreen').style.display = 'flex';
+            document.getElementById('callContactName').innerText = call.peer;
+
+            call.on('stream', (remoteStream) => {
+              document.getElementById('remoteVideo').srcObject = remoteStream;
+            });
+          } catch (err) {
+            alert("Error al acceder a la cámara/micrófono.");
+          }
+        } else {
+          call.close();
+        }
+      });
+    }
+
+    function mostrarPantalla(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // Conectarnos de forma activa usando el código de un amigo
     function conectarConAmigo() {
-      const destId = document.getElementById('destPeerId').value.trim();
+      let destId = document.getElementById('destPeerId').value.trim().toLowerCase();
       if (!destId) return alert("Ingresa un código válido.");
+
+      // Si el usuario no escribe "wave-", se lo añadimos automáticamente por comodidad
+      if (!destId.startsWith('wave-')) {
+        destId = 'wave-' + destId;
+      }
+
       if (destId === peer.id) return alert("No puedes conectarte a ti mismo.");
 
       dataConnection = peer.connect(destId);
@@ -469,15 +557,15 @@
     }
 
     function abrirPantallaDeChat(peerId) {
-      document.getElementById('setupScreen').classList.remove('active');
-      document.getElementById('activeChatScreen').classList.add('active');
-      document.getElementById('activeContactName').innerText = peerId;
-      document.getElementById('activeAvatar').innerText = peerId.substring(5, 7).toUpperCase();
+      mostrarPantalla('activeChatScreen');
+      // Mostrar solo el nombre limpio sin el "wave-" en la cabecera
+      const displayName = peerId.replace('wave-', '').toUpperCase();
+      document.getElementById('activeContactName').innerText = displayName;
+      document.getElementById('activeAvatar').innerText = displayName.substring(0, 2);
     }
 
     function regresarAlInicio() {
-      document.getElementById('activeChatScreen').classList.remove('active');
-      document.getElementById('setupScreen').classList.add('active');
+      mostrarPantalla('setupScreen');
     }
 
     // --- ENVIAR ARCHIVOS Y TEXTO ---
@@ -531,7 +619,7 @@
     async function iniciarLlamada() {
       if (!amigoId) return;
       document.getElementById('callScreen').style.display = 'flex';
-      document.getElementById('callContactName').innerText = amigoId;
+      document.getElementById('callContactName').innerText = amigoId.replace('wave-', '').toUpperCase();
 
       try {
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -555,20 +643,16 @@
 
       if (!compartiendoPantalla) {
         try {
-          // Solicitar captura de pantalla al navegador
           screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
           
-          // Reemplazar la pista de video que estamos enviando al amigo
           const videoTrack = screenStream.getVideoTracks()[0];
           const sender = mediaCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
           if (sender) sender.replaceTrack(videoTrack);
 
-          // Mostrar nuestra propia pantalla en la miniatura (sin efecto espejo)
           localVideoElem.srcObject = screenStream;
           localVideoElem.classList.remove('mirror');
           compartiendoPantalla = true;
 
-          // Si el usuario deja de compartir desde el botón del navegador
           videoTrack.onended = () => detenerCompartirPantalla();
 
         } catch (err) {
@@ -583,15 +667,13 @@
       if (!mediaCall || !compartiendoPantalla) return;
 
       const localVideoElem = document.getElementById('localVideo');
-
-      // Volver a la cámara normal
       const cameraTracks = localStream.getVideoTracks();
+
       if (cameraTracks.length > 0) {
         const sender = mediaCall.peerConnection.getSenders().find(s => s.track.kind === 'video');
         if (sender) sender.replaceTrack(cameraTracks[0]);
       }
 
-      // Cerrar transmisión de pantalla
       if (screenStream) {
         screenStream.getTracks().forEach(track => track.stop());
         screenStream = null;
