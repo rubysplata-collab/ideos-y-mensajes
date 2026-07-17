@@ -18,6 +18,7 @@
       --bubble-sent: #002d62;
       --bubble-recv: #1f2c34;
       --danger: #ff1744;
+      --warning: #ffa726;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -281,6 +282,41 @@
       object-fit: cover;
       z-index: 210;
     }
+
+    /* Botones de control de llamada */
+    .call-controls {
+      position: absolute;
+      bottom: 40px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      z-index: 220;
+    }
+
+    .call-btn {
+      border: none;
+      padding: 15px;
+      border-radius: 50%;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      width: 55px;
+      height: 55px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .call-btn:active {
+      transform: scale(0.9);
+    }
+
+    .btn-hangup { background-color: var(--danger); }
+    .btn-toggle { background-color: rgba(255, 255, 255, 0.2); }
+    .btn-toggle.disabled { background-color: var(--warning); color: black; }
   </style>
 </head>
 <body>
@@ -369,9 +405,18 @@
   <div class="call-overlay" id="callOverlay">
     <video id="localVideo" autoplay playsinline muted></video>
     <video id="remoteVideo" autoplay playsinline></video>
-    <div style="position:absolute; bottom:40px; width:100%; display:flex; justify-content:center;">
-      <button onclick="colgarLlamada()" style="background:var(--danger); border:none; padding:15px; border-radius:50%; color:white;">
+    
+    <div class="call-controls">
+      <button class="call-btn btn-toggle" id="btnAudio" onclick="toggleAudio()" title="Silenciar/Activar Micrófono">
+        <i class="fa-solid fa-microphone" id="iconAudio"></i>
+      </button>
+      
+      <button class="call-btn btn-hangup" onclick="colgarLlamada()" title="Terminar Llamada">
         <i class="fa-solid fa-phone-slash"></i>
+      </button>
+
+      <button class="call-btn btn-toggle" id="btnVideo" onclick="toggleVideo()" title="Apagar/Encender Cámara">
+        <i class="fa-solid fa-video" id="iconVideo"></i>
       </button>
     </div>
   </div>
@@ -385,16 +430,19 @@
   let localStream = null;
   let typingTimeout;
 
+  let audioEnabled = true;
+  let videoEnabled = true;
+
   // Colección corregida con codificación Base64 perfecta y válida para evitar imágenes rotas
   const backupStickers = [
     { name: 'xd', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik0yNSA0MCBsMTUtMTAgbC0xNS0xMCBNNzUgNDAgbC0xNS0xMCBsMTUtMTAiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgNjUgUTUwIDg1IDcwIDY1IiBzdHJva2U9IiM0NzI1MDAiIHN0cm9rZS13aWR0aD0iNiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+' },
-    { name: 'risa', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjM1IiByeD0iNSIgcnk9IjEwIiBmaWxsPSIjNDcyNTAwIi8+PGVsbGlwc2UgY3g9IjY1IiBjeT0iMzUiIHJ4PSI1IiByeT0iMTAiIGZpbGw9IiM0NzI1MDAiLz48cGF0aCBkPSJNMjUgNjAgUTUwIDkwIDc1IDYwIFoiIGZpbGw9IiM0NzI1MDAiLz48cGF0aCBkPSJNMzUgNjAgUTUwIDcwIDY1IDYwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==' },
+    { name: 'risa', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjM1IiByeD0iNSIgcnk9IjEwIiBmaWxsPSIjNDcyNTAwIi8+PGVsbGlwc2UgY3g9IjY1IiBjeT0iMzUiIHJ4PSI1IiByeT0iMTAiIGZpbGw9IiM0NzI1MDAiLz48cGF0aCBkPSJNMjUgNjAgUTUwIDkwID7NSA2MCBaIiBmaWxsPSIjNDcyNTAwIi8+QzUgNjAgUTUwIDcwIDY1IDYwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==' },
     { name: 'meme', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzUiIHI9IjEwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjNDcyNTAwIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjUiIHI9IjQiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjgiIGN5PSIzNSIgcj0iMTQiIGZpbGw9IndoaXRlIiBzdHJva2U9IiM0NzI1MDAiIHN0cm9rZS13aWR0aD0iMyIvPjxjaXJjbGUgY3g9IjY4IiBjeT0iMzUiIHI9IjciIGZpbGw9ImJsYWNrIi8+PHBhdGggZD0iTTMwIDY1IFFVNTAgNTAgNzAgNjUiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
-    { name: 'baile', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik01MCA0NSBMNTAgNzUgTTUwIDU1IEwyNSA0MCBNNTAgNTUgTDc1IDUwIE01MCA3NSBMMzUgOTUgTTUwIDhMMTYgOTUiIHN0cm9rZT0iI0ZGRDE1QyIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
-    { name: 'llorar', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjQwIiByeD0iNCIgcnk9IjciIGZpbGw9IiM0NzI1MDAiLz48ZWxsaXBzZSBjeD0iNjUiIGN5PSI0MCIgcng9IjQiIHJ5PSI3IiBmaWxsPSIjNDcyNTAwIi8+PHBhdGggZD0iTTzNSA3MCBRNTAgNTUgNjUgNzAiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzUgNDggTDM1IDgwIE02NSA0OCBMNjUgODAiIHN0cm9rZT0iIzVDQUZGRiIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
+    { name: 'baile', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik01MCA0NSBMNTAgNzUgTTUwIDU1IEwyNSA0MCBNNTAgNTUgTDc1IDUwIE01MCA3NSBMMzUgOTUgTTUwIDhMMTEgOTUiIHN0cm9rZT0iI0ZGRDE1QyIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
+    { name: 'llorar', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjQwIiByeD0iICIgcnk9IjciIGZpbGw9IiM0NzI1MDAiLz48ZWxsaXBzZSBjeD0iNjUiIGN5PSI0MCIgcng9IjQiIHJ5PSI3IiBmaWxsPSIjNDcyNTAwIi8+PHBhdGggZD0iTTzNSA3MCBRNTAgNTUgNjUgNzAiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzUgNDggTDM1IDgwIE02NSA0OCBMNjUgODAiIHN0cm9rZT0iIzVDQUZGRiIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
     { name: 'ok', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzAwRTY3NiIvPjxwYXRoIGQ9Ik0zMCA1MCBMNDUgNjUgTDcwIDM1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=' },
     { name: 'gato', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMTUgNDAgTDM1IDE1IEw1MCAzNSBMNjUgMTUgTDg1IDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ZGQTcyNiIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTAiIHI9IjUiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSI1MCIgcj0iNSIgZmlsbD0iYmxhY2siLz48cGF0aCBkPSJNNDUgNjAgTDU1IDYwIEw1MCA2NSBaIiBmaWxsPSIjRkY3MDQzIi8+PHBhdGggZD0iTTQwIDcwIFFVNTAgNzggNjAgNzAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==' },
-    { name: 'perro', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMjAgNDAgTDgwIDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ExODg3RiIvPjxwYXRoIGQ9Ik0xNSAzMCBMMzAgMzAgTDI1IDYwIFoiIGZpbGw9IiM3RDY2MDgiLz4gPHBhdGggZD0iTTg1IDMwIEw3MCAzMCBMNzUgNjAgWiIgZmlsbD0iIzdENjYwOCIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTUiIHI9IjUiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSI1NSIgcj0iNSIgZmlsbD0iYmxhY2siLz48ZWxsaXBzZSBjeD0iNTAiIGN5PSI2NSIgcng9IjciIHJ5PSI1IiBmaWxsPSJibGFjayIvPjwvc3ZnPg==' },
+    { name: 'perro', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMjAgNDAgTDgwIDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ExODg3RiIvPjxwYXRoIGQ9Ik0xNSAzMCBMMzAgMzAgTDI1IDYwIFoiIGZpbGw9IiM3RDY2MDgiLz4gPHBhdGggZD0iTTg1IDMwIEw3MCAzMCBMNzUgNjAgWiIgZmlsbD0iIzdENjYwOCIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTUiIHI9IjUiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSI1NSIgcj0iIHNm"IGZpbGw9ImJsYWNrIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHN4PSI3IiBzeT0iNSIgZmlsbD0iYmxhY2siLz48L3N2Zz4=' },
     { name: 'love', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik0yMCAzNSBDIDIwIDIwLCA0NSAyMCwgNDUgMzUgQyA0NSAyMCwgNzAgMjAsIDcwIDM1IEMgNzAgNTUsIDQ1IDcwLCA0NSA3MCBDIDQ1IDcwLCAyMCA1NSwgMjAgMzUgWiIgZmlsbD0iI0ZGMTc0NCIvPjwvc3ZnPg==' }
   ];
 
@@ -456,6 +504,9 @@
         try {
           localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
           document.getElementById('localVideo').srcObject = localStream;
+          audioEnabled = true;
+          videoEnabled = true;
+          actualizarBotonesControles();
         } catch(e) {
           console.log("No se pudo iniciar cámara local, solo recibiendo señal.");
         }
@@ -760,6 +811,9 @@
   // --- VIDEOLLAMADA / COMPARTIR PANTALLA ---
   async function iniciarLlamada(compartirPantalla = false) {
     try {
+      audioEnabled = true;
+      videoEnabled = true;
+
       if (compartirPantalla) {
         localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       } else {
@@ -769,6 +823,8 @@
       document.getElementById('callOverlay').style.display = 'flex';
       document.getElementById('localVideo').srcObject = localStream;
       
+      actualizarBotonesControles();
+
       const call = peer.call(activePeerId, localStream);
       call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
       
@@ -786,6 +842,54 @@
       localStream.getTracks().forEach(track => track.stop());
     }
     location.reload(); 
+  }
+
+  // --- FUNCIONES PARA SILENCIAR AUDIO / APAGAR VIDEO ---
+  function toggleAudio() {
+    if (localStream) {
+      const audioTracks = localStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        audioEnabled = !audioEnabled;
+        audioTracks[0].enabled = audioEnabled;
+        actualizarBotonesControles();
+      }
+    }
+  }
+
+  function toggleVideo() {
+    if (localStream) {
+      const videoTracks = localStream.getVideoTracks();
+      if (videoTracks.length > 0) {
+        videoEnabled = !videoEnabled;
+        videoTracks[0].enabled = videoEnabled;
+        actualizarBotonesControles();
+      }
+    }
+  }
+
+  function actualizarBotonesControles() {
+    const btnAudio = document.getElementById('btnAudio');
+    const iconAudio = document.getElementById('iconAudio');
+    const btnVideo = document.getElementById('btnVideo');
+    const iconVideo = document.getElementById('iconVideo');
+
+    // Estado del Micrófono
+    if (audioEnabled) {
+      btnAudio.classList.remove('disabled');
+      iconAudio.className = 'fa-solid fa-microphone';
+    } else {
+      btnAudio.classList.add('disabled');
+      iconAudio.className = 'fa-solid fa-microphone-slash';
+    }
+
+    // Estado de la Cámara
+    if (videoEnabled) {
+      btnVideo.classList.remove('disabled');
+      iconVideo.className = 'fa-solid fa-video';
+    } else {
+      btnVideo.classList.add('disabled');
+      iconVideo.className = 'fa-solid fa-video-slash';
+    }
   }
 </script>
 
