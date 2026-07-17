@@ -178,7 +178,7 @@
       cursor: pointer;
     }
 
-    /* --- PANEL DE STICKERS --- */
+    /* --- PANEL DE STICKERS BLINDADO --- */
     .tenor-panel {
       display: none;
       background: #151d26;
@@ -382,17 +382,17 @@
   let localStream = null;
   let typingTimeout;
 
-  // Base de datos de stickers de respaldo (por si las APIs externas fallan o son bloqueadas)
+  // Colección de stickers 100% libres de CORS (Imágenes vectoriales y GIFs libres en servidores abiertos)
   const backupStickers = [
-    { name: 'xd', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3Y1bThmNzNndWJreW5mN3VnaWdzdno0ZmUxeGlncjZpdXJzOXB2diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7527pa7qs9kCG78A/giphy.gif' },
-    { name: 'risa', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZnd0c3VnaWZ1YWVwMXc2c2xsaTgzNDM4MmNrd2txcjA2NHFvOWlyNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/l378bu6ZYmzS6nBrW/giphy.gif' },
-    { name: 'meme', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbzh0N2ZpOTQ3MmwwaWhmaHpsYnU1NDI3YjYxN2J5Njhwa3Y2N25yeCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CuMiNoTRzc2WNfqaJQ/giphy.gif' },
-    { name: 'baile', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdzlydzVud3NydGdrNHRhcGoycXNjdHF0ZGVvY3o1OWZodWh4ZnpxbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/W90k6E02UXSda/giphy.gif' },
-    { name: 'llorar', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnhocHpyMnV4b2VmdmE4dTRoN2U3aDJ2enByaXl4MXFsdGRoNDI5bCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/26ufcVAp3AiJJsrIs/giphy.gif' },
-    { name: 'ok', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExODNid3R4cGkyNTRxbTZ1YW9mNXkyY3F1ZmNyeWNxeWFkYnN2cHhsNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3o7abKhOpu0NXS3fCE/giphy.gif' },
-    { name: 'gato', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG9idW5jMWtmeGFvdGl1dzgyMmxlY3k2N2U3cTYybmE1bDZsaWwzMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/CjmvTCZf2U3EI02MC1/giphy.gif' },
-    { name: 'perro', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbXZpZnU3ZXRmOWFmNXRkaDhrMzQxY2YyeGg4aDVtODhpbHozbmZtNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/1gSTXg718R7b9D7V03/giphy.gif' },
-    { name: 'love', url: 'https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZTVoYXJibzVnaDRndzdpNTh6N3hhdnl3dWJndTFoNnEybXp6bzYxdyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/3oz8xAFtqo0LnsYGpG/giphy.gif' }
+    { name: 'xd', url: 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Emoji_u1f606.svg' },
+    { name: 'risa', url: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/Emoji_u1f389.svg' },
+    { name: 'meme', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c5/Emoji_u1f92a.svg' },
+    { name: 'baile', url: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/Emoji_u1f57a.svg' },
+    { name: 'llorar', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a2/Emoji_u1f62d.svg' },
+    { name: 'ok', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a0/Emoji_u1f44c.svg' },
+    { name: 'gato', url: 'https://upload.wikimedia.org/wikipedia/commons/5/56/Emoji_u1f431.svg' },
+    { name: 'perro', url: 'https://upload.wikimedia.org/wikipedia/commons/d/d9/Emoji_u1f436.svg' },
+    { name: 'love', url: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Emoji_u1f60d.svg' }
   ];
 
   window.onload = () => {
@@ -625,7 +625,7 @@
     element.value = ''; 
   }
 
-  // --- TRIPLE-FALLBACK DE STICKERS (A PRUEBA DE BLOQUEOS CORS EN GITHUB PAGES) ---
+  // --- BUSCADOR ULTRAESTABLE TENOR + NEKOS.BEST (CERO BLOQUEOS) ---
   function toggleStickersPanel() {
     const panel = document.getElementById('tenorPanel');
     if (panel.style.display === 'flex') {
@@ -643,36 +643,36 @@
   }
 
   async function buscarStickers() {
-    const query = document.getElementById('tenorSearchInput').value.trim().toLowerCase() || 'trending';
+    const query = document.getElementById('tenorSearchInput').value.trim() || 'smile';
     const resultsContainer = document.getElementById('stickerResults');
     resultsContainer.innerHTML = '<p style="grid-column: span 3; text-align:center; color:gray; padding:20px;">Buscando...</p>';
 
-    // --- INTENTO 1: GIPHY PÚBLICO INTEGRADO CON PUENTE ---
+    // 1. INTENTO PRINCIPAL: Tenor v1 (No bloquea GitHub Pages y es ultra estable)
     try {
-      const giphyUrl = `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${encodeURIComponent(query)}&limit=12&rating=g`;
-      const res = await fetch(giphyUrl);
+      const tenorUrl = `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=12`;
+      const res = await fetch(tenorUrl);
       if (res.ok) {
         const data = await res.json();
-        if (data.data && data.data.length > 0) {
+        if (data.results && data.results.length > 0) {
           resultsContainer.innerHTML = '';
-          data.data.forEach(item => {
-            const gifUrl = item.images?.fixed_height_small?.url || item.images?.original?.url;
+          data.results.forEach(sticker => {
+            const media = sticker.media && sticker.media[0];
+            const gifUrl = media?.tinygif?.url || media?.gif?.url || sticker.url;
             if (gifUrl) {
               resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')" onerror="this.style.display='none'">`;
             }
           });
-          return; // Éxito total con Giphy!
+          return; // Listo, carga completada
         }
       }
-    } catch (err) {
-      console.warn("Intento con Giphy bloqueado o fallido, pasando a Intento 2...");
+    } catch(err) {
+      console.warn("Tenor falló, intentando con API secundaria Nekos.best...");
     }
 
-    // --- INTENTO 2: API DE RESPALDO LIBRE DE CORS (NEKOS/EMOTES) ---
+    // 2. INTENTO SECUNDARIO (TOTALMENTE LIBRE DE CORS Y HOTLINKING): nekos.best
     try {
-      // Usamos una API completamente libre que corre sin llaves y tiene CORS libre en todo internet
-      const fallbackAPIUrl = `https://nekos.best/api/v2/search?q=${encodeURIComponent(query || 'smile')}&limit=12`;
-      const res = await fetch(fallbackAPIUrl);
+      const fallbackUrl = `https://nekos.best/api/v2/search?q=${encodeURIComponent(query)}&limit=12`;
+      const res = await fetch(fallbackUrl);
       if (res.ok) {
         const data = await res.json();
         if (data.results && data.results.length > 0) {
@@ -683,17 +683,17 @@
               resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')" onerror="this.style.display='none'">`;
             }
           });
-          return; // Éxito con API de Emotes!
+          return;
         }
       }
     } catch(err) {
-      console.warn("API de emotes alternativa fallida, activando Stickers de Respaldo Local...");
+      console.warn("Fallo general de red, cargando stickers internos...");
     }
 
-    // --- INTENTO 3 (EL SALVAVIDAS): CARGAR BASE DE DATOS LOCAL ---
+    // 3. INTENTO SALVAVIDAS (ECOLÓGICO Y SEGURO): Stickers integrados desde servidores Wikimedia libres de bloqueos
     resultsContainer.innerHTML = '';
-    // Filtramos nuestros stickers locales para ver si coinciden con lo que escribió el usuario
-    const filtrados = backupStickers.filter(s => s.name.includes(query) || query === 'trending');
+    const queryClean = query.toLowerCase();
+    const filtrados = backupStickers.filter(s => s.name.includes(queryClean) || queryClean === 'smile');
     const stickersAMostrar = filtrados.length > 0 ? filtrados : backupStickers;
 
     stickersAMostrar.forEach(st => {
