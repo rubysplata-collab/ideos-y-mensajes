@@ -189,8 +189,14 @@
       gap: 10px;
     }
 
-    .tenor-search {
+    .tenor-search-box {
+      display: flex;
+      gap: 8px;
       width: 100%;
+    }
+
+    .tenor-search {
+      flex: 1;
       padding: 8px 12px;
       border-radius: 20px;
       border: none;
@@ -324,7 +330,12 @@
     <div class="typing-status" id="typingLabel">Escribiendo...</div>
 
     <div class="tenor-panel" id="tenorPanel">
-      <input type="text" class="tenor-search" id="tenorSearchInput" placeholder="Buscar Stickers en Tenor..." oninput="buscarEnTenor()">
+      <div class="tenor-search-box">
+        <input type="text" class="tenor-search" id="tenorSearchInput" placeholder="Buscar Stickers (ej: risas, gato)..." onkeydown="detectarEnterTenor(event)">
+        <button onclick="buscarEnTenor()" style="background:var(--accent); border:none; padding: 0 15px; border-radius:20px; color:black; cursor:pointer; font-weight:bold;">
+          <i class="fa-solid fa-magnifying-glass" style="color:black; font-size:0.9rem;"></i>
+        </button>
+      </div>
       <div class="tenor-results" id="tenorResults"></div>
     </div>
 
@@ -597,7 +608,7 @@
       box.scrollTop = box.scrollHeight;
     };
     reader.readAsDataURL(file);
-    element.value = ''; // Limpiar input
+    element.value = ''; 
   }
 
   // --- STICKERS DE TENOR ---
@@ -607,13 +618,19 @@
       panel.style.display = 'none';
     } else {
       panel.style.display = 'flex';
-      buscarEnTenor(); // Cargar iniciales (trending)
+      buscarEnTenor(); 
+    }
+  }
+
+  function detectarEnterTenor(event) {
+    if (event.key === "Enter") {
+      buscarEnTenor();
     }
   }
 
   async function buscarEnTenor() {
-    const query = document.getElementById('tenorSearchInput').value.trim() || 'trending stickers';
-    // Usamos una clave pública de Tenor para pruebas
+    const query = document.getElementById('tenorSearchInput').value.trim() || 'stickers';
+    // API optimizada para stickers transparentes
     const url = `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=9&media_filter=minimal`;
     
     try {
@@ -622,11 +639,14 @@
       const resultsContainer = document.getElementById('tenorResults');
       resultsContainer.innerHTML = '';
       
-      data.results.forEach(sticker => {
-        // Obtenemos el GIF optimizado/pequeño
-        const gifUrl = sticker.media[0].tinygif.url;
-        resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')">`;
-      });
+      if (data.results && data.results.length > 0) {
+        data.results.forEach(sticker => {
+          const gifUrl = sticker.media[0].tinygif.url;
+          resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')">`;
+        });
+      } else {
+        resultsContainer.innerHTML = '<p style="grid-column: span 3; text-align:center; color:gray; padding:20px;">Sin resultados</p>';
+      }
     } catch(err) {
       console.error("Error cargando Tenor: ", err);
     }
@@ -640,7 +660,7 @@
     box.innerHTML += `<div class="bubble sent"><img src="${url}"></div>`;
     guardarEnHistorial(activePeerId, 'me', 'image', url);
     
-    document.getElementById('tenorPanel').style.display = 'none'; // cerrar panel
+    document.getElementById('tenorPanel').style.display = 'none'; 
     box.scrollTop = box.scrollHeight;
   }
 
@@ -700,7 +720,7 @@
       call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
       
       if(compartirPantalla) {
-        localStream.getVideoTracks()[0].onended = () => colgarLlamada();
+        localStream.getVideoTracks()[0].onended = () => colgangLlamada();
       }
     } catch(err) {
       console.error("Error al iniciar stream: ", err);
