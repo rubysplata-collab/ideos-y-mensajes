@@ -443,7 +443,7 @@
 
   function abrirModalConexion() { document.getElementById('connectModal').style.display = 'flex'; }
   function cerrarModal() { document.getElementById('connectModal').style.display = 'none'; }
-  
+   
   function renderizarListaChats() {
     const list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
     const container = document.getElementById('chatListContainer');
@@ -484,7 +484,14 @@
     conn.on('data', (data) => {
       if(data.type === 'text') {
         const box = document.getElementById('msgBox');
-        box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
+        
+        // CORRECCIÓN: Renderiza imágenes si detecta Base64
+        if (data.content.startsWith('data:image/')) {
+          box.innerHTML += `<div class="bubble recv"><img src="${data.content}" style="max-width: 100%; border-radius: 10px; display: block;" /></div>`;
+        } else {
+          box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
+        }
+        
         guardarEnHistorial(activePeerId, 'friend', data.content);
         box.scrollTop = box.scrollHeight;
       }
@@ -498,11 +505,22 @@
 
   function enviarMensaje() {
     const input = document.getElementById('chatInput');
-    if(!input.value.trim() || !conn) return;
-    conn.send({ type: 'text', content: input.value.trim() });
-    document.getElementById('msgBox').innerHTML += `<div class="bubble sent">${input.value.trim()}</div>`;
-    guardarEnHistorial(activePeerId, 'me', input.value.trim());
+    const mensaje = input.value.trim();
+    if(!mensaje || !conn) return;
+    
+    conn.send({ type: 'text', content: mensaje });
+    
+    const box = document.getElementById('msgBox');
+    // CORRECCIÓN: Renderiza tus propias imágenes si pegas un Base64
+    if (mensaje.startsWith('data:image/')) {
+      box.innerHTML += `<div class="bubble sent"><img src="${mensaje}" style="max-width: 100%; border-radius: 10px; display: block;" /></div>`;
+    } else {
+      box.innerHTML += `<div class="bubble sent">${mensaje}</div>`;
+    }
+    
+    guardarEnHistorial(activePeerId, 'me', mensaje);
     input.value = '';
+    box.scrollTop = box.scrollHeight;
   }
 
   function guardarEnHistorial(id, sender, text) {
@@ -516,7 +534,17 @@
     const hist = JSON.parse(localStorage.getItem(`hist_${id}`) || '[]');
     const box = document.getElementById('msgBox');
     box.innerHTML = '';
-    hist.forEach(m => box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`);
+    
+    // CORRECCIÓN: Comprueba cada elemento del historial para ver si era una imagen
+    hist.forEach(m => {
+      const esImagen = m.text.startsWith('data:image/');
+      const contenidoBubble = esImagen 
+        ? `<img src="${m.text}" style="max-width: 100%; border-radius: 10px; display: block;" />` 
+        : m.text;
+        
+      box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${contenidoBubble}</div>`;
+    });
+    
     box.scrollTop = box.scrollHeight;
   }
 
