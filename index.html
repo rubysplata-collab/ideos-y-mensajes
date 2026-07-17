@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat 2.0 - Con Pantalla Compartida</title>
+  <title>WaveChat 2.0 - Premium Edition</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -135,6 +135,13 @@
       word-wrap: break-word;
     }
 
+    .bubble img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 5px;
+      display: block;
+    }
+
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
 
@@ -146,15 +153,16 @@
       display: none;
     }
 
+    /* --- BARRA DE ENTRADA --- */
     .input-bar {
       padding: 15px;
       background-color: #1f2c34;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .input-bar input {
+    .input-bar input[type="text"] {
       flex: 1;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1);
@@ -163,6 +171,52 @@
       color: white;
       outline: none;
     }
+
+    .input-bar i {
+      font-size: 1.2rem;
+      color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* --- PANEL DE TENOR --- */
+    .tenor-panel {
+      display: none;
+      background: #151d26;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      height: 250px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tenor-search {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 20px;
+      border: none;
+      background: #0b0e14;
+      color: white;
+      outline: none;
+    }
+
+    .tenor-results {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      overflow-y: auto;
+    }
+
+    .tenor-results img {
+      width: 100%;
+      height: 75px;
+      object-fit: cover;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .tenor-results img:hover { transform: scale(1.05); }
 
     /* --- MODALES --- */
     .modal {
@@ -262,16 +316,26 @@
       <div style="display:flex; gap: 15px; align-items: center;">
         <i class="fa-solid fa-trash" onclick="confirmarBorrarHistorial()" style="color:var(--text-dim); cursor:pointer"></i>
         <i class="fa-solid fa-desktop" onclick="iniciarLlamada(true)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Compartir Pantalla"></i>
-        <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Videollamada de Cámara"></i>
+        <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Videollamada"></i>
       </div>
     </header>
     
     <div class="messages-box" id="msgBox"></div>
     <div class="typing-status" id="typingLabel">Escribiendo...</div>
 
+    <div class="tenor-panel" id="tenorPanel">
+      <input type="text" class="tenor-search" id="tenorSearchInput" placeholder="Buscar Stickers en Tenor..." oninput="buscarEnTenor()">
+      <div class="tenor-results" id="tenorResults"></div>
+    </div>
+
     <div class="input-bar">
+      <input type="file" id="fileInput" style="display: none;" onchange="enviarArchivo(this)">
+      
+      <i class="fa-solid fa-paperclip" onclick="document.getElementById('fileInput').click()" title="Mandar Foto o Archivo"></i>
+      <i class="fa-regular fa-face-smile" onclick="toggleTenorPanel()" title="Buscar Stickers"></i>
+      
       <input type="text" id="chatInput" placeholder="Mensaje..." oninput="detectarEscritura()">
-      <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()" style="color:var(--accent); cursor:pointer"></i>
+      <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()" title="Enviar"></i>
     </div>
   </div>
 
@@ -334,9 +398,7 @@
   function forzarCambioDeNombre() {
     localStorage.removeItem('wave_my_id');
     mostrarPantalla('registerScreen');
-    if (peer) {
-      peer.destroy();
-    }
+    if (peer) peer.destroy();
   }
 
   function inicializarPeer(myId) {
@@ -363,8 +425,6 @@
 
     peer.on('call', async (call) => {
       if(confirm("¿Recibir transmisión de " + call.peer.replace('wave-','').toUpperCase() + "?")) {
-        // Al recibir videollamada normal intentamos habilitar cámara para bidireccional,
-        // pero si ellos solo nos comparten pantalla, no obligamos a prender la nuestra.
         try {
           localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
           document.getElementById('localVideo').srcObject = localStream;
@@ -383,6 +443,7 @@
   function cerrarModal() { document.getElementById('connectModal').style.display = 'none'; }
   
   function irAListaChats() {
+    document.getElementById('tenorPanel').style.display = 'none';
     mostrarPantalla('chatsScreen');
     activePeerId = null;
     renderizarListaChats();
@@ -411,7 +472,6 @@
     });
   }
 
-  // --- MANEJO DE CHAT ---
   function abrirChat(id) {
     activePeerId = id;
     document.getElementById('activeChatName').innerText = id.replace('wave-','').toUpperCase();
@@ -428,9 +488,7 @@
     let id = idManual || document.getElementById('peerIdInput').value.trim().toLowerCase();
     if(!id) return;
     
-    if(!id.startsWith('wave-')) {
-      id = 'wave-' + id;
-    }
+    if(!id.startsWith('wave-')) id = 'wave-' + id;
 
     conn = peer.connect(id);
     vincularEventos();
@@ -446,7 +504,11 @@
         document.getElementById('typingLabel').innerText = typingText;
         document.getElementById('typingLabel').style.display = data.status ? 'block' : 'none';
       } else if(data.type === 'text') {
-        recibirMensaje(data.content);
+        recibirMensaje(data.content, 'text');
+      } else if(data.type === 'image') {
+        recibirMensaje(data.content, 'image');
+      } else if(data.type === 'file') {
+        recibirMensaje(data, 'file');
       }
     });
   }
@@ -459,7 +521,7 @@
     }
   }
 
-  // --- ENVIAR Y RECIBIR MENSAJES ---
+  // --- ENVIAR MENSAJES ---
   function detectarEscritura() {
     if(conn && conn.open) {
       conn.send({ type: 'typing', status: true });
@@ -479,26 +541,114 @@
     
     const box = document.getElementById('msgBox');
     box.innerHTML += `<div class="bubble sent">${text}</div>`;
-    guardarEnHistorial(activePeerId, 'me', text);
+    guardarEnHistorial(activePeerId, 'me', 'text', text);
     
     input.value = '';
     box.scrollTop = box.scrollHeight;
-    
     conn.send({ type: 'typing', status: false });
   }
 
-  function recibirMensaje(text) {
+  function recibirMensaje(data, format) {
     const box = document.getElementById('msgBox');
-    box.innerHTML += `<div class="bubble recv">${text}</div>`;
-    guardarEnHistorial(activePeerId, 'friend', text);
+    if (format === 'text') {
+      box.innerHTML += `<div class="bubble recv">${data}</div>`;
+      guardarEnHistorial(activePeerId, 'friend', 'text', data);
+    } else if (format === 'image') {
+      box.innerHTML += `<div class="bubble recv"><img src="${data}"></div>`;
+      guardarEnHistorial(activePeerId, 'friend', 'image', data);
+    } else if (format === 'file') {
+      box.innerHTML += `
+        <div class="bubble recv">
+          <p style="font-size:0.8rem; color:var(--text-dim)">Archivo recibido:</p>
+          <a href="${data.content}" download="${data.fileName}" class="connect-btn" style="margin-top:5px; text-decoration:none; display:inline-flex;">
+            <i class="fa-solid fa-download"></i> ${data.fileName}
+          </a>
+        </div>`;
+      guardarEnHistorial(activePeerId, 'friend', 'file', JSON.stringify({ name: data.fileName, data: data.content }));
+    }
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // --- COMPARTIR FOTOS Y ARCHIVOS ---
+  function enviarArchivo(element) {
+    const file = element.files[0];
+    if (!file || !conn) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      const fileData = evt.target.result;
+      const box = document.getElementById('msgBox');
+      
+      if (file.type.startsWith('image/')) {
+        conn.send({ type: 'image', content: fileData });
+        box.innerHTML += `<div class="bubble sent"><img src="${fileData}"></div>`;
+        guardarEnHistorial(activePeerId, 'me', 'image', fileData);
+      } else {
+        conn.send({ type: 'file', content: fileData, fileName: file.name });
+        box.innerHTML += `
+          <div class="bubble sent">
+            <p style="font-size:0.8rem; opacity:0.7">Archivo enviado:</p>
+            <a href="${fileData}" download="${file.name}" class="connect-btn" style="margin-top:5px; text-decoration:none; display:inline-flex; background:rgba(255,255,255,0.1); color:white;">
+              <i class="fa-solid fa-file"></i> ${file.name}
+            </a>
+          </div>`;
+        guardarEnHistorial(activePeerId, 'me', 'file', JSON.stringify({ name: file.name, data: fileData }));
+      }
+      box.scrollTop = box.scrollHeight;
+    };
+    reader.readAsDataURL(file);
+    element.value = ''; // Limpiar input
+  }
+
+  // --- STICKERS DE TENOR ---
+  function toggleTenorPanel() {
+    const panel = document.getElementById('tenorPanel');
+    if (panel.style.display === 'flex') {
+      panel.style.display = 'none';
+    } else {
+      panel.style.display = 'flex';
+      buscarEnTenor(); // Cargar iniciales (trending)
+    }
+  }
+
+  async function buscarEnTenor() {
+    const query = document.getElementById('tenorSearchInput').value.trim() || 'trending stickers';
+    // Usamos una clave pública de Tenor para pruebas
+    const url = `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=9&media_filter=minimal`;
+    
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      const resultsContainer = document.getElementById('tenorResults');
+      resultsContainer.innerHTML = '';
+      
+      data.results.forEach(sticker => {
+        // Obtenemos el GIF optimizado/pequeño
+        const gifUrl = sticker.media[0].tinygif.url;
+        resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')">`;
+      });
+    } catch(err) {
+      console.error("Error cargando Tenor: ", err);
+    }
+  }
+
+  function enviarSticker(url) {
+    if(!conn) return;
+    conn.send({ type: 'image', content: url });
+    
+    const box = document.getElementById('msgBox');
+    box.innerHTML += `<div class="bubble sent"><img src="${url}"></div>`;
+    guardarEnHistorial(activePeerId, 'me', 'image', url);
+    
+    document.getElementById('tenorPanel').style.display = 'none'; // cerrar panel
     box.scrollTop = box.scrollHeight;
   }
 
   // --- HISTORIAL ---
-  function guardarEnHistorial(id, sender, text) {
+  function guardarEnHistorial(id, sender, type, text) {
     const key = `hist_${id}`;
     let hist = JSON.parse(localStorage.getItem(key) || '[]');
-    hist.push({ sender, text });
+    hist.push({ sender, type, text });
     localStorage.setItem(key, JSON.stringify(hist));
   }
 
@@ -507,8 +657,22 @@
     const hist = JSON.parse(localStorage.getItem(key) || '[]');
     const box = document.getElementById('msgBox');
     box.innerHTML = '';
+    
     hist.forEach(m => {
-      box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`;
+      if (m.type === 'text') {
+        box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`;
+      } else if (m.type === 'image') {
+        box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}"><img src="${m.text}"></div>`;
+      } else if (m.type === 'file') {
+        const fileObj = JSON.parse(m.text);
+        box.innerHTML += `
+          <div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">
+            <p style="font-size:0.8rem; opacity:0.7">Archivo guardado:</p>
+            <a href="${fileObj.data}" download="${fileObj.name}" class="connect-btn" style="margin-top:5px; text-decoration:none; display:inline-flex; ${m.sender === 'me' ? 'background:rgba(255,255,255,0.1); color:white;' : ''}">
+              <i class="fa-solid fa-download"></i> ${fileObj.name}
+            </a>
+          </div>`;
+      }
     });
     box.scrollTop = box.scrollHeight;
   }
@@ -524,10 +688,8 @@
   async function iniciarLlamada(compartirPantalla = false) {
     try {
       if (compartirPantalla) {
-        // Lógica de capturar pantalla
         localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
       } else {
-        // Lógica normal de capturar cámara
         localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       }
       
@@ -537,13 +699,12 @@
       const call = peer.call(activePeerId, localStream);
       call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
       
-      // Si se detiene la captura de pantalla por el botón nativo del navegador
       if(compartirPantalla) {
         localStream.getVideoTracks()[0].onended = () => colgarLlamada();
       }
     } catch(err) {
       console.error("Error al iniciar stream: ", err);
-      alert("No se pudo iniciar la transmisión. Asegúrate de dar los permisos.");
+      alert("No se pudo iniciar la transmisión.");
     }
   }
 
