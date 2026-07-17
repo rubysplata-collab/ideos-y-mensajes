@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Versión Final Estable con Audio</title>
+  <title>WaveTok & WaveChat - Mensajería Multimedia Completa</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -63,14 +63,22 @@
     .avatar { width: 40px; height: 40px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
 
     .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; color: white; }
+    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 5px; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
     .share-card { background: #1c2732; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; cursor: pointer; min-width: 180px; }
+    
+    /* Contenedores multimedia en chat */
+    .chat-img-render { max-width: 100%; max-height: 200px; border-radius: 10px; object-fit: cover; margin-top: 3px; border: 1px solid rgba(255,255,255,0.1); }
+    .chat-audio-render { max-width: 100%; outline: none; margin-top: 3px; height: 36px; }
 
     .input-bar { padding: 15px 25px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 15px; }
     .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
-    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
+    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; transition: transform 0.1s; }
+    .input-bar i:active { transform: scale(0.85); }
+    .mic-recording { color: var(--danger) !important; animation: pulseMic 1s infinite alternate; }
+
+    @keyframes pulseMic { from { opacity: 0.5; } to { opacity: 1; } }
 
     .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.02); }
     .my-code-footer b { color: var(--accent); letter-spacing: 0.5px; }
@@ -156,9 +164,18 @@
               <i class="fa-solid fa-video" onclick="iniciarLlamadaVozVideo(true)"></i>
             </div>
           </div>
+          
           <div class="messages-container" id="msgBox"></div>
+          
           <div class="input-bar" id="chatInputBarArea" style="display: none;">
+            <label for="chatInputFileImage" style="margin: 0; padding: 0; display: flex; align-items: center;">
+              <i class="fa-solid fa-paperclip"></i>
+            </label>
+            <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="procesarYEnviarFotoChat(this)">
+            
             <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
+            
+            <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="invertirEstadoGrabacionAudio()"></i>
             <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
           </div>
         </div>
@@ -254,6 +271,10 @@
     let unsubscribirComentarios = null;
     let videoSeleccionadoParaComentarios = null;
 
+    // Variables de audio/grabación
+    let grabadorAudioMedia = null, fragmentosAudioGrabados = [];
+    let estaGrabandoAudio = false;
+
     window.inicializarPlataformaCompleta = () => {
       mySessionId = localStorage.getItem('wt_session_peer_id') || "";
       escucharFeedVideosGlobal();
@@ -291,7 +312,7 @@
             miStreamLocal = stream;
             document.getElementById('panelLlamadaActiva').style.display = 'flex';
             document.getElementById('localStreamVideo').srcObject = stream;
-            document.getElementById('txtEstadoLlamada').innerText = "Conconnected";
+            document.getElementById('txtEstadoLlamada').innerText = "Conectado";
             incomingCall.answer(stream);
             llamadaActualWebRTC = incomingCall;
             incomingCall.on('stream', (remoteStream) => {
@@ -340,11 +361,74 @@
       await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
         sender: mySessionId,
         text: input.value.trim(),
+        type: "text",
         timestamp: window.serverTimestamp()
       });
       input.value = '';
     }
 
+    /* ENVIAR FOTOS EN BASE64 */
+    function procesarYEnviarFotoChat(input) {
+      if (!currentTargetPeerId || !input.files[0]) return;
+      let file = input.files[0];
+      let lector = new FileReader();
+      
+      lector.onload = async (e) => {
+        let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+        await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+          sender: mySessionId,
+          text: e.target.result, 
+          type: "image",
+          timestamp: window.serverTimestamp()
+        });
+        input.value = ""; // Limpiar input file
+      };
+      lector.readAsDataURL(file);
+    }
+
+    /* SISTEMA DE GRABACIÓN DE AUDIO */
+    function invertirEstadoGrabacionAudio() {
+      if (!currentTargetPeerId) return;
+      const btnMic = document.getElementById('btnIconoMicrofonoAudio');
+
+      if (!estaGrabandoAudio) {
+        // Empezar a grabar
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          grabadorAudioMedia = new MediaRecorder(stream);
+          fragmentosAudioGrabados = [];
+          
+          grabadorAudioMedia.ondataavailable = e => fragmentosAudioGrabados.push(e.data);
+          
+          grabadorAudioMedia.onstop = () => {
+            let audioBlob = new Blob(fragmentosAudioGrabados, { type: 'audio/mp3' });
+            let lector = new FileReader();
+            lector.onload = async (e) => {
+              let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+              await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+                sender: mySessionId,
+                text: e.target.result, 
+                type: "audio",
+                timestamp: window.serverTimestamp()
+              });
+            };
+            lector.readAsDataURL(audioBlob);
+            // Apagar micrófono físicamente
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          grabadorAudioMedia.start();
+          estaGrabandoAudio = true;
+          btnMic.classList.add('mic-recording');
+        }).catch(() => alert("No se pudo acceder al micrófono"));
+      } else {
+        // Detener la grabación
+        if (grabadorAudioMedia) grabadorAudioMedia.stop();
+        estaGrabandoAudio = false;
+        btnMic.classList.remove('mic-recording');
+      }
+    }
+
+    /* ESCUCHA DE MENSAJES MULTIMEDIA FIRESTORE */
     function escucharMensajesFirestore(targetId) {
       if(unsubscribirEscuchaFirestore) unsubscribirEscuchaFirestore();
       let salaId = [mySessionId, targetId].sort().join("_CH_");
@@ -357,11 +441,20 @@
         snapshot.forEach((doc) => {
           let datos = doc.data();
           let esMio = datos.sender === mySessionId;
+          
+          // Crear la burbuja correspondiente según el tipo de mensaje
           if(datos.text && datos.text.startsWith('SHARE_VD:::')) {
             let parts = datos.text.split(':::');
             box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><div class="share-card" onclick="navegarHacia('tok')">🎬 <b>Clip Compartido:</b><br>${parts[1]}</div></div>`;
-          } else {
-            box.innerHTML += `<div class="bubble ${esMio ? 'sent' : 'recv'}">${datos.text}</div>`;
+          } 
+          else if(datos.type === "image") {
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${datos.sender}:</b><img src="${datos.text}" class="chat-img-render"/></div>`;
+          } 
+          else if(datos.type === "audio") {
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${datos.sender}:</b><audio src="${datos.text}" controls class="chat-audio-render"></audio></div>`;
+          } 
+          else {
+            box.innerHTML += `<div class="bubble ${esMio ? 'sent' : 'recv'}"><b>@${datos.sender}:</b><br>${datos.text}</div>`;
           }
         });
         box.scrollTop = box.scrollHeight;
@@ -397,6 +490,7 @@
       await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
         sender: mySessionId,
         text: `SHARE_VD:::${video.caption}:::${video.url}`,
+        type: "share",
         timestamp: window.serverTimestamp()
       });
       alert("¡Video compartido en tu chat privado!");
@@ -468,13 +562,12 @@
       }
     }
 
-    /* MANEJO DE AUDIO DINÁMICO AL HACER CLIC */
     function controlarReproduccionYAudio(videoElement) {
       if (videoElement.paused) {
-        videoElement.muted = false; // Quita el silencio al dar play
+        videoElement.muted = false; 
         videoElement.play().catch(()=>{});
       } else {
-        videoElement.pause();
+        videoElement.muted = !videoElement.muted;
       }
     }
 
@@ -520,15 +613,17 @@
       const wrapper = document.getElementById('tokFeedIterator');
       let target = currentFeedIndex + dir;
       if (target >= 0 && target < masterVideoArray.length) {
-        document.querySelectorAll('.tok-video').forEach(v => { v.pause(); v.muted = true; });
+        let prevVideo = wrapper.children[currentFeedIndex].querySelector('video');
+        if(prevVideo) prevVideo.pause();
+
         cerrarCajonComentarios();
         currentFeedIndex = target;
         wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
+        
         let activeVideo = wrapper.children[currentFeedIndex].querySelector('video');
         if(activeVideo) {
-          activeVideo.muted = false; // El nuevo video cargado sonará si el navegador lo permite
+          activeVideo.muted = false;
           activeVideo.play().catch(()=>{
-            // Si el navegador bloquea el autoplay con audio, lo arranca silenciado hasta que hagan clic
             activeVideo.muted = true;
             activeVideo.play().catch(()=>{});
           });
@@ -565,7 +660,7 @@
     }
 
     function navegarHacia(pantalla) {
-      document.querySelectorAll('.tok-video').forEach(v => { v.pause(); v.muted = true; });
+      document.querySelectorAll('.tok-video').forEach(v => v.pause());
       document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       cerrarCajonComentarios();
