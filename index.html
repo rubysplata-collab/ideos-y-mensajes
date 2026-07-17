@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat 2.0 - Premium Edition</title>
+  <title>WaveChat 3.0 - TikTok & Editor Edition</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -46,274 +46,111 @@
       border: 1px solid rgba(0, 230, 118, 0.2);
     }
 
-    .screen { display: none; flex-direction: column; height: 100%; width: 100%; }
+    .screen { display: none; flex-direction: column; height: calc(100% - 60px); width: 100%; }
     .screen.active { display: flex; }
-
-    /* --- REGISTRO INICIAL --- */
-    .register-box {
-      padding: 30px;
+    
+    /* Navbar Inferior Principal */
+    .bottom-nav {
+      height: 60px;
+      background-color: #1f2c34;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      z-index: 10;
+    }
+    .nav-item {
+      color: var(--text-dim);
+      font-size: 1.2rem;
+      cursor: pointer;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      flex: 1;
-      justify-content: center;
       align-items: center;
-      text-align: center;
+      gap: 3px;
     }
+    .nav-item.active { color: var(--accent); }
+    .nav-item span { font-size: 0.7rem; }
+
+    /* --- REGISTRO INICIAL --- */
+    .register-box { padding: 30px; display: flex; flex-direction: column; gap: 20px; flex: 1; justify-content: center; align-items: center; text-align: center; }
 
     /* --- CABECERA --- */
-    .header {
-      background-color: #1f2c34;
-      padding: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
+    .header { background-color: #1f2c34; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .header h2 { color: var(--accent); font-size: 1.4rem; font-weight: 700; }
-
-    .connect-btn {
-      background-color: var(--accent);
-      color: black;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 20px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+    .connect-btn { background-color: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
 
     /* --- LISTA DE CHATS --- */
     .chat-list { flex: 1; overflow-y: auto; background-color: #121b22; }
-
-    .chat-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-      cursor: pointer;
-    }
-
-    .avatar {
-      width: 55px;
-      height: 55px;
-      border-radius: 50%;
-      background-color: #054735;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 1.2rem;
-      border: 2px solid var(--accent);
-    }
-
+    .chat-item { display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer; }
+    .avatar { width: 55px; height: 55px; border-radius: 50%; background-color: #054735; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; border: 2px solid var(--accent); }
     .chat-info { flex: 1; }
     .chat-info h4 { margin-bottom: 4px; font-size: 1.05rem; }
     .chat-preview { color: var(--text-dim); font-size: 0.85rem; }
 
     /* --- CHAT ACTIVO --- */
-    .messages-box {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background-color: #0b141a;
-    }
-
-    .bubble {
-      max-width: 80%;
-      padding: 10px 15px;
-      border-radius: 18px;
-      font-size: 0.95rem;
-      line-height: 1.4;
-      word-wrap: break-word;
-    }
-
-    .bubble img {
-      max-width: 130px;
-      max-height: 130px;
-      border-radius: 10px;
-      margin-top: 5px;
-      display: block;
-      object-fit: contain;
-    }
-
+    .messages-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: #0b141a; }
+    .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
+    .bubble img { max-width: 130px; max-height: 130px; border-radius: 10px; margin-top: 5px; display: block; object-fit: contain; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .typing-status { font-size: 0.8rem; color: var(--accent); padding: 5px 20px; background-color: #0b141a; display: none; }
 
-    .typing-status {
-      font-size: 0.8rem;
-      color: var(--accent);
-      padding: 5px 20px;
-      background-color: #0b141a;
-      display: none;
-    }
+    .input-bar { padding: 15px; background-color: #1f2c34; display: flex; align-items: center; gap: 12px; }
+    .input-bar input[type="text"] { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; border-radius: 25px; color: white; outline: none; }
+    .input-bar i { font-size: 1.2rem; color: var(--accent); cursor: pointer; }
 
-    /* --- BARRA DE ENTRADA --- */
-    .input-bar {
-      padding: 15px;
-      background-color: #1f2c34;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
+    /* --- SECCIÓN TIKTOK (FEED DE VIDEOS) --- */
+    .tiktok-container { flex: 1; background: black; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+    .tiktok-feed { flex: 1; scroll-snap-type: y mandatory; overflow-y: scroll; scroll-behavior: smooth; }
+    .tiktok-post { width: 100%; height: 100%; scroll-snap-align: start; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+    .tiktok-video { width: 100%; height: 100%; object-fit: cover; }
+    
+    /* Acciones laterales flotantes */
+    .tiktok-actions { position: absolute; right: 15px; bottom: 80px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 5; }
+    .action-btn { background: rgba(0,0,0,0.5); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
+    .action-btn.liked { color: var(--danger); }
+    .tiktok-actions span { font-size: 0.75rem; color: white; margin-top: -15px; text-shadow: 1px 1px 3px black; }
 
-    .input-bar input[type="text"] {
-      flex: 1;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 12px 18px;
-      border-radius: 25px;
-      color: white;
-      outline: none;
-    }
+    /* Descripción inferior */
+    .tiktok-meta { position: absolute; left: 15px; bottom: 20px; z-index: 5; max-width: 75%; text-shadow: 1px 1px 4px black; }
+    .tiktok-meta h4 { color: white; margin-bottom: 5px; }
+    .tiktok-meta p { color: #ddd; font-size: 0.85rem; }
 
-    .input-bar i {
-      font-size: 1.2rem;
-      color: var(--accent);
-      cursor: pointer;
-    }
+    /* --- PANEL COMENTARIOS --- */
+    .comments-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #151d26; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 20; display: none; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; }
+    .comments-panel.open { display: flex; transform: translateY(0); }
+    .comments-header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
+    .comments-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+    .comment-item { font-size: 0.9rem; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 5px; }
+    .comment-user { color: var(--accent); font-weight: bold; margin-right: 5px; }
 
-    /* --- PANEL DE STICKERS --- */
-    .tenor-panel {
-      display: none;
-      background: #151d26;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 10px;
-      height: 250px;
-      flex-direction: column;
-      gap: 10px;
-    }
+    /* --- PANEL EDITOR DE VIDEOS --- */
+    .editor-screen { flex: 1; background: #0b0e14; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+    .preview-container { width: 100%; height: 250px; background: black; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+    #editorPreview { width: 100%; height: 100%; object-fit: contain; }
+    
+    /* Controles de efectos CSS */
+    .filter-selector { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+    .filter-thumb { padding: 8px 15px; background: #1f2c34; border-radius: 15px; font-size: 0.8rem; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+    .filter-thumb.selected { border-color: var(--accent); color: var(--accent); }
 
-    .tenor-search-box {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-    }
+    /* Filtros Disponibles mapeados en CSS */
+    .f-normal { filter: none; }
+    .f-bn { filter: grayscale(1); }
+    .f-sepia { filter: sepia(1); }
+    .f-invert { filter: invert(1); }
+    .f-vintage { filter: sepia(0.5) hue-rotate(-30deg) saturate(1.2); }
 
-    .tenor-search {
-      flex: 1;
-      padding: 8px 12px;
-      border-radius: 20px;
-      border: none;
-      background: #0b0e14;
-      color: white;
-      outline: none;
-    }
+    /* --- MODALES / LLAMADAS --- */
+    .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 30px; }
+    .modal-content { background: var(--bg-card); padding: 30px; border-radius: 20px; width: 100%; text-align: center; border: 1px solid var(--accent); }
+    .modal input, .register-box input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #0b0e14; color: white; text-align: center; outline: none; }
 
-    .tenor-results {
-      flex: 1;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      overflow-y: auto;
-    }
-
-    .tenor-results img {
-      width: 100%;
-      height: 75px;
-      object-fit: contain;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.1s;
-      background: rgba(255,255,255,0.02);
-      padding: 5px;
-    }
-
-    .tenor-results img:hover { transform: scale(1.05); }
-
-    /* --- MODALES --- */
-    .modal {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      z-index: 100;
-      justify-content: center;
-      align-items: center;
-      padding: 30px;
-    }
-
-    .modal-content {
-      background: var(--bg-card);
-      padding: 30px;
-      border-radius: 20px;
-      width: 100%;
-      text-align: center;
-      border: 1px solid var(--accent);
-    }
-
-    .modal input, .register-box input {
-      width: 100%;
-      padding: 12px;
-      margin: 15px 0;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: #0b0e14;
-      color: white;
-      text-align: center;
-      outline: none;
-    }
-
-    /* --- VIDEO / PANTALLA --- */
-    .call-overlay {
-      display: none;
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: black;
-      z-index: 200;
-      flex-direction: column;
-    }
-
+    .call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 200; flex-direction: column; }
     #remoteVideo { width: 100%; height: 100%; object-fit: contain; background: #111; }
-    #localVideo {
-      position: absolute;
-      top: 20px; right: 20px;
-      width: 120px; height: 180px;
-      border-radius: 15px;
-      border: 2px solid var(--accent);
-      object-fit: cover;
-      z-index: 210;
-    }
-
-    /* Botones de control de llamada */
-    .call-controls {
-      position: absolute;
-      bottom: 40px;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      z-index: 220;
-    }
-
-    .call-btn {
-      border: none;
-      padding: 15px;
-      border-radius: 50%;
-      color: white;
-      font-size: 1.1rem;
-      cursor: pointer;
-      width: 55px;
-      height: 55px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-      transition: background 0.2s, transform 0.1s;
-    }
-
-    .call-btn:active {
-      transform: scale(0.9);
-    }
-
+    #localVideo { position: absolute; top: 20px; right: 20px; width: 120px; height: 180px; border-radius: 15px; border: 2px solid var(--accent); object-fit: cover; z-index: 210; }
+    .call-controls { position: absolute; bottom: 40px; width: 100%; display: flex; justify-content: center; gap: 20px; z-index: 220; }
+    .call-btn { border: none; padding: 15px; border-radius: 50%; color: white; font-size: 1.1rem; cursor: pointer; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .btn-hangup { background-color: var(--danger); }
     .btn-toggle { background-color: rgba(255, 255, 255, 0.2); }
     .btn-toggle.disabled { background-color: var(--warning); color: black; }
@@ -325,79 +162,105 @@
   
   <div class="screen" id="registerScreen">
     <div class="register-box">
-      <h2 style="color: var(--accent);">Crea tu ID WaveChat</h2>
-      <p style="color: var(--text-dim); font-size: 0.9rem;">Elige tu nombre (ej. fer, jheiler, juan). Sin espacios ni caracteres raros.</p>
-      <input type="text" id="usernameInput" placeholder="Escribe tu nombre aquí">
-      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="guardarNombreDeUsuario()">
-        Confirmar ID Único
-      </button>
+      <h2 style="color: var(--accent);">ID WaveChat</h2>
+      <input type="text" id="usernameInput" placeholder="Tu nombre único">
+      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="guardarNombreDeUsuario()">Entrar</button>
     </div>
   </div>
 
   <div class="screen" id="chatsScreen">
     <header class="header">
       <h2>WaveChat</h2>
-      <button class="connect-btn" onclick="abrirModalConexion()">
-        <i class="fa-solid fa-plus"></i> Conectar
-      </button>
+      <button class="connect-btn" onclick="abrirModalConexion()"><i class="fa-solid fa-plus"></i> Conectar</button>
     </header>
     <div class="chat-list" id="chatListContainer"></div>
-    
-    <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center; background: #121b22; border-top: 1px solid rgba(255,255,255,0.05);">
-      <span style="font-size: 0.8rem; color: var(--text-dim);">
-        Tu ID: <strong id="myIdFooter" style="color: var(--accent);">...</strong>
-      </span>
-      <button onclick="forzarCambioDeNombre()" style="background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 0.9rem;">
-        <i class="fa-solid fa-pen-to-square"></i> Editar
-      </button>
-    </div>
   </div>
 
-  <div class="screen" id="activeChatScreen">
+  <div class="screen" id="activeChatScreen" style="height:100%">
     <header class="header">
       <div style="display:flex; align-items:center; gap:10px;">
-        <i class="fa-solid fa-arrow-left" onclick="irAListaChats()" style="cursor:pointer"></i>
+        <i class="fa-solid fa-arrow-left" onclick="cambiarPestana('chats')" style="cursor:pointer"></i>
         <div id="activeChatName" style="font-weight: bold;">Nombre</div>
       </div>
       <div style="display:flex; gap: 15px; align-items: center;">
-        <i class="fa-solid fa-trash" onclick="confirmarBorrarHistorial()" style="color:var(--text-dim); cursor:pointer"></i>
-        <i class="fa-solid fa-desktop" onclick="iniciarLlamada(true)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Compartir Pantalla"></i>
-        <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer; font-size: 1.1rem;" title="Videollamada"></i>
+        <i class="fa-solid fa-desktop" onclick="iniciarLlamada(true)" style="color:var(--accent); cursor:pointer;"></i>
+        <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer;"></i>
       </div>
     </header>
-    
     <div class="messages-box" id="msgBox"></div>
-    <div class="typing-status" id="typingLabel">Escribiendo...</div>
-
-    <div class="tenor-panel" id="tenorPanel">
-      <div class="tenor-search-box">
-        <input type="text" class="tenor-search" id="tenorSearchInput" placeholder="Buscar Stickers (risas, meme, xd)..." onkeydown="detectarEnterSticker(event)">
-        <button onclick="buscarStickers()" style="background:var(--accent); border:none; padding: 0 15px; border-radius:20px; color:black; cursor:pointer; font-weight:bold;">
-          <i class="fa-solid fa-magnifying-glass" style="color:black; font-size:0.9rem;"></i>
-        </button>
-      </div>
-      <div class="tenor-results" id="stickerResults"></div>
-    </div>
-
     <div class="input-bar">
-      <input type="file" id="fileInput" style="display: none;" onchange="enviarArchivo(this)">
-      
-      <i class="fa-solid fa-paperclip" onclick="document.getElementById('fileInput').click()" title="Mandar Foto o Archivo"></i>
-      <i class="fa-regular fa-face-smile" onclick="toggleStickersPanel()" title="Buscar Stickers"></i>
-      
-      <input type="text" id="chatInput" placeholder="Mensaje..." oninput="detectarEscritura()">
-      <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()" title="Enviar"></i>
+      <input type="text" id="chatInput" placeholder="Mensaje...">
+      <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
     </div>
   </div>
 
+  <div class="screen" id="tiktokScreen">
+    <header class="header">
+      <h2>WaveTok 🎬</h2>
+      <button class="connect-btn" onclick="cambiarPestana('editor')"><i class="fa-solid fa-video-camera"></i> Crear</button>
+    </header>
+    <div class="tiktok-container">
+      <div class="tiktok-feed" id="tiktokFeedContainer">
+        </div>
+    </div>
+  </div>
+
+  <div class="comments-panel" id="commentsPanel">
+    <div class="comments-header">
+      <span>Comentarios</span>
+      <i class="fa-solid fa-xmark" onclick="cerrarComentarios()" style="cursor:pointer"></i>
+    </div>
+    <div class="comments-list" id="commentsList"></div>
+    <div class="input-bar">
+      <input type="text" id="commentInput" placeholder="Añade un comentario...">
+      <i class="fa-solid fa-paper-plane" onclick="publicarComentario()"></i>
+    </div>
+  </div>
+
+  <div class="screen" id="editorScreen">
+    <header class="header">
+      <h2>Mini Editor</h2>
+      <i class="fa-solid fa-xmark" onclick="cambiarPestana('tiktok')" style="cursor:pointer"></i>
+    </header>
+    <div class="editor-screen">
+      <input type="file" id="videoFileInput" accept="video/*" onchange="cargarVideoEnEditor(this)">
+      
+      <div class="preview-container">
+        <video id="editorPreview" loop muted autoplay></video>
+      </div>
+
+      <label style="font-size: 0.9rem; color:var(--text-dim)">Selecciona un filtro de vídeo:</label>
+      <div class="filter-selector">
+        <div class="filter-thumb selected" onclick="aplicarFiltro('f-normal', this)">Normal</div>
+        <div class="filter-thumb" onclick="aplicarFiltro('f-bn', this)">B&N</div>
+        <div class="filter-thumb" onclick="aplicarFiltro('f-sepia', this)">Sepia</div>
+        <div class="filter-thumb" onclick="aplicarFiltro('f-invert', this)">Invertir</div>
+        <div class="filter-thumb" onclick="aplicarFiltro('f-vintage', this)">Vintage</div>
+      </div>
+
+      <label style="font-size: 0.9rem; color:var(--text-dim)">Punto de inicio de vídeo (Segundos):</label>
+      <input type="range" id="trimStart" min="0" max="10" value="0" step="0.5" oninput="actualizarTiempoEditor()">
+      <span id="trimLabel" style="font-size:0.8rem; color:var(--accent)">0s</span>
+
+      <input type="text" id="videoCaptionInput" placeholder="Escribe una descripción para tu vídeo...">
+      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="publicarVideoEditado()">🚀 Publicar en WaveTok</button>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" id="mainNavbar" style="display:none;">
+    <div class="nav-item active" id="nav-chats" onclick="cambiarPestana('chats')">
+      <i class="fa-solid fa-message"></i><span>Chats</span>
+    </div>
+    <div class="nav-item" id="nav-tiktok" onclick="cambiarPestana('tiktok')">
+      <i class="fa-solid fa-clapperboard"></i><span>WaveTok</span>
+    </div>
+  </nav>
+
   <div class="modal" id="connectModal">
     <div class="modal-content">
-      <h3 style="color:var(--accent)">Nueva Conexión</h3>
-      <p style="font-size: 0.85rem; margin-top:10px; color: var(--text-dim)">Ingresa el ID de tu amigo para agregarlo a tus chats:</p>
-      <input type="text" id="peerIdInput" placeholder="Ejemplo: wave-fer">
-      <button class="connect-btn" style="width:100%; justify-content:center" onclick="conectarConPeer()">
-        Vincular Chat
-      </button>
+      <h3>Vincular amigo</h3>
+      <input type="text" id="peerIdInput" placeholder="ID de tu amigo">
+      <button class="connect-btn" style="width:100%; justify-content:center" onclick="conectarConPeer()">Vincular</button>
       <p onclick="cerrarModal()" style="margin-top:15px; font-size:0.8rem; cursor:pointer; color:var(--text-dim)">Cancelar</p>
     </div>
   </div>
@@ -405,49 +268,35 @@
   <div class="call-overlay" id="callOverlay">
     <video id="localVideo" autoplay playsinline muted></video>
     <video id="remoteVideo" autoplay playsinline></video>
-    
     <div class="call-controls">
-      <button class="call-btn btn-toggle" id="btnAudio" onclick="toggleAudio()" title="Silenciar/Activar Micrófono">
-        <i class="fa-solid fa-microphone" id="iconAudio"></i>
-      </button>
-      
-      <button class="call-btn btn-hangup" onclick="colgarLlamada()" title="Terminar Llamada">
-        <i class="fa-solid fa-phone-slash"></i>
-      </button>
-
-      <button class="call-btn btn-toggle" id="btnVideo" onclick="toggleVideo()" title="Apagar/Encender Cámara">
-        <i class="fa-solid fa-video" id="iconVideo"></i>
-      </button>
+      <button class="call-btn btn-toggle" id="btnAudio" onclick="toggleAudio()"><i class="fa-solid fa-microphone" id="iconAudio"></i></button>
+      <button class="call-btn btn-hangup" onclick="colgarLlamada()"><i class="fa-solid fa-phone-slash"></i></button>
+      <button class="call-btn btn-toggle" id="btnVideo" onclick="toggleVideo()"><i class="fa-solid fa-video" id="iconVideo"></i></button>
     </div>
   </div>
 
 </div>
 
 <script>
-  let peer;
-  let conn = null;
-  let activePeerId = null;
-  let localStream = null;
-  let typingTimeout;
+  let peer, conn = null, activePeerId = null, localStream = null;
+  let audioEnabled = true, videoEnabled = true;
+  
+  // Variables globales del editor y base de datos simulada
+  let videoBase64Cargado = "";
+  let filtroSeleccionado = "f-normal";
+  let listaVideos = [];
+  let indexVideoComentarios = null;
 
-  let audioEnabled = true;
-  let videoEnabled = true;
-
-  // Colección corregida con codificación Base64 perfecta y válida para evitar imágenes rotas
-  const backupStickers = [
-    { name: 'xd', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik0yNSA0MCBsMTUtMTAgbC0xNS0xMCBNNzUgNDAgbC0xNS0xMCBsMTUtMTAiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgNjUgUTUwIDg1IDcwIDY1IiBzdHJva2U9IiM0NzI1MDAiIHN0cm9rZS13aWR0aD0iNiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+' },
-    { name: 'risa', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjM1IiByeD0iNSIgcnk9IjEwIiBmaWxsPSIjNDcyNTAwIi8+PGVsbGlwc2UgY3g9IjY1IiBjeT0iMzUiIHJ4PSI1IiByeT0iMTAiIGZpbGw9IiM0NzI1MDAiLz48cGF0aCBkPSJNMjUgNjAgUTUwIDkwID7NSA2MCBaIiBmaWxsPSIjNDcyNTAwIi8+QzUgNjAgUTUwIDcwIDY1IDYwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==' },
-    { name: 'meme', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzUiIHI9IjEwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjNDcyNTAwIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjUiIHI9IjQiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjgiIGN5PSIzNSIgcj0iMTQiIGZpbGw9IndoaXRlIiBzdHJva2U9IiM0NzI1MDAiIHN0cm9rZS13aWR0aD0iMyIvPjxjaXJjbGUgY3g9IjY4IiBjeT0iMzUiIHI9IjciIGZpbGw9ImJsYWNrIi8+PHBhdGggZD0iTTMwIDY1IFFVNTAgNTAgNzAgNjUiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
-    { name: 'baile', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik01MCA0NSBMNTAgNzUgTTUwIDU1IEwyNSA0MCBNNTAgNTUgTDc1IDUwIE01MCA3NSBMMzUgOTUgTTUwIDhMMTEgOTUiIHN0cm9rZT0iI0ZGRDE1QyIgc3Ryb2tlLXdpZHRoPSI4IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
-    { name: 'llorar', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjQwIiByeD0iICIgcnk9IjciIGZpbGw9IiM0NzI1MDAiLz48ZWxsaXBzZSBjeD0iNjUiIGN5PSI0MCIgcng9IjQiIHJ5PSI3IiBmaWxsPSIjNDcyNTAwIi8+PHBhdGggZD0iTTzNSA3MCBRNTAgNTUgNjUgNzAiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI1IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNMzUgNDggTDM1IDgwIE02NSA0OCBMNjUgODAiIHN0cm9rZT0iIzVDQUZGRiIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
-    { name: 'ok', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzAwRTY3NiIvPjxwYXRoIGQ9Ik0zMCA1MCBMNDUgNjUgTDcwIDM1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=' },
-    { name: 'gato', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMTUgNDAgTDM1IDE1IEw1MCAzNSBMNjUgMTUgTDg1IDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ZGQTcyNiIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTAiIHI9IjUiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSI1MCIgcj0iNSIgZmlsbD0iYmxhY2siLz48cGF0aCBkPSJNNDUgNjAgTDU1IDYwIEw1MCA2NSBaIiBmaWxsPSIjRkY3MDQzIi8+PHBhdGggZD0iTTQwIDcwIFFVNTAgNzggNjAgNzAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==' },
-    { name: 'perro', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMjAgNDAgTDgwIDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ExODg3RiIvPjxwYXRoIGQ9Ik0xNSAzMCBMMzAgMzAgTDI1IDYwIFoiIGZpbGw9IiM3RDY2MDgiLz4gPHBhdGggZD0iTTg1IDMwIEw3MCAzMCBMNzUgNjAgWiIgZmlsbD0iIzdENjYwOCIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTUiIHI9IjUiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSI1NSIgcj0iIHNm"IGZpbGw9ImJsYWNrIi8+PGVsbGlwc2UgY3g9IjUwIiBjeT0iNjUiIHN4PSI3IiBzeT0iNSIgZmlsbD0iYmxhY2siLz48L3N2Zz4=' },
-    { name: 'love', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik0yMCAzNSBDIDIwIDIwLCA0NSAyMCwgNDUgMzUgQyA0NSAyMCwgNzAgMjAsIDcwIDM1IEMgNzAgNTUsIDQ1IDcwLCA0NSA3MCBDIDQ1IDcwLCAyMCA1NSwgMjAgMzUgWiIgZmlsbD0iI0ZGMTc0NCIvPjwvc3ZnPg==' }
+  // Videos de ejemplo iniciales (Para que no esté vacío)
+  const videosPredeterminados = [
+    { id: 0, author: "WaveChat", caption: "¡Bienvenidos al nuevo WaveTok incorporado! 🎬🔥", url: "https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-from-below-4804-large.mp4", filter: "f-normal", likes: 12, liked: false, comments: [{user: "Fer", text: "Brutal esta actualización!"}] },
+    { id: 1, author: "GamerPro", caption: "Navegando relajado por el código 💻✨", url: "https://assets.mixkit.co/videos/preview/mixkit-typing-on-a-backlit-computer-keyboard-44358-large.mp4", filter: "f-vintage", likes: 45, liked: false, comments: [] }
   ];
 
   window.onload = () => {
     const savedId = localStorage.getItem('wave_my_id');
+    // Cargar Base de datos de videos local
+    listaVideos = JSON.parse(localStorage.getItem('wave_tok_videos')) || videosPredeterminados;
     if (savedId) {
       inicializarPeer(savedId);
     } else {
@@ -457,41 +306,44 @@
 
   function mostrarPantalla(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
+    const target = document.getElementById(screenId);
+    if(target) target.classList.add('active');
+  }
+
+  function cambiarPestana(tipo) {
+    // Apagar videos de WaveTok si salimos de la pestaña
+    document.querySelectorAll('.tiktok-video').forEach(v => v.pause());
+
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('mainNavbar').style.display = (tipo === 'chats' || tipo === 'tiktok') ? 'flex' : 'none';
+
+    if (tipo === 'chats') {
+      document.getElementById('nav-chats').classList.add('active');
+      mostrarPantalla('chatsScreen');
+      renderizarListaChats();
+    } else if (tipo === 'tiktok') {
+      document.getElementById('nav-tiktok').classList.add('active');
+      mostrarPantalla('tiktokScreen');
+      renderizarFeedTikTok();
+    } else if (tipo === 'editor') {
+      mostrarPantalla('editorScreen');
+    }
   }
 
   function guardarNombreDeUsuario() {
     const input = document.getElementById('usernameInput');
     const rawName = input.value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
-
-    if (!rawName) return alert("Por favor, introduce un nombre válido.");
-
+    if (!rawName) return alert("Introduce un nombre.");
     const finalID = 'wave-' + rawName;
     localStorage.setItem('wave_my_id', finalID);
     inicializarPeer(finalID);
   }
 
-  function forzarCambioDeNombre() {
-    localStorage.removeItem('wave_my_id');
-    mostrarPantalla('registerScreen');
-    if (peer) peer.destroy();
-  }
-
   function inicializarPeer(myId) {
-    document.getElementById('myIdFooter').innerText = myId;
-    mostrarPantalla('chatsScreen');
-    renderizarListaChats();
+    document.getElementById('mainNavbar').style.display = 'flex';
+    cambiarPestana('chats');
 
     peer = new Peer(myId);
-    
-    peer.on('error', (err) => {
-      if (err.type === 'unavailable-id') {
-        alert("Ese nombre ya está en uso. Por favor, elige otro.");
-        localStorage.removeItem('wave_my_id');
-        mostrarPantalla('registerScreen');
-      }
-    });
-
     peer.on('connection', (incomingConn) => {
       conn = incomingConn;
       activePeerId = conn.peer;
@@ -500,15 +352,15 @@
     });
 
     peer.on('call', async (call) => {
-      if(confirm("¿Recibir transmisión de " + call.peer.replace('wave-','').toUpperCase() + "?")) {
-        try {
-          localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-          document.getElementById('localVideo').srcObject = localStream;
-          audioEnabled = true;
-          videoEnabled = true;
-          actualizarBotonesControles();
-        } catch(e) {
-          console.log("No se pudo iniciar cámara local, solo recibiendo señal.");
+      if(confirm("¿Recibir llamada de " + call.peer.replace('wave-','').toUpperCase() + "?")) {
+        let transmitirMiCamara = confirm("¿Quieres encender tu cámara y micrófono también?");
+        if (transmitirMiCamara) {
+          try {
+            localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+            document.getElementById('localVideo').srcObject = localStream;
+          } catch(e) { console.log("Sin acceso de cámara."); }
+        } else {
+          localStream = new MediaStream();
         }
         document.getElementById('callOverlay').style.display = 'flex';
         call.answer(localStream);
@@ -517,58 +369,39 @@
     });
   }
 
-  // --- NAVEGACIÓN ---
+  // --- CONTROL DE CHATS ---
   function abrirModalConexion() { document.getElementById('connectModal').style.display = 'flex'; }
   function cerrarModal() { document.getElementById('connectModal').style.display = 'none'; }
   
-  function irAListaChats() {
-    document.getElementById('tenorPanel').style.display = 'none';
-    mostrarPantalla('chatsScreen');
-    activePeerId = null;
-    renderizarListaChats();
-  }
-
   function renderizarListaChats() {
     const list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
     const container = document.getElementById('chatListContainer');
-    container.innerHTML = '';
-    
-    if(list.length === 0) {
-      container.innerHTML = '<p style="text-align:center; padding:40px; color:gray">No tienes chats activos todavía. Usa "Conectar" para agregar uno.</p>';
-      return;
-    }
-
+    container.innerHTML = list.length === 0 ? '<p style="text-align:center; padding:40px; color:gray">No hay chats activos.</p>' : '';
     list.forEach(id => {
       container.innerHTML += `
         <div class="chat-item" onclick="abrirChat('${id}')">
           <div class="avatar">${id.replace('wave-','').substring(0,2).toUpperCase()}</div>
           <div class="chat-info">
             <h4>${id.replace('wave-','').toUpperCase()}</h4>
-            <p class="chat-preview">Historial guardado localmente</p>
+            <p class="chat-preview">Toca para chatear</p>
           </div>
-        </div>
-      `;
+        </div>`;
     });
   }
 
   function abrirChat(id) {
     activePeerId = id;
     document.getElementById('activeChatName').innerText = id.replace('wave-','').toUpperCase();
+    document.getElementById('mainNavbar').style.display = 'none';
     mostrarPantalla('activeChatScreen');
-    
-    if(!conn || conn.peer !== id) {
-      conectarConPeer(id);
-    }
-    
+    if(!conn || conn.peer !== id) conectarConPeer(id);
     cargarHistorial(id);
   }
 
   function conectarConPeer(idManual) {
     let id = idManual || document.getElementById('peerIdInput').value.trim().toLowerCase();
     if(!id) return;
-    
     if(!id.startsWith('wave-')) id = 'wave-' + id;
-
     conn = peer.connect(id);
     vincularEventos();
     registrarChatEnLista(id);
@@ -578,319 +411,195 @@
 
   function vincularEventos() {
     conn.on('data', (data) => {
-      if(data.type === 'typing') {
-        const typingText = activePeerId.replace('wave-','').toUpperCase() + ' está escribiendo...';
-        document.getElementById('typingLabel').innerText = typingText;
-        document.getElementById('typingLabel').style.display = data.status ? 'block' : 'none';
-      } else if(data.type === 'text') {
-        recibirMensaje(data.content, 'text');
-      } else if(data.type === 'image') {
-        recibirMensaje(data.content, 'image');
-      } else if(data.type === 'file') {
-        recibirMensaje(data, 'file');
+      if(data.type === 'text') {
+        const box = document.getElementById('msgBox');
+        box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
+        guardarEnHistorial(activePeerId, 'friend', data.content);
+        box.scrollTop = box.scrollHeight;
       }
     });
   }
 
   function registrarChatEnLista(id) {
     let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
-    if(!list.includes(id)) {
-      list.push(id);
-      localStorage.setItem('wave_chats', JSON.stringify(list));
-    }
-  }
-
-  // --- ENVIAR MENSAJES ---
-  function detectarEscritura() {
-    if(conn && conn.open) {
-      conn.send({ type: 'typing', status: true });
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
-        conn.send({ type: 'typing', status: false });
-      }, 1500);
-    }
+    if(!list.includes(id)) { list.push(id); localStorage.setItem('wave_chats', JSON.stringify(list)); }
   }
 
   function enviarMensaje() {
     const input = document.getElementById('chatInput');
-    const text = input.value.trim();
-    if(!text || !conn) return;
-
-    conn.send({ type: 'text', content: text });
-    
-    const box = document.getElementById('msgBox');
-    box.innerHTML += `<div class="bubble sent">${text}</div>`;
-    guardarEnHistorial(activePeerId, 'me', 'text', text);
-    
+    if(!input.value.trim() || !conn) return;
+    conn.send({ type: 'text', content: input.value.trim() });
+    document.getElementById('msgBox').innerHTML += `<div class="bubble sent">${input.value.trim()}</div>`;
+    guardarEnHistorial(activePeerId, 'me', input.value.trim());
     input.value = '';
-    box.scrollTop = box.scrollHeight;
-    conn.send({ type: 'typing', status: false });
   }
 
-  function recibirMensaje(data, format) {
-    const box = document.getElementById('msgBox');
-    if (format === 'text') {
-      box.innerHTML += `<div class="bubble recv">${data}</div>`;
-      guardarEnHistorial(activePeerId, 'friend', 'text', data);
-    } else if (format === 'image') {
-      box.innerHTML += `<div class="bubble recv"><img src="${data}" alt="Sticker" onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/svgs/regular/image.svg';"></div>`;
-      guardarEnHistorial(activePeerId, 'friend', 'image', data);
-    } else if (format === 'file') {
-      box.innerHTML += `
-        <div class="bubble recv">
-          <p style="font-size:0.8rem; color:var(--text-dim)">Archivo recibido:</p>
-          <a href="${data.content}" download="${data.fileName}" class="connect-btn" style="margin-top:5px; text-decoration:none; display:inline-flex;">
-            <i class="fa-solid fa-download"></i> ${data.fileName}
-          </a>
-        </div>`;
-      guardarEnHistorial(activePeerId, 'friend', 'file', JSON.stringify({ name: data.fileName, data: data.content }));
-    }
-    box.scrollTop = box.scrollHeight;
-  }
-
-  // --- COMPARTIR FOTOS Y ARCHIVOS ---
-  function enviarArchivo(element) {
-    const file = element.files[0];
-    if (!file || !conn) return;
-
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      const fileData = evt.target.result;
-      const box = document.getElementById('msgBox');
-      
-      if (file.type.startsWith('image/')) {
-        conn.send({ type: 'image', content: fileData });
-        box.innerHTML += `<div class="bubble sent"><img src="${fileData}" alt="Imagen"></div>`;
-        guardarEnHistorial(activePeerId, 'me', 'image', fileData);
-      } else {
-        conn.send({ type: 'file', content: fileData, fileName: file.name });
-        box.innerHTML += `
-          <div class="bubble sent">
-            <p style="font-size:0.8rem; opacity:0.7">Archivo enviado:</p>
-            <a href="${fileData}" download="${file.name}" class="connect-btn" style="margin-top:5px; text-decoration:none; display:inline-flex; background:rgba(255,255,255,0.1); color:white;">
-              <i class="fa-solid fa-file"></i> ${file.name}
-            </a>
-          </div>`;
-        guardarEnHistorial(activePeerId, 'me', 'file', JSON.stringify({ name: file.name, data: fileData }));
-      }
-      box.scrollTop = box.scrollHeight;
-    };
-    reader.readAsDataURL(file);
-    element.value = ''; 
-  }
-
-  // --- BUSCADOR ULTRAESTABLE TENOR + NEKOS.BEST ---
-  function toggleStickersPanel() {
-    const panel = document.getElementById('tenorPanel');
-    if (panel.style.display === 'flex') {
-      panel.style.display = 'none';
-    } else {
-      panel.style.display = 'flex';
-      buscarStickers(); 
-    }
-  }
-
-  function detectarEnterSticker(event) {
-    if (event.key === "Enter") {
-      buscarStickers();
-    }
-  }
-
-  async function buscarStickers() {
-    const query = document.getElementById('tenorSearchInput').value.trim() || 'smile';
-    const resultsContainer = document.getElementById('stickerResults');
-    resultsContainer.innerHTML = '<p style="grid-column: span 3; text-align:center; color:gray; padding:20px;">Buscando...</p>';
-
-    // 1. INTENTO PRINCIPAL: Tenor v1
-    try {
-      const tenorUrl = `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=12`;
-      const res = await fetch(tenorUrl);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          resultsContainer.innerHTML = '';
-          data.results.forEach(sticker => {
-            const media = sticker.media && sticker.media[0];
-            const gifUrl = media?.tinygif?.url || media?.gif?.url || sticker.url;
-            if (gifUrl) {
-              resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')" onerror="this.style.display='none'">`;
-            }
-          });
-          return;
-        }
-      }
-    } catch(err) {
-      console.warn("Tenor falló, intentando con API secundaria...");
-    }
-
-    // 2. INTENTO SECUNDARIO: nekos.best
-    try {
-      const fallbackUrl = `https://nekos.best/api/v2/search?q=${encodeURIComponent(query)}&limit=12`;
-      const res = await fetch(fallbackUrl);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          resultsContainer.innerHTML = '';
-          data.results.forEach(item => {
-            const gifUrl = item.url;
-            if (gifUrl) {
-              resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')" onerror="this.style.display='none'">`;
-            }
-          });
-          return;
-        }
-      }
-    } catch(err) {
-      console.warn("Fallo general de red, cargando stickers internos...");
-    }
-
-    // 3. INTENTO SALVAVIDAS: Base64 local (Solución definitiva y limpia)
-    resultsContainer.innerHTML = '';
-    const queryClean = query.toLowerCase();
-    const filtrados = backupStickers.filter(s => s.name.includes(queryClean) || queryClean === 'smile' || queryClean === 'risas' || queryClean === 'xd');
-    const stickersAMostrar = filtrados.length > 0 ? filtrados : backupStickers;
-
-    stickersAMostrar.forEach(st => {
-      // Uso de comillas dobles para evitar conflictos de parseo en el HTML y renderizado de Base64 validado
-      resultsContainer.innerHTML += `<img src="${st.url}" onclick="enviarSticker('${st.url}')" title="${st.name}" alt="${st.name}">`;
-    });
-  }
-
-  function enviarSticker(url) {
-    if(!conn) return;
-    conn.send({ type: 'image', content: url });
-    
-    const box = document.getElementById('msgBox');
-    box.innerHTML += `<div class="bubble sent"><img src="${url}" alt="Sticker" onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/svgs/regular/image.svg';"></div>`;
-    guardarEnHistorial(activePeerId, 'me', 'image', url);
-    
-    document.getElementById('tenorPanel').style.display = 'none'; 
-    box.scrollTop = box.scrollHeight;
-  }
-
-  // --- HISTORIAL ---
-  function guardarEnHistorial(id, sender, type, text) {
+  function guardarEnHistorial(id, sender, text) {
     const key = `hist_${id}`;
     let fillHist = JSON.parse(localStorage.getItem(key) || '[]');
-    fillHist.push({ sender, type, text });
+    fillHist.push({ sender, type: 'text', text });
     localStorage.setItem(key, JSON.stringify(fillHist));
   }
 
   function cargarHistorial(id) {
-    const key = `hist_${id}`;
-    const hist = JSON.parse(localStorage.getItem(key) || '[]');
+    const hist = JSON.parse(localStorage.getItem(`hist_${id}`) || '[]');
     const box = document.getElementById('msgBox');
     box.innerHTML = '';
-    
-    hist.forEach(m => {
-      if (m.type === 'text') {
-        box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`;
-      } else if (m.type === 'image') {
-        box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}"><img src="${m.text}" alt="Sticker" onerror="this.onerror=null; this.src='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/svgs/regular/image.svg';"></div>`;
-      } else if (m.type === 'file') {
-        const fileObj = JSON.parse(m.text);
-        box.innerHTML += `
-          <div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">
-            <p style="font-size:0.8rem; opacity:0.7">Archivo guardado:</p>
-            <a href="${fileObj.data}" download="${fileObj.name}" class="connect-btn" style="margin-top:5px; text-decoration:none; display:inline-flex; ${m.sender === 'me' ? 'background:rgba(255,255,255,0.1); color:white;' : ''}">
-              <i class="fa-solid fa-download"></i> ${fileObj.name}
-            </a>
-          </div>`;
-      }
-    });
+    hist.forEach(m => box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`);
     box.scrollTop = box.scrollHeight;
   }
 
-  function confirmarBorrarHistorial() {
-    if(confirm("¿Borrar historial de este chat? Tu amigo seguirá teniendo su copia.")) {
-      localStorage.removeItem(`hist_${activePeerId}`);
-      cargarHistorial(activePeerId);
-    }
+  // --- MOTOR DE TIKTOK (WAVETOK) ---
+  function renderizerFeedTikTok() {
+    const container = document.getElementById('tiktokFeedContainer');
+    container.innerHTML = '';
+
+    listaVideos.forEach((video, idx) => {
+      container.innerHTML += `
+        <div class="tiktok-post">
+          <video class="tiktok-video ${video.filter}" src="${video.url}" loop onclick="togglePlayVideo(this)"></video>
+          <div class="tiktok-actions">
+            <button class="action-btn ${video.liked ? 'liked' : ''}" onclick="darLikeVideo(${idx}, this)">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+            <span id="likes-count-${idx}">${video.likes}</span>
+            <button class="action-btn" onclick="abrirComentarios(${idx})">
+              <i class="fa-solid fa-comment"></i>
+            </button>
+            <span>${video.comments.length}</span>
+          </div>
+          <div class="tiktok-meta">
+            <h4>@${video.author}</h4>
+            <p>${video.caption}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    // Auto reproducir el primer video visible
+    setTimeout(() => {
+      const primerVideo = container.querySelector('.tiktok-video');
+      if (primerVideo) primerVideo.play().catch(() => {});
+    }, 200);
   }
 
-  // --- VIDEOLLAMADA / COMPARTIR PANTALLA ---
-  async function iniciarLlamada(compartirPantalla = false) {
-    try {
-      audioEnabled = true;
-      videoEnabled = true;
+  function togglePlayVideo(v) { v.paused ? v.play() : v.pause(); }
 
-      if (compartirPantalla) {
-        localStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-      } else {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-      }
-      
+  function darLikeVideo(idx, boton) {
+    listaVideos[idx].liked = !listaVideos[idx].liked;
+    listaVideos[idx].likes += listaVideos[idx].liked ? 1 : -1;
+    boton.classList.toggle('liked');
+    document.getElementById(`likes-count-${idx}`).innerText = listaVideos[idx].likes;
+    localStorage.setItem('wave_tok_videos', JSON.stringify(listaVideos));
+  }
+
+  // --- SECCIÓN COMENTARIOS TIKTOK ---
+  function abrirComentarios(idx) {
+    indexVideoComentarios = idx;
+    const panel = document.getElementById('commentsPanel');
+    panel.classList.add('open');
+    renderizarComentariosVideo();
+  }
+
+  function cerrarComentarios() { document.getElementById('commentsPanel').classList.remove('open'); }
+
+  function renderizarComentariosVideo() {
+    const listContainer = document.getElementById('commentsList');
+    listContainer.innerHTML = '';
+    const comentarios = listaVideos[indexVideoComentarios].comments;
+    comentarios.forEach(c => {
+      listContainer.innerHTML += `
+        <div class="comment-item">
+          <span class="comment-user">@${c.user}:</span>${c.text}
+        </div>`;
+    });
+  }
+
+  function publicarComentario() {
+    const input = document.getElementById('commentInput');
+    if(!input.value.trim() || indexVideoComentarios === null) return;
+    
+    const miNombre = localStorage.getItem('wave_my_id').replace('wave-','');
+    listaVideos[indexVideoComentarios].comments.push({ user: miNombre, text: input.value.trim() });
+    
+    localStorage.setItem('wave_tok_videos', JSON.stringify(listaVideos));
+    input.value = '';
+    renderizarComentariosVideo();
+    renderizerFeedTikTok();
+  }
+
+  // --- MINI EDITOR DE VIDEOS CONTROLES ---
+  function cargarVideoEnEditor(element) {
+    const file = element.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      videoBase64Cargado = e.target.result;
+      const preview = document.getElementById('editorPreview');
+      preview.src = videoBase64Cargado;
+      preview.play();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function aplicarFiltro(claseFiltro, elementoThumb) {
+    document.querySelectorAll('.filter-thumb').forEach(t => t.classList.remove('selected'));
+    elementoThumb.classList.add('selected');
+    
+    filtroSeleccionado = claseFiltro;
+    const preview = document.getElementById('editorPreview');
+    preview.className = ''; 
+    preview.classList.add(claseFiltro);
+  }
+
+  function actualizarTiempoEditor() {
+    const startRange = document.getElementById('trimStart').value;
+    document.getElementById('trimLabel').innerText = `${startRange}s`;
+    const preview = document.getElementById('editorPreview');
+    preview.currentTime = startRange; // Salta al segundo elegido de inmediato
+  }
+
+  function publicarVideoEditado() {
+    const caption = document.getElementById('videoCaptionInput').value.trim() || "Vídeo editado en WaveChat";
+    if(!videoBase64Cargado) return alert("Por favor, selecciona primero un archivo de vídeo.");
+
+    const miNombre = localStorage.getItem('wave_my_id').replace('wave-','').toUpperCase();
+    const nuevoVideo = {
+      id: listaVideos.length,
+      author: miNombre,
+      caption: caption,
+      url: videoBase64Cargado, // Guardamos el video con su filtro asignado
+      filter: filtroSeleccionado,
+      likes: 0,
+      liked: false,
+      comments: []
+    };
+
+    listaVideos.unshift(nuevoVideo); // Lo pone de primero en el feed
+    localStorage.setItem('wave_tok_videos', JSON.stringify(listaVideos));
+    
+    // Resetear campos del editor
+    document.getElementById('videoCaptionInput').value = '';
+    videoBase64Cargado = "";
+    
+    alert("¡Vídeo publicado con éxito! 🎉");
+    cambiarPestana('tiktok');
+  }
+
+  // --- CONTROLES DE LLAMADAS ---
+  async function iniciarLlamada(pantalla = false) {
+    try {
+      localStream = pantalla ? await navigator.mediaDevices.getDisplayMedia({video:true, audio:true}) : await navigator.mediaDevices.getUserMedia({video:true, audio:true});
       document.getElementById('callOverlay').style.display = 'flex';
       document.getElementById('localVideo').srcObject = localStream;
-      
-      actualizarBotonesControles();
-
-      const call = peer.call(activePeerId, localStream);
-      call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
-      
-      if(compartirPantalla) {
-        localStream.getVideoTracks()[0].onended = () => colgarLlamada();
-      }
-    } catch(err) {
-      console.error("Error al iniciar stream: ", err);
-      alert("No se pudo iniciar la transmisión.");
-    }
+      peer.call(activePeerId, localStream).on('stream', (r) => document.getElementById('remoteVideo').srcObject = r);
+    } catch(e) { alert("Error de multimedia."); }
   }
 
-  function colgarLlamada() {
-    if(localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-    }
-    location.reload(); 
-  }
-
-  // --- FUNCIONES PARA SILENCIAR AUDIO / APAGAR VIDEO ---
-  function toggleAudio() {
-    if (localStream) {
-      const audioTracks = localStream.getAudioTracks();
-      if (audioTracks.length > 0) {
-        audioEnabled = !audioEnabled;
-        audioTracks[0].enabled = audioEnabled;
-        actualizarBotonesControles();
-      }
-    }
-  }
-
-  function toggleVideo() {
-    if (localStream) {
-      const videoTracks = localStream.getVideoTracks();
-      if (videoTracks.length > 0) {
-        videoEnabled = !videoEnabled;
-        videoTracks[0].enabled = videoEnabled;
-        actualizarBotonesControles();
-      }
-    }
-  }
-
-  function actualizarBotonesControles() {
-    const btnAudio = document.getElementById('btnAudio');
-    const iconAudio = document.getElementById('iconAudio');
-    const btnVideo = document.getElementById('btnVideo');
-    const iconVideo = document.getElementById('iconVideo');
-
-    // Estado del Micrófono
-    if (audioEnabled) {
-      btnAudio.classList.remove('disabled');
-      iconAudio.className = 'fa-solid fa-microphone';
-    } else {
-      btnAudio.classList.add('disabled');
-      iconAudio.className = 'fa-solid fa-microphone-slash';
-    }
-
-    // Estado de la Cámara
-    if (videoEnabled) {
-      btnVideo.classList.remove('disabled');
-      iconVideo.className = 'fa-solid fa-video';
-    } else {
-      btnVideo.classList.add('disabled');
-      iconVideo.className = 'fa-solid fa-video-slash';
-    }
-  }
+  function colgarLlamada() { if(localStream) localStream.getTracks().forEach(t => t.stop()); location.reload(); }
+  function toggleAudio() { audioEnabled = !audioEnabled; localStream.getAudioTracks()[0].enabled = audioEnabled; document.getElementById('btnAudio').classList.toggle('disabled', !audioEnabled); }
+  function toggleVideo() { videoEnabled = !videoEnabled; localStream.getVideoTracks()[0].enabled = videoEnabled; document.getElementById('btnVideo').classList.toggle('disabled', !videoEnabled); }
 </script>
 
 </body>
