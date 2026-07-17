@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Premium Edition</title>
+  <title>WaveTok & WaveChat - Ultra Edition</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -19,6 +19,7 @@
       --bubble-recv: #1f2c34;
       --danger: #ff1744;
       --streak-color: #ff9100;
+      --fav-color: #ffeb3b;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
@@ -31,7 +32,6 @@
       overflow: hidden;
     }
 
-    /* BARRA LATERAL */
     .sidebar {
       width: 260px;
       background-color: var(--bg-sidebar);
@@ -90,7 +90,6 @@
       background: black;
     }
 
-    /* PANTALLAS */
     .screen { display: none; width: 100%; height: 100%; flex-direction: column; background: var(--bg-dark); }
     .screen.active { display: flex; }
 
@@ -103,19 +102,6 @@
       border-bottom: 1px solid rgba(255,255,255,0.05);
     }
 
-    .search-wrapper { position: relative; width: 300px; }
-    .search-wrapper input {
-      width: 100%;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.1);
-      padding: 8px 12px 8px 35px;
-      border-radius: 20px;
-      color: white;
-      outline: none;
-    }
-    .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
-
-    /* REPRODUCTOR CORREGIDO PARA QUE NO SE COMA LOS BOTONES */
     .tok-feed-container {
       flex: 1;
       display: flex;
@@ -173,6 +159,7 @@
       cursor: pointer;
     }
     .circle-action.liked { color: var(--danger); }
+    .circle-action.favorited { color: var(--fav-color); }
     .tok-actions span { font-size: 0.8rem; color: white; margin-top: -10px; text-shadow: 1px 1px 3px black; }
 
     .tok-meta {
@@ -197,6 +184,21 @@
     .arrow-left { left: 20px; }
     .arrow-right { right: 20px; }
 
+    /* ANIMACIÓN LIKE CORAZÓN FLOTANTE */
+    .heart-pulse-overlay {
+      position: absolute;
+      font-size: 5rem;
+      color: var(--danger);
+      animation: heartExplode 0.6s ease-out forwards;
+      pointer-events: none;
+      z-index: 500;
+    }
+    @keyframes heartExplode {
+      0% { transform: scale(0); opacity: 0; }
+      50% { transform: scale(1.2); opacity: 0.9; }
+      100% { transform: scale(1); opacity: 0; }
+    }
+
     /* CHATS */
     .chat-layout { display: flex; flex: 1; height: 100%; }
     .chats-master {
@@ -210,16 +212,25 @@
     
     .chat-item {
       display: flex; align-items: center; gap: 12px; padding: 15px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; position: relative;
     }
     .chat-item:hover, .chat-item.active { background: rgba(255,255,255,0.03); }
     
+    .avatar-wrapper { position: relative; }
     .avatar {
       width: 40px; height: 40px; border-radius: 50%; background: #233138;
       display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent);
     }
+    
+    /* INDICADOR ONLINE */
+    .status-dot {
+      position: absolute; bottom: 0; right: 0;
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid var(--bg-sidebar);
+      background-color: #555;
+    }
+    .status-dot.online { background-color: var(--accent); }
 
-    /* CONTADOR RACHAS */
     .streak-badge {
       background: rgba(255, 145, 0, 0.15);
       color: var(--streak-color);
@@ -252,19 +263,24 @@
     }
     .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
 
-    /* PERFIL */
+    /* PERFIL Y SUB-PESTACAS */
     .profile-container { padding: 40px; display: flex; flex-direction: column; gap: 30px; overflow-y: auto; }
     .profile-header-box { display: flex; align-items: center; gap: 25px; }
     .profile-pic-wrapper { position: relative; width: 110px; height: 110px; }
     .p-avatar { width: 100%; height: 100%; border-radius: 50%; background: #054735; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; border: 3px solid var(--accent); background-size: cover; background-position: center; }
     .profile-pic-wrapper label { position: absolute; bottom: 0; right: 0; background: var(--accent); color: black; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     
+    .profile-tabs { display: flex; gap: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-top: 10px; }
+    .p-tab { padding: 10px 5px; color: var(--text-dim); cursor: pointer; font-weight: bold; }
+    .p-tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+
     .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
     .grid-card { position: relative; aspect-ratio: 9/16; background: black; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
     .grid-card video { width: 100%; height: 100%; object-fit: cover; }
     .del-btn { position: absolute; top: 8px; right: 8px; background: var(--danger); color: white; border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; z-index: 5; }
+    .pin-btn { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; z-index: 5; }
+    .pin-btn.pinned { color: var(--accent); background: var(--bg-sidebar); border: 1px solid var(--accent); }
 
-    /* MODALES */
     .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; }
     .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 360px; text-align: center; }
     .modal-box input { width:100%; padding:12px; margin:15px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; text-align:center; outline:none; }
@@ -346,7 +362,10 @@
           </div>
         </div>
         <div>
-          <h3 style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Mis Publicaciones</h3>
+          <div class="profile-tabs">
+            <div class="p-tab active" id="tab-v-posts" onclick="conmutarFiltroPerfil('posts')">Mis Publicaciones</div>
+            <div class="p-tab" id="tab-v-favs" onclick="conmutarFiltroPerfil('favs')">⭐️ Guardados</div>
+          </div>
           <div class="my-grid" id="gridMisVideosPublicados"></div>
         </div>
       </div>
@@ -390,8 +409,8 @@
   let cacheVideoBase64 = "";
   let masterVideoArray = [];
   let currentFeedIndex = 0;
+  let perfilTabActiva = "posts"; 
 
-  // Inicialización de la Base de Datos con persistencia blindada
   function abrirManejadorDB(callback) {
     let peticion = indexedDB.open("WaveTokStorageMaster", 1);
     peticion.onupgradeneeded = function(e) {
@@ -404,9 +423,7 @@
       dbIndexedStorage = e.target.result;
       if(callback) callback();
     };
-    peticion.onerror = function() { 
-      if(callback) callback(); 
-    };
+    peticion.onerror = function() { if(callback) callback(); };
   }
 
   window.onload = () => {
@@ -422,11 +439,10 @@
     });
   };
 
-  // Carga estable desde disco para evitar pérdidas al actualizar
   function cargarVideosDesdeDisco(callback) {
     let videosPorDefecto = [
-      { id: 101, author: "WAVETOK", caption: "¡Bienvenidos al feed estable! 🎬🔥", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 1024, liked: false },
-      { id: 102, author: "SAMPLE", caption: "Prueba de scroll vertical interactivo 🐰🍃", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", likes: 582, liked: false }
+      { id: 101, author: "WAVETOK", caption: "¡Bienvenidos al feed unificado! 🎬🔥", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 1024, liked: false, pinned: false },
+      { id: 102, author: "YEIBLOX", caption: "Prueba de scroll e interfaz limpia 🐰🍃", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", likes: 582, liked: false, pinned: false }
     ];
 
     if (!dbIndexedStorage) {
@@ -441,18 +457,16 @@
 
     solicitud.onsuccess = function() {
       if (solicitud.result && solicitud.result.length > 0) {
-        let deUsuario = [...solicitud.result].reverse();
+        // MEJORA: Clasificar los videos fijados del usuario arriba del todo
+        let deUsuario = [...solicitud.result];
+        deUsuario.sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
         masterVideoArray = deUsuario.concat(videosPorDefecto);
       } else {
         masterVideoArray = videosPorDefecto;
       }
       if(callback) callback();
     };
-
-    solicitud.onerror = function() {
-      masterVideoArray = videosPorDefecto;
-      if(callback) callback();
-    };
+    solicitud.onerror = function() { masterVideoArray = videosPorDefecto; if(callback) callback(); };
   }
 
   function registrarNodoCliente() {
@@ -468,9 +482,7 @@
   function levantarInstanciaPeer(idMio) {
     peerInstance = new Peer(idMio);
     
-    peerInstance.on('open', () => { 
-      renderizarFeedPrincipalVideos(); 
-    });
+    peerInstance.on('open', () => { renderizarFeedPrincipalVideos(); setInterval(validarCanalesActivosOnline, 4000); });
 
     peerInstance.on('connection', (incomingConn) => {
       conn = incomingConn;
@@ -480,6 +492,7 @@
       actualizarRacha(currentTargetPeerId); 
       enlazarEscuchadoresDatos();
       despacharMensajesOffline(currentTargetPeerId);
+      renderizarListaChats();
     });
   }
 
@@ -497,13 +510,21 @@
     conn.on('open', () => {
       actualizarRacha(target);
       despacharMensajesOffline(target);
+      renderizarListaChats();
     });
+
+    conn.on('close', () => { renderizarListaChats(); });
+    conn.on('error', () => { renderizarListaChats(); });
 
     enlazarEscuchadoresDatos();
     if(!idDirecto) desplegarChatIndividual(target);
   }
 
-  // Escuchador de datos corregido para Incógnito y Videos Compartidos
+  function validarCanalesActivosOnline() {
+    // Si la conexión global actual está abierta, actualiza dinámicamente
+    if(conn && !conn.open) { renderizarListaChats(); }
+  }
+
   function enlazarEscuchadoresDatos() {
     if (!conn) return;
     conn.on('data', (data) => {
@@ -533,7 +554,6 @@
     });
   }
 
-  // Envío corregido: Guarda la variable antes de limpiar el input
   function enviarMensaje() {
     const input = document.getElementById('chatInput');
     const mensaje = input.value.trim();
@@ -554,14 +574,10 @@
     box.scrollTop = box.scrollHeight;
   }
 
-  // Compartición Offline vía Colas Locales
   function compartirVideoPorChat(idx) {
     let video = masterVideoArray[idx];
     let listAmigos = JSON.parse(localStorage.getItem('wave_chats') || '[]');
-    
-    if (listAmigos.length === 0) {
-      return alert("Vincula a un amigo en Chats privados primero.");
-    }
+    if (listAmigos.length === 0) return alert("Vincula a un amigo en Chats privados primero.");
     
     let targetFriend = currentTargetPeerId || listAmigos[0];
     let payloadStr = `SHARE_VD_IDX:${video.id}:${video.caption}`;
@@ -592,7 +608,6 @@
     }
   }
 
-  // Sistema de Rachas de TikTok
   function actualizarRacha(pId) {
     let rachasMap = JSON.parse(localStorage.getItem('wt_rachas_data') || '{}');
     let hoy = new Date().toDateString();
@@ -618,6 +633,31 @@
     return rachasMap[pId] ? rachasMap[pId].count : 0;
   }
 
+  // MEJORA: Sistema de Favoritos Guardados
+  function conmutarFavoritoVideo(idx, node) {
+    let video = masterVideoArray[idx];
+    let listaFavs = JSON.parse(localStorage.getItem('wt_favoritos_ids') || '[]');
+    
+    if (listaFavs.includes(video.id)) {
+      listaFavs = listaFavs.filter(id => id !== video.id);
+      node.classList.remove('favorited');
+    } else {
+      listaFavs.push(video.id);
+      node.classList.add('favorited');
+    }
+    localStorage.setItem('wt_favoritos_ids', JSON.stringify(listaFavs));
+  }
+
+  // MEJORA: Doble Toque en Pantalla (Like Rápido)
+  function detectarDobleToqueLike(idx, elementoPost) {
+    reaccionarLikeVideo(idx, elementoPost.querySelector('.like-btn-nodo'));
+    
+    let corazonFlotante = document.createElement('i');
+    corazonFlotante.className = "fa-solid fa-heart heart-pulse-overlay";
+    elementoPost.appendChild(corazonFlotante);
+    setTimeout(() => corazonFlotante.remove(), 600);
+  }
+
   function saltarAVideoDesdeLink(vId) {
     let indexFound = masterVideoArray.findIndex(v => v.id === vId);
     if(indexFound !== -1) {
@@ -639,6 +679,13 @@
     if(pantalla === 'tok') reproducirVideoIndiceActual();
     else if(pantalla === 'chat') renderizarListaChats();
     else if(pantalla === 'profile') renderizarMosaicoVideosPerfil();
+  }
+
+  function conmutarFiltroPerfil(tab) {
+    perfilTabActiva = tab;
+    document.querySelectorAll('.p-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(`tab-v-${tab}`).classList.add('active');
+    renderizarMosaicoVideosPerfil();
   }
 
   function desplegarChatIndividual(id) {
@@ -684,13 +731,21 @@
     list.forEach(id => {
       let racha = obtenerContadorRacha(id);
       let rachaHtml = racha > 0 ? `<div class="streak-badge"><i class="fa-solid fa-fire"></i> ${racha}</div>` : '';
+      
+      // MEJORA: Evaluar estado Online
+      let estaOnline = (conn && conn.peer === id && conn.open);
+      let claseOnline = estaOnline ? 'online' : '';
+
       container.innerHTML += `
         <div class="chat-item" onclick="desplegarChatIndividual('${id}')">
-          <div class="avatar">${id.replace('wave-','').substring(0,2).toUpperCase()}</div>
+          <div class="avatar-wrapper">
+            <div class="avatar">${id.replace('wave-','').substring(0,2).toUpperCase()}</div>
+            <div class="status-dot ${claseOnline}"></div>
+          </div>
           <div style="flex:1; display:flex; justify-content:space-between; align-items:center;">
             <div style="margin-left: 10px;">
               <h5 style="color:white;">${id.replace('wave-','').toUpperCase()}</h5>
-              <p style="color:var(--text-dim); font-size:0.8rem;">Click para chatear</p>
+              <p style="color:var(--text-dim); font-size:0.8rem;">${estaOnline ? 'Conectado ahora' : 'Desconectado'}</p>
             </div>
             ${rachaHtml}
           </div>
@@ -706,17 +761,17 @@
   function renderizarFeedPrincipalVideos() {
     const container = document.getElementById('tokFeedIterator');
     container.innerHTML = '';
-    if(masterVideoArray.length === 0) {
-      container.innerHTML = `<div style="color:white; margin:auto;">No hay videos en el feed.</div>`;
-      return;
-    }
+    let favoritos = JSON.parse(localStorage.getItem('wt_favoritos_ids') || '[]');
+
     masterVideoArray.forEach((vid, idx) => {
+      let esFav = favoritos.includes(vid.id) ? 'favorited' : '';
       container.innerHTML += `
-        <div class="tok-post">
+        <div class="tok-post" ondblclick="detectarDobleToqueLike(${idx}, this)">
           <video class="tok-video" src="${vid.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
           <div class="tok-actions">
-            <div class="circle-action ${vid.liked?'liked':''}" onclick="reaccionarLikeVideo(${idx}, this)"><i class="fa-solid fa-heart"></i></div>
+            <div class="circle-action like-btn-nodo ${vid.liked?'liked':''}" onclick="reaccionarLikeVideo(${idx}, this)"><i class="fa-solid fa-heart"></i></div>
             <span>${vid.likes}</span>
+            <div class="circle-action ${esFav}" onclick="conmutarFavoritoVideo(${idx}, this)"><i class="fa-solid fa-star"></i></div>
             <div class="circle-action" style="color:var(--accent);" onclick="compartirVideoPorChat(${idx})"><i class="fa-solid fa-share"></i></div>
           </div>
           <div class="tok-meta">
@@ -752,9 +807,7 @@
 
   function reproducirVideoIndiceActual() {
     const vids = document.querySelectorAll('.tok-video');
-    if(vids[currentFeedIndex]) {
-      vids[currentFeedIndex].play().catch(()=>{});
-    }
+    if(vids[currentFeedIndex]) vids[currentFeedIndex].play().catch(()=>{});
   }
 
   function sincronizarAtributosPerfilEstatico() {
@@ -782,31 +835,68 @@
   function renderizarMosaicoVideosPerfil() {
     const grid = document.getElementById('gridMisVideosPublicados');
     grid.innerHTML = '';
-    const miFirma = localStorage.getItem('wt_session_peer_id') ? localStorage.getItem('wt_session_peer_id').replace('wave-','').toUpperCase() : "ANÓNIMO";
-    let filtrados = masterVideoArray.filter(v => v.author === miFirma);
-    if(filtrados.length === 0) {
-      grid.innerHTML = '<p style="color:gray; font-size:0.85rem; padding:15px;">No has subido clips de video todavía.</p>';
-      return;
+    
+    if (perfilTabActiva === 'posts') {
+      const miFirma = localStorage.getItem('wt_session_peer_id') ? localStorage.getItem('wt_session_peer_id').replace('wave-','').toUpperCase() : "ANÓNIMO";
+      let filtrados = masterVideoArray.filter(v => v.author === miFirma);
+      if(filtrados.length === 0) {
+        grid.innerHTML = '<p style="color:gray; font-size:0.85rem; padding:15px;">No has subido clips todavía.</p>';
+        return;
+      }
+      filtrados.forEach(v => {
+        let orig = masterVideoArray.findIndex(m => m.id === v.id);
+        let pinClase = v.pinned ? 'pinned' : '';
+        grid.innerHTML += `
+          <div class="grid-card">
+            <button class="pin-btn ${pinClase}" onclick="event.stopPropagation(); conmutarPinVideoDB(${v.id})"><i class="fa-solid fa-thumbtack"></i></button>
+            <button class="del-btn" onclick="event.stopPropagation(); destruirVideoEspecifico(${v.id})"><i class="fa-solid fa-trash"></i></button>
+            <video src="${v.url}" muted onclick="navegarHacia('tok'); enfocarVideoSpecificoFeed(${orig});"></video>
+          </div>`;
+      });
+    } else {
+      // Pestaña de guardados
+      let favoritosIds = JSON.parse(localStorage.getItem('wt_favoritos_ids') || '[]');
+      let filtrados = masterVideoArray.filter(v => favoritosIds.includes(v.id));
+      if(filtrados.length === 0) {
+        grid.innerHTML = '<p style="color:gray; font-size:0.85rem; padding:15px;">No tienes videos guardados.</p>';
+        return;
+      }
+      filtrados.forEach(v => {
+        let orig = masterVideoArray.findIndex(m => m.id === v.id);
+        grid.innerHTML += `
+          <div class="grid-card">
+            <video src="${v.url}" muted onclick="navegarHacia('tok'); enfocarVideoSpecificoFeed(${orig});"></video>
+          </div>`;
+      });
     }
-    filtrados.forEach(v => {
-      let orig = masterVideoArray.findIndex(m => m.id === v.id);
-      grid.innerHTML += `
-        <div class="grid-card">
-          <button class="del-btn" onclick="event.stopPropagation(); destruirVideoEspecifico(${v.id})"><i class="fa-solid fa-trash"></i></button>
-          <video src="${v.url}" muted onclick="navegarHacia('tok'); enfocarVideoSpecificoFeed(${orig});"></video>
-        </div>`;
-    });
+  }
+
+  // MEJORA: Alternar el estado Fijado (Pin) en IndexedDB
+  function conmutarPinVideoDB(id) {
+    let tx = dbIndexedStorage.transaction(["videos"], "readwrite");
+    let almacen = tx.objectStore("videos");
+    almacen.get(id).onsuccess = function(e) {
+      let data = e.target.result;
+      if(data) {
+        data.pinned = !data.pinned;
+        almacen.put(data);
+      }
+    };
+    tx.oncomplete = () => {
+      cargarVideosDesdeDisco(() => { renderizarMosaicoVideosPerfil(); });
+    };
   }
 
   function destruirVideoEspecifico(id) {
     if(confirm("¿Eliminar publicación permanentemente?")) {
-      let tx = dbIndexedStorage.transaction(["videos"], "readwrite");
+      let tx = dbIndexedStorage.transaction(["videos"], "delete");
       tx.objectStore("videos").delete(id);
       tx.oncomplete = () => { cargarVideosDesdeDisco(() => { renderizarMosaicoVideosPerfil(); }); };
     }
   }
 
   function reaccionarLikeVideo(idx, node) {
+    if(!node) return;
     masterVideoArray[idx].liked = !masterVideoArray[idx].liked;
     masterVideoArray[idx].likes += masterVideoArray[idx].liked ? 1 : -1;
     node.classList.toggle('liked');
@@ -823,28 +913,21 @@
     r.readAsDataURL(input.files[0]);
   }
 
-  // Guardado Seguro en Base de Datos (Persistencia Real al actualizar)
   function guardarVideoEditadoDB() {
     const caption = document.getElementById('inputVideoCaption').value.trim() || "Clip de WaveTok";
     if(!cacheVideoBase64) return alert("Selecciona un archivo multimedia.");
     const miFirma = localStorage.getItem('wt_session_peer_id') ? localStorage.getItem('wt_session_peer_id').replace('wave-','').toUpperCase() : "ANÓNIMO";
     
-    // Generamos una ID numérica única basada en la estampa de tiempo
-    const pack = { id: Date.now(), author: miFirma, caption: caption, url: cacheVideoBase64, likes: 0, liked: false };
+    const pack = { id: Date.now(), author: miFirma, caption: caption, url: cacheVideoBase64, likes: 0, liked: false, pinned: false };
 
     let tx = dbIndexedStorage.transaction(["videos"], "readwrite");
-    let almacen = tx.objectStore("videos");
-    almacen.add(pack);
+    tx.objectStore("videos").add(pack);
 
     tx.oncomplete = () => {
       document.getElementById('inputVideoCaption').value = '';
       cacheVideoBase64 = "";
       cerrarCapaModal('modalSubirVideo');
-      // Recarga el feed leyendo directamente la base de datos de disco
-      cargarVideosDesdeDisco(() => { 
-        navegarHacia('tok'); 
-        renderizarFeedPrincipalVideos(); 
-      });
+      cargarVideosDesdeDisco(() => { navegarHacia('tok'); renderizarFeedPrincipalVideos(); });
     };
   }
 
