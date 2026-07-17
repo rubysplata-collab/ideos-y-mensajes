@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Versión Final Estable</title>
+  <title>WaveTok & WaveChat - Versión Final Estable con Audio</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -39,7 +39,7 @@
     .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; height: calc(100vh - 70px); overflow: hidden; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; }
     .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
-    .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; cursor: pointer; }
     
     .tok-actions { position: absolute; right: 25px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 999; }
     .circle-action { background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
@@ -72,7 +72,6 @@
     .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
     .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
 
-    /* LÍNEA DE CÓDIGO INFERIOR */
     .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.02); }
     .my-code-footer b { color: var(--accent); letter-spacing: 0.5px; }
 
@@ -292,7 +291,7 @@
             miStreamLocal = stream;
             document.getElementById('panelLlamadaActiva').style.display = 'flex';
             document.getElementById('localStreamVideo').srcObject = stream;
-            document.getElementById('txtEstadoLlamada').innerText = "Conectado";
+            document.getElementById('txtEstadoLlamada').innerText = "Conconnected";
             incomingCall.answer(stream);
             llamadaActualWebRTC = incomingCall;
             incomingCall.on('stream', (remoteStream) => {
@@ -469,13 +468,23 @@
       }
     }
 
+    /* MANEJO DE AUDIO DINÁMICO AL HACER CLIC */
+    function controlarReproduccionYAudio(videoElement) {
+      if (videoElement.paused) {
+        videoElement.muted = false; // Quita el silencio al dar play
+        videoElement.play().catch(()=>{});
+      } else {
+        videoElement.pause();
+      }
+    }
+
     function renderizarFeedPrincipalVideos() {
       const container = document.getElementById('tokFeedIterator');
       container.innerHTML = '';
       masterVideoArray.forEach((vid, idx) => {
         container.innerHTML += `
           <div class="tok-post">
-            <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline onclick="this.paused?this.play():this.pause()"></video>
+            <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline onclick="controlarReproduccionYAudio(this)"></video>
             <div class="tok-actions">
               <div class="circle-action" onclick="reaccionarLikeVideoFirestore('${vid.id}')"><i class="fa-solid fa-heart"></i></div>
               <span>${vid.likes}</span>
@@ -511,12 +520,19 @@
       const wrapper = document.getElementById('tokFeedIterator');
       let target = currentFeedIndex + dir;
       if (target >= 0 && target < masterVideoArray.length) {
-        document.querySelectorAll('.tok-video').forEach(v => v.pause());
+        document.querySelectorAll('.tok-video').forEach(v => { v.pause(); v.muted = true; });
         cerrarCajonComentarios();
         currentFeedIndex = target;
         wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
         let activeVideo = wrapper.children[currentFeedIndex].querySelector('video');
-        if(activeVideo) activeVideo.play().catch(()=>{});
+        if(activeVideo) {
+          activeVideo.muted = false; // El nuevo video cargado sonará si el navegador lo permite
+          activeVideo.play().catch(()=>{
+            // Si el navegador bloquea el autoplay con audio, lo arranca silenciado hasta que hagan clic
+            activeVideo.muted = true;
+            activeVideo.play().catch(()=>{});
+          });
+        }
       }
     }
 
@@ -549,7 +565,7 @@
     }
 
     function navegarHacia(pantalla) {
-      document.querySelectorAll('.tok-video').forEach(v => v.pause());
+      document.querySelectorAll('.tok-video').forEach(v => { v.pause(); v.muted = true; });
       document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       cerrarCajonComentarios();
