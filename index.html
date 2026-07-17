@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveChat 3.0 - Ultra Premium Edition</title>
+  <title>WaveChat 4.0 - Desktop Pro Edition</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -30,8 +30,10 @@
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      overflow: hidden;
     }
 
+    /* Contenedor adaptativo: Celular en móvil, Full-pantalla en PC */
     .app-container {
       width: 100%;
       max-width: 450px;
@@ -43,16 +45,82 @@
       position: relative;
     }
 
-    @media (min-width: 600px) {
+    /* DISEÑO PARA PC / ESCRITORIO */
+    @media (min-width: 950px) {
+      body { background-color: #010101; }
       .app-container {
-        height: 850px;
-        border-radius: 30px;
-        box-shadow: 0 25px 50px rgba(0,0,0,0.8);
-        border: 1px solid rgba(0, 230, 118, 0.2);
+        max-width: 1250px;
+        height: 100vh;
+        flex-direction: row;
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
+      }
+      .main-content {
+        flex: 1;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .pc-sidebar {
+        display: flex !important;
+      }
+      .bottom-nav {
+        display: none !important; /* Escondemos barra inferior en PC */
       }
     }
 
-    .screen { display: none; flex-direction: column; height: calc(100% - 60px); width: 100%; }
+    .main-content {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* Barra Lateral estilo TikTok para PC */
+    .pc-sidebar {
+      display: none;
+      width: 280px;
+      background-color: var(--bg-dark);
+      border-right: 1px solid rgba(255,255,255,0.08);
+      flex-direction: column;
+      padding: 20px 10px;
+      gap: 25px;
+      overflow-y: auto;
+    }
+    .sidebar-logo {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--accent);
+      padding-left: 15px;
+      margin-bottom: 10px;
+    }
+    .sidebar-menu { display: flex; flex-direction: column; gap: 8px; }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: background 0.2s;
+    }
+    .sidebar-item i { font-size: 1.3rem; width: 25px; text-align: center; }
+    .sidebar-item:hover, .sidebar-item.active {
+      background-color: rgba(255,255,255,0.05);
+      color: var(--accent);
+    }
+    .sidebar-sep { border-top: 1px solid rgba(255,255,255,0.08); margin: 10px 0; }
+    .sidebar-section-title { font-size: 0.8rem; color: var(--text-dim); font-weight: bold; padding-left: 15px; text-transform: uppercase; margin-bottom: 5px;}
+
+    .screen { display: none; flex-direction: column; height: 100%; width: 100%; }
+    @media (max-width: 950px) {
+      .screen { height: calc(100% - 60px); }
+    }
     .screen.active { display: flex; }
     
     .bottom-nav {
@@ -79,10 +147,14 @@
     .register-box { padding: 30px; display: flex; flex-direction: column; gap: 20px; flex: 1; justify-content: center; align-items: center; text-align: center; }
 
     .header { background-color: #1f2c34; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    @media (min-width: 950px) {
+      .header { background-color: var(--bg-dark); }
+    }
     .header h2 { color: var(--accent); font-size: 1.4rem; font-weight: 700; }
     .connect-btn { background-color: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
 
     .chat-list { flex: 1; overflow-y: auto; background-color: #121b22; }
+    @media (min-width: 950px) { .chat-list { background-color: var(--bg-dark); } }
     .chat-item { display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer; }
     .avatar { width: 55px; height: 55px; border-radius: 50%; background-color: #054735; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; border: 2px solid var(--accent); text-transform: uppercase; }
     .chat-info { flex: 1; }
@@ -95,9 +167,11 @@
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
 
     .input-bar { padding: 15px; background-color: #1f2c34; display: flex; align-items: center; gap: 12px; }
+    @media (min-width: 950px) { .input-bar { background-color: var(--bg-card); border-radius: 10px; margin: 10px; } }
     .input-bar input[type="text"] { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; border-radius: 25px; color: white; outline: none; }
     .input-bar i { font-size: 1.2rem; color: var(--accent); cursor: pointer; }
 
+    /* REDISEÑO MAQUETA WAVETOK ESTILO TIKTOK PC */
     .tiktok-container { 
       flex: 1; 
       background: black; 
@@ -105,14 +179,24 @@
       overflow: hidden; 
       display: flex; 
       flex-direction: column; 
+      align-items: center;
+      justify-content: center;
+    }
+    @media (min-width: 950px) {
+      .tiktok-container { background: #010101; }
     }
     .tiktok-feed { 
-      flex: 1; 
       display: flex; 
       overflow-x: hidden; 
       scroll-behavior: smooth;
       width: 100%;
       height: 100%;
+    }
+    @media (min-width: 950px) {
+      .tiktok-feed {
+        width: 650px; /* Ancho fijo centrado para emular la vista de reproductor */
+        height: calc(100vh - 80px);
+      }
     }
     .tiktok-post { 
       min-width: 100%; 
@@ -123,21 +207,26 @@
       align-items: center; 
       justify-content: center; 
     }
+    @media (min-width: 950px) {
+      .tiktok-post {
+        border-radius: 12px;
+        overflow: hidden;
+      }
+    }
     .tiktok-video { 
       width: 100%; 
       height: 100%; 
       object-fit: contain; 
     }
     
+    /* Flechas de Navegación Extremas */
     .nav-arrow {
       position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--accent);
-      width: 40px;
-      height: 40px;
+      background: rgba(40, 40, 40, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -145,9 +234,17 @@
       cursor: pointer;
       z-index: 15;
       font-size: 1.2rem;
+      transition: background 0.2s;
     }
-    .arrow-left { left: 10px; }
-    .arrow-right { right: 10px; }
+    .nav-arrow:hover { background: var(--accent); color: black; }
+    .arrow-left { left: 20px; }
+    .arrow-right { right: 20px; }
+    
+    @media (min-width: 950px) {
+      /* Posicionamiento en PC a la extrema derecha como en tu foto */
+      .arrow-left { right: 90px; left: auto; top: 45%; }
+      .arrow-right { right: 30px; top: 45%; }
+    }
 
     /* Mute Volante */
     .mute-overlay-btn {
@@ -164,16 +261,27 @@
       cursor: pointer;
     }
 
+    /* Acciones Flotantes al Costado Derecho del Video */
     .tiktok-actions { position: absolute; right: 15px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 5; }
-    .action-btn { background: rgba(0,0,0,0.5); border: none; width: 45px; height: 45px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
+    @media (min-width: 950px) {
+      /* En PC se colocan por fuera flotando de forma estética */
+      .tiktok-actions { right: -75px; bottom: 40px; position: absolute; }
+    }
+    .action-btn { background: rgba(35,35,35,0.8); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s; }
+    .action-btn:hover { transform: scale(1.08); }
     .action-btn.liked { color: var(--danger); }
-    .tiktok-actions span { font-size: 0.75rem; color: white; margin-top: -15px; text-shadow: 1px 1px 3px black; }
+    .tiktok-actions span { font-size: 0.8rem; color: white; margin-top: -15px; text-shadow: 1px 1px 3px black; font-weight: bold; }
 
     .tiktok-meta { position: absolute; left: 15px; bottom: 30px; z-index: 5; max-width: 75%; text-shadow: 1px 1px 4px black; }
-    .tiktok-meta h4 { color: white; margin-bottom: 5px; }
-    .tiktok-meta p { color: #ddd; font-size: 0.85rem; }
+    .tiktok-meta h4 { color: white; margin-bottom: 5px; font-size: 1.1rem; }
+    .tiktok-meta p { color: #ddd; font-size: 0.9rem; }
 
     .comments-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #151d26; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 20; display: none; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; }
+    @media (min-width: 950px) {
+      /* Panel lateral de comentarios en PC */
+      .comments-panel { right: 0; left: auto; top: 0; width: 350px; height: 100%; border-radius: 0; border-left: 1px solid rgba(255,255,255,0.1); transform: translateX(100%); }
+      .comments-panel.open { display: flex; transform: translateX(0); }
+    }
     .comments-panel.open { display: flex; transform: translateY(0); }
     .comments-header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
     .comments-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
@@ -181,6 +289,7 @@
     .comment-user { color: var(--accent); font-weight: bold; margin-right: 5px; }
 
     .editor-screen { flex: 1; background: #0b0e14; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+    @media (min-width: 950px) { .editor-screen { max-width: 600px; margin: 0 auto; width: 100%; } }
     .preview-container { width: 100%; height: 250px; background: black; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
     #editorPreview { width: 100%; height: 100%; object-fit: contain; }
     
@@ -194,15 +303,15 @@
     .f-invert { filter: invert(1); }
     .f-vintage { filter: sepia(0.5) hue-rotate(-30deg) saturate(1.2); }
 
-    /* Perfil CSS */
     .profile-box { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px; }
     .profile-banner { width: 90px; height: 90px; border-radius: 50%; font-size: 2.5rem; color: white; display: flex; align-items: center; justify-content: center; border: 3px solid var(--accent); text-transform: uppercase; font-weight: bold;}
     .my-videos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-top: 15px; }
+    @media (min-width: 950px) { .my-videos-grid { grid-template-columns: repeat(4, 1fr); max-width: 800px; margin: 15px auto; } }
     .grid-item { background: #000; height: 140px; border-radius: 8px; overflow: hidden; position: relative; border: 1px solid rgba(255,255,255,0.05); }
     .grid-item video { width: 100%; height: 100%; object-fit: cover; }
 
     .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 30px; }
-    .modal-content { background: var(--bg-card); padding: 30px; border-radius: 20px; width: 100%; text-align: center; border: 1px solid var(--accent); }
+    .modal-content { background: var(--bg-card); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--accent); }
     .modal input, .register-box input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #0b0e14; color: white; text-align: center; outline: none; }
 
     .call-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 200; flex-direction: column; }
@@ -219,124 +328,152 @@
 
 <div class="app-container">
   
-  <div class="screen" id="registerScreen">
-    <div class="register-box">
-      <h2 style="color: var(--accent);">ID WaveChat</h2>
-      <input type="text" id="usernameInput" placeholder="Tu nombre único">
-      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="guardarNombreDeUsuario()">Entrar</button>
-    </div>
-  </div>
-
-  <div class="screen" id="chatsScreen">
-    <header class="header">
-      <h2>WaveChat</h2>
-      <button class="connect-btn" onclick="abrirModalConexion()"><i class="fa-solid fa-plus"></i> Conectar</button>
-    </header>
-    <div class="chat-list" id="chatListContainer"></div>
-  </div>
-
-  <div class="screen" id="activeChatScreen" style="height:100%">
-    <header class="header">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <i class="fa-solid fa-arrow-left" onclick="cambiarPestana('chats')" style="cursor:pointer"></i>
-        <div id="activeChatName" style="font-weight: bold;">Nombre</div>
+  <aside class="pc-sidebar">
+    <div class="sidebar-logo">WaveTok 🎬</div>
+    <div class="sidebar-menu">
+      <div class="sidebar-item active" id="pc-nav-tiktok" onclick="cambiarPestana('tiktok')">
+        <i class="fa-solid fa-house"></i><span>Para ti</span>
       </div>
-      <div style="display:flex; gap: 15px; align-items: center;">
-        <i class="fa-solid fa-desktop" onclick="iniciarLlamada(true)" style="color:var(--accent); cursor:pointer;"></i>
-        <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer;"></i>
+      <div class="sidebar-item" id="pc-nav-chats" onclick="cambiarPestana('chats')">
+        <i class="fa-solid fa-message"></i><span>Chats privados</span>
       </div>
-    </header>
-    <div class="messages-box" id="msgBox"></div>
-    <div class="input-bar">
-      <input type="text" id="chatInput" placeholder="Mensaje...">
-      <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
-    </div>
-  </div>
-
-  <div class="screen" id="tiktokScreen">
-    <header class="header">
-      <h2>WaveTok 🎬</h2>
-      <button class="connect-btn" onclick="cambiarPestana('editor')"><i class="fa-solid fa-video-camera"></i> Crear</button>
-    </header>
-    <div class="tiktok-container">
-      <button class="mute-overlay-btn" onclick="toggleMuteGlobal()"><i id="muteIcon" class="fa-solid fa-volume-up"></i></button>
-      <button class="nav-arrow arrow-left" onclick="navegarVideo(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-      <button class="nav-arrow arrow-right" onclick="navegarVideo(1)"><i class="fa-solid fa-chevron-right"></i></button>
-      <div class="tiktok-feed" id="tiktokFeedContainer"></div>
-    </div>
-  </div>
-
-  <div class="screen" id="profileScreen">
-    <header class="header">
-      <h2>Mi Perfil</h2>
-      <i class="fa-solid fa-right-from-bracket" onclick="localStorage.clear(); location.reload();" style="color:var(--danger); cursor:pointer"></i>
-    </header>
-    <div style="flex:1; overflow-y:auto;">
-      <div class="profile-box">
-        <div class="profile-banner" id="profileBadge">U</div>
-        <h3 id="profileName">@Username</h3>
-        <p style="color:var(--text-dim); font-size:0.85rem;" id="profileStats">Vistas totales: 0</p>
-      </div>
-      <div style="padding: 0 20px;">
-        <h4 style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">Mis Videos</h4>
-        <div class="my-videos-grid" id="myVideosGrid"></div>
+      <div class="sidebar-item" id="pc-nav-profile" onclick="cambiarPestana('profile')">
+        <i class="fa-solid fa-user"></i><span>Mi Perfil</span>
       </div>
     </div>
-  </div>
-
-  <div class="comments-panel" id="commentsPanel">
-    <div class="comments-header">
-      <span>Comentarios</span>
-      <i class="fa-solid fa-xmark" onclick="cerrarComentarios()" style="cursor:pointer"></i>
-    </div>
-    <div class="comments-list" id="commentsList"></div>
-    <div class="input-bar">
-      <input type="text" id="commentInput" placeholder="Añade un comentario...">
-      <i class="fa-solid fa-paper-plane" onclick="publicarComentario()"></i>
-    </div>
-  </div>
-
-  <div class="screen" id="editorScreen">
-    <header class="header">
-      <h2>Mini Editor</h2>
-      <i class="fa-solid fa-xmark" onclick="cambiarPestana('tiktok')" style="cursor:pointer"></i>
-    </header>
-    <div class="editor-screen">
-      <input type="file" id="videoFileInput" accept="video/*" onchange="cargarVideoEnEditor(this)">
-      
-      <div class="preview-container">
-        <video id="editorPreview" loop muted autoplay playsinline></video>
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-section-title">Descubrir</div>
+    <div class="sidebar-menu">
+      <div class="sidebar-item" onclick="cambiarPestana('editor')">
+        <i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i><span>Subir video</span>
       </div>
+    </div>
+  </aside>
 
-      <label style="font-size: 0.9rem; color:var(--text-dim)">Selecciona un filtro:</label>
-      <div class="filter-selector">
-        <div class="filter-thumb selected" onclick="aplicarFiltro('f-normal', this)">Normal</div>
-        <div class="filter-thumb" onclick="aplicarFiltro('f-bn', this)">B&N</div>
-        <div class="filter-thumb" onclick="aplicarFiltro('f-sepia', this)">Sepia</div>
-        <div class="filter-thumb" onclick="aplicarFiltro('f-invert', this)">Invertir</div>
-        <div class="filter-thumb" onclick="aplicarFiltro('f-vintage', this)">Vintage</div>
+  <div class="main-content">
+    
+    <div class="screen" id="registerScreen">
+      <div class="register-box">
+        <h2 style="color: var(--accent);">ID WaveChat</h2>
+        <input type="text" id="usernameInput" placeholder="Tu nombre único">
+        <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="guardarNombreDeUsuario()">Entrar</button>
       </div>
-
-      <label style="font-size: 0.9rem; color:var(--text-dim)">Punto de inicio (Segundos):</label>
-      <input type="range" id="trimStart" min="0" max="10" value="0" step="0.5" oninput="actualizarTiempoEditor()">
-      <span id="trimLabel" style="font-size:0.8rem; color:var(--accent)">0s</span>
-
-      <input type="text" id="videoCaptionInput" placeholder="Escribe una descripción...">
-      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="publicarVideoEditated()">🚀 Publicar en WaveTok</button>
     </div>
+
+    <div class="screen" id="chatsScreen">
+      <header class="header">
+        <h2>Chats</h2>
+        <button class="connect-btn" onclick="abrirModalConexion()"><i class="fa-solid fa-plus"></i> Conectar amigo</button>
+      </header>
+      <div class="chat-list" id="chatListContainer"></div>
+    </div>
+
+    <div class="screen" id="activeChatScreen">
+      <header class="header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <i class="fa-solid fa-arrow-left" onclick="cambiarPestana('chats')" style="cursor:pointer"></i>
+          <div id="activeChatName" style="font-weight: bold;">Nombre</div>
+        </div>
+        <div style="display:flex; gap: 15px; align-items: center;">
+          <i class="fa-solid fa-desktop" onclick="iniciarLlamada(true)" style="color:var(--accent); cursor:pointer;"></i>
+          <i class="fa-solid fa-video" onclick="iniciarLlamada(false)" style="color:var(--accent); cursor:pointer;"></i>
+        </div>
+      </header>
+      <div class="messages-box" id="msgBox"></div>
+      <div class="input-bar">
+        <input type="text" id="chatInput" placeholder="Mensaje...">
+        <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
+      </div>
+    </div>
+
+    <div class="screen" id="tiktokScreen">
+      <header class="header" style="display: var(--display-header, flex);">
+        <h2>WaveTok 🎬</h2>
+        <button class="connect-btn" onclick="cambiarPestana('editor')"><i class="fa-solid fa-video-camera"></i> Crear</button>
+      </header>
+      <div class="tiktok-container">
+        <button class="mute-overlay-btn" onclick="toggleMuteGlobal()"><i id="muteIcon" class="fa-solid fa-volume-up"></i></button>
+        
+        <button class="nav-arrow arrow-left" onclick="navegarVideo(-1)"><i class="fa-solid fa-chevron-up"></i></button>
+        <button class="nav-arrow arrow-right" onclick="navegarVideo(1)"><i class="fa-solid fa-chevron-down"></i></button>
+        
+        <div class="tiktok-feed" id="tiktokFeedContainer"></div>
+      </div>
+    </div>
+
+    <div class="screen" id="profileScreen">
+      <header class="header">
+        <h2>Mi Perfil</h2>
+        <i class="fa-solid fa-right-from-bracket" onclick="localStorage.clear(); location.reload();" style="color:var(--danger); cursor:pointer"></i>
+      </header>
+      <div style="flex:1; overflow-y:auto;">
+        <div class="profile-box">
+          <div class="profile-banner" id="profileBadge">U</div>
+          <h3 id="profileName">@Username</h3>
+          <p style="color:var(--text-dim); font-size:0.85rem;" id="profileStats">Vistas totales: 0</p>
+        </div>
+        <div style="padding: 0 20px;">
+          <h4 style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">Mis Videos</h4>
+          <div class="my-videos-grid" id="myVideosGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="comments-panel" id="commentsPanel">
+      <div class="comments-header">
+        <span>Comentarios</span>
+        <i class="fa-solid fa-xmark" onclick="cerrarComentarios()" style="cursor:pointer"></i>
+      </div>
+      <div class="comments-list" id="commentsList"></div>
+      <div class="input-bar">
+        <input type="text" id="commentInput" placeholder="Añade un comentario...">
+        <i class="fa-solid fa-paper-plane" onclick="publicarComentario()"></i>
+      </div>
+    </div>
+
+    <div class="screen" id="editorScreen">
+      <header class="header">
+        <h2>Mini Editor</h2>
+        <i class="fa-solid fa-xmark" onclick="cambiarPestana('tiktok')" style="cursor:pointer"></i>
+      </header>
+      <div class="editor-screen">
+        <input type="file" id="videoFileInput" accept="video/*" onchange="cargarVideoEnEditor(this)">
+        
+        <div class="preview-container">
+          <video id="editorPreview" loop muted autoplay playsinline></video>
+        </div>
+
+        <label style="font-size: 0.9rem; color:var(--text-dim)">Selecciona un filtro:</label>
+        <div class="filter-selector">
+          <div class="filter-thumb selected" onclick="aplicarFiltro('f-normal', this)">Normal</div>
+          <div class="filter-thumb" onclick="aplicarFiltro('f-bn', this)">B&N</div>
+          <div class="filter-thumb" onclick="aplicarFiltro('f-sepia', this)">Sepia</div>
+          <div class="filter-thumb" onclick="aplicarFiltro('f-invert', this)">Invertir</div>
+          <div class="filter-thumb" onclick="aplicarFiltro('f-vintage', this)">Vintage</div>
+        </div>
+
+        <label style="font-size: 0.9rem; color:var(--text-dim)">Punto de inicio (Segundos):</label>
+        <input type="range" id="trimStart" min="0" max="10" value="0" step="0.5" oninput="actualizarTiempoEditor()">
+        <span id="trimLabel" style="font-size:0.8rem; color:var(--accent)">0s</span>
+
+        <input type="text" id="videoCaptionInput" placeholder="Escribe una descripción...">
+        <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="publicarVideoEditated()">🚀 Publicar en WaveTok</button>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" id="mainNavbar" style="display:none;">
+      <div class="nav-item" id="nav-chats" onclick="cambiarPestana('chats')">
+        <i class="fa-solid fa-message"></i><span>Chats</span>
+      </div>
+      <div class="nav-item active" id="nav-tiktok" onclick="cambiarPestana('tiktok')">
+        <i class="fa-solid fa-clapperboard"></i><span>WaveTok</span>
+      </div>
+      <div class="nav-item" id="nav-profile" onclick="cambiarPestana('profile')">
+        <i class="fa-solid fa-user"></i><span>Perfil</span>
+      </div>
+    </nav>
+
   </div>
-
-  <nav class="bottom-nav" id="mainNavbar" style="display:none;">
-    <div class="nav-item active" id="nav-chats" onclick="cambiarPestana('chats')">
-      <i class="fa-solid fa-message"></i><span>Chats</span>
-    </div>
-    <div class="nav-item" id="nav-tiktok" onclick="cambiarPestana('tiktok')">
-      <i class="fa-solid fa-clapperboard"></i><span>WaveTok</span>
-    </div>
-    <div class="nav-item" id="nav-profile" onclick="cambiarPestana('profile')">
-      <i class="fa-solid fa-user"></i><span>Perfil</span>
-    </div>
-  </nav>
 
   <div class="modal" id="connectModal">
     <div class="modal-content">
@@ -424,19 +561,29 @@
 
   function cambiarPestana(tipo) {
     document.querySelectorAll('.tiktok-video').forEach(v => { v.pause(); v.currentTime = 0; });
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('mainNavbar').style.display = (tipo === 'chats' || tipo === 'tiktok' || tipo === 'profile') ? 'flex' : 'none';
+    
+    // Sincronizar clases activas (Mobile y PC)
+    document.querySelectorAll('.nav-item, .sidebar-item').forEach(n => n.classList.remove('active'));
+    
+    const activeNavbarItem = document.getElementById(`nav-${tipo}`);
+    const activeSidebarItem = document.getElementById(`pc-nav-${tipo}`);
+    if(activeNavbarItem) activeNavbarItem.classList.add('active');
+    if(activeSidebarItem) activeSidebarItem.classList.add('active');
+
+    // Controlar visibilidad del header superior en pantallas grandes
+    if(window.innerWidth > 950 && tipo === 'tiktok') {
+      document.getElementById('tiktokScreen').style.setProperty('--display-header', 'none');
+    } else {
+      document.getElementById('tiktokScreen').style.setProperty('--display-header', 'flex');
+    }
 
     if (tipo === 'chats') {
-      document.getElementById('nav-chats').classList.add('active');
       mostrarPantalla('chatsScreen');
       renderizarListaChats();
     } else if (tipo === 'tiktok') {
-      document.getElementById('nav-tiktok').classList.add('active');
       mostrarPantalla('tiktokScreen');
       renderizerFeedTikTok();
     } else if (tipo === 'profile') {
-      document.getElementById('nav-profile').classList.add('active');
       mostrarPantalla('profileScreen');
       renderizarPerfil();
     } else if (tipo === 'editor') {
@@ -455,7 +602,7 @@
 
   function inicializarPeer(myId) {
     document.getElementById('mainNavbar').style.display = 'flex';
-    cambiarPestana('chats');
+    cambiarPestana('tiktok');
 
     peer = new Peer(myId);
     peer.on('connection', (incomingConn) => {
@@ -505,7 +652,6 @@
   function abrirChat(id) {
     activePeerId = id;
     document.getElementById('activeChatName').innerText = id.replace('wave-','').toUpperCase();
-    document.getElementById('mainNavbar').style.display = 'none';
     mostrarPantalla('activeChatScreen');
     if(!conn || conn.peer !== id) conectarConPeer(id);
     cargarHistorial(id);
@@ -641,7 +787,6 @@
       videos[currentVideoIndex].muted = globalMuted;
       videos[currentVideoIndex].play().catch(() => {});
       
-      // NUEVO: Sumar Vista (Views)
       if(listaVideos[currentVideoIndex]) {
         listaVideos[currentVideoIndex].views = (listaVideos[currentVideoIndex].views || 0) + 1;
         document.getElementById(`view-count-${currentVideoIndex}`).innerText = listaVideos[currentVideoIndex].views;
