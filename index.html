@@ -33,7 +33,6 @@
       overflow: hidden;
     }
 
-    /* Contenedor adaptativo: Celular en móvil, Full-pantalla en PC */
     .app-container {
       width: 100%;
       max-width: 450px;
@@ -62,12 +61,8 @@
         display: flex;
         flex-direction: column;
       }
-      .pc-sidebar {
-        display: flex !important;
-      }
-      .bottom-nav {
-        display: none !important; /* Escondemos barra inferior en PC */
-      }
+      .pc-sidebar { display: flex !important; }
+      .bottom-nav { display: none !important; }
     }
 
     .main-content {
@@ -78,7 +73,7 @@
       position: relative;
     }
 
-    /* Barra Lateral estilo TikTok para PC */
+    /* Barra Lateral estilo TikTok */
     .pc-sidebar {
       display: none;
       width: 280px;
@@ -89,13 +84,7 @@
       gap: 25px;
       overflow-y: auto;
     }
-    .sidebar-logo {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--accent);
-      padding-left: 15px;
-      margin-bottom: 10px;
-    }
+    .sidebar-logo { font-size: 1.6rem; font-weight: 800; color: var(--accent); padding-left: 15px; margin-bottom: 10px; }
     .sidebar-menu { display: flex; flex-direction: column; gap: 8px; }
     .sidebar-item {
       display: flex;
@@ -118,9 +107,7 @@
     .sidebar-section-title { font-size: 0.8rem; color: var(--text-dim); font-weight: bold; padding-left: 15px; text-transform: uppercase; margin-bottom: 5px;}
 
     .screen { display: none; flex-direction: column; height: 100%; width: 100%; }
-    @media (max-width: 950px) {
-      .screen { height: calc(100% - 60px); }
-    }
+    @media (max-width: 950px) { .screen { height: calc(100% - 60px); } }
     .screen.active { display: flex; }
     
     .bottom-nav {
@@ -147,9 +134,7 @@
     .register-box { padding: 30px; display: flex; flex-direction: column; gap: 20px; flex: 1; justify-content: center; align-items: center; text-align: center; }
 
     .header { background-color: #1f2c34; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    @media (min-width: 950px) {
-      .header { background-color: var(--bg-dark); }
-    }
+    @media (min-width: 950px) { .header { background-color: var(--bg-dark); } }
     .header h2 { color: var(--accent); font-size: 1.4rem; font-weight: 700; }
     .connect-btn { background-color: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
 
@@ -162,16 +147,26 @@
     .chat-preview { color: var(--text-dim); font-size: 0.85rem; }
 
     .messages-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: #0b141a; }
+    
+    /* Burbujas de chat interactivas */
     .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .bubble.video-link {
+      border: 1px dashed var(--accent);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .bubble.video-link:hover {
+      background-color: rgba(0, 230, 118, 0.15);
+    }
 
     .input-bar { padding: 15px; background-color: #1f2c34; display: flex; align-items: center; gap: 12px; }
     @media (min-width: 950px) { .input-bar { background-color: var(--bg-card); border-radius: 10px; margin: 10px; } }
     .input-bar input[type="text"] { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; border-radius: 25px; color: white; outline: none; }
     .input-bar i { font-size: 1.2rem; color: var(--accent); cursor: pointer; }
 
-    /* REDISEÑO MAQUETA WAVETOK ESTILO TIKTOK PC */
+    /* FEED EN PARALELO */
     .tiktok-container { 
       flex: 1; 
       background: black; 
@@ -182,9 +177,7 @@
       align-items: center;
       justify-content: center;
     }
-    @media (min-width: 950px) {
-      .tiktok-container { background: #010101; }
-    }
+    @media (min-width: 950px) { .tiktok-container { background: #010101; } }
     .tiktok-feed { 
       display: flex; 
       overflow-x: hidden; 
@@ -192,34 +185,12 @@
       width: 100%;
       height: 100%;
     }
-    @media (min-width: 950px) {
-      .tiktok-feed {
-        width: 650px; /* Ancho fijo centrado para emular la vista de reproductor */
-        height: calc(100vh - 80px);
-      }
-    }
-    .tiktok-post { 
-      min-width: 100%; 
-      height: 100%; 
-      position: relative; 
-      background: #000; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-    }
-    @media (min-width: 950px) {
-      .tiktok-post {
-        border-radius: 12px;
-        overflow: hidden;
-      }
-    }
-    .tiktok-video { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: contain; 
-    }
+    @media (min-width: 950px) { .tiktok-feed { width: 650px; height: calc(100vh - 80px); } }
+    .tiktok-post { min-width: 100%; height: 100%; position: relative; background: #000; display: flex; align-items: center; justify-content: center; }
+    @media (min-width: 950px) { .tiktok-post { border-radius: 12px; overflow: hidden; } }
+    .tiktok-video { width: 100%; height: 100%; object-fit: contain; }
     
-    /* Flechas de Navegación Extremas */
+    /* Flechas de Navegación */
     .nav-arrow {
       position: absolute;
       background: rgba(40, 40, 40, 0.6);
@@ -241,32 +212,15 @@
     .arrow-right { right: 20px; }
     
     @media (min-width: 950px) {
-      /* Posicionamiento en PC a la extrema derecha como en tu foto */
       .arrow-left { right: 90px; left: auto; top: 45%; }
       .arrow-right { right: 30px; top: 45%; }
     }
 
-    /* Mute Volante */
-    .mute-overlay-btn {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background: rgba(0,0,0,0.6);
-      border: none;
-      color: white;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      z-index: 12;
-      cursor: pointer;
-    }
+    .mute-overlay-btn { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; z-index: 12; cursor: pointer; }
 
-    /* Acciones Flotantes al Costado Derecho del Video */
+    /* Botones Laterales */
     .tiktok-actions { position: absolute; right: 15px; bottom: 120px; display: flex; flex-direction: column; gap: 20px; align-items: center; z-index: 5; }
-    @media (min-width: 950px) {
-      /* En PC se colocan por fuera flotando de forma estética */
-      .tiktok-actions { right: -75px; bottom: 40px; position: absolute; }
-    }
+    @media (min-width: 950px) { .tiktok-actions { right: -75px; bottom: 40px; position: absolute; } }
     .action-btn { background: rgba(35,35,35,0.8); border: none; width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; transition: transform 0.2s; }
     .action-btn:hover { transform: scale(1.08); }
     .action-btn.liked { color: var(--danger); }
@@ -276,9 +230,9 @@
     .tiktok-meta h4 { color: white; margin-bottom: 5px; font-size: 1.1rem; }
     .tiktok-meta p { color: #ddd; font-size: 0.9rem; }
 
+    /* Comentarios y Compartir */
     .comments-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #151d26; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 20; display: none; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; }
     @media (min-width: 950px) {
-      /* Panel lateral de comentarios en PC */
       .comments-panel { right: 0; left: auto; top: 0; width: 350px; height: 100%; border-radius: 0; border-left: 1px solid rgba(255,255,255,0.1); transform: translateX(100%); }
       .comments-panel.open { display: flex; transform: translateX(0); }
     }
@@ -287,6 +241,10 @@
     .comments-list { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
     .comment-item { font-size: 0.9rem; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 5px; }
     .comment-user { color: var(--accent); font-weight: bold; margin-right: 5px; }
+
+    /* Lista del Modal Compartir */
+    .share-list { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; margin-top: 15px; }
+    .share-friend-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 10px; }
 
     .editor-screen { flex: 1; background: #0b0e14; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
     @media (min-width: 950px) { .editor-screen { max-width: 600px; margin: 0 auto; width: 100%; } }
@@ -484,6 +442,14 @@
     </div>
   </div>
 
+  <div class="modal" id="shareModal">
+    <div class="modal-content">
+      <h3>Compartir video con...</h3>
+      <div class="share-list" id="shareFriendsListContainer"></div>
+      <p onclick="cerrarModalCompartir()" style="margin-top:20px; font-size:0.9rem; cursor:pointer; color:var(--danger)">Cerrar</p>
+    </div>
+  </div>
+
   <div class="call-overlay" id="callOverlay">
     <video id="localVideo" autoplay playsinline muted></video>
     <video id="remoteVideo" autoplay playsinline></video>
@@ -505,6 +471,7 @@
   let listaVideos = [];
   let indexVideoComentarios = null;
   let currentVideoIndex = 0;
+  let videoIdParaCompartir = null;
 
   const coloresAvatar = ["#00796b", "#d32f2f", "#7b1fa2", "#303f9f", "#f57c00", "#388e3c"];
   let miColorAvatar = coloresAvatar[Math.floor(Math.random() * coloresAvatar.length)];
@@ -546,7 +513,7 @@
         listaVideos = request.result.reverse(); 
       } else {
         listaVideos = [
-          { id: 9991, author: "WAVECHAT", caption: "¡Bienvenidos a WaveTok! Sube videos de Roblox sin límites 🎬🔥", url: "https://www.w3schools.com/html/mov_bbb.mp4", filter: "f-normal", likes: 12, liked: false, comments: [], views: 45 }
+          { id: 9991, author: "WAVECHAT", caption: "¡Bienvenidos a WaveTok! Sube videos sin límites 🎬🔥", url: "https://www.w3schools.com/html/mov_bbb.mp4", filter: "f-normal", likes: 12, liked: false, comments: [], views: 45 }
         ];
       }
       renderizerFeedTikTok();
@@ -561,8 +528,6 @@
 
   function cambiarPestana(tipo) {
     document.querySelectorAll('.tiktok-video').forEach(v => { v.pause(); v.currentTime = 0; });
-    
-    // Sincronizar clases activas (Mobile y PC)
     document.querySelectorAll('.nav-item, .sidebar-item').forEach(n => n.classList.remove('active'));
     
     const activeNavbarItem = document.getElementById(`nav-${tipo}`);
@@ -570,7 +535,6 @@
     if(activeNavbarItem) activeNavbarItem.classList.add('active');
     if(activeSidebarItem) activeSidebarItem.classList.add('active');
 
-    // Controlar visibilidad del header superior en pantallas grandes
     if(window.innerWidth > 950 && tipo === 'tiktok') {
       document.getElementById('tiktokScreen').style.setProperty('--display-header', 'none');
     } else {
@@ -670,10 +634,15 @@
 
   function vincularEventos() {
     conn.on('data', (data) => {
-      if(data.type === 'text') {
+      if(data.type === 'text' || data.type === 'video-link') {
         const box = document.getElementById('msgBox');
-        box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
-        guardarEnHistorial(activePeerId, 'friend', data.content);
+        if(data.type === 'video-link') {
+          box.innerHTML += `<div class="bubble recv video-link" onclick="saltarAlVideo(${data.videoId})">${data.content}</div>`;
+          guardarEnHistorial(activePeerId, 'friend', data.content, 'video-link', data.videoId);
+        } else {
+          box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
+          guardarEnHistorial(activePeerId, 'friend', data.content, 'text');
+        }
         box.scrollTop = box.scrollHeight;
       }
     });
@@ -684,25 +653,29 @@
     if(!list.includes(id)) { list.push(id); localStorage.setItem('wave_chats', JSON.stringify(list)); }
   }
 
-  function enviarMensaje(textoForzado = null) {
+  function enviarMensaje(textoForzado = null, msgType = 'text', linkedVideoId = null) {
     const input = document.getElementById('chatInput');
     const mensaje = textoForzado || input.value.trim();
     if(!mensaje || !conn) return;
     
-    conn.send({ type: 'text', content: mensaje });
+    conn.send({ type: msgType, content: mensaje, videoId: linkedVideoId });
     
     const box = document.getElementById('msgBox');
-    box.innerHTML += `<div class="bubble sent">${mensaje}</div>`;
+    if(msgType === 'video-link') {
+      box.innerHTML += `<div class="bubble sent video-link" onclick="saltarAlVideo(${linkedVideoId})">${mensaje}</div>`;
+    } else {
+      box.innerHTML += `<div class="bubble sent">${mensaje}</div>`;
+    }
     
-    guardarEnHistorial(activePeerId, 'me', mensaje);
+    guardarEnHistorial(activePeerId, 'me', mensaje, msgType, linkedVideoId);
     if(!textoForzado) input.value = '';
     box.scrollTop = box.scrollHeight;
   }
 
-  function guardarEnHistorial(id, sender, text) {
+  function guardarEnHistorial(id, sender, text, msgType = 'text', videoId = null) {
     const key = `hist_${id}`;
     let fillHist = JSON.parse(localStorage.getItem(key) || '[]');
-    fillHist.push({ sender, type: 'text', text });
+    fillHist.push({ sender, text, msgType, videoId });
     localStorage.setItem(key, JSON.stringify(fillHist));
   }
 
@@ -711,7 +684,11 @@
     const box = document.getElementById('msgBox');
     box.innerHTML = '';
     hist.forEach(m => {
-      box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`;
+      if(m.msgType === 'video-link') {
+        box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'} video-link" onclick="saltarAlVideo(${m.videoId})">${m.text}</div>`;
+      } else {
+        box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${m.text}</div>`;
+      }
     });
     box.scrollTop = box.scrollHeight;
   }
@@ -728,7 +705,7 @@
     listaVideos.forEach((video, idx) => {
       if(!video.views) video.views = 0;
       container.innerHTML += `
-        <div class="tiktok-post">
+        <div class="tiktok-post" id="post-video-${video.id}">
           <video class="tiktok-video ${video.filter}" src="${video.url}" loop playsinline muted="${globalMuted}" onclick="togglePlayVideo(this)"></video>
           <div class="tiktok-actions">
             <button class="action-btn ${video.liked ? 'liked' : ''}" onclick="darLikeVideo(${idx}, this)">
@@ -740,7 +717,7 @@
             </button>
             <span>${video.comments ? video.comments.length : 0}</span>
             
-            <button class="action-btn" style="color:var(--accent)" onclick="compartirVideoAlChat(${idx})">
+            <button class="action-btn" style="color:var(--accent)" onclick="abrirModalCompartir(${video.id})">
               <i class="fa-solid fa-share"></i>
             </button>
             <span style="font-size:0.6rem; color:var(--text-dim);"><i class="fa-solid fa-eye"></i> <b id="view-count-${idx}">${video.views}</b></span>
@@ -798,18 +775,69 @@
     }
   }
 
-  function compartirVideoAlChat(idx) {
+  /* NUEVA FUNCIÓN: DESPLEGAR LISTA DE AMIGOS PARA COMPARTIR */
+  function abrirModalCompartir(videoId) {
+    videoIdParaCompartir = videoId;
     const list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
-    if(list.length === 0) return alert("Primero vincula a un amigo en la sección de chats.");
+    const container = document.getElementById('shareFriendsListContainer');
     
-    let destino = list[0]; 
-    activePeerId = destino;
-    if(!conn || conn.peer !== destino) conectarConPeer(destino);
-    
+    if(list.length === 0) {
+      container.innerHTML = '<p style="color:gray; font-size:0.9rem;">No tienes amigos vinculados aún. Ve a Chats privados y añade uno.</p>';
+    } else {
+      container.innerHTML = '';
+      list.forEach(friendId => {
+        const readableName = friendId.replace('wave-','').toUpperCase();
+        container.innerHTML += `
+          <div class="share-friend-item">
+            <span>👤 ${readableName}</span>
+            <button class="connect-btn" onclick="ejecutarCompartido('${friendId}')">Enviar</button>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('shareModal').style.display = 'flex';
+  }
+
+  function cerrarModalCompartir() {
+    document.getElementById('shareModal').style.display = 'none';
+  }
+
+  function ejecutarCompartido(destinoFriendId) {
+    const videoObj = listaVideos.find(v => v.id === videoIdParaCompartir);
+    if(!videoObj) return;
+
+    activePeerId = destinoFriendId;
+    if(!conn || conn.peer !== destinoFriendId) {
+      conn = peer.connect(destinoFriendId);
+      vincularEventos();
+    }
+
     setTimeout(() => {
-      enviarMensaje(`🎬 ¡Mira este WaveTok de @${listaVideos[idx].author}! "${listaVideos[idx].caption}"`);
-      alert("¡Video compartido por chat privado! 🎉");
+      enviarMensaje(`🎬 ¡Mira este video en WaveTok! "@${videoObj.author}: ${videoObj.caption}" (Clic para abrir)`, 'video-link', videoObj.id);
+      cerrarModalCompartir();
+      alert("¡Enviado con éxito! 🎉");
     }, 400);
+  }
+
+  /* NUEVA FUNCIÓN: SALTAR DIRECTAMENTE AL VIDEO CUANDO LE DAN CLICK */
+  function saltarAlVideo(idVideo) {
+    cambiarPestana('tiktok');
+    const posts = document.querySelectorAll('.tiktok-post');
+    let targetIndex = -1;
+    
+    listaVideos.forEach((v, idx) => {
+      if(v.id === idVideo) targetIndex = idx;
+    });
+
+    if(targetIndex !== -1 && posts[targetIndex]) {
+      document.querySelectorAll('.tiktok-video').forEach(v => { v.pause(); v.currentTime = 0; });
+      currentVideoIndex = targetIndex;
+      const contenedor = document.getElementById('tiktokFeedContainer');
+      contenedor.scrollLeft = currentVideoIndex * posts[0].clientWidth;
+      setTimeout(() => { reproducirVideoActual(); }, 400);
+    } else {
+      alert("Lo sentimos, este video ya no está disponible.");
+    }
   }
 
   function renderizarPerfil() {
@@ -842,7 +870,6 @@
     listaVideos[idx].likes += listaVideos[idx].liked ? 1 : -1;
     boton.classList.toggle('liked');
     document.getElementById(`likes-count-${idx}`).innerText = listaVideos[idx].likes;
-    
     if(dbIndexed) {
       let transaction = dbIndexed.transaction(["videos"], "readwrite");
       transaction.objectStore("videos").put(listaVideos[idx]);
@@ -911,6 +938,7 @@
     const miNombre = localStorage.getItem('wave_my_id') ? localStorage.getItem('wave_my_id').replace('wave-','') : "anónimo";
     
     const nuevoVideo = {
+      id: Date.now(),
       author: miNombre, caption: caption, url: videoBase64Cargado, filter: filtroSeleccionado, likes: 0, liked: false, comments: [], views: 0
     };
 
