@@ -114,22 +114,8 @@
       outline: none;
     }
     .search-wrapper i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-dim); }
-    
-    .search-dropdown {
-      display: none;
-      position: absolute;
-      top: 45px; left: 0; width: 100%;
-      background: var(--bg-sidebar);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      z-index: 100;
-      max-height: 250px;
-      overflow-y: auto;
-    }
-    .dropdown-item { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.03); cursor: pointer; }
-    .dropdown-item:hover { background: rgba(255,255,255,0.05); color: var(--accent); }
 
-    /* FEED VÍDEOS */
+    /* REPRODUCTOR CORREGIDO PARA QUE NO SE COMA LOS BOTONES */
     .tok-feed-container {
       flex: 1;
       display: flex;
@@ -137,13 +123,14 @@
       justify-content: center;
       position: relative;
       background: #000;
+      height: calc(100vh - 70px);
+      overflow: hidden;
     }
     .tok-wrapper {
       width: 100%;
       height: 100%;
       display: flex;
-      overflow-x: hidden;
-      scroll-behavior: smooth;
+      overflow: hidden;
     }
     .tok-post {
       min-width: 100%;
@@ -154,32 +141,39 @@
       justify-content: center;
       background: #000;
     }
-    .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .tok-video { 
+      width: 100%; 
+      height: 100%; 
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain; 
+      background: #000; 
+    }
     
     .tok-actions {
       position: absolute;
-      right: 30px;
-      bottom: 60px;
+      right: 25px;
+      bottom: 80px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
       align-items: center;
-      z-index: 10;
+      z-index: 999;
     }
     .circle-action {
       background: rgba(30, 44, 52, 0.85);
       border: 1px solid rgba(255,255,255,0.1);
-      width: 50px; height: 50px;
+      width: 48px; height: 48px;
       border-radius: 50%;
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       cursor: pointer;
     }
     .circle-action.liked { color: var(--danger); }
-    .tok-actions span { font-size: 0.8rem; color: white; margin-top: -15px; text-shadow: 1px 1px 3px black; }
+    .tok-actions span { font-size: 0.8rem; color: white; margin-top: -10px; text-shadow: 1px 1px 3px black; }
 
     .tok-meta {
       position: absolute;
@@ -208,7 +202,7 @@
     .chats-master {
       width: 320px;
       background: var(--bg-sidebar);
-      border-right: 1px solid rgba(255,255,255,0.05);
+      border-right: 1px solid rgba(255, 255, 255, 0.05);
       display: flex;
       flex-direction: column;
     }
@@ -271,7 +265,7 @@
     .del-btn { position: absolute; top: 8px; right: 8px; background: var(--danger); color: white; border: none; border-radius: 5px; width: 28px; height: 28px; cursor: pointer; z-index: 5; }
 
     /* MODALES */
-    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:300; justify-content:center; align-items:center; }
+    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; }
     .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 360px; text-align: center; }
     .modal-box input { width:100%; padding:12px; margin:15px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; text-align:center; outline:none; }
     .btn-solid { background: var(--accent); color:black; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
@@ -307,11 +301,6 @@
     <div class="screen active" id="screen-tok">
       <div class="top-bar">
         <h3 style="color: white;">Explorar</h3>
-        <div class="search-wrapper">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="vSearch" placeholder="Buscar..." oninput="filtrarVideosFeed()">
-          <div class="search-dropdown" id="searchDropdown"></div>
-        </div>
       </div>
       <div class="tok-feed-container">
         <button class="nav-arrow arrow-left" onclick="cambiarVideoFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
@@ -324,18 +313,18 @@
       <div class="chat-layout">
         <div class="chats-master">
           <div class="top-bar" style="padding: 15px;">
-            <button class="btn-solid" style="width: 100%;" onclick="abrirModalVincular()"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button>
+            <button class="btn-solid" style="width: 100%;" onclick="abrirModalConexion()"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button>
           </div>
-          <div style="flex:1; overflow-y:auto;" id="listaAmigosContainer"></div>
+          <div style="flex:1; overflow-y:auto;" id="chatListContainer"></div>
         </div>
         <div class="chats-detail">
           <div class="top-bar" id="chatDetailHeader" style="display: none;">
             <h4 id="targetChatName" style="color: white;">Amigo</h4>
           </div>
-          <div class="messages-container" id="chatBoxMensajes"></div>
+          <div class="messages-container" id="msgBox"></div>
           <div class="input-bar" id="chatInputBarArea" style="display: none;">
-            <input type="text" id="txtMensaje" placeholder="Escribe un mensaje...">
-            <i class="fa-solid fa-paper-plane" onclick="procesarEnvioTexto()"></i>
+            <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
+            <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
           </div>
         </div>
       </div>
@@ -373,12 +362,12 @@
     </div>
   </div>
 
-  <div class="modal-bg" id="modalVincularAmigo">
+  <div class="modal-bg" id="connectModal">
     <div class="modal-box">
       <h3>Vincular Amigo</h3>
       <input type="text" id="inputPeerIdDestino" placeholder="ID de tu amigo">
       <button class="btn-solid" style="width: 100%;" onclick="conectarConPeerAmigo()">Vincular</button>
-      <p onclick="cerrarCapaModal('modalVincularAmigo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p>
+      <p onclick="cerrarModal()" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p>
     </div>
   </div>
 
@@ -396,13 +385,13 @@
   </div>
 
 <script>
-  let peerInstance = null, activeConnection = null, currentTargetPeerId = null;
+  let peerInstance = null, conn = null, activePeerId = null, currentTargetPeerId = null;
   let dbIndexedStorage = null;
   let cacheVideoBase64 = "";
   let masterVideoArray = [];
   let currentFeedIndex = 0;
 
-  // Inicialización Segura de Base de Datos
+  // Inicialización de la Base de Datos con persistencia blindada
   function abrirManejadorDB(callback) {
     let peticion = indexedDB.open("WaveTokStorageMaster", 1);
     peticion.onupgradeneeded = function(e) {
@@ -433,11 +422,11 @@
     });
   };
 
-  // Corrección: Cargar videos de forma segura para evitar pantallas negras
+  // Carga estable desde disco para evitar pérdidas al actualizar
   function cargarVideosDesdeDisco(callback) {
     let videosPorDefecto = [
-      { id: 101, author: "WAVETOK", caption: "¡Bienvenidos al feed unificado! 🎬🔥", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 1024, liked: false },
-      { id: 102, author: "YEIBLOX", caption: "El video del conejito clásico 🐰🍃", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", likes: 582, liked: false }
+      { id: 101, author: "WAVETOK", caption: "¡Bienvenidos al feed estable! 🎬🔥", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 1024, liked: false },
+      { id: 102, author: "SAMPLE", caption: "Prueba de scroll vertical interactivo 🐰🍃", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", likes: 582, liked: false }
     ];
 
     if (!dbIndexedStorage) {
@@ -452,7 +441,6 @@
 
     solicitud.onsuccess = function() {
       if (solicitud.result && solicitud.result.length > 0) {
-        // Clonamos e invertimos de forma segura para no corromper la lectura
         let deUsuario = [...solicitud.result].reverse();
         masterVideoArray = deUsuario.concat(videosPorDefecto);
       } else {
@@ -471,7 +459,7 @@
     const user = document.getElementById('inputUsernameUnico').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
     if (!user) return alert("Ingresa un identificador válido.");
     const idUnicoGenerado = 'wave-' + user;
-    localStorage.setItem('wt_session_peer_id', idUngenerated = idUnicoGenerado);
+    localStorage.setItem('wt_session_peer_id', idUnicoGenerado);
     document.getElementById('modalRegistroInicial').style.display = 'none';
     levantarInstanciaPeer(idUnicoGenerado);
     sincronizarAtributosPerfilEstatico();
@@ -485,8 +473,9 @@
     });
 
     peerInstance.on('connection', (incomingConn) => {
-      activeConnection = incomingConn;
-      currentTargetPeerId = activeConnection.peer;
+      conn = incomingConn;
+      activePeerId = conn.peer;
+      currentTargetPeerId = conn.peer;
       almacenarAmigoEnLista(currentTargetPeerId);
       actualizarRacha(currentTargetPeerId); 
       enlazarEscuchadoresDatos();
@@ -500,11 +489,12 @@
     if(!target.startsWith('wave-')) target = 'wave-' + target;
     
     almacenarAmigoEnLista(target);
-    cerrarCapaModal('modalVincularAmigo');
+    cerrarModal();
     
-    activeConnection = peerInstance.connect(target);
+    conn = peerInstance.connect(target);
+    activePeerId = target;
     
-    activeConnection.on('open', () => {
+    conn.on('open', () => {
       actualizarRacha(target);
       despacharMensajesOffline(target);
     });
@@ -513,76 +503,78 @@
     if(!idDirecto) desplegarChatIndividual(target);
   }
 
+  // Escuchador de datos corregido para Incógnito y Videos Compartidos
   function enlazarEscuchadoresDatos() {
-    if (!activeConnection) return;
-    activeConnection.on('data', (data) => {
-      const box = document.getElementById('chatBoxMensajes');
-      const banderaChatAbierto = document.getElementById('screen-chat').classList.contains('active');
+    if (!conn) return;
+    conn.on('data', (data) => {
+      const box = document.getElementById('msgBox');
+      const pantallaChatActiva = document.getElementById('screen-chat').classList.contains('active');
       
       if (data.type === 'text') {
-        registrarMensajeHistorial(activeConnection.peer, 'friend', data.content);
-        actualizarRacha(activeConnection.peer);
-        if (banderaChatAbierto && currentTargetPeerId === activeConnection.peer) {
-          box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
-          box.scrollTop = box.scrollHeight;
-        }
-      } else if (data.type === 'share-video') {
-        registrarMensajeHistorial(activeConnection.peer, 'friend', `SHARE_VD_IDX:${data.videoId}:${data.caption}`);
-        actualizarRacha(activeConnection.peer);
-        if (banderaChatAbierto && currentTargetPeerId === activeConnection.peer) {
-          box.innerHTML += `
-            <div class="bubble recv">
-              <div class="share-card" onclick="saltarAVideoDesdeLink(${data.videoId})">
-                <span style="color:var(--accent); font-weight:bold;">🎬 Video Compartido</span>
-                <p style="margin-top:5px;">${data.caption}</p>
-              </div>
-            </div>`;
+        guardarEnHistorial(conn.peer, 'friend', data.content);
+        actualizarRacha(conn.peer);
+        
+        if (pantallaChatActiva && currentTargetPeerId === conn.peer) {
+          if (data.content.startsWith('SHARE_VD_IDX:')) {
+            let partes = data.content.split(':');
+            box.innerHTML += `
+              <div class="bubble recv">
+                <div class="share-card" onclick="saltarAVideoDesdeLink(${partes[1]})">
+                  <span style="color:var(--accent); font-weight:bold;">🎬 Video Compartido</span>
+                  <p style="margin-top:5px;">${partes[2] || 'Ver publicación'}</p>
+                </div>
+              </div>`;
+          } else {
+            box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
+          }
           box.scrollTop = box.scrollHeight;
         }
       }
     });
   }
 
-  function procesarEnvioTexto() {
-    const input = document.getElementById('txtMensaje');
-    const msg = input.value.trim();
-    if(!msg) return;
+  // Envío corregido: Guarda la variable antes de limpiar el input
+  function enviarMensaje() {
+    const input = document.getElementById('chatInput');
+    const mensaje = input.value.trim();
+    if (!mensaje || !conn) return;
     
-    registrarMensajeHistorial(currentTargetPeerId, 'me', msg);
+    guardarEnHistorial(currentTargetPeerId, 'me', mensaje);
     actualizarRacha(currentTargetPeerId);
 
-    if (activeConnection && activeConnection.open && activeConnection.peer === currentTargetPeerId) {
-      activeConnection.send({ type: 'text', content: msg });
+    if (conn && conn.open && conn.peer === currentTargetPeerId) {
+      conn.send({ type: 'text', content: mensaje });
     } else {
-      encolarMensajeOffline(currentTargetPeerId, { type: 'text', content: msg });
+      encolarMensajeOffline(currentTargetPeerId, { type: 'text', content: mensaje });
     }
     
-    const box = document.getElementById('chatBoxMensajes');
-    box.innerHTML += `<div class="bubble sent">${msg}</div>`;
+    const box = document.getElementById('msgBox');
+    box.innerHTML += `<div class="bubble sent">${mensaje}</div>`;
     input.value = '';
     box.scrollTop = box.scrollHeight;
   }
 
-  // Compartición Offline robusta mediante LocalStorage
+  // Compartición Offline vía Colas Locales
   function compartirVideoPorChat(idx) {
     let video = masterVideoArray[idx];
-    let listAmigos = JSON.parse(localStorage.getItem('wt_amigos_list') || '[]');
+    let listAmigos = JSON.parse(localStorage.getItem('wave_chats') || '[]');
     
     if (listAmigos.length === 0) {
-      return alert("Primero debes añadir/vincular a un amigo en la pestaña de Chats.");
+      return alert("Vincula a un amigo en Chats privados primero.");
     }
     
     let targetFriend = currentTargetPeerId || listAmigos[0];
+    let payloadStr = `SHARE_VD_IDX:${video.id}:${video.caption}`;
     
-    registrarMensajeHistorial(targetFriend, 'me', `SHARE_VD_IDX:${video.id}:${video.caption}`);
+    guardarEnHistorial(targetFriend, 'me', payloadStr);
     actualizarRacha(targetFriend);
 
-    if (activeConnection && activeConnection.peer === targetFriend && activeConnection.open) {
-      activeConnection.send({ type: 'share-video', videoId: video.id, caption: video.caption });
-      alert("¡Video compartido!");
+    if (conn && conn.peer === targetFriend && conn.open) {
+      conn.send({ type: 'text', content: payloadStr });
+      alert("¡Video compartido directo!");
     } else {
-      encolarMensajeOffline(targetFriend, { type: 'share-video', videoId: video.id, caption: video.caption });
-      alert("Tu amigo está desconectado. El vídeo se le enviará automáticamente en cuanto se conecte 🚀");
+      encolarMensajeOffline(targetFriend, { type: 'text', content: payloadStr });
+      alert("Amigo desconectado. Se enviará automáticamente cuando se conecte 🚀");
     }
   }
 
@@ -594,13 +586,13 @@
 
   function despacharMensajesOffline(pId) {
     let queue = JSON.parse(localStorage.getItem(`queue_${pId}`) || '[]');
-    if(queue.length > 0 && activeConnection && activeConnection.open) {
-      queue.forEach(data => activeConnection.send(data));
+    if(queue.length > 0 && conn && conn.open) {
+      queue.forEach(data => conn.send(data));
       localStorage.removeItem(`queue_${pId}`);
     }
   }
 
-  // Sistema de Rachas como TikTok
+  // Sistema de Rachas de TikTok
   function actualizarRacha(pId) {
     let rachasMap = JSON.parse(localStorage.getItem('wt_rachas_data') || '{}');
     let hoy = new Date().toDateString();
@@ -618,7 +610,7 @@
       }
     }
     localStorage.setItem('wt_rachas_data', JSON.stringify(rachasMap));
-    actualizarListaIzquierdaAmigos();
+    renderizarListaChats();
   }
 
   function obtenerContadorRacha(pId) {
@@ -632,7 +624,7 @@
       navegarHacia('tok');
       enfocarVideoSpecificoFeed(indexFound);
     } else {
-      alert("Este vídeo local no se encuentra disponible en tu dispositivo.");
+      alert("Este video local no está guardado en este dispositivo.");
     }
   }
 
@@ -645,7 +637,7 @@
     document.getElementById(`screen-${pantalla}`).classList.add('active');
 
     if(pantalla === 'tok') reproducirVideoIndiceActual();
-    else if(pantalla === 'chat') actualizarListaIzquierdaAmigos();
+    else if(pantalla === 'chat') renderizarListaChats();
     else if(pantalla === 'profile') renderizarMosaicoVideosPerfil();
   }
 
@@ -654,11 +646,11 @@
     document.getElementById('targetChatName').innerText = id.replace('wave-','').toUpperCase();
     document.getElementById('chatDetailHeader').style.display = 'flex';
     document.getElementById('chatInputBarArea').style.display = 'flex';
-    if(!activeConnection || activeConnection.peer !== id) conectarConPeerAmigo(id);
+    if(!conn || conn.peer !== id) conectarConPeerAmigo(id);
     dibujarMensajesHistorial(id);
   }
 
-  function registrarMensajeHistorial(pId, sender, text) {
+  function guardarEnHistorial(pId, sender, text) {
     let hist = JSON.parse(localStorage.getItem(`h_v2_${pId}`) || '[]');
     hist.push({ sender, text });
     localStorage.setItem(`h_v2_${pId}`, JSON.stringify(hist));
@@ -666,7 +658,7 @@
 
   function dibujarMensajesHistorial(pId) {
     let hist = JSON.parse(localStorage.getItem(`h_v2_${pId}`) || '[]');
-    const box = document.getElementById('chatBoxMensajes');
+    const box = document.getElementById('msgBox');
     box.innerHTML = '';
     hist.forEach(h => {
       if(h.text.startsWith('SHARE_VD_IDX:')) {
@@ -679,16 +671,15 @@
             </div>
           </div>`;
       } else {
-        box.innerHTML += `
-          <div class="bubble ${h.sender === 'me' ? 'sent' : 'recv'}">${h.text}</div>`;
+        box.innerHTML += `<div class="bubble ${h.sender === 'me' ? 'sent' : 'recv'}">${h.text}</div>`;
       }
     });
     box.scrollTop = box.scrollHeight;
   }
 
-  function actualizarListaIzquierdaAmigos() {
-    let list = JSON.parse(localStorage.getItem('wt_amigos_list') || '[]');
-    const container = document.getElementById('listaAmigosContainer');
+  function renderizarListaChats() {
+    let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
+    const container = document.getElementById('chatListContainer');
     container.innerHTML = '';
     list.forEach(id => {
       let racha = obtenerContadorRacha(id);
@@ -708,11 +699,10 @@
   }
 
   function almacenarAmigoEnLista(id) {
-    let list = JSON.parse(localStorage.getItem('wt_amigos_list') || '[]');
-    if(!list.includes(id)) { list.push(id); localStorage.setItem('wt_amigos_list', JSON.stringify(list)); }
+    let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
+    if(!list.includes(id)) { list.push(id); localStorage.setItem('wave_chats', JSON.stringify(list)); }
   }
 
-  // Renderizador Estable
   function renderizarFeedPrincipalVideos() {
     const container = document.getElementById('tokFeedIterator');
     container.innerHTML = '';
@@ -763,25 +753,8 @@
   function reproducirVideoIndiceActual() {
     const vids = document.querySelectorAll('.tok-video');
     if(vids[currentFeedIndex]) {
-      vids[currentFeedIndex].play().catch((e)=>{ console.log("Auto-play bloqueado temporalmente por navegador."); });
+      vids[currentFeedIndex].play().catch(()=>{});
     }
-  }
-
-  function filtrarVideosFeed() {
-    const q = document.getElementById('vSearch').value.trim().toLowerCase();
-    const drop = document.getElementById('searchDropdown');
-    if(!q) { drop.style.display = 'none'; return; }
-    let matches = masterVideoArray.filter(v => v.caption.toLowerCase().includes(q) || v.author.toLowerCase().includes(q));
-    drop.innerHTML = '';
-    if(matches.length === 0) {
-      drop.innerHTML = '<div class="dropdown-item" style="color:gray;">No hay coincidencias</div>';
-    } else {
-      matches.forEach(v => {
-        let origIdx = masterVideoArray.findIndex(m => m.id === v.id);
-        drop.innerHTML += `<div class="dropdown-item" onclick="enfocarVideoSpecificoFeed(${origIdx}); document.getElementById('searchDropdown').style.display='none';"><strong>@${v.author}</strong> - ${v.caption}</div>`;
-      });
-    }
-    drop.style.display = 'block';
   }
 
   function sincronizarAtributosPerfilEstatico() {
@@ -812,7 +785,7 @@
     const miFirma = localStorage.getItem('wt_session_peer_id') ? localStorage.getItem('wt_session_peer_id').replace('wave-','').toUpperCase() : "ANÓNIMO";
     let filtrados = masterVideoArray.filter(v => v.author === miFirma);
     if(filtrados.length === 0) {
-      grid.innerHTML = '<p style="color:gray; font-size:0.85rem; padding:15px;">No has cargado clips de video todavía.</p>';
+      grid.innerHTML = '<p style="color:gray; font-size:0.85rem; padding:15px;">No has subido clips de video todavía.</p>';
       return;
     }
     filtrados.forEach(v => {
@@ -838,10 +811,6 @@
     masterVideoArray[idx].likes += masterVideoArray[idx].liked ? 1 : -1;
     node.classList.toggle('liked');
     node.nextElementSibling.innerText = masterVideoArray[idx].likes;
-    if(dbIndexedStorage && masterVideoArray[idx].id > 200) {
-      let tx = dbIndexedStorage.transaction(["videos"], "readwrite");
-      tx.objectStore("videos").put(masterVideoArray[idx]);
-    }
   }
 
   function cargarPrevisualizacionVideo(input) {
@@ -854,24 +823,34 @@
     r.readAsDataURL(input.files[0]);
   }
 
+  // Guardado Seguro en Base de Datos (Persistencia Real al actualizar)
   function guardarVideoEditadoDB() {
     const caption = document.getElementById('inputVideoCaption').value.trim() || "Clip de WaveTok";
     if(!cacheVideoBase64) return alert("Selecciona un archivo multimedia.");
     const miFirma = localStorage.getItem('wt_session_peer_id') ? localStorage.getItem('wt_session_peer_id').replace('wave-','').toUpperCase() : "ANÓNIMO";
-    const pack = { author: miFirma, caption: caption, url: cacheVideoBase64, likes: 0, liked: false };
+    
+    // Generamos una ID numérica única basada en la estampa de tiempo
+    const pack = { id: Date.now(), author: miFirma, caption: caption, url: cacheVideoBase64, likes: 0, liked: false };
 
     let tx = dbIndexedStorage.transaction(["videos"], "readwrite");
-    tx.objectStore("videos").add(pack);
+    let almacen = tx.objectStore("videos");
+    almacen.add(pack);
+
     tx.oncomplete = () => {
       document.getElementById('inputVideoCaption').value = '';
       cacheVideoBase64 = "";
       cerrarCapaModal('modalSubirVideo');
-      cargarVideosDesdeDisco(() => { navegarHacia('tok'); renderizarFeedPrincipalVideos(); });
+      // Recarga el feed leyendo directamente la base de datos de disco
+      cargarVideosDesdeDisco(() => { 
+        navegarHacia('tok'); 
+        renderizarFeedPrincipalVideos(); 
+      });
     };
   }
 
-  function abrirModalVincular() { document.getElementById('modalVincularAmigo').style.display = 'flex'; }
+  function abrirModalConexion() { document.getElementById('connectModal').style.display = 'flex'; }
   function abrirModalSubir() { document.getElementById('modalSubirVideo').style.display = 'flex'; }
+  function cerrarModal() { document.getElementById('connectModal').style.display = 'none'; }
   function cerrarCapaModal(id) { document.getElementById(id).style.display = 'none'; }
 </script>
 </body>
