@@ -34,22 +34,27 @@
 
     .app-container {
       width: 100%;
-      max-width: 420px;
-      height: 850px;
+      max-width: 450px;
+      height: 100vh;
       background-color: var(--bg-dark);
-      border-radius: 30px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 25px 50px rgba(0,0,0,0.8);
       position: relative;
-      border: 1px solid rgba(0, 230, 118, 0.2);
+    }
+
+    @media (min-width: 600px) {
+      .app-container {
+        height: 850px;
+        border-radius: 30px;
+        box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+        border: 1px solid rgba(0, 230, 118, 0.2);
+      }
     }
 
     .screen { display: none; flex-direction: column; height: calc(100% - 60px); width: 100%; }
     .screen.active { display: flex; }
     
-    /* Navbar Principal Inferior */
     .bottom-nav {
       height: 60px;
       background-color: #1f2c34;
@@ -71,15 +76,12 @@
     .nav-item.active { color: var(--accent); }
     .nav-item span { font-size: 0.7rem; }
 
-    /* Registro */
     .register-box { padding: 30px; display: flex; flex-direction: column; gap: 20px; flex: 1; justify-content: center; align-items: center; text-align: center; }
 
-    /* Componentes de Encabezado */
     .header { background-color: #1f2c34; padding: 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .header h2 { color: var(--accent); font-size: 1.4rem; font-weight: 700; }
     .connect-btn { background-color: var(--accent); color: black; border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; gap: 5px; }
 
-    /* Chat Lista */
     .chat-list { flex: 1; overflow-y: auto; background-color: #121b22; }
     .chat-item { display: flex; align-items: center; gap: 15px; padding: 15px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.03); cursor: pointer; }
     .avatar { width: 55px; height: 55px; border-radius: 50%; background-color: #054735; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; border: 2px solid var(--accent); }
@@ -87,7 +89,6 @@
     .chat-info h4 { margin-bottom: 4px; font-size: 1.05rem; }
     .chat-preview { color: var(--text-dim); font-size: 0.85rem; }
 
-    /* Mensajes */
     .messages-box { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; background-color: #0b141a; }
     .bubble { max-width: 80%; padding: 10px 15px; border-radius: 18px; font-size: 0.95rem; line-height: 1.4; word-wrap: break-word; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
@@ -97,7 +98,6 @@
     .input-bar input[type="text"] { flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 12px 18px; border-radius: 25px; color: white; outline: none; }
     .input-bar i { font-size: 1.2rem; color: var(--accent); cursor: pointer; }
 
-    /* --- SISTEMA WAVETOK HORIZONTAL CON FLECHAS --- */
     .tiktok-container { 
       flex: 1; 
       background: black; 
@@ -129,7 +129,6 @@
       object-fit: contain; 
     }
     
-    /* Flechas flotantes laterales */
     .nav-arrow {
       position: absolute;
       top: 50%;
@@ -161,7 +160,6 @@
     .tiktok-meta h4 { color: white; margin-bottom: 5px; }
     .tiktok-meta p { color: #ddd; font-size: 0.85rem; }
 
-    /* Comentarios */
     .comments-panel { position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: #151d26; border-top-left-radius: 20px; border-top-right-radius: 20px; z-index: 20; display: none; flex-direction: column; transform: translateY(100%); transition: transform 0.3s ease; }
     .comments-panel.open { display: flex; transform: translateY(0); }
     .comments-header { padding: 15px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.1); font-weight: bold; }
@@ -169,7 +167,6 @@
     .comment-item { font-size: 0.9rem; line-height: 1.3; border-bottom: 1px solid rgba(255,255,255,0.02); padding-bottom: 5px; }
     .comment-user { color: var(--accent); font-weight: bold; margin-right: 5px; }
 
-    /* Editor */
     .editor-screen { flex: 1; background: #0b0e14; padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
     .preview-container { width: 100%; height: 250px; background: black; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
     #editorPreview { width: 100%; height: 100%; object-fit: contain; }
@@ -184,7 +181,6 @@
     .f-invert { filter: invert(1); }
     .f-vintage { filter: sepia(0.5) hue-rotate(-30deg) saturate(1.2); }
 
-    /* Modales y Llamadas */
     .modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; padding: 30px; }
     .modal-content { background: var(--bg-card); padding: 30px; border-radius: 20px; width: 100%; text-align: center; border: 1px solid var(--accent); }
     .modal input, .register-box input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: #0b0e14; color: white; text-align: center; outline: none; }
@@ -271,7 +267,7 @@
       <input type="file" id="videoFileInput" accept="video/*" onchange="cargarVideoEnEditor(this)">
       
       <div class="preview-container">
-        <video id="editorPreview" loop muted autoplay></video>
+        <video id="editorPreview" loop muted autoplay playsinline></video>
       </div>
 
       <label style="font-size: 0.9rem; color:var(--text-dim)">Selecciona un filtro:</label>
@@ -288,7 +284,7 @@
       <span id="trimLabel" style="font-size:0.8rem; color:var(--accent)">0s</span>
 
       <input type="text" id="videoCaptionInput" placeholder="Escribe una descripción...">
-      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="publicarVideoEditado()">🚀 Publicar en WaveTok</button>
+      <button class="connect-btn" style="width:100%; justify-content:center; padding:12px;" onclick="publicarVideoEditated()">🚀 Publicar en WaveTok</button>
     </div>
   </div>
 
@@ -332,7 +328,6 @@
   let indexVideoComentarios = null;
   let currentVideoIndex = 0;
 
-  // Base de datos IndexedDB ilimitada
   function initDatabase(callback) {
     let request = indexedDB.open("WaveTokDB", 1);
     request.onupgradeneeded = function(e) {
@@ -371,10 +366,12 @@
       if (request.result && request.result.length > 0) {
         listaVideos = request.result.reverse(); 
       } else {
+        // CORRECCIÓN: Cambiado el link de muestra por uno 100% compatible con móviles sin bloqueos CORS
         listaVideos = [
-          { id: 9991, author: "WAVECHAT", caption: "¡Bienvenidos a WaveTok! Sube videos de Roblox sin límites 🎬🔥", url: "https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-from-below-4804-large.mp4", filter: "f-normal", likes: 12, liked: false, comments: [] }
+          { id: 9991, author: "WAVECHAT", caption: "¡Bienvenidos a WaveTok! Sube videos de Roblox sin límites 🎬🔥", url: "https://www.w3schools.com/html/mov_bbb.mp4", filter: "f-normal", likes: 12, liked: false, comments: [] }
         ];
       }
+      renderizerFeedTikTok();
     };
   }
 
@@ -395,7 +392,7 @@
       renderizarListaChats();
     } else if (tipo === 'tiktok') {
       document.getElementById('nav-tiktok').classList.add('active');
-      mostrarPantalla('tiktokScreen');
+      mostrarPantarma = mostrarPantalla('tiktokScreen');
       renderizerFeedTikTok();
     } else if (tipo === 'editor') {
       mostrarPantalla('editorScreen');
@@ -484,14 +481,11 @@
     conn.on('data', (data) => {
       if(data.type === 'text') {
         const box = document.getElementById('msgBox');
-        
-        // CORRECCIÓN: Renderiza imágenes si detecta Base64
         if (data.content.startsWith('data:image/')) {
           box.innerHTML += `<div class="bubble recv"><img src="${data.content}" style="max-width: 100%; border-radius: 10px; display: block;" /></div>`;
         } else {
           box.innerHTML += `<div class="bubble recv">${data.content}</div>`;
         }
-        
         guardarEnHistorial(activePeerId, 'friend', data.content);
         box.scrollTop = box.scrollHeight;
       }
@@ -511,7 +505,6 @@
     conn.send({ type: 'text', content: mensaje });
     
     const box = document.getElementById('msgBox');
-    // CORRECCIÓN: Renderiza tus propias imágenes si pegas un Base64
     if (mensaje.startsWith('data:image/')) {
       box.innerHTML += `<div class="bubble sent"><img src="${mensaje}" style="max-width: 100%; border-radius: 10px; display: block;" /></div>`;
     } else {
@@ -534,21 +527,16 @@
     const hist = JSON.parse(localStorage.getItem(`hist_${id}`) || '[]');
     const box = document.getElementById('msgBox');
     box.innerHTML = '';
-    
-    // CORRECCIÓN: Comprueba cada elemento del historial para ver si era una imagen
     hist.forEach(m => {
       const esImagen = m.text.startsWith('data:image/');
       const contenidoBubble = esImagen 
         ? `<img src="${m.text}" style="max-width: 100%; border-radius: 10px; display: block;" />` 
         : m.text;
-        
       box.innerHTML += `<div class="bubble ${m.sender === 'me' ? 'sent' : 'recv'}">${contenidoBubble}</div>`;
     });
-    
     box.scrollTop = box.scrollHeight;
   }
 
-  /* --- RENDERIZADO HORIZONTAL WAVETOK --- */
   function renderizerFeedTikTok() {
     const container = document.getElementById('tiktokFeedContainer');
     container.innerHTML = '';
@@ -558,10 +546,11 @@
       return;
     }
 
+    // CORRECCIÓN: Se añade el atributo playsinline para obligar a los teléfonos a no abrir el reproductor nativo a pantalla completa
     listaVideos.forEach((video, idx) => {
       container.innerHTML += `
         <div class="tiktok-post">
-          <video class="tiktok-video ${video.filter}" src="${video.url}" loop onclick="togglePlayVideo(this)"></video>
+          <video class="tiktok-video ${video.filter}" src="${video.url}" loop playsinline onclick="togglePlayVideo(this)"></video>
           <div class="tiktok-actions">
             <button class="action-btn ${video.liked ? 'liked' : ''}" onclick="darLikeVideo(${idx}, this)">
               <i class="fa-solid fa-heart"></i>
@@ -596,7 +585,6 @@
 
     let nuevoIndex = currentVideoIndex + direccion;
     if (nuevoIndex >= 0 && nuevoIndex < posts.length) {
-      // Detener audios anteriores de raíz
       document.querySelectorAll('.tiktok-video').forEach(v => {
         v.pause();
         v.currentTime = 0;
@@ -704,7 +692,7 @@
     preview.currentTime = startRange;
   }
 
-  function publicarVideoEditado() {
+  function publicarVideoEditated() {
     const caption = document.getElementById('videoCaptionInput').value.trim() || "Vídeo editado";
     if(!videoBase64Cargado) return alert("Selecciona un vídeo primero.");
 
