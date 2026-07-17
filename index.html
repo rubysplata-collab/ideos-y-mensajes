@@ -178,7 +178,7 @@
       cursor: pointer;
     }
 
-    /* --- PANEL DE TENOR --- */
+    /* --- PANEL DE STICKERS --- */
     .tenor-panel {
       display: none;
       background: #151d26;
@@ -216,10 +216,11 @@
     .tenor-results img {
       width: 100%;
       height: 75px;
-      object-fit: cover;
+      object-fit: contain;
       border-radius: 8px;
       cursor: pointer;
       transition: transform 0.1s;
+      background: rgba(255,255,255,0.02);
     }
 
     .tenor-results img:hover { transform: scale(1.05); }
@@ -331,19 +332,19 @@
 
     <div class="tenor-panel" id="tenorPanel">
       <div class="tenor-search-box">
-        <input type="text" class="tenor-search" id="tenorSearchInput" placeholder="Buscar Stickers (ej: risas, gato)..." onkeydown="detectarEnterTenor(event)">
-        <button onclick="buscarEnTenor()" style="background:var(--accent); border:none; padding: 0 15px; border-radius:20px; color:black; cursor:pointer; font-weight:bold;">
+        <input type="text" class="tenor-search" id="tenorSearchInput" placeholder="Buscar Stickers (risas, meme, xd)..." onkeydown="detectarEnterSticker(event)">
+        <button onclick="buscarStickers()" style="background:var(--accent); border:none; padding: 0 15px; border-radius:20px; color:black; cursor:pointer; font-weight:bold;">
           <i class="fa-solid fa-magnifying-glass" style="color:black; font-size:0.9rem;"></i>
         </button>
       </div>
-      <div class="tenor-results" id="tenorResults"></div>
+      <div class="tenor-results" id="stickerResults"></div>
     </div>
 
     <div class="input-bar">
       <input type="file" id="fileInput" style="display: none;" onchange="enviarArchivo(this)">
       
       <i class="fa-solid fa-paperclip" onclick="document.getElementById('fileInput').click()" title="Mandar Foto o Archivo"></i>
-      <i class="fa-regular fa-face-smile" onclick="toggleTenorPanel()" title="Buscar Stickers"></i>
+      <i class="fa-regular fa-face-smile" onclick="toggleStickersPanel()" title="Buscar Stickers"></i>
       
       <input type="text" id="chatInput" placeholder="Mensaje..." oninput="detectarEscritura()">
       <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()" title="Enviar"></i>
@@ -611,44 +612,47 @@
     element.value = ''; 
   }
 
-  // --- STICKERS DE TENOR ---
-  function toggleTenorPanel() {
+  // --- STICKERS DE GIPHY (CORREGIDO) ---
+  function toggleStickersPanel() {
     const panel = document.getElementById('tenorPanel');
     if (panel.style.display === 'flex') {
       panel.style.display = 'none';
     } else {
       panel.style.display = 'flex';
-      buscarEnTenor(); 
+      buscarStickers(); 
     }
   }
 
-  function detectarEnterTenor(event) {
+  function detectarEnterSticker(event) {
     if (event.key === "Enter") {
-      buscarEnTenor();
+      buscarStickers();
     }
   }
 
-  async function buscarEnTenor() {
+  async function buscarStickers() {
     const query = document.getElementById('tenorSearchInput').value.trim() || 'stickers';
-    // API optimizada para stickers transparentes
-    const url = `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=9&media_filter=minimal`;
+    
+    // Usamos el API de GIPHY con su key pública de desarrollo que es 100% estable
+    const url = `https://api.giphy.com/v1/gifs/search?api_key=dc6zaTOxFJmzC&q=${encodeURIComponent(query)}&limit=12&rating=g`;
     
     try {
       const res = await fetch(url);
-      const data = await res.json();
-      const resultsContainer = document.getElementById('tenorResults');
+      const result = await res.json();
+      const resultsContainer = document.getElementById('stickerResults');
       resultsContainer.innerHTML = '';
       
-      if (data.results && data.results.length > 0) {
-        data.results.forEach(sticker => {
-          const gifUrl = sticker.media[0].tinygif.url;
+      if (result.data && result.data.length > 0) {
+        result.data.forEach(item => {
+          // Extraemos la versión optimizada para móviles
+          const gifUrl = item.images.fixed_height_small.url;
           resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')">`;
         });
       } else {
         resultsContainer.innerHTML = '<p style="grid-column: span 3; text-align:center; color:gray; padding:20px;">Sin resultados</p>';
       }
     } catch(err) {
-      console.error("Error cargando Tenor: ", err);
+      console.error("Error cargando Giphy: ", err);
+      document.getElementById('stickerResults').innerHTML = '<p style="grid-column: span 3; text-align:center; color:red; padding:20px;">Error de red</p>';
     }
   }
 
@@ -720,7 +724,7 @@
       call.on('stream', (remote) => document.getElementById('remoteVideo').srcObject = remote);
       
       if(compartirPantalla) {
-        localStream.getVideoTracks()[0].onended = () => colgangLlamada();
+        localStream.getVideoTracks()[0].onended = () => colgarLlamada();
       }
     } catch(err) {
       console.error("Error al iniciar stream: ", err);
