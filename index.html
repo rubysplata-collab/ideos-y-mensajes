@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Firebase Ultimate Edition</title>
+  <title>WaveTok & WaveChat - Versión Final</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -18,234 +18,71 @@
       --bubble-sent: #002d62;
       --bubble-recv: #1f2c34;
       --danger: #ff1744;
-      --streak-color: #ff9100;
       --fav-color: #ffeb3b;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-    body {
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      display: flex;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .sidebar {
-      width: 260px;
-      background-color: var(--bg-sidebar);
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      flex-direction: column;
-      padding: 20px 10px;
-      gap: 25px;
-      flex-shrink: 0;
-    }
-
-    .brand h2 {
-      color: var(--accent);
-      font-size: 1.5rem;
-      font-weight: 800;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-left: 10px;
-    }
-
+    .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; }
+    .brand h2 { color: var(--accent); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
     .side-menu { display: flex; flex-direction: column; gap: 8px; }
-    
-    .menu-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 12px 15px;
-      color: var(--text-main);
-      text-decoration: none;
-      font-weight: 600;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    .menu-item:hover, .menu-item.active {
-      background: rgba(0, 230, 118, 0.1);
-      color: var(--accent);
-    }
+    .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
+    .menu-item:hover, .menu-item.active { background: rgba(0, 230, 118, 0.1); color: var(--accent); }
     .menu-item i { font-size: 1.2rem; width: 25px; }
+    .separator { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; padding-left: 15px; margin-top: 10px; }
 
-    .separator {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: var(--text-dim);
-      letter-spacing: 1px;
-      padding-left: 15px;
-      margin-top: 10px;
-    }
-
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      background: black;
-    }
-
+    .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: black; }
     .screen { display: none; width: 100%; height: 100%; flex-direction: column; background: var(--bg-dark); }
     .screen.active { display: flex; }
+    .top-bar { background: var(--bg-sidebar); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
 
-    .top-bar {
-      background: var(--bg-sidebar);
-      padding: 15px 30px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .tok-feed-container {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      background: #000;
-      height: calc(100vh - 70px);
-      overflow: hidden;
-    }
-    .tok-wrapper {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      overflow: hidden;
-    }
-    .tok-post {
-      min-width: 100%;
-      height: 100%;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #000;
-    }
-    .tok-video { 
-      width: 100%; 
-      height: 100%; 
-      object-fit: contain; 
-      background: #000; 
-    }
+    .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; height: calc(100vh - 70px); overflow: hidden; }
+    .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; }
+    .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
+    .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; }
     
-    .tok-actions {
-      position: absolute;
-      right: 25px;
-      bottom: 80px;
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      align-items: center;
-      z-index: 999;
-    }
-    .circle-action {
-      background: rgba(30, 44, 52, 0.85);
-      border: 1px solid rgba(255,255,255,0.1);
-      width: 48px; height: 48px;
-      border-radius: 50%;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      cursor: pointer;
-    }
+    .tok-actions { position: absolute; right: 25px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 999; }
+    .circle-action { background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
     .circle-action.liked { color: var(--danger); }
     .tok-actions span { font-size: 0.8rem; color: white; margin-top: -10px; text-shadow: 1px 1px 3px black; }
+    .tok-meta { position: absolute; left: 30px; bottom: 40px; z-index: 10; max-width: 60%; text-shadow: 1px 1px 5px black; }
 
-    .tok-meta {
-      position: absolute;
-      left: 30px;
-      bottom: 40px;
-      z-index: 10;
-      max-width: 60%;
-      text-shadow: 1px 1px 5px black;
-    }
-
-    .nav-arrow {
-      position: absolute;
-      top: 50%; transform: translateY(-50%);
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(255,255,255,0.2);
-      color: white; width: 45px; height: 45px;
-      border-radius: 50%; display: flex; align-items: center;
-      justify-content: center; cursor: pointer; z-index: 15;
-    }
+    .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 15; }
     .nav-arrow:hover { background: var(--accent); color: black; }
     .arrow-left { left: 20px; }
     .arrow-right { right: 20px; }
 
-    /* SECCIÓN COMENTARIOS FLOTANTES */
-    .comments-drawer {
-      display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%;
-      background: rgba(18, 27, 34, 0.98); border-top: 2px solid var(--accent);
-      z-index: 2000; flex-direction: column; padding: 20px; border-radius: 20px 20px 0 0;
-    }
+    .comments-drawer { display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: rgba(18, 27, 34, 0.98); border-top: 2px solid var(--accent); z-index: 2000; flex-direction: column; padding: 20px; border-radius: 20px 20px 0 0; }
     .comments-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
     .comment-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; font-size: 0.9rem; }
 
-    /* CHATS */
     .chat-layout { display: flex; flex: 1; height: 100%; }
-    .chats-master {
-      width: 320px;
-      background: var(--bg-sidebar);
-      border-right: 1px solid rgba(255, 255, 255, 0.05);
-      display: flex;
-      flex-direction: column;
-    }
+    .chats-master { width: 320px; background: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; }
     .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; }
-    
-    .chat-item {
-      display: flex; align-items: center; gap: 12px; padding: 15px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer;
-    }
+    .chat-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
     .chat-item:hover, .chat-item.active { background: rgba(255,255,255,0.03); }
-    
-    .avatar {
-      width: 40px; height: 40px; border-radius: 50%; background: #233138;
-      display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent);
-    }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
 
     .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
     .bubble { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; color: white; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
+    .share-card { background: #1c2732; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; cursor: pointer; min-width: 180px; }
 
-    .share-card {
-      background: #1c2732; border: 1px solid var(--accent);
-      border-radius: 12px; padding: 12px; cursor: pointer; min-width: 180px;
-    }
-
-    .input-bar {
-      padding: 15px 25px; background: var(--bg-sidebar);
-      display: flex; align-items: center; gap: 15px;
-    }
-    .input-bar input {
-      flex: 1; background: rgba(255,255,255,0.05); border: none;
-      padding: 12px 20px; border-radius: 25px; color: white; outline: none;
-    }
+    .input-bar { padding: 15px 25px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 15px; }
+    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
     .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
 
-    /* CONTENEDOR DE LLAMADA STREAM */
-    .call-overlay-container {
-      display: none; position: fixed; top: 20px; right: 20px; width: 320px;
-      background: #121b22; border: 2px solid var(--accent); border-radius: 15px;
-      padding: 15px; z-index: 2000; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px black;
-    }
+    .call-overlay-container { display: none; position: fixed; top: 20px; right: 20px; width: 320px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px black; }
     .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
     .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #222; }
 
-    /* PERFIL */
     .profile-container { padding: 40px; display: flex; flex-direction: column; gap: 30px; }
-    .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 20px; }
-    .grid-card { position: relative; aspect-ratio: 9/16; background: black; border-radius: 12px; overflow: hidden; }
+    .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+    .grid-card { position: relative; aspect-ratio: 9/16; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .grid-card video { width: 100%; height: 100%; object-fit: cover; }
+    .grid-card .meta-card { position: absolute; bottom: 8px; left: 8px; font-size: 0.8rem; text-shadow: 1px 1px 2px black; }
 
     .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; }
     .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 360px; text-align: center; }
@@ -338,7 +175,7 @@
   </main>
 
   <div class="call-overlay-container" id="panelLlamadaActiva">
-    <h5 id="txtEstadoLlamada" style="color: white; text-align: center;">Llamando...</h5>
+    <h5 id="txtEstadoLlamada" style="color: white; text-align: center;">Conectando...</h5>
     <div class="video-grid-call">
       <video id="localStreamVideo" autoplay muted playsinline></video>
       <video id="remoteStreamVideo" autoplay playsinline></video>
@@ -349,7 +186,7 @@
   <div class="modal-bg" id="modalRegistroInicial" style="display: flex;">
     <div class="modal-box">
       <h2 style="color: var(--accent);">Crear tu ID WaveTok</h2>
-      <input type="text" id="inputUsernameUnico" placeholder="Ej: wave-jheiler o tu apodo">
+      <input type="text" id="inputUsernameUnico" placeholder="Ingresa tu ID personalizado">
       <button class="btn-solid" style="width: 100%;" onclick="registrarNodoCliente()">Ingresar</button>
     </div>
   </div>
@@ -439,10 +276,7 @@
     function levantarInstanciaPeer(idMio) {
       peerInstance = new Peer(idMio);
       
-      peerInstance.on('open', () => { 
-        renderizarListaChats(); 
-      });
-
+      peerInstance.on('open', () => { renderizarListaChats(); });
       peerInstance.on('connection', (incomingConn) => {
         conn = incomingConn;
         almacenarAmigoEnLista(conn.peer);
@@ -467,7 +301,6 @@
       });
     }
 
-    // ESCUCHA FIJA DE VIDEOS SIN BORRARSE AL ACTUALIZAR
     function escucharFeedVideosGlobal() {
       if(unsubscribirFeedVideos) unsubscribirFeedVideos();
       const q = window.query(window.collection(window.fsdb, "videos"), window.orderBy("createdAt", "desc"));
@@ -479,21 +312,20 @@
           nuevosVideos.push({ id: doc.id, author: d.author, caption: d.caption, url: d.url, likes: d.likes || 0 });
         });
 
-        // Solo si Firestore está en blanco metemos el de respaldo, de lo contrario usamos lo guardado
         if(nuevosVideos.length > 0) {
           masterVideoArray = nuevosVideos;
         } else if(masterVideoArray.length === 0) {
-          masterVideoArray = [{ id: "backup_default", author: "SYSTEM", caption: "Sube tu primer archivo estable.", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 0 }];
+          masterVideoArray = [{ id: "backup_def", author: "SYSTEM", caption: "Sube un video estable.", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 0 }];
         }
         
         renderizarFeedPrincipalVideos();
+        renderizarMiPerfilCuadrilla();
       });
     }
 
     function conectarConPeerAmigo() {
       let target = document.getElementById('inputPeerIdDestino').value.trim();
       if(!target) return;
-      
       almacenarAmigoEnLista(target);
       cerrarModal();
       desplegarChatIndividual(target);
@@ -526,7 +358,7 @@
           let esMio = datos.sender === mySessionId;
           if(datos.text && datos.text.startsWith('SHARE_VD:::')) {
             let parts = datos.text.split(':::');
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><div class="share-card" onclick="navegarHacia('tok')">🎬 <b>Clip Recomendado:</b><br>${parts[1]}</div></div>`;
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><div class="share-card" onclick="navegarHacia('tok')">🎬 <b>Clip Compartido:</b><br>${parts[1]}</div></div>`;
           } else {
             box.innerHTML += `<div class="bubble ${esMio ? 'sent' : 'recv'}">${datos.text}</div>`;
           }
@@ -558,7 +390,7 @@
       let video = masterVideoArray[idx];
       let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
       let target = currentTargetPeerId || list[0];
-      if(!target) return alert("Por favor vincula a un amigo primero.");
+      if(!target) return alert("Primero añade un amigo en la pestaña de chats.");
 
       let salaId = [mySessionId, target].sort().join("_CH_");
       await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
@@ -566,7 +398,7 @@
         text: `SHARE_VD:::${video.caption}:::${video.url}`,
         timestamp: window.serverTimestamp()
       });
-      alert("¡Video compartido en el chat con éxito!");
+      alert("¡Video compartido en tu chat privado!");
     }
 
     async function reaccionarLikeVideoFirestore(vId) {
@@ -575,11 +407,9 @@
       await window.updateDoc(refDoc, { likes: window.increment(1) });
     }
 
-    // GESTIÓN DE COMENTARIOS EN FIRESTORE
     function abrirCajonComentarios(vId) {
       videoSeleccionadoParaComentarios = vId;
       document.getElementById('drawerComentarios').style.display = 'flex';
-      
       if(unsubscribirComentarios) unsubscribirComentarios();
       
       const q = window.query(window.collection(window.fsdb, "videos", vId, "comentarios"), window.orderBy("createdAt", "asc"));
@@ -607,17 +437,15 @@
       input.value = '';
     }
 
-    function cerrarCajonComentarios() {
-      document.getElementById('drawerComentarios').style.display = 'none';
-    }
+    function cerrarCajonComentarios() { document.getElementById('drawerComentarios').style.display = 'none'; }
 
     async function guardarVideoEditadoDB() {
       let caption = document.getElementById('inputVideoCaption').value.trim() || "Nuevo Clip";
       let url = document.getElementById('inputVideoUrlDirecta').value.trim() || cacheVideoBase64;
-      if(!url) return alert("Sube un archivo o pon una URL .mp4");
+      if(!url) return alert("Inserta un enlace .mp4 o carga un archivo local.");
 
       await window.addDoc(window.collection(window.fsdb, "videos"), {
-        author: mySessionId || "ANÓNIMO",
+        author: mySessionId || "Anónimo",
         caption: caption,
         url: url,
         likes: 0,
@@ -661,6 +489,20 @@
       
       const wrapper = document.getElementById('tokFeedIterator');
       wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
+    }
+
+    function renderizarMiPerfilCuadrilla() {
+      const grid = document.getElementById('gridMisVideosPublicados');
+      grid.innerHTML = '';
+      let misVideos = masterVideoArray.filter(v => v.author === mySessionId);
+      
+      misVideos.forEach(vid => {
+        grid.innerHTML += `
+          <div class="grid-card">
+            <video src="${vid.url}" muted playsinline></video>
+            <div class="meta-card"><i class="fa-solid fa-heart"></i> ${vid.likes}</div>
+          </div>`;
+      });
     }
 
     function cambiarVideoFeed(dir) {
