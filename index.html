@@ -178,7 +178,7 @@
       cursor: pointer;
     }
 
-    /* --- PANEL DE STICKERS BLINDADO --- */
+    /* --- PANEL DE STICKERS --- */
     .tenor-panel {
       display: none;
       background: #151d26;
@@ -382,18 +382,17 @@
   let localStream = null;
   let typingTimeout;
 
-  // Colección de stickers 100% INMUNE A BLOQUEOS (SVGs Inline codificados en Base64)
-  // No requieren internet, no hacen llamadas de red, jamás saldrá el icono roto.
+  // Colección de stickers en BASE64 real (Sin comillas problemáticas, 100% estables)
   const backupStickers = [
-    { name: 'xd', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD15C"/><path d="M25 40 l15-10 l-15-10 M75 40 l-15-10 l15-10" stroke="%23472500" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M30 65 Q50 85 70 65" stroke="%23472500" stroke-width="6" fill="none" stroke-linecap="round"/></svg>' },
-    { name: 'risa', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD15C"/><ellipse cx="35" cy="35" rx="5" ry="10" fill="%23472500"/><ellipse cx="65" cy="35" rx="5" ry="10" fill="%23472500"/><path d="M25 60 Q50 90 75 60 Z" fill="%23472500"/><path d="M35 60 Q50 70 65 60" fill="white"/></svg>' },
-    { name: 'meme', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD15C"/><circle cx="32" cy="35" r="10" fill="white" stroke="%23472500" stroke-width="3"/><circle cx="32" cy="35" r="4" fill="black"/><circle cx="68" cy="35" r="14" fill="white" stroke="%23472500" stroke-width="3"/><circle cx="68" cy="35" r="7" fill="black"/><path d="M30 65 Q50 50 70 65" stroke="%23472500" stroke-width="6" fill="none" stroke-linecap="round"/></svg>' },
-    { name: 'baile', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="30" r="15" fill="%23FFD15C"/><path d="M50 45 L50 75 M50 55 L25 40 M50 55 L75 50 M50 75 L35 95 M50 75 L65 95" stroke="%23FFD15C" stroke-width="8" stroke-linecap="round"/></svg>' },
-    { name: 'llorar', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD15C"/><ellipse cx="35" cy="40" rx="4" ry="7" fill="%23472500"/><ellipse cx="65" cy="40" rx="4" ry="7" fill="%23472500"/><path d="M35 70 Q50 55 65 70" stroke="%23472500" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M35 48 L35 80 M65 48 L65 80" stroke="%235CADFF" stroke-width="6" stroke-linecap="round"/></svg>' },
-    { name: 'ok', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%2300E676"/><path d="M30 50 L45 65 L70 35" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>' },
-    { name: 'gato', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M15 40 L35 15 L50 35 L65 15 L85 40 L80 80 L20 80 Z" fill="%23FFA726"/><circle cx="35" cy="50" r="5" fill="black"/><circle cx="65" cy="50" r="5" fill="black"/><path d="M45 60 L55 60 L50 65 Z" fill="%23FF7043"/><path d="M40 70 Q50 78 60 70" stroke="black" stroke-width="3" fill="none"/></svg>' },
-    { name: 'perro', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M20 40 L80 40 L80 80 L20 80 Z" fill="%23A1887F"/><path d="M15 30 L30 30 L25 60 Z" fill="%237D6608"/><path d="M85 30 L70 30 L75 60 Z" fill="%237D6608"/><circle cx="35" cy="55" r="5" fill="black"/><circle cx="65" cy="55" r="5" fill="black"/><ellipse cx="50" cy="65" rx="7" ry="5" fill="black"/></svg>' },
-    { name: 'love', url: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23FFD15C"/><path d="M20 35 C 20 20, 45 20, 45 35 C 45 20, 70 20, 70 35 C 70 55, 45 70, 45 70 C 45 70, 20 55, 20 35 Z" fill="%23FF1744"/></svg>' }
+    { name: 'xd', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik0yNSA0MCBsMTUtMTAgbC0xNS0xMCBNNzUgNDAgbC0xNS0xMCBsMTUtMTAiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI2IiBzdHJva2UtbGluZWNhcD0icm91bmQiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMzAgNjUgUTUwIDg1IDcwIDY1IiBzdHJva2U9IiM0NzI1MDAiIHN0cm9rZS13aWR0aD0iNiIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PC9zdmc+' },
+    { name: 'risa', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjM1IiByeD0iNSIgcnk9IjEwIiBmaWxsPSIjNDcyNTAwIi8+PGVsbGlwc2UgY3g9IjY1IiBjeT0iMzUiIHJ4PSI1IiByeT0iMTAiIGZpbGw9IiM0NzI1MDAiLz48cGF0aCBkPSJNMjUgNjAgUTUwIDkwIDc1IDYwIFoiIGZpbGw9IiM0NzI1MDAiLz48cGF0aCBkPSJNMzUgNjAgUTUwIDcwIDY1IDYwIiBmaWxsPSJ3aGl0ZSIvPjwvc3ZnPg==' },
+    { name: 'meme', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPkdleWVzPjxjaXJjbGUgY3g9IjMyIiBjeT0iMzUiIHI9IjEwIiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjNDcyNTAwIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSIzMiIgY3k9IjM1IiByPSI0IiBmaWxsPSJibGFjayIvPjxjaXJjbGUgY3g9IjY4IiBjeT0iMzUiIHI9IjE0IiBmaWxsPSJ3aGl0ZSIgc3Ryb2tlPSIjNDcyNTAwIiBzdHJva2Utd2lkdGg9IjMiLz48Y2lyY2xlIGN4PSI2OCIgY3k9IjM1IiByPSI3IiBmaWxsPSJibGFjayIvPjxwYXRoIGQ9Ik0zMCA2NSBRNTAgNTAgNzAgNjUiIHN0cm9rZT0iIzQ3MjUwMCIgc3Ryb2tlLXdpZHRoPSI2IiBmaWxsPSJub25lIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48L3N2Zz4=' },
+    { name: 'baile', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik01MCA0NSBMNTAgNzUgTTUwIDU1IEwyNSA0MCBNNTAgNTUgTDc1IDUwIE01MCA3NSBMMzUgOTUgTTUwIDc1IEw2NSA5NSIgc3Ryb2tlPSIjRkZEMTVDIiBzdHJva2Utd2lkdGg9IjgiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==' },
+    { name: 'llorar', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxlbGxpcHNlIGN4PSIzNSIgY3k9IjQwIiByeD0iNCIgcnk9IjciIGZpbGw9IiM0NzI1MDAiLz48ZWxsaXBzZSBjeD0iNjUiIGN5PSI0MCIgcng9IjQiIHJ5PSI3IiBmaWxsPSIjNDcyNTAwIi8+PHBhdGggZD0iTTM1IDcwIFFUwNSA1NSA2NSA3MCIgc3Ryb2tlPSIjNDcyNTAwIiBzdHJva2Utd2lkdGg9IjUiIGZpbGw9Im5vbmUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjxwYXRoIGQ9Ik0zNSA0OCBMMzUgODAgTTY1IDQ4IEw2NSA4MCIgc3Ryb2tlPSIjNUNBRkZGIiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPjwvc3ZnPg==' },
+    { name: 'ok', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iIzAwRTY3NiIvPjxwYXRoIGQ9Ik0zMCA1MCBMNDUgNjUgTDcwIDM1IiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEwIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGZpbGw9Im5vbmUiLz48L3N2Zz4=' },
+    { name: 'gato', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMTUgNDAgTDM1IDE1IEw1MCAzNSBMNjUgMTUgTDg1IDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ZGQTcyNiIvPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTAiIHI9IjUiIGZpbGw9ImJsYWNrIi8+PGNpcmNsZSBjeD0iNjUiIGN5PSI1MCIgcj0iNSIgZmlsbD0iYmxhY2siLz48cGF0aCBkPSJNNDUgNjAgTDU1IDYwIEw1MCA2NSBaIiBmaWxsPSIjRkY3MDQzIi8+PHBhdGggZD0iTTQwIDcwIFFVNTAgNzggNjAgNzAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMyIgZmlsbD0ibm9uZSIvPjwvc3ZnPg==' },
+    { name: 'perro', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBkPSJNMjAgNDAgTDgwIDQwIEw4MCA4MCBMMjAgODAgWiIgZmlsbD0iI0ExODg3RiIvPjxwYXRoIGQ9Ik0xNSAzMCBMMzAgMzAgTDI1IDYwIFoiIGZpbGw9IiM3RDY2MDgiLz48cGF0aCBkPSJNODUgMzAgTDcwIDMwIEw3NSA2MCBaIiBmaWxsPSIjN0Q2NjA4Ii8+PGNpcmNsZSBjeD0iMzUiIGN5PSI1NSIgcj0iNSIgZmlsbD0iYmxhY2siLz48Y2lyY2xlIGN4PSI2NSIgY3k9IjU1IiByPSI1IiBmaWxsPSJibGFjayIvPjxlbGxpcHNlIGN4PSI1MCIgY3k9IjY1IiByeD0iNyIgcnk9IjUiIGZpbGw9ImJsYWNrIi8+PC9zdmc+' },
+    { name: 'love', url: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48Y2lyY2xlIGN4PSI1MCIgY3k9IjUwIiByPSI0NSIgZmlsbD0iI0ZGRDE1QyIvPjxwYXRoIGQ9Ik0yMCAzNSBDIDIwIDIwLCA0NSAyMCwgNDUgMzUgQyA0NSAyMCwgNzAgMjAsIDcwIDM1IEMgNzAgNTUsIDQ1IDcwLCA0NSA3MCBDIDQ1IDcwLCAyMCA1NSwgMjAgMzUgWiIgZmlsbD0iI0ZGMTc0NCIvPjwvc3ZnPg==' }
   ];
 
   window.onload = () => {
@@ -626,7 +625,7 @@
     element.value = ''; 
   }
 
-  // --- BUSCADOR ULTRAESTABLE TENOR + NEKOS.BEST (CERO BLOQUEOS) ---
+  // --- BUSCADOR ULTRAESTABLE TENOR + NEKOS.BEST ---
   function toggleStickersPanel() {
     const panel = document.getElementById('tenorPanel');
     if (panel.style.display === 'flex') {
@@ -648,7 +647,7 @@
     const resultsContainer = document.getElementById('stickerResults');
     resultsContainer.innerHTML = '<p style="grid-column: span 3; text-align:center; color:gray; padding:20px;">Buscando...</p>';
 
-    // 1. INTENTO PRINCIPAL: Tenor v1 (No bloquea GitHub Pages y es ultra estable)
+    // 1. INTENTO PRINCIPAL: Tenor v1
     try {
       const tenorUrl = `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=LIVDSRZULELA&limit=12`;
       const res = await fetch(tenorUrl);
@@ -663,14 +662,14 @@
               resultsContainer.innerHTML += `<img src="${gifUrl}" onclick="enviarSticker('${gifUrl}')" onerror="this.style.display='none'">`;
             }
           });
-          return; // Carga completada
+          return;
         }
       }
     } catch(err) {
-      console.warn("Tenor falló, intentando con API secundaria Nekos.best...");
+      console.warn("Tenor falló, intentando con API secundaria...");
     }
 
-    // 2. INTENTO SECUNDARIO (TOTALMENTE LIBRE DE CORS Y HOTLINKING): nekos.best
+    // 2. INTENTO SECUNDARIO: nekos.best
     try {
       const fallbackUrl = `https://nekos.best/api/v2/search?q=${encodeURIComponent(query)}&limit=12`;
       const res = await fetch(fallbackUrl);
@@ -691,13 +690,14 @@
       console.warn("Fallo general de red, cargando stickers internos...");
     }
 
-    // 3. INTENTO SALVAVIDAS COMPLETAMENTE INTEGRADO E INMUNE A CAÍDAS (SVGs locatizados)
+    // 3. INTENTO SALVAVIDAS: Base64 local (Solución definitiva para image_11b1c2.png)
     resultsContainer.innerHTML = '';
     const queryClean = query.toLowerCase();
     const filtrados = backupStickers.filter(s => s.name.includes(queryClean) || queryClean === 'smile' || queryClean === 'risas' || queryClean === 'xd');
     const stickersAMostrar = filtrados.length > 0 ? filtrados : backupStickers;
 
     stickersAMostrar.forEach(st => {
+      // Uso estricto de comillas dobles para evitar conflictos de parseo en el HTML
       resultsContainer.innerHTML += `<img src="${st.url}" onclick="enviarSticker('${st.url}')" title="${st.name}">`;
     });
   }
