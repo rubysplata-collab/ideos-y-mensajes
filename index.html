@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WaveTok & WaveChat - Premium Multimedia</title>
-  
+
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -24,62 +24,112 @@
     body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
     /* MENÚ LATERAL */
-    .sidebar { width: 240px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; }
+    .sidebar { width: 250px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; z-index: 10; }
     .brand h2 { color: var(--accent); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
     .side-menu { display: flex; flex-direction: column; gap: 8px; }
-    .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; }
+    .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
     .menu-item:hover, .menu-item.active { background: rgba(255, 235, 59, 0.1); color: var(--accent); }
+    .menu-item i { font-size: 1.2rem; width: 25px; }
+    .separator { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; padding-left: 15px; margin-top: 10px; }
 
-    /* LAYOUT PRINCIPAL DE TRES COLUMNAS */
-    .main-layout { flex: 1; display: flex; height: 100%; overflow: hidden; }
+    /* LAYOUT PRINCIPAL GLOBAL */
+    .main-layout { flex: 1; display: flex; height: 100%; overflow: hidden; position: relative; }
 
-    /* COLUMNA 1: LISTA DE CHATS AMIGOS */
+    /* PANTALLAS INDEPENDIENTES */
+    .screen { display: none; width: 100%; height: 100%; }
+    .screen.active { display: flex; }
+
+    /* ESTRUCTURA INTERNA DE LA SALA GLOBAL (3 COLUMNAS) */
+    .feed-container-box { width: 400px; display: flex; flex-direction: column; height: 100%; background: #000; border-right: 1px solid rgba(255, 255, 255, 0.05); position: relative; flex-shrink: 0; }
+    .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; }
+    .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; scroll-behavior: smooth; }
+    .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
+    .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; cursor: pointer; }
+    .tok-actions { position: absolute; right: 20px; bottom: 60px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 99; }
+    .circle-action { background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 46px; height: 46px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
+    .circle-action:hover { transform: scale(1.1); color: var(--accent); }
+    .tok-actions span { font-size: 0.8rem; color: white; margin-top: -8px; text-shadow: 1px 1px 3px black; font-weight: 600; }
+    .tok-meta { position: absolute; left: 25px; bottom: 30px; z-index: 10; max-width: 70%; text-shadow: 1px 1px 5px black; }
+    .tok-meta h3 { color: white; margin-bottom: 5px; font-size: 1.1rem; }
+    .tok-meta p { color: #e1e1e6; font-size: 0.9rem; }
+
+    .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 15; transition: background 0.2s; }
+    .nav-arrow:hover { background: var(--accent); color: black; }
+    .arrow-left { left: 15px; }
+    .arrow-right { right: 15px; }
+
+    .top-bar-feed { background: var(--bg-sidebar); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); height: 69px; }
+    .search-box-container { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 180px; }
+    .search-box-container input { background: none; border: none; outline: none; color: white; font-size: 0.85rem; width: 100%; margin-left: 8px; }
+
+    /* COMENTARIOS FEED */
+    .feed-comments-panel { height: 180px; background: #0e1318; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; padding: 12px; }
+    .comments-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; margin-bottom: 8px; }
+    .comment-line b { color: var(--accent); }
+    .comment-input-area { display: flex; gap: 8px; }
+    .comment-input-area input { flex:1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 15px; color: white; outline: none; font-size: 0.85rem; }
+
+    /* CHATS LISTA */
     .chats-master { width: 280px; background: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; flex-shrink: 0; }
     .top-bar-chats { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
     .chat-item:hover, .chat-item.active { background: rgba(255,255,255,0.03); }
-    .avatar { width: 35px; height: 35px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
+    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
 
-    /* COLUMNA 2: EL CHAT ACTIVO (CENTRO) */
+    /* CHAT DETALLE */
     .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; border-right: 1px solid rgba(255, 255, 255, 0.05); }
-    .chat-header { background: var(--bg-sidebar); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .chat-header { background: var(--bg-sidebar); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); height: 69px; }
     .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-    
-    /* BURBUJAS DE MENSAJES */
-    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 4px; }
+
+    /* BURBUJAS */
+    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 5px; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
-    .sticker-msg-render { width: 120px; height: 120px; object-fit: contain; display: block; }
-    .chat-img-render { max-width: 100%; max-height: 200px; border-radius: 8px; object-fit: cover; }
+    .sticker-msg-render { width: 125px; height: 125px; object-fit: contain; display: block; }
+    .chat-img-render { max-width: 100%; max-height: 220px; border-radius: 10px; object-fit: cover; }
     .chat-audio-render { max-width: 100%; height: 36px; }
 
-    /* ÁREA DE INPUT Y STICKERS POPOVER */
+    /* ENTRADAS E INPUT BAR */
     .input-bar-container { position: relative; background: var(--bg-sidebar); width: 100%; display: flex; flex-direction: column; }
-    .input-bar { padding: 15px 20px; display: flex; align-items: center; gap: 15px; }
+    .input-bar { padding: 15px 25px; display: flex; align-items: center; gap: 15px; }
     .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
     .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
     .mic-recording { color: var(--danger) !important; animation: pulseMic 1s infinite alternate; }
 
-    .sticker-popover { display: none; position: absolute; bottom: 75px; right: 60px; width: 280px; height: 220px; background: #1f2c34; border: 2px solid var(--accent); border-radius: 12px; z-index: 200; padding: 10px; flex-direction: column; }
-    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; flex: 1; margin-top: 5px; }
-    .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 6px; }
+    .sticker-popover { display: none; position: absolute; bottom: 75px; right: 80px; width: 300px; height: 240px; background: #1f2c34; border: 2px solid var(--accent); border-radius: 15px; z-index: 200; padding: 12px; flex-direction: column; }
+    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 8px; }
+    .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 8px; }
     .sticker-option:hover { transform: scale(1.1); background: rgba(255,255,255,0.05); }
 
-    /* COLUMNA 3: TRANSMISIONES / PANTALLAS (DERECHA) */
-    .right-stream-panel { width: 340px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 15px; gap: 15px; flex-shrink: 0; }
-    .video-box-call { width: 100%; background: #000; border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative; }
+    /* SALA DERECHA STRMING */
+    .right-stream-panel { width: 340px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px; gap: 20px; flex-shrink: 0; }
+    .video-box-call { width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); position: relative; }
     .video-box-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
-    .video-label { position: absolute; bottom: 5px; left: 8px; background: rgba(0,0,0,0.6); padding: 2px 6px; font-size: 0.75rem; border-radius: 4px; }
+    .video-label { position: absolute; bottom: 8px; left: 10px; background: rgba(0,0,0,0.7); padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; color: white; }
 
-    .btn-solid { background: var(--accent); color: black; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-danger { background: var(--danger); color: white; border: none; padding: 10px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; }
+    /* BOTONES INTERFAZ */
+    .btn-solid { background: var(--accent); color: black; border: none; padding: 11px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-size: 0.9rem; }
+    .btn-danger { background: var(--danger); color: white; border: none; padding: 11px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; }
+    .btn-link { background: none; border: none; color: var(--text-dim); font-size: 0.85rem; cursor: pointer; text-decoration: underline; margin-top: 12px; }
 
     @keyframes pulseMic { from { opacity: 0.5; } to { opacity: 1; } }
-    .footer-id { background: #070a0e; text-align: center; padding: 6px; font-size: 0.8rem; color: var(--text-dim); }
-    .footer-id b { color: var(--accent); }
-    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center; }
-    .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 25px; border-radius: 15px; width: 90%; max-width: 340px; text-align: center; }
-    .modal-box input { width:100%; padding:10px; margin:12px 0; border-radius:6px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; outline:none; text-align:center; }
+    .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); margin-top: auto; }
+    .my-code-footer b { color: var(--accent); }
+
+    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:3000; justify-content:center; align-items:center; }
+    .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 90%; max-width: 380px; text-align: center; }
+    .modal-box input { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; outline:none; text-align:center; }
+    .modal-box.wide { max-width: 560px; text-align: left; }
+    .terms-scroll-area { max-height: 50vh; overflow-y: auto; text-align: left; font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 10px; margin: 15px 0; }
+    .terms-scroll-area h4 { color: var(--accent); margin-top: 14px; margin-bottom: 6px; }
+    .terms-scroll-area h4:first-child { margin-top: 0; }
+    .checkbox-row { display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; text-align:left; margin: 14px 0; color: var(--text-dim); }
+    .checkbox-row input[type="checkbox"] { width: auto; margin: 2px 0 0 0; flex-shrink: 0; }
+    .checkbox-row a { color: var(--accent); cursor: pointer; text-decoration: underline; }
+    .auth-error-msg { color: var(--danger); font-size: 0.8rem; min-height: 18px; margin-top: 4px; }
+    .auth-tabs { display: flex; gap: 10px; margin-bottom: 10px; }
+    .auth-tab { flex: 1; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-dim); background: rgba(255,255,255,0.03); }
+    .auth-tab.active { background: var(--accent); color: black; }
   </style>
 </head>
 <body>
@@ -87,86 +137,178 @@
   <aside class="sidebar">
     <div class="brand"><h2><i class="fa-solid fa-clapperboard"></i> WaveTok</h2></div>
     <nav class="side-menu">
-      <div class="menu-item" onclick="mostrarSeccion('feed')"><i class="fa-solid fa-house"></i> <span>Para ti</span></div>
-      <div class="menu-item active" onclick="mostrarSeccion('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chats privados</span></div>
-      <div class="menu-item" onclick="mostrarSeccion('perfil')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
+      <div class="menu-item active" id="btn-nav-plataforma" onclick="activarFiltroPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Para ti (Sala)</span></div>
+      <div class="menu-item" id="btn-nav-perfil" onclick="activarFiltroPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
     </nav>
-    <div style="margin-top:auto; display:flex; flex-direction:column; gap:10px;">
-      <button class="btn-solid" onclick="abrirModal('modalSubirVideo')"><i class="fa-solid fa-circle-plus"></i> Subir video</button>
-      <div class="footer-id" id="lblCodeFooter">ID: Desconectado</div>
+    <div class="separator">Herramientas</div>
+    <div class="side-menu">
+      <div class="menu-item" onclick="abrirCapaModal('modalSubirVideo')"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Publicar Video</span></div>
     </div>
+    <div class="my-code-footer" id="labelFooterMyCode">Sesión: <b>Desconectado</b></div>
   </aside>
 
   <div class="main-layout">
-    
-    <div class="chats-master">
-      <div class="top-bar-chats">
-        <button class="btn-solid" onclick="abrirModal('connectModal')"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button>
-      </div>
-      <div style="flex:1; overflow-y:auto;" id="chatListContainer"></div>
-    </div>
 
-    <div class="chats-detail">
-      <div class="chat-header" id="chatDetailHeader" style="visibility: hidden;">
-        <h4 id="targetChatName" style="color: white;">Selecciona un amigo</h4>
-        <div style="display: flex; gap: 15px; color: var(--accent); font-size: 1.2rem; cursor: pointer;">
-          <i class="fa-solid fa-phone" onclick="iniciarLlamadaWebRTC(false)"></i>
-          <i class="fa-solid fa-video" onclick="iniciarLlamadaWebRTC(true)"></i>
-        </div>
-      </div>
-      
-      <div class="messages-container" id="msgBox"></div>
-      
-      <div class="input-bar-container">
-        <div class="sticker-popover" id="popoverStickersBox">
-          <div style="display:flex; justify-content:between; align-items:center; font-size:0.8rem; color:var(--accent); font-weight:bold; margin-bottom:5px;">
-            <span>Stickers Animados</span>
-            <i class="fa-solid fa-xmark" style="cursor:pointer; color:white; margin-left:auto;" onclick="alternarStickers()"></i>
+    <div class="screen active" id="screen-plataforma">
+
+      <div class="feed-container-box">
+        <div class="top-bar-feed">
+          <h3>Para ti</h3>
+          <div class="search-box-container">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="inputBuscarDescripcion" placeholder="Buscar..." oninput="filtrarVideosSistema()">
           </div>
-          <div class="sticker-grid" id="containerGridStickers"></div>
         </div>
-
-        <div class="input-bar" id="chatInputBarArea" style="display: none;">
-          <label for="chatInputFileImage" style="cursor:pointer;"><i class="fa-solid fa-paperclip"></i></label>
-          <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="enviarImagenChat(this)">
-          
-          <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensajeTexto()">
-          
-          <i class="fa-regular fa-face-smile" onclick="alternarStickers()"></i>
-          <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="toggleGrabacionAudio()"></i>
-          <i class="fa-solid fa-paper-plane" onclick="enviarMensajeTexto()"></i>
+        <div class="tok-feed-view">
+          <button class="nav-arrow arrow-left" onclick="controlNavegacionFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="nav-arrow arrow-right" onclick="controlNavegacionFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
+          <div class="tok-wrapper" id="tokFeedIterator"></div>
+        </div>
+        <div class="feed-comments-panel">
+          <div class="comments-scroll" id="boxCommentsFeedVideo"></div>
+          <div class="comment-input-area">
+            <input type="text" id="inputNewCommentFeed" placeholder="Comentar..." onkeypress="if(event.key==='Enter') agregarComentarioVideoActual()">
+            <button class="btn-solid" style="width:auto; padding: 5px 15px;" onclick="agregarComentarioVideoActual()"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
         </div>
       </div>
+
+      <div class="chats-master">
+        <div class="top-bar-chats">
+          <button class="btn-solid" onclick="abrirCapaModal('connectModal')"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button>
+        </div>
+        <div style="flex:1; overflow-y:auto;" id="chatListContainer"></div>
+      </div>
+
+      <div class="chats-detail">
+        <div class="chat-header" id="chatDetailHeader" style="visibility: hidden;">
+          <h4 id="targetChatName" style="color: white;">Amigo</h4>
+          <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem; cursor: pointer;">
+            <i class="fa-solid fa-phone" onclick="ejecutarEnlaceWebRTC(false)"></i>
+            <i class="fa-solid fa-video" onclick="ejecutarEnlaceWebRTC(true)"></i>
+          </div>
+        </div>
+
+        <div class="messages-container" id="msgBox"></div>
+
+        <div class="input-bar-container">
+          <div class="sticker-popover" id="popoverStickersBox">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--accent); font-weight:bold;">
+              <span>Stickers</span>
+              <i class="fa-solid fa-xmark" style="cursor:pointer; color:white;" onclick="alternarCapaStickers()"></i>
+            </div>
+            <div class="sticker-grid" id="containerGridStickers"></div>
+          </div>
+
+          <div class="input-bar" id="chatInputBarArea" style="display: none;">
+            <label for="chatInputFileImage" style="cursor:pointer; display: flex; align-items: center;"><i class="fa-solid fa-paperclip"></i></label>
+            <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="procesarImagenBinariaChat(this)">
+            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensajeTextoBase()">
+            <i class="fa-regular fa-face-smile" onclick="alternarCapaStickers()"></i>
+            <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="gestionarMecanismoAudioGrabacion()"></i>
+            <i class="fa-solid fa-paper-plane" onclick="enviarMensajeTextoBase()"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="right-stream-panel">
+        <h5 style="color:var(--accent); font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;"><i class="fa-solid fa-satellite-dish"></i> Sala de Video</h5>
+        <div class="video-box-call"><video id="localStreamVideo" autoplay muted playsinline></video><div class="video-label">Mi Cámara</div></div>
+        <div class="video-box-call"><video id="remoteStreamVideo" autoplay playsinline></video><div class="video-label" id="lblRemoteLabel">Remoto</div></div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:auto;">
+          <button class="btn-solid" style="background:#0288d1; color:white;" onclick="intercambiarCapturaPantallaWebRTC()"><i class="fa-solid fa-desktop"></i> Compartir Pantalla</button>
+          <button class="btn-danger" onclick="finalizarEnlaceLlamada()"><i class="fa-solid fa-phone-slash"></i> Colgar</button>
+        </div>
+      </div>
+
     </div>
 
-    <div class="right-stream-panel">
-      <h5 style="color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Transmisión / Sala</h5>
-      
-      <div class="video-box-call">
-        <video id="localStreamVideo" autoplay muted playsinline></video>
-        <div class="video-label">Tú (Mi Cámara/Pantalla)</div>
-      </div>
-
-      <div class="video-box-call">
-        <video id="remoteStreamVideo" autoplay playsinline></video>
-        <div class="video-label" id="lblRemoteLabel">Amigo (Remoto)</div>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:10px; margin-top:auto;">
-        <button class="btn-solid" style="background:#0288d1; color:white;" onclick="toggleCompartirPantalla()"><i class="fa-solid fa-desktop"></i> Compartir Pantalla</button>
-        <button class="btn-danger" onclick="colgarLlamadaWebRTC()">Desconectarse / Colgar</button>
+    <div class="screen" id="screen-perfil">
+      <div class="top-bar-feed" style="width:100%;"><h3>Mi Perfil WaveTok</h3></div>
+      <div style="padding:5px; text-align:center; max-width:400px; margin: 40px auto;">
+        <div class="avatar" style="width:90px; height:90px; font-size:2.2rem; margin:0 auto 20px auto;" id="avatarPerfilGrande">U</div>
+        <h2 id="txtLabelPerfilID" style="color: var(--accent); margin-bottom:8px;">@ID</h2>
+        <p id="txtLabelPerfilEmail" style="color: var(--text-dim); margin-bottom:25px; font-size:0.85rem;"></p>
+        <button class="btn-danger" onclick="destruirCredencialesSesion()">Cerrar Sesión</button>
       </div>
     </div>
 
   </div>
 
-  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;"><div class="modal-box"><h2>Crear tu ID WaveTok</h2><input type="text" id="inputUsernameUnico" placeholder="Tu nombre único de usuario"><button class="btn-solid" onclick="registrarUsuarioLocal()">Ingresar</button></div></div>
-  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Vincular Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID exacto de tu amigo"><button class="btn-solid" onclick="vincularAmigoLista()">Vincular</button><p onclick="cerrarModal('connectModal')" style="margin-top:12px; font-size:0.8rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
-  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="URL del video .mp4"><input type="text" id="inputVideoCaption" placeholder="Descripción..."><button class="btn-solid" onclick="subirVideoFirebase()">Subir</button><p onclick="cerrarModal('modalSubirVideo')" style="margin-top:12px; font-size:0.8rem; cursor:pointer; color:var(--text-dim)">Cancelar</p></div></div>
+  <!-- MODAL DE AUTENTICACIÓN (registro / inicio de sesión) -->
+  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;">
+    <div class="modal-box">
+      <h2 style="color:var(--accent); margin-bottom:15px;"><i class="fa-solid fa-clapperboard"></i> WaveTok</h2>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tabRegistro" onclick="cambiarPestanaAuth('registro')">Crear cuenta</div>
+        <div class="auth-tab" id="tabLogin" onclick="cambiarPestanaAuth('login')">Ya tengo cuenta</div>
+      </div>
+
+      <input type="email" id="inputEmailAuth" placeholder="Correo electrónico" autocomplete="email">
+      <input type="password" id="inputPassAuth" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="current-password">
+
+      <div class="checkbox-row" id="filaTerminos">
+        <input type="checkbox" id="checkTerminos">
+        <label for="checkTerminos">He leído y acepto los <a onclick="abrirCapaModal('modalTerminos')">Términos y Condiciones</a> y la Política de Privacidad.</label>
+      </div>
+
+      <div class="auth-error-msg" id="lblErrorAuth"></div>
+
+      <button class="btn-solid" id="btnAccionAuth" onclick="registrarUsuario()">Crear cuenta</button>
+    </div>
+  </div>
+
+  <!-- MODAL TÉRMINOS Y CONDICIONES -->
+  <div class="modal-bg" id="modalTerminos">
+    <div class="modal-box wide">
+      <h3 style="color:var(--accent); margin-bottom:5px;">Términos y Condiciones</h3>
+      <p style="color:var(--text-dim); font-size:0.8rem; margin-bottom:10px;">Última actualización: 18/07/2026</p>
+      <div class="terms-scroll-area">
+        <h4>1. Aceptación</h4>
+        <p>Al crear una cuenta o usar WaveTok, aceptas estos Términos y Condiciones y nuestra Política de Privacidad. Si no estás de acuerdo, no debes usar la plataforma.</p>
+
+        <h4>2. Edad mínima</h4>
+        <p>WaveTok no está dirigida a menores de 13 años. Si tienes entre 13 y 18 años, necesitas el permiso de tu padre, madre o tutor legal para usar el servicio.</p>
+
+        <h4>3. Cuenta de usuario</h4>
+        <p>Eres responsable de mantener la confidencialidad de tu contraseña y de toda la actividad realizada desde tu cuenta. Debes notificarnos ante cualquier uso no autorizado.</p>
+
+        <h4>4. Contenido del usuario</h4>
+        <p>Eres el único responsable de los videos, mensajes, imágenes, audios y demás contenido que publiques o envíes. Al publicar contenido, nos otorgas una licencia no exclusiva para almacenarlo y mostrarlo dentro de la plataforma, únicamente con el fin de operar el servicio.</p>
+
+        <h4>5. Conducta prohibida</h4>
+        <p>No está permitido publicar contenido ilegal, que incite al odio o la violencia, que sexualice a menores, que acose a otras personas, ni suplantar la identidad de terceros. Nos reservamos el derecho de eliminar contenido y suspender cuentas que incumplan esta norma.</p>
+
+        <h4>6. Videollamadas y transmisiones en vivo</h4>
+        <p>Las llamadas de audio/video se establecen directamente entre los dispositivos de los usuarios (conexión punto a punto). No graban ni almacenan las transmisiones, pero no podemos garantizar el comportamiento de la otra persona en la llamada.</p>
+
+        <h4>7. Moderación</h4>
+        <p>Podemos revisar, eliminar contenido o suspender cuentas que violen estos términos, aunque no garantizamos una moderación exhaustiva de todo el contenido publicado por usuarios.</p>
+
+        <h4>8. Privacidad de los datos</h4>
+        <p>Recopilamos tu correo electrónico, identificador de cuenta, mensajes, contenido multimedia que subas y metadatos técnicos necesarios para operar el servicio (por ejemplo, marcas de tiempo). No vendemos tus datos personales a terceros.</p>
+
+        <h4>9. Limitación de responsabilidad</h4>
+        <p>El servicio se ofrece "tal cual". No garantizamos disponibilidad continua ni nos hacemos responsables de daños derivados del uso de la plataforma o del contenido publicado por otros usuarios.</p>
+
+        <h4>10. Cambios en los términos</h4>
+        <p>Podemos actualizar estos términos en cualquier momento. El uso continuado del servicio después de un cambio implica la aceptación de los nuevos términos.</p>
+
+        <h4>11. Contacto</h4>
+        <p>Para dudas, reportes de contenido o solicitudes relacionadas con tus datos personales, contáctanos a través de los medios indicados en la plataforma.</p>
+      </div>
+      <button class="btn-solid" onclick="cerrarCapaModal('modalTerminos')">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Sincronizar Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID de tu amigo"><button class="btn-solid" onclick="inyectarAmigoListaLocal()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
+  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="URL .mp4 externa"><input type="text" id="inputVideoCaption" placeholder="Descripción..."><button class="btn-solid" onclick="enviarVideoEstructuraFirebase()">Indexar al Feed</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Volver</p></div></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA",
@@ -179,15 +321,22 @@
 
     const app = initializeApp(firebaseConfig);
     window.fsdb = getFirestore(app);
-    window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp;
-    
-    window.inicializarApp();
+    window.fbAuth = getAuth(app);
+
+    window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp; window.doc = doc; window.updateDoc = updateDoc; window.increment = increment;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
+
+    window.desplegarSecuenciaInicioBase();
   </script>
 
   <script>
-    let peerInstance = null, mySessionId = "", currentTargetPeerId = null;
-    let miStreamLocal = null, llamadaActualWebRTC = null, screenTrack = null, estaCompartiendoPantalla = false;
-    let unsubscribirMensajes = null, grabadorMedia = null, fragmentosAudio = [], grabandoAudio = false;
+    let peerInstance = null, mySessionId = "", mySessionEmail = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
+    let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
+    let unsubscribirEscuchaFirestore = null, unsubscribirComentariosVideo = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
+    let pestanaAuthActual = 'registro';
 
     const bibliotecaStickers = [
       "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
@@ -198,102 +347,283 @@
       "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp"
     ];
 
-    window.inicializarApp = () => {
-      mySessionId = localStorage.getItem('wt_session_peer_id') || "";
-      cargarStickersGid();
-      if (mySessionId) {
-        document.getElementById('modalRegistroInicial').style.display = 'none';
-        document.getElementById('lblCodeFooter').innerHTML = `Tu código: <b>${mySessionId}</b>`;
-        conectarPeerJS(mySessionId);
-      }
+    window.desplegarSecuenciaInicioBase = () => {
+      cargarStickersEnPanel();
+      escucharFeedVideosGlobal();
+
+      // Escucha el estado real de autenticación de Firebase (reemplaza el localStorage anterior)
+      window.onAuthStateChanged(window.fbAuth, (user) => {
+        if (user) {
+          mySessionId = user.uid;
+          mySessionEmail = user.email || "";
+          document.getElementById('modalRegistroInicial').style.display = 'none';
+          inicializarCanalesPeerMecanismo(mySessionId);
+          document.getElementById('txtLabelPerfilID').innerText = `@${mySessionId.substring(0, 8)}`;
+          document.getElementById('txtLabelPerfilEmail').innerText = mySessionEmail;
+          document.getElementById('avatarPerfilGrande').innerText = (mySessionEmail || mySessionId).substring(0,2).toUpperCase();
+          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>${mySessionEmail || mySessionId.substring(0,8)}</b>`;
+          compilarRenderContactoLista();
+        } else {
+          mySessionId = "";
+          mySessionEmail = "";
+          document.getElementById('modalRegistroInicial').style.display = 'flex';
+          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>Desconectado</b>`;
+        }
+      });
     };
 
-    function registrarUsuarioLocal() {
-      let user = document.getElementById('inputUsernameUnico').value.trim();
-      if(!user) return alert("Ingresa un ID");
-      localStorage.setItem('wt_session_peer_id', user);
-      location.reload();
+    function cambiarPestanaAuth(modo) {
+      pestanaAuthActual = modo;
+      document.getElementById('lblErrorAuth').innerText = '';
+      const tabRegistro = document.getElementById('tabRegistro');
+      const tabLogin = document.getElementById('tabLogin');
+      const filaTerminos = document.getElementById('filaTerminos');
+      const btn = document.getElementById('btnAccionAuth');
+
+      if (modo === 'registro') {
+        tabRegistro.classList.add('active');
+        tabLogin.classList.remove('active');
+        filaTerminos.style.display = 'flex';
+        btn.innerText = 'Crear cuenta';
+        btn.setAttribute('onclick', 'registrarUsuario()');
+      } else {
+        tabLogin.classList.add('active');
+        tabRegistro.classList.remove('active');
+        filaTerminos.style.display = 'none';
+        btn.innerText = 'Iniciar sesión';
+        btn.setAttribute('onclick', 'iniciarSesionUsuario()');
+      }
     }
 
-    function conectarPeerJS(idMio) {
+    async function registrarUsuario() {
+      const email = document.getElementById('inputEmailAuth').value.trim();
+      const pass = document.getElementById('inputPassAuth').value;
+      const aceptaTerminos = document.getElementById('checkTerminos').checked;
+      const lblError = document.getElementById('lblErrorAuth');
+      lblError.innerText = '';
+
+      if (!aceptaTerminos) { lblError.innerText = "Debes aceptar los Términos y Condiciones."; return; }
+      if (!email || pass.length < 6) { lblError.innerText = "Ingresa un correo válido y una contraseña de al menos 6 caracteres."; return; }
+
+      try {
+        await window.createUserWithEmailAndPassword(window.fbAuth, email, pass);
+        // onAuthStateChanged se encarga de cerrar el modal y cargar la sesión
+      } catch (e) {
+        lblError.innerText = traducirErrorAuth(e.code);
+      }
+    }
+
+    async function iniciarSesionUsuario() {
+      const email = document.getElementById('inputEmailAuth').value.trim();
+      const pass = document.getElementById('inputPassAuth').value;
+      const lblError = document.getElementById('lblErrorAuth');
+      lblError.innerText = '';
+
+      if (!email || !pass) { lblError.innerText = "Ingresa tu correo y contraseña."; return; }
+
+      try {
+        await window.signInWithEmailAndPassword(window.fbAuth, email, pass);
+      } catch (e) {
+        lblError.innerText = traducirErrorAuth(e.code);
+      }
+    }
+
+    function traducirErrorAuth(code) {
+      const mapa = {
+        'auth/email-already-in-use': 'Ese correo ya tiene una cuenta registrada.',
+        'auth/invalid-email': 'El correo electrónico no es válido.',
+        'auth/weak-password': 'La contraseña es demasiado débil.',
+        'auth/user-not-found': 'No existe una cuenta con ese correo.',
+        'auth/wrong-password': 'Contraseña incorrecta.',
+        'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+        'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde.'
+      };
+      return mapa[code] || 'Ocurrió un error. Intenta de nuevo.';
+    }
+
+    function inicializarCanalesPeerMecanismo(idMio) {
+      if (peerInstance) return; // evita reinicializar si ya hay una conexión activa
       peerInstance = new Peer(idMio, { config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] } });
-      peerInstance.on('open', () => { renderizarListaContactos(); });
-      peerInstance.on('call', (call) => {
-        if(confirm(`¿Contestar llamada/transmisión de ${call.peer}?`)) {
+      peerInstance.on('call', (incomingCall) => {
+        if(confirm(`¿Contestar transmisión de ${incomingCall.peer}?`)) {
           navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             miStreamLocal = stream;
             document.getElementById('localStreamVideo').srcObject = stream;
-            call.answer(stream);
-            llamadaActualWebRTC = call;
-            call.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
+            incomingCall.answer(stream);
+            llamadaActualWebRTC = incomingCall;
+            incomingCall.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
           });
         }
       });
     }
 
-    function cargarStickersGid() {
-      const g = document.getElementById('containerGridStickers');
-      g.innerHTML = '';
-      bibliotecaStickers.forEach(url => {
-        g.innerHTML += `<img src="${url}" class="sticker-option" onclick="enviarSticker('${url}')">`;
+    function activarFiltroPantalla(pantalla) {
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+      document.getElementById(`screen-${pantalla}`).classList.add('active');
+      document.getElementById(`btn-nav-${pantalla}`).classList.add('active');
+
+      if(pantalla !== 'plataforma') {
+        document.querySelectorAll('.tok-video').forEach(v => v.pause());
+      } else {
+        controlSecuenciaAudioVideoFeed();
+      }
+    }
+
+    function escucharFeedVideosGlobal() {
+      const backupVideo = [{ id:"def", author:"Francia_Mundial", caption:"¿Quién eliminó a Francia en cada Copa del Mundo?", url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:12 }];
+
+      try {
+        const q = window.query(window.collection(window.fsdb, "videos"), window.orderBy("createdAt", "desc"));
+        window.onSnapshot(q, (snapshot) => {
+          let items = [];
+          snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+          masterVideoArray = items.length ? items : backupVideo;
+          filtrarVideosSistema();
+        }, (err) => {
+          masterVideoArray = backupVideo;
+          filtrarVideosSistema();
+        });
+      } catch(e) {
+        masterVideoArray = backupVideo;
+        filtrarVideosSistema();
+      }
+    }
+
+    function filtrarVideosSistema() {
+      let b = document.getElementById('inputBuscarDescripcion').value.toLowerCase().trim();
+      vidsFiltradosArray = b ? masterVideoArray.filter(v => v.caption?.toLowerCase().includes(b)) : [...masterVideoArray];
+      currentFeedIndex = 0;
+      compilarRenderFeedVideos();
+    }
+
+    function compilarRenderFeedVideos() {
+      const container = document.getElementById('tokFeedIterator');
+      container.innerHTML = '';
+      if(!vidsFiltradosArray.length) return;
+
+      vidsFiltradosArray.forEach((vid, ind) => {
+        container.innerHTML += `
+          <div class="tok-post">
+            <video class="tok-video" src="${vid.url}" loop id="feedVideoElemento_${ind}" onclick="controlEstadoReproductor(this)"></video>
+            <div class="tok-actions">
+              <div class="circle-action" onclick="inyectarLikeVideoBase('${vid.id}')"><i class="fa-solid fa-heart" style="color:#ff1744"></i></div><span>${vid.likes||0}</span>
+            </div>
+            <div class="tok-meta"><h3>@${vid.author}</h3><p>${vid.caption}</p></div>
+          </div>`;
+      });
+      controlSecuenciaAudioVideoFeed();
+    }
+
+    function controlEstadoReproductor(vidNode) {
+      if(vidNode.paused) {
+        vidNode.play();
+      } else {
+        vidNode.pause();
+      }
+    }
+
+    function controlNavegacionFeed(dir) {
+      let target = currentFeedIndex + dir;
+      if (target >= 0 && target < vidsFiltradosArray.length) {
+        currentFeedIndex = target;
+        controlSecuenciaAudioVideoFeed();
+      }
+    }
+
+    function controlSecuenciaAudioVideoFeed() {
+      const wrapper = document.getElementById('tokFeedIterator');
+      if(!wrapper) return;
+      wrapper.querySelectorAll('video').forEach(v => v.pause());
+
+      wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
+
+      setTimeout(() => {
+        let targetVideo = document.getElementById(`feedVideoElemento_${currentFeedIndex}`);
+        if(targetVideo) {
+          targetVideo.muted = false;
+          targetVideo.play().catch(()=>{});
+          conectarEscuchaComentariosVideo(vidsFiltradosArray[currentFeedIndex].id);
+        }
+      }, 250);
+    }
+
+    function conectarEscuchaComentariosVideo(videoId) {
+      if(unsubscribirComentariosVideo) unsubscribirComentariosVideo();
+      if(!videoId || videoId === "def") {
+        document.getElementById('boxCommentsFeedVideo').innerHTML = `<p style="color:var(--text-dim);padding:10px;">Sin comentarios.</p>`;
+        return;
+      }
+      const q = window.query(window.collection(window.fsdb, "videos", videoId, "comentarios"), window.orderBy("createdAt", "asc"));
+      unsubscribirComentariosVideo = window.onSnapshot(q, (snapshot) => {
+        const box = document.getElementById('boxCommentsFeedVideo');
+        box.innerHTML = '';
+        snapshot.forEach(doc => {
+          let c = doc.data();
+          box.innerHTML += `<div class="comment-line"><b>@${c.author}:</b> ${c.text}</div>`;
+        });
+        box.scrollTop = box.scrollHeight;
       });
     }
 
-    function alternarStickers() {
-      const p = document.getElementById('popoverStickersBox');
-      p.style.display = (p.style.display === 'flex') ? 'none' : 'flex';
-    }
+    async function agregarComentarioVideoActual() {
+      let input = document.getElementById('inputNewCommentFeed');
+      if(!input.value.trim() || !mySessionId) return;
+      let targetVideo = vidsFiltradosArray[currentFeedIndex];
+      if(!targetVideo || targetVideo.id === "def") return;
 
-    async function enviarSticker(url) {
-      if(!currentTargetPeerId) return;
-      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-        sender: mySessionId, text: url, type: "sticker", timestamp: window.serverTimestamp()
+      await window.addDoc(window.collection(window.fsdb, "videos", targetVideo.id, "comentarios"), {
+        author: mySessionEmail || "Anonimo", text: input.value.trim(), createdAt: window.serverTimestamp()
       });
-      alternarStickers();
+      input.value = '';
     }
 
-    function abrirChatConAmigo(id) {
+    async function inyectarLikeVideoBase(idVideoDoc) {
+      if(!idVideoDoc || idVideoDoc === "def") return;
+      const docRef = window.doc(window.fsdb, "videos", idVideoDoc);
+      await window.updateDoc(docRef, { likes: window.increment(1) });
+    }
+
+    function desplegarVentanaConversacionIndividual(id) {
       currentTargetPeerId = id;
-      document.getElementById('targetChatName').innerText = `Chat: ${id.toUpperCase()}`;
+      document.getElementById('targetChatName').innerText = `@${id.toUpperCase()}`;
       document.getElementById('chatDetailHeader').style.visibility = 'visible';
       document.getElementById('chatInputBarArea').style.display = 'flex';
-      document.getElementById('lblRemoteLabel').innerText = id.toUpperCase();
-      
-      document.querySelectorAll('.chat-item').forEach(c => c.classList.remove('active'));
-      event.currentTarget.classList.add('active');
+      document.getElementById('lblRemoteLabel').innerText = `Remoto: ${id.toUpperCase()}`;
 
-      conectarSalaMensajes(id);
+      document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
+      escucharMensajesFirestore(id);
     }
 
-    function conectarSalaMensajes(targetId) {
-      if(unsubscribirMensajes) unsubscribirMensajes();
+    function escucharMensajesFirestore(targetId) {
+      if(unsubscribirEscuchaFirestore) unsubscribirEscuchaFirestore();
       let salaId = [mySessionId, targetId].sort().join("_CH_");
       const q = window.query(window.collection(window.fsdb, "salas", salaId, "mensajes"), window.orderBy("timestamp", "asc"));
       const box = document.getElementById('msgBox');
 
-      unsubscribirMensajes = window.onSnapshot(q, (snapshot) => {
+      unsubscribirEscuchaFirestore = window.onSnapshot(q, (snapshot) => {
         box.innerHTML = '';
         snapshot.forEach((doc) => {
           let d = doc.data();
-          let mio = d.sender === mySessionId;
+          let esMio = d.sender === mySessionId;
           if(d.type === "sticker") {
-            box.innerHTML += `<div class="bubble ${mio?'sent':'recv'}"><b>@${d.sender}:</b><img src="${d.text}" class="sticker-msg-render"/></div>`;
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><img src="${d.text}" class="sticker-msg-render"/></div>`;
           } else if(d.type === "image") {
-            box.innerHTML += `<div class="bubble ${mio?'sent':'recv'}"><b>@${d.sender}:</b><img src="${d.text}" class="chat-img-render"/></div>`;
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><img src="${d.text}" class="chat-img-render"/></div>`;
           } else if(d.type === "audio") {
-            box.innerHTML += `<div class="bubble ${mio?'sent':'recv'}"><b>@${d.sender}:</b><audio src="${d.text}" controls class="chat-audio-render"></audio></div>`;
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><audio src="${d.text}" controls class="chat-audio-render"></audio></div>`;
           } else {
-            box.innerHTML += `<div class="bubble ${mio?'sent':'recv'}"><b>@${d.sender}:</b><br>${d.text}</div>`;
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}">${d.text}</div>`;
           }
         });
         box.scrollTop = box.scrollHeight;
       });
     }
 
-    async function enviarMensajeTexto() {
+    async function enviarMensajeTextoBase() {
       const input = document.getElementById('chatInput');
-      if(!input.value.trim() || !currentTargetPeerId) return;
+      if(!input.value.trim() || !currentTargetPeerId || !mySessionId) return;
       let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
       await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
         sender: mySessionId, text: input.value.trim(), type: "text", timestamp: window.serverTimestamp()
@@ -301,98 +631,140 @@
       input.value = '';
     }
 
-    function enviarImagenChat(input) {
-      if(!input.files[0] || !currentTargetPeerId) return;
-      let reader = new FileReader();
-      reader.onload = async (e) => {
+    function procesarImagenBinariaChat(input) {
+      if(!currentTargetPeerId || !input.files[0] || !mySessionId) return;
+      let lector = new FileReader();
+      lector.onload = async (e) => {
         let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
         await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
           sender: mySessionId, text: e.target.result, type: "image", timestamp: window.serverTimestamp()
         });
       };
-      reader.readAsDataURL(input.files[0]);
+      lector.readAsDataURL(input.files[0]);
     }
 
-    function toggleGrabacionAudio() {
-      const btn = document.getElementById('btnIconoMicrofonoAudio');
-      if(!grabandoAudio) {
+    function gestionarMecanismoAudioGrabacion() {
+      if (!currentTargetPeerId || !mySessionId) return;
+      const btnMic = document.getElementById('btnIconoMicrofonoAudio');
+
+      if (!estaGrabandoAudio) {
         navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-          grabadorMedia = new MediaRecorder(stream);
-          fragmentosAudio = [];
-          grabadorMedia.ondataavailable = e => fragmentosAudio.push(e.data);
-          grabadorMedia.onstop = () => {
-            let blob = new Blob(fragmentosAudio, { type: 'audio/mp3' });
-            let r = new FileReader();
-            r.onload = async (e) => {
+          grabadorAudioMedia = new MediaRecorder(stream);
+          fragmentosAudioGrabados = [];
+          grabadorAudioMedia.ondataavailable = e => fragmentosAudioGrabados.push(e.data);
+          grabadorAudioMedia.onstop = () => {
+            let audioBlob = new Blob(fragmentosAudioGrabados, { type: 'audio/mp3' });
+            let lector = new FileReader();
+            lector.onload = async (e) => {
               let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
               await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
                 sender: mySessionId, text: e.target.result, type: "audio", timestamp: window.serverTimestamp()
               });
             };
-            r.readAsDataURL(blob);
+            lector.readAsDataURL(audioBlob);
           };
-          grabadorMedia.start();
-          grabandoAudio = true;
-          btn.classList.add('mic-recording');
+          grabadorAudioMedia.start();
+          estaGrabandoAudio = true;
+          btnMic.classList.add('mic-recording');
         });
       } else {
-        if(grabadorMedia) grabadorMedia.stop();
-        grabandoAudio = false;
-        btn.classList.remove('mic-recording');
+        if (grabadorAudioMedia) grabadorAudioMedia.stop();
+        estaGrabandoAudio = false;
+        btnMic.classList.remove('mic-recording');
       }
     }
 
-    function iniciarLlamadaWebRTC(conVideo) {
-      if(!currentTargetPeerId) return;
-      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then(stream => {
+    function ejecutarEnlaceWebRTC(conVideo) {
+      if(!currentTargetPeerId) return alert("Selecciona un contacto.");
+      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
         miStreamLocal = stream;
         document.getElementById('localStreamVideo').srcObject = stream;
         let call = peerInstance.call(currentTargetPeerId, stream);
         llamadaActualWebRTC = call;
-        call.on('stream', rStream => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
+        call.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
       });
     }
 
-    function toggleCompartirPantalla() {
-      if(!estaCompartiendoPantalla) {
-        navigator.mediaDevices.getDisplayMedia({ video: true }).then(stream => {
-          screenTrack = stream.getVideoTracks()[0];
+    function intercambiarCapturaPantallaWebRTC() {
+      if(!llamadaActualWebRTC) return alert("No hay transmisión activa.");
+      if(!transmitiendoPantalla) {
+        navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+          transmisorPantallaTrack = stream.getVideoTracks()[0];
           let sender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if(sender) sender.replaceTrack(screenTrack);
+          if(sender) sender.replaceTrack(transmisorPantallaTrack);
           document.getElementById('localStreamVideo').srcObject = stream;
-          estaCompartiendoPantalla = true;
+          transmitiendoPantalla = true;
         });
       }
     }
 
-    function colgarLlamadaWebRTC() {
+    function finalizarEnlaceLlamada() {
       if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
       document.getElementById('localStreamVideo').srcObject = null;
       document.getElementById('remoteStreamVideo').srcObject = null;
+      transmitiendoPantalla = false;
     }
 
-    function vincularAmigoLista() {
-      let id = document.getElementById('inputPeerIdDestino').value.trim();
-      if(!id) return;
-      let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
-      if(!list.includes(id)) { list.push(id); localStorage.setItem('wave_chats', JSON.stringify(list)); }
-      renderizarListaContactos();
-      cerrarModal('connectModal');
+    function inyectarAmigoListaLocal() {
+      let t = document.getElementById('inputPeerIdDestino').value.trim();
+      if(!t || !mySessionId) return;
+      let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
+      if(!list.includes(t)) { list.push(t); localStorage.setItem('wave_chats_' + mySessionId, JSON.stringify(list)); }
+      compilarRenderContactoLista();
+      cerrarCapaModal('connectModal');
     }
 
-    function renderizarListaContactos() {
-      let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
+    function compilarRenderContactoLista() {
+      if (!mySessionId) return;
+      let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
       const container = document.getElementById('chatListContainer');
       container.innerHTML = '';
       list.forEach(id => {
-        container.innerHTML += `<div class="chat-item" onclick="abrirChatConAmigo('${id}')"><div class="avatar">${id.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">${id.toUpperCase()}</h5></div>`;
+        container.innerHTML += `<div class="chat-item" onclick="desplegarVentanaConversacionIndividual('${id}')"><div class="avatar">${id.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">${id.toUpperCase()}</h5></div>`;
       });
     }
 
-    function abrirModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
-    function mostrarSeccion(sec) { console.log("Cambiando a " + sec); }
+    async function enviarVideoEstructuraFirebase() {
+      if (!mySessionId) return alert("Debes iniciar sesión.");
+      let caption = document.getElementById('inputVideoCaption').value.trim() || "WaveTok Clip";
+      let url = document.getElementById('inputVideoUrlDirecta').value.trim();
+      if(!url) return alert("URL requerida.");
+      await window.addDoc(window.collection(window.fsdb, "videos"), {
+        author: mySessionEmail || "Anonimo", caption: caption, url: url, likes: 0, createdAt: window.serverTimestamp()
+      });
+      cerrarCapaModal('modalSubirVideo');
+    }
+
+    function cargarStickersEnPanel() {
+      const grid = document.getElementById('containerGridStickers');
+      grid.innerHTML = '';
+      bibliotecaStickers.forEach(url => {
+        grid.innerHTML += `<img src="${url}" class="sticker-option" onclick="ejecutarDespachoSticker('${url}')">`;
+      });
+    }
+    function alternarCapaStickers() {
+      const box = document.getElementById('popoverStickersBox');
+      box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
+    }
+    async function ejecutarDespachoSticker(url) {
+      if(!currentTargetPeerId || !mySessionId) return;
+      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+        sender: mySessionId, text: url, type: "sticker", timestamp: window.serverTimestamp()
+      });
+      alternarCapaStickers();
+    }
+
+    function destruirCredencialesSesion() {
+      window.signOut(window.fbAuth);
+      peerInstance = null;
+      currentTargetPeerId = null;
+      document.getElementById('chatDetailHeader').style.visibility = 'hidden';
+      document.getElementById('chatInputBarArea').style.display = 'none';
+      document.getElementById('msgBox').innerHTML = '';
+    }
+    function abrirCapaModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function cerrarCapaModal(id) { document.getElementById(id).style.display = 'none'; }
   </script>
 </body>
 </html>
-  
