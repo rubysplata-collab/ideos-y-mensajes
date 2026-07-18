@@ -39,16 +39,21 @@
     .screen { display: none; width: 100%; height: 100%; }
     .screen.active { display: flex; }
 
-    /* ESTRUCTURA INTERNA DE LA SALA GLOBAL (3 COLUMNAS) */
-    .feed-container-box { width: 400px; display: flex; flex-direction: column; height: 100%; background: #000; border-right: 1px solid rgba(255, 255, 255, 0.05); position: relative; flex-shrink: 0; }
+    /* ESTRUCTURA INTERNA DE LA SALA GLOBAL (3 COLUMNAS) - CORREGIDO */
+    .feed-container-box { width: 100%; max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: #000; position: relative; flex-shrink: 0; }
     .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; scroll-behavior: smooth; }
-    .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; background: #000; }
-    .tok-video-card { position: relative; width: 240px; max-width: 88%; aspect-ratio: 9/16; border-radius: 16px; overflow: hidden; background: #111; box-shadow: 0 10px 40px rgba(0,0,0,0.55); flex-shrink: 0; }
+    
+    /* CORRECCIÓN: Evitamos que flex-direction horizontal empuje los elementos hacia afuera */
+    .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
+    .tok-video-card { position: relative; width: 100%; height: 100%; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; }
     .tok-video { width: 100%; height: 100%; object-fit: cover; background: #000; cursor: pointer; display: block; }
+    
     .tok-top-overlay { position: absolute; top: 10px; right: 10px; z-index: 12; }
     .tok-author-avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); }
-    .tok-actions { position: static; display: flex; flex-direction: column; gap: 14px; align-items: center; z-index: 99; flex-shrink: 0; }
+    
+    /* CORRECCIÓN: Botones de interacción flotan de forma absoluta sobre el video a la derecha */
+    .tok-actions { position: absolute; right: 15px; bottom: 30px; display: flex; flex-direction: column; gap: 14px; align-items: center; z-index: 99; }
     .tok-actions-avatar-wrap { position: relative; margin-bottom: 4px; }
     .tok-actions-avatar { width: 42px; height: 42px; border-radius: 50%; background: #233138; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: var(--accent); }
     .follow-badge { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 18px; height: 18px; border-radius: 50%; background: var(--danger); color: white; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--bg-dark); }
@@ -57,8 +62,10 @@
     .circle-action:hover { transform: scale(1.1); color: var(--accent); }
     .circle-action.activo { color: var(--danger); border-color: var(--danger); }
     .circle-action.activo.guardado { color: var(--accent); border-color: var(--accent); }
-    .tok-actions span { font-size: 0.78rem; color: var(--text-dim); margin-top: -6px; font-weight: 600; text-align: center; }
-    .tok-meta { position: absolute; left: 16px; bottom: 16px; z-index: 10; max-width: 78%; text-shadow: 1px 1px 5px black; }
+    .tok-actions span { font-size: 0.78rem; color: #fff; margin-top: -6px; font-weight: 600; text-align: center; text-shadow: 1px 1px 3px black; }
+    
+    /* CORRECCIÓN: La metadata del video flota abajo a la izquierda */
+    .tok-meta { position: absolute; left: 16px; bottom: 25px; z-index: 10; max-width: 75%; text-shadow: 1px 1px 5px rgba(0,0,0,0.9); }
     .tok-meta h3 { color: white; margin-bottom: 5px; font-size: 1rem; }
     .tok-meta p { color: #e1e1e6; font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     .tok-meta p.expandido { -webkit-line-clamp: unset; }
@@ -119,7 +126,7 @@
     .sticker-upload-label { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,235,59,0.1); color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
     .sticker-upload-label:hover { background: rgba(255,235,59,0.18); }
 
-    /* SALA DERECHA STRMING */
+    /* SALA DERECHA STREAMING */
     .right-stream-panel { width: 340px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px; gap: 20px; flex-shrink: 0; }
     .video-box-call { width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); position: relative; }
     .video-box-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
@@ -148,57 +155,33 @@
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 10px; }
     .auth-tab { flex: 1; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-dim); background: rgba(255,255,255,0.03); }
     .auth-tab.active { background: var(--accent); color: black; }
-    /* ===================== MODO MÓVIL (estilo TikTok) ===================== */
+    
+    /* MODO MÓVIL (estilo TikTok) */
     @media (max-width: 768px) {
       body { flex-direction: column; }
-
-      /* La barra lateral se convierte en barra inferior de navegación */
-      .sidebar {
-        width: 100%; height: 60px; flex-direction: row; align-items: center; justify-content: space-around;
-        padding: 0 5px; gap: 0; order: 2; border-right: none; border-top: 1px solid rgba(255,255,255,0.08);
-        position: fixed; bottom: 0; left: 0; z-index: 500;
-      }
+      .sidebar { width: 100%; height: 60px; flex-direction: row; align-items: center; justify-content: space-around; padding: 0 5px; gap: 0; order: 2; border-right: none; border-top: 1px solid rgba(255,255,255,0.08); position: fixed; bottom: 0; left: 0; z-index: 500; }
       .brand, .separator, .my-code-footer { display: none; }
       .side-menu { flex-direction: row; gap: 0; }
       .menu-item { flex-direction: column; gap: 2px; padding: 6px 10px; font-size: 0.62rem; border-radius: 10px; }
       .menu-item span { font-size: 0.62rem; }
       .menu-item i { font-size: 1.25rem; width: auto; }
-
       .main-layout { order: 1; height: calc(100% - 60px); }
-
-      /* Pantalla "Para ti": feed vertical a pantalla completa, deslizable con el dedo */
       #screen-plataforma { padding: 0; }
       .feed-container-box { width: 100% !important; max-width: 100% !important; height: 100%; margin: 0 !important; }
-      .top-bar-feed {
-        position: absolute; top: 0; left: 0; right: 0; z-index: 60; height: auto; padding: 12px 15px;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); border-bottom: none;
-      }
+      .top-bar-feed { position: absolute; top: 0; left: 0; right: 0; z-index: 60; height: auto; padding: 12px 15px; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); border-bottom: none; }
       .top-bar-feed h3 { display: none; }
       .search-box-container { width: 140px; background: rgba(0,0,0,0.4); }
-
       .tok-feed-view { height: 100%; }
       .tok-wrapper { flex-direction: column; overflow-y: scroll; overflow-x: hidden; scroll-snap-type: y mandatory; }
       .tok-post { min-width: 100%; min-height: 100%; scroll-snap-align: start; scroll-snap-stop: always; }
-      .nav-arrow { display: none; } /* en móvil se navega deslizando el dedo, no con flechas */
+      .nav-arrow { display: none; }
       .tok-actions { bottom: 90px; right: 12px; }
       .tok-meta { bottom: 20px; left: 16px; max-width: 65%; }
-
-      /* Comentarios como panel deslizante desde abajo (como TikTok), no ocupan espacio fijo */
-      .feed-comments-panel {
-        position: absolute; left: 0; right: 0; bottom: 0; height: 50%; z-index: 80;
-        border-radius: 18px 18px 0 0; transform: translateY(100%); transition: transform 0.25s ease;
-        box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-      }
+      .feed-comments-panel { position: absolute; left: 0; right: 0; bottom: 0; height: 50%; z-index: 80; border-radius: 18px 18px 0 0; transform: translateY(100%); transition: transform 0.25s ease; box-shadow: 0 -4px 20px rgba(0,0,0,0.5); }
       .feed-comments-panel.open { transform: translateY(0); }
-      .comment-toggle-fab {
-        display: flex; position: absolute; right: 20px; bottom: 210px; z-index: 99;
-        background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 46px; height: 46px;
-        border-radius: 50%; color: white; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer;
-      }
+      .comment-toggle-fab { display: flex; position: absolute; right: 20px; bottom: 210px; z-index: 99; background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 46px; height: 46px; border-radius: 50%; color: white; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
       .comments-backdrop { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 75; }
       .comments-backdrop.open { display: block; }
-
-      /* Pantalla de chats: apilada verticalmente, con navegación simple entre lista y conversación */
       #screen-chats { flex-direction: column; }
       .chats-master, .chats-detail, .right-stream-panel { width: 100%; height: 100%; border-right: none; }
       #screen-chats .chats-master, #screen-chats .right-stream-panel { display: none; }
@@ -206,7 +189,6 @@
       #screen-chats:not(.chat-abierto) .chats-detail { display: none; }
       #screen-chats:not(.chat-abierto) .chats-master { display: flex; }
       .btn-volver-lista-chats { display: flex !important; }
-
       .modal-box { max-width: 92%; }
     }
     .btn-volver-lista-chats { display: none; color: var(--accent); font-size: 1.2rem; cursor: pointer; margin-right: 10px; }
@@ -335,31 +317,24 @@
 
   </div>
 
-  <!-- MODAL DE AUTENTICACIÓN (registro / inicio de sesión) -->
   <div class="modal-bg" id="modalRegistroInicial" style="display: flex;">
     <div class="modal-box">
       <h2 style="color:var(--accent); margin-bottom:15px;"><i class="fa-solid fa-clapperboard"></i> WaveTok</h2>
-
       <div class="auth-tabs">
         <div class="auth-tab active" id="tabRegistro" onclick="cambiarPestanaAuth('registro')">Crear cuenta</div>
         <div class="auth-tab" id="tabLogin" onclick="cambiarPestanaAuth('login')">Ya tengo cuenta</div>
       </div>
-
       <input type="email" id="inputEmailAuth" placeholder="Correo electrónico" autocomplete="email">
       <input type="password" id="inputPassAuth" placeholder="Contraseña (mín. 6 caracteres)" autocomplete="current-password">
-
       <div class="checkbox-row" id="filaTerminos">
         <input type="checkbox" id="checkTerminos">
         <label for="checkTerminos">He leído y acepto los <a onclick="abrirCapaModal('modalTerminos')">Términos y Condiciones</a> y la Política de Privacidad.</label>
       </div>
-
       <div class="auth-error-msg" id="lblErrorAuth"></div>
-
       <button class="btn-solid" id="btnAccionAuth" onclick="registrarUsuario()">Crear cuenta</button>
     </div>
   </div>
 
-  <!-- MODAL TÉRMINOS Y CONDICIONES -->
   <div class="modal-bg" id="modalTerminos">
     <div class="modal-box wide">
       <h3 style="color:var(--accent); margin-bottom:5px;">Términos y Condiciones</h3>
@@ -367,34 +342,24 @@
       <div class="terms-scroll-area">
         <h4>1. Aceptación</h4>
         <p>Al crear una cuenta o usar WaveTok, aceptas estos Términos y Condiciones y nuestra Política de Privacidad. Si no estás de acuerdo, no debes usar la plataforma.</p>
-
         <h4>2. Edad mínima</h4>
         <p>WaveTok no está dirigida a menores de 13 años. Si tienes entre 13 y 18 años, necesitas el permiso de tu padre, madre o tutor legal para usar el servicio.</p>
-
         <h4>3. Cuenta de usuario</h4>
         <p>Eres responsable de mantener la confidencialidad de tu contraseña y de toda la actividad realizada desde tu cuenta. Debes notificarnos ante cualquier uso no autorizado.</p>
-
         <h4>4. Contenido del usuario</h4>
         <p>Eres el único responsable de los videos, mensajes, imágenes, audios y demás contenido que publiques o envíes. Al publicar contenido, nos otorgas una licencia no exclusiva para almacenarlo y mostrarlo dentro de la plataforma, únicamente con el fin de operar el servicio.</p>
-
         <h4>5. Conducta prohibida</h4>
         <p>No está permitido publicar contenido ilegal, que incite al odio o la violencia, que sexualice a menores, que acose a otras personas, ni suplantar la identidad de terceros. Nos reservamos el derecho de eliminar contenido y suspender cuentas que incumplan esta norma.</p>
-
         <h4>6. Videollamadas y transmisiones en vivo</h4>
         <p>Las llamadas de audio/video se establecen directamente entre los dispositivos de los usuarios (conexión punto a punto). No graban ni almacenan las transmisiones, pero no podemos garantizar el comportamiento de la otra persona en la llamada.</p>
-
         <h4>7. Moderación</h4>
         <p>Podemos revisar, eliminar contenido o suspender cuentas que violen estos términos, aunque no garantizamos una moderación exhaustiva de todo el contenido publicado por usuarios.</p>
-
         <h4>8. Privacidad de los datos</h4>
         <p>Recopilamos tu correo electrónico, identificador de cuenta, mensajes, contenido multimedia que subas y metadatos técnicos necesarios para operar el servicio (por ejemplo, marcas de tiempo). No vendemos tus datos personales a terceros.</p>
-
         <h4>9. Limitación de responsabilidad</h4>
         <p>El servicio se ofrece "tal cual". No garantizamos disponibilidad continua ni nos hacemos responsables de daños derivados del uso de la plataforma o del contenido publicado por otros usuarios.</p>
-
         <h4>10. Cambios en los términos</h4>
         <p>Podemos actualizar estos términos en cualquier momento. El uso continuado del servicio después de un cambio implica la aceptación de los nuevos términos.</p>
-
         <h4>11. Contacto</h4>
         <p>Para dudas, reportes de contenido o solicitudes relacionadas con tus datos personales, contáctanos a través de los medios indicados en la plataforma.</p>
       </div>
@@ -416,601 +381,656 @@
       projectId: "mensajes-tiktokk",
       storageBucket: "mensajes-tiktokk.firebasestorage.app",
       messagingSenderId: "1079940811085",
-      appId: "1:1079940811085:web:6ab00b6476ef4d85908f04"
+      appId: "1:1079940811085:web:6ab00b6476"
     };
 
     const app = initializeApp(firebaseConfig);
-    window.fsdb = getFirestore(app);
-    window.fbAuth = getAuth(app);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp; window.doc = doc; window.updateDoc = updateDoc; window.increment = increment; window.deleteDoc = deleteDoc;
-    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-    window.onAuthStateChanged = onAuthStateChanged;
-    window.signOut = signOut;
+    let usuarioActual = null;
+    let peerGlobal = null;
+    let llamadaActivaPeer = null;
+    let streamLocalGlobal = null;
+    let streamPantallaGlobal = null;
+    let listaContactosAmigos = [];
+    let contactoSeleccionadoChat = null;
+    let modoAutenticacionActual = "registro";
 
-    window.desplegarSecuenciaInicioBase();
-  </script>
+    let matrizGlobalVideos = [];
+    let indexVideoFeedEnPantalla = 0;
+    let mapaSeguimientoLocal = {};
 
-  <script>
-    let peerInstance = null, mySessionId = "", mySessionEmail = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
-    let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
-    let unsubscribirEscuchaFirestore = null, unsubscribirComentariosVideo = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
-    let pestanaAuthActual = 'registro';
-    let categoriaStickerActual = 'emojis';
-    let stickersPersonalizados = [];
-    let unsubscribirStickersPersonalizados = null;
+    let grabadoraMediosVoz = null;
+    let fragmentosAudioGrabados = [];
 
-    // Biblioteca de stickers organizada por categorías (Noto Emoji, dominio público / Google Fonts)
-    const categoriasStickers = {
-      emojis: [
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f971/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f631/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f643/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f92f/512.webp"
+    const coleccionStickersEstaticos = {
+      "Memes": [
+        "https://api.dicebear.com/7.x/bottts/svg?seed=funny",
+        "https://api.dicebear.com/7.x/bottts/svg?seed=lol",
+        "https://api.dicebear.com/7.x/bottts/svg?seed=crazy"
       ],
-      reacciones: [
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44d/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44e/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f4af/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f64f/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44f/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/512.webp"
+      "Reacciones": [
+        "https://api.dicebear.com/7.x/thumbs/svg?seed=like",
+        "https://api.dicebear.com/7.x/thumbs/svg?seed=love",
+        "https://api.dicebear.com/7.x/thumbs/svg?seed=wow"
       ],
-      animales: [
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f436/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f431/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43c/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f98a/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f984/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f419/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f428/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43f_fe0f/512.webp",
-        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f427/512.webp"
-      ]
+      "Mis Stickers": []
     };
-    const NOMBRES_CATEGORIAS = { emojis: 'Emojis', reacciones: 'Reacciones', animales: 'Animales', mios: 'Mis Stickers' };
+    let categoriaStickersSeleccionada = "Memes";
 
-    window.desplegarSecuenciaInicioBase = () => {
-      cargarStickersEnPanel();
-      escucharFeedVideosGlobal();
-
-      // Escucha el estado real de autenticación de Firebase (reemplaza el localStorage anterior)
-      window.onAuthStateChanged(window.fbAuth, (user) => {
-        if (user) {
-          mySessionId = user.uid;
-          mySessionEmail = user.email || "";
-          document.getElementById('modalRegistroInicial').style.display = 'none';
-          inicializarCanalesPeerMecanismo(mySessionId);
-          document.getElementById('txtLabelPerfilID').innerText = `@${mySessionId.substring(0, 8)}`;
-          document.getElementById('txtLabelPerfilEmail').innerText = mySessionEmail;
-          document.getElementById('avatarPerfilGrande').innerText = (mySessionEmail || mySessionId).substring(0,2).toUpperCase();
-          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>${obtenerNombreVisible()}</b>`;
-          compilarRenderContactoLista();
-          conectarEscuchaStickersPersonalizados();
-        } else {
-          mySessionId = "";
-          mySessionEmail = "";
-          stickersPersonalizados = [];
-          if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
-          document.getElementById('modalRegistroInicial').style.display = 'flex';
-          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>Desconectado</b>`;
-        }
-      });
+    window.cambiarPestanaAuth = function(modo) {
+      modoAutenticacionActual = modo;
+      const tReg = document.getElementById("tabReferenciaRegistro") || document.getElementById("tabRegistro");
+      const tLog = document.getElementById("tabReferenciaLogin") || document.getElementById("tabLogin");
+      const fTerm = document.getElementById("filaTerminos");
+      const btn = document.getElementById("btnAccionAuth");
+      
+      if(modo === "registro") {
+        if(tReg) tReg.classList.add("active");
+        if(tLog) tLog.classList.remove("active");
+        if(fTerm) fTerm.style.display = "flex";
+        if(btn) btn.innerText = "Crear cuenta";
+      } else {
+        if(tReg) tReg.classList.remove("active");
+        if(tLog) tLog.classList.add("active");
+        if(fTerm) fTerm.style.display = "none";
+        if(btn) btn.innerText = "Iniciar Sesión";
+      }
     };
 
-    function obtenerNombreVisible() {
-      if (!mySessionEmail) return "Anonimo";
-      return mySessionEmail.split('@')[0];
-    }
+    window.registrarUsuario = function() {
+      const email = document.getElementById("inputEmailAuth").value.trim();
+      const pass = document.getElementById("inputPassAuth").value;
+      const lblErr = document.getElementById("lblErrorAuth");
+      if(lblErr) lblErr.innerText = "";
 
-    function cambiarPestanaAuth(modo) {
-      pestanaAuthActual = modo;
-      document.getElementById('lblErrorAuth').innerText = '';
-      const tabRegistro = document.getElementById('tabRegistro');
-      const tabLogin = document.getElementById('tabLogin');
-      const filaTerminos = document.getElementById('filaTerminos');
-      const btn = document.getElementById('btnAccionAuth');
-
-      if (modo === 'registro') {
-        tabRegistro.classList.add('active');
-        tabLogin.classList.remove('active');
-        filaTerminos.style.display = 'flex';
-        btn.innerText = 'Crear cuenta';
-        btn.setAttribute('onclick', 'registrarUsuario()');
-      } else {
-        tabLogin.classList.add('active');
-        tabRegistro.classList.remove('active');
-        filaTerminos.style.display = 'none';
-        btn.innerText = 'Iniciar sesión';
-        btn.setAttribute('onclick', 'iniciarSesionUsuario()');
-      }
-    }
-
-    async function registrarUsuario() {
-      const email = document.getElementById('inputEmailAuth').value.trim();
-      const pass = document.getElementById('inputPassAuth').value;
-      const aceptaTerminos = document.getElementById('checkTerminos').checked;
-      const lblError = document.getElementById('lblErrorAuth');
-      lblError.innerText = '';
-
-      if (!aceptaTerminos) { lblError.innerText = "Debes aceptar los Términos y Condiciones."; return; }
-      if (!email || pass.length < 6) { lblError.innerText = "Ingresa un correo válido y una contraseña de al menos 6 caracteres."; return; }
-
-      try {
-        await window.createUserWithEmailAndPassword(window.fbAuth, email, pass);
-        // onAuthStateChanged se encarga de cerrar el modal y cargar la sesión
-      } catch (e) {
-        lblError.innerText = traducirErrorAuth(e.code);
-      }
-    }
-
-    async function iniciarSesionUsuario() {
-      const email = document.getElementById('inputEmailAuth').value.trim();
-      const pass = document.getElementById('inputPassAuth').value;
-      const lblError = document.getElementById('lblErrorAuth');
-      lblError.innerText = '';
-
-      if (!email || !pass) { lblError.innerText = "Ingresa tu correo y contraseña."; return; }
-
-      try {
-        await window.signInWithEmailAndPassword(window.fbAuth, email, pass);
-      } catch (e) {
-        lblError.innerText = traducirErrorAuth(e.code);
-      }
-    }
-
-    function traducirErrorAuth(code) {
-      const mapa = {
-        'auth/email-already-in-use': 'Ese correo ya tiene una cuenta registrada.',
-        'auth/invalid-email': 'El correo electrónico no es válido.',
-        'auth/weak-password': 'La contraseña es demasiado débil.',
-        'auth/user-not-found': 'No existe una cuenta con ese correo.',
-        'auth/wrong-password': 'Contraseña incorrecta.',
-        'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-        'auth/too-many-requests': 'Demasiados intentos. Intenta más tarde.'
-      };
-      return mapa[code] || 'Ocurrió un error. Intenta de nuevo.';
-    }
-
-    function inicializarCanalesPeerMecanismo(idMio) {
-      if (peerInstance) return; // evita reinicializar si ya hay una conexión activa
-      peerInstance = new Peer(idMio, { config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] } });
-      peerInstance.on('call', (incomingCall) => {
-        if(confirm(`¿Contestar transmisión de ${incomingCall.peer}?`)) {
-          navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-            miStreamLocal = stream;
-            document.getElementById('localStreamVideo').srcObject = stream;
-            incomingCall.answer(stream);
-            llamadaActualWebRTC = incomingCall;
-            incomingCall.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
-          });
-        }
-      });
-    }
-
-    function activarFiltroPantalla(pantalla) {
-      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-
-      document.getElementById(`screen-${pantalla}`).classList.add('active');
-      document.getElementById(`btn-nav-${pantalla}`).classList.add('active');
-
-      if(pantalla !== 'plataforma') {
-        document.querySelectorAll('.tok-video').forEach(v => v.pause());
-      } else {
-        controlSecuenciaAudioVideoFeed();
-      }
-    }
-
-    function escucharFeedVideosGlobal() {
-      const backupVideo = [{ id:"def", author:"Francia_Mundial", caption:"¿Quién eliminó a Francia en cada Copa del Mundo?", url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes:12 }];
-
-      try {
-        const q = window.query(window.collection(window.fsdb, "videos"), window.orderBy("createdAt", "desc"));
-        window.onSnapshot(q, (snapshot) => {
-          let items = [];
-          snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-          masterVideoArray = items.length ? items : backupVideo;
-          filtrarVideosSistema();
-        }, (err) => {
-          masterVideoArray = backupVideo;
-          filtrarVideosSistema();
-        });
-      } catch(e) {
-        masterVideoArray = backupVideo;
-        filtrarVideosSistema();
-      }
-    }
-
-    function filtrarVideosSistema() {
-      let b = document.getElementById('inputBuscarDescripcion').value.toLowerCase().trim();
-      vidsFiltradosArray = b ? masterVideoArray.filter(v => v.caption?.toLowerCase().includes(b)) : [...masterVideoArray];
-      currentFeedIndex = 0;
-      compilarRenderFeedVideos();
-    }
-
-    function compilarRenderFeedVideos() {
-      const container = document.getElementById('tokFeedIterator');
-      container.innerHTML = '';
-      if(!vidsFiltradosArray.length) return;
-
-      vidsFiltradosArray.forEach((vid, ind) => {
-        container.innerHTML += `
-          <div class="tok-post">
-            <video class="tok-video" src="${vid.url}" loop id="feedVideoElemento_${ind}" onclick="controlEstadoReproductor(this)"></video>
-            <div class="tok-actions">
-              <div class="circle-action" onclick="inyectarLikeVideoBase('${vid.id}')"><i class="fa-solid fa-heart" style="color:#ff1744"></i></div><span>${vid.likes||0}</span>
-            </div>
-            <div class="tok-meta"><h3>@${vid.author}</h3><p>${vid.caption}</p></div>
-          </div>`;
-      });
-      const wrapperListener = document.getElementById('tokFeedIterator');
-      if (wrapperListener && !wrapperListener.dataset.scrollBound) {
-        wrapperListener.addEventListener('scroll', gestionarScrollManualFeed);
-        wrapperListener.dataset.scrollBound = "1";
-      }
-      controlSecuenciaAudioVideoFeed();
-    }
-
-    function controlEstadoReproductor(vidNode) {
-      if(vidNode.paused) {
-        vidNode.play();
-      } else {
-        vidNode.pause();
-      }
-    }
-
-    function esVistaMovil() {
-      return window.matchMedia('(max-width: 768px)').matches;
-    }
-
-    function controlNavegacionFeed(dir) {
-      let target = currentFeedIndex + dir;
-      if (target >= 0 && target < vidsFiltradosArray.length) {
-        currentFeedIndex = target;
-        controlSecuenciaAudioVideoFeed();
-      }
-    }
-
-    function controlSecuenciaAudioVideoFeed() {
-      const wrapper = document.getElementById('tokFeedIterator');
-      if(!wrapper) return;
-      wrapper.querySelectorAll('video').forEach(v => v.pause());
-
-      if (esVistaMovil()) {
-        wrapper.scrollTop = currentFeedIndex * wrapper.clientHeight;
-      } else {
-        wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
-      }
-
-      setTimeout(() => {
-        let targetVideo = document.getElementById(`feedVideoElemento_${currentFeedIndex}`);
-        if(targetVideo) {
-          targetVideo.muted = false;
-          targetVideo.play().catch(()=>{});
-          conectarEscuchaComentariosVideo(vidsFiltradosArray[currentFeedIndex].id);
-        }
-      }, 250);
-    }
-
-    // En móvil el usuario navega deslizando el dedo (scroll-snap); detectamos en qué video quedó para
-    // reproducirlo, pausar los demás, y cargar sus comentarios — igual que con las flechas en escritorio.
-    let temporizadorScrollFeed = null;
-    function gestionarScrollManualFeed() {
-      if (!esVistaMovil()) return;
-      clearTimeout(temporizadorScrollFeed);
-      temporizadorScrollFeed = setTimeout(() => {
-        const wrapper = document.getElementById('tokFeedIterator');
-        if (!wrapper || !wrapper.clientHeight) return;
-        const nuevoIndice = Math.round(wrapper.scrollTop / wrapper.clientHeight);
-        if (nuevoIndice !== currentFeedIndex && nuevoIndice >= 0 && nuevoIndice < vidsFiltradosArray.length) {
-          currentFeedIndex = nuevoIndice;
-          wrapper.querySelectorAll('video').forEach(v => v.pause());
-          let targetVideo = document.getElementById(`feedVideoElemento_${currentFeedIndex}`);
-          if (targetVideo) {
-            targetVideo.muted = false;
-            targetVideo.play().catch(()=>{});
-            conectarEscuchaComentariosVideo(vidsFiltradosArray[currentFeedIndex].id);
-          }
-        }
-      }, 120);
-    }
-
-    // Panel de comentarios como hoja deslizante desde abajo (solo en móvil)
-    function alternarPanelComentariosMovil() {
-      document.getElementById('panelComentariosFeed').classList.toggle('open');
-      document.getElementById('comentariosBackdrop').classList.toggle('open');
-    }
-
-    function conectarEscuchaComentariosVideo(videoId) {
-      if(unsubscribirComentariosVideo) unsubscribirComentariosVideo();
-      if(!videoId || videoId === "def") {
-        document.getElementById('boxCommentsFeedVideo').innerHTML = `<p style="color:var(--text-dim);padding:10px;">Sin comentarios.</p>`;
+      if(!email || !pass) {
+        if(lblErr) lblErr.innerText = "Completa todos los campos obligatorios.";
         return;
       }
-      const q = window.query(window.collection(window.fsdb, "videos", videoId, "comentarios"), window.orderBy("createdAt", "asc"));
-      unsubscribirComentariosVideo = window.onSnapshot(q, (snapshot) => {
-        const box = document.getElementById('boxCommentsFeedVideo');
-        box.innerHTML = '';
-        snapshot.forEach(doc => {
-          let c = doc.data();
-          box.innerHTML += `<div class="comment-line"><b>@${c.author}:</b> ${c.text}</div>`;
-        });
-        box.scrollTop = box.scrollHeight;
-      });
-    }
 
-    async function agregarComentarioVideoActual() {
-      let input = document.getElementById('inputNewCommentFeed');
-      if(!input.value.trim() || !mySessionId) return;
-      let targetVideo = vidsFiltradosArray[currentFeedIndex];
-      if(!targetVideo || targetVideo.id === "def") return;
-
-      await window.addDoc(window.collection(window.fsdb, "videos", targetVideo.id, "comentarios"), {
-        author: obtenerNombreVisible(), text: input.value.trim(), createdAt: window.serverTimestamp()
-      });
-      input.value = '';
-    }
-
-    async function inyectarLikeVideoBase(idVideoDoc) {
-      if(!idVideoDoc || idVideoDoc === "def") return;
-      const docRef = window.doc(window.fsdb, "videos", idVideoDoc);
-      await window.updateDoc(docRef, { likes: window.increment(1) });
-    }
-
-    function desplegarVentanaConversacionIndividual(id) {
-      currentTargetPeerId = id;
-      document.getElementById('targetChatName').innerText = `@${id.toUpperCase()}`;
-      document.getElementById('chatDetailHeader').style.visibility = 'visible';
-      document.getElementById('chatInputBarArea').style.display = 'flex';
-      document.getElementById('lblRemoteLabel').innerText = `Remoto: ${id.toUpperCase()}`;
-      document.getElementById('screen-chats').classList.add('chat-abierto');
-
-      document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
-      escucharMensajesFirestore(id);
-    }
-
-    function volverListaChatsMovil() {
-      document.getElementById('screen-chats').classList.remove('chat-abierto');
-    }
-
-    function escucharMensajesFirestore(targetId) {
-      if(unsubscribirEscuchaFirestore) unsubscribirEscuchaFirestore();
-      let salaId = [mySessionId, targetId].sort().join("_CH_");
-      const q = window.query(window.collection(window.fsdb, "salas", salaId, "mensajes"), window.orderBy("timestamp", "asc"));
-      const box = document.getElementById('msgBox');
-
-      unsubscribirEscuchaFirestore = window.onSnapshot(q, (snapshot) => {
-        box.innerHTML = '';
-        snapshot.forEach((doc) => {
-          let d = doc.data();
-          let esMio = d.sender === mySessionId;
-          if(d.type === "sticker") {
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><img src="${d.text}" class="sticker-msg-render"/></div>`;
-          } else if(d.type === "image") {
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><img src="${d.text}" class="chat-img-render"/></div>`;
-          } else if(d.type === "audio") {
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><audio src="${d.text}" controls class="chat-audio-render"></audio></div>`;
-          } else {
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}">${d.text}</div>`;
-          }
-        });
-        box.scrollTop = box.scrollHeight;
-      });
-    }
-
-    async function enviarMensajeTextoBase() {
-      const input = document.getElementById('chatInput');
-      if(!input.value.trim() || !currentTargetPeerId || !mySessionId) return;
-      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-        sender: mySessionId, text: input.value.trim(), type: "text", timestamp: window.serverTimestamp()
-      });
-      input.value = '';
-    }
-
-    function procesarImagenBinariaChat(input) {
-      if(!currentTargetPeerId || !input.files[0] || !mySessionId) return;
-      let lector = new FileReader();
-      lector.onload = async (e) => {
-        let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-        await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-          sender: mySessionId, text: e.target.result, type: "image", timestamp: window.serverTimestamp()
-        });
-      };
-      lector.readAsDataURL(input.files[0]);
-    }
-
-    function gestionarMecanismoAudioGrabacion() {
-      if (!currentTargetPeerId || !mySessionId) return;
-      const btnMic = document.getElementById('btnIconoMicrofonoAudio');
-
-      if (!estaGrabandoAudio) {
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-          grabadorAudioMedia = new MediaRecorder(stream);
-          fragmentosAudioGrabados = [];
-          grabadorAudioMedia.ondataavailable = e => fragmentosAudioGrabados.push(e.data);
-          grabadorAudioMedia.onstop = () => {
-            let audioBlob = new Blob(fragmentosAudioGrabados, { type: 'audio/mp3' });
-            let lector = new FileReader();
-            lector.onload = async (e) => {
-              let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-              await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-                sender: mySessionId, text: e.target.result, type: "audio", timestamp: window.serverTimestamp()
-              });
-            };
-            lector.readAsDataURL(audioBlob);
-          };
-          grabadorAudioMedia.start();
-          estaGrabandoAudio = true;
-          btnMic.classList.add('mic-recording');
-        });
+      if(modoAutenticacionActual === "registro") {
+        const check = document.getElementById("checkTerminos");
+        if(check && !check.checked) {
+          if(lblErr) lblErr.innerText = "Debes aceptar los Términos y Condiciones.";
+          return;
+        }
+        createUserWithEmailAndPassword(auth, email, pass)
+          .catch(err => { if(lblErr) lblErr.innerText = "Error de registro: " + err.message; });
       } else {
-        if (grabadorAudioMedia) grabadorAudioMedia.stop();
-        estaGrabandoAudio = false;
-        btnMic.classList.remove('mic-recording');
+        signInWithEmailAndPassword(auth, email, pass)
+          .catch(err => { if(lblErr) lblErr.innerText = "Credenciales incorrectas: " + err.message; });
       }
+    };
+
+    window.destruirCredencialesSesion = function() {
+      signOut(auth).then(() => { location.reload(); });
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        usuarioActual = user;
+        document.getElementById("modalRegistroInicial").style.display = "none";
+        document.getElementById("txtLabelPerfilID").innerText = "@" + user.email.split("@")[0];
+        document.getElementById("txtLabelPerfilEmail").innerText = user.email;
+        document.getElementById("avatarPerfilGrande").innerText = user.email.charAt(0).toUpperCase();
+        inicializarComponentePeerJS(user);
+        inicializarEscuchasSincronizacion();
+      } else {
+        document.getElementById("modalRegistroInicial").style.display = "flex";
+      }
+    });
+
+    function inicializarComponentePeerJS(user) {
+      const cleanId = user.email.replace(/[^a-zA-Z0-9]/g, "");
+      document.getElementById("labelFooterMyCode").innerHTML = `Mi ID: <b style='color:var(--accent); font-size:0.75rem;'>${cleanId}</b>`;
+      
+      peerGlobal = new Peer(cleanId);
+
+      peerGlobal.on('open', (id) => {
+        console.log("PeerJS conectado con ID:", id);
+      });
+
+      peerGlobal.on('call', (incomingCall) => {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+          streamLocalGlobal = stream;
+          document.getElementById("localStreamVideo").srcObject = stream;
+          incomingCall.answer(stream);
+          gestionarFlujoLlamadaRemota(incomingCall);
+        }).catch(err => {
+          console.error("No se pudo obtener medios para llamada entrante:", err);
+          incomingCall.answer();
+        });
+      });
+
+      peerGlobal.on('error', (err) => {
+        console.error("Error en modulo PeerJS:", err);
+      });
     }
 
-    function ejecutarEnlaceWebRTC(conVideo) {
-      if(!currentTargetPeerId) return alert("Selecciona un contacto.");
+    function gestionarFlujoLlamadaRemota(call) {
+      llamadaActivaPeer = call;
+      activarFiltroPantalla('chats');
+      document.getElementById("screen-chats").classList.add("chat-abierto");
+      document.getElementById("lblRemoteLabel").innerText = "Conectado";
+
+      call.on('stream', (remoteStream) => {
+        document.getElementById("remoteStreamVideo").srcObject = remoteStream;
+      });
+      call.on('close', () => {
+        finalizarEnlaceLlamada();
+      });
+    }
+
+    window.ejecutarEnlaceWebRTC = function(conVideo) {
+      if(!contactoSeleccionadoChat) return;
+      const peerIdDestino = contactoSeleccionadoChat.replace(/[^a-zA-Z0-9]/g, "");
+      
+      document.getElementById("lblRemoteLabel").innerText = "Llamando...";
+      
       navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
-        miStreamLocal = stream;
-        document.getElementById('localStreamVideo').srcObject = stream;
-        let call = peerInstance.call(currentTargetPeerId, stream);
-        llamadaActualWebRTC = call;
-        call.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
+        streamLocalGlobal = stream;
+        document.getElementById("localStreamVideo").srcObject = stream;
+        const call = peerGlobal.call(peerIdDestino, stream);
+        gestionarFlujoLlamadaRemota(call);
+      }).catch(err => {
+        alert("Error al acceder a dispositivos de captura multimedia.");
+        console.error(err);
       });
+    };
+
+    window.intercambiarCapturaPantallaWebRTC = function() {
+      if(!llamadaActivaPeer) return;
+      navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+        streamPantallaGlobal = stream;
+        const videoTrack = stream.getVideoTracks()[0];
+        const senders = llamadaActivaPeer.peerConnection.getSenders();
+        const sender = senders.find(s => s.track.kind === 'video');
+        if(sender) sender.replaceTrack(videoTrack);
+        
+        document.getElementById("localStreamVideo").srcObject = stream;
+        
+        videoTrack.onended = () => {
+          restaurarCamaraPorDefectoLlamada();
+        };
+      }).catch(err => console.error("Error al compartir pantalla:", err));
+    };
+
+    function restaurarCamaraPorDefectoLlamada() {
+      if(!llamadaActivaPeer || !streamLocalGlobal) return;
+      const videoTrack = streamLocalGlobal.getVideoTracks()[0];
+      const senders = llamadaActivaPeer.peerConnection.getSenders();
+      const sender = senders.find(s => s.track.kind === 'video');
+      if(sender && videoTrack) sender.replaceTrack(videoTrack);
+      document.getElementById("localStreamVideo").srcObject = streamLocalGlobal;
     }
 
-    function intercambiarCapturaPantallaWebRTC() {
-      if(!llamadaActualWebRTC) return alert("No hay transmisión activa.");
-      if(!transmitiendoPantalla) {
-        navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
-          transmisorPantallaTrack = stream.getVideoTracks()[0];
-          let sender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if(sender) sender.replaceTrack(transmisorPantallaTrack);
-          document.getElementById('localStreamVideo').srcObject = stream;
-          transmitiendoPantalla = true;
-        });
+    window.finalizarEnlaceLlamada = function() {
+      if(llamadaActivaPeer) { llamadaActivaPeer.close(); llamadaActivaPeer = null; }
+      if(streamLocalGlobal) { streamLocalGlobal.getTracks().forEach(t => t.stop()); streamLocalGlobal = null; }
+      if(streamPantallaGlobal) { streamPantallaGlobal.getTracks().forEach(t => t.stop()); streamPantallaGlobal = null; }
+      document.getElementById("localStreamVideo").srcObject = null;
+      document.getElementById("remoteStreamVideo").srcObject = null;
+      document.getElementById("lblRemoteLabel").innerText = "Desconectado";
+    };
+
+    window.activarFiltroPantalla = function(target) {
+      document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+      document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
+      
+      const sPlat = document.getElementById("btn-nav-plataforma");
+      const sCh = document.getElementById("btn-nav-chats");
+      const sPerf = document.getElementById("btn-nav-perfil");
+
+      if(target === 'plataforma') {
+        document.getElementById("screen-plataforma").classList.add("active");
+        if(sPlat) sPlat.classList.add("active");
+        reproducirVideoIndiceActual();
+      } else if(target === 'chats') {
+        document.getElementById("screen-chats").classList.add("active");
+        if(sCh) sCh.classList.add("active");
+        pausarTodosLosVideosFeed();
+      } else if(target === 'perfil') {
+        document.getElementById("screen-perfil").classList.add("active");
+        if(sPerf) sPerf.classList.add("active");
+        pausarTodosLosVideosFeed();
       }
-    }
+    };
 
-    function finalizarEnlaceLlamada() {
-      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
-      document.getElementById('localStreamVideo').srcObject = null;
-      document.getElementById('remoteStreamVideo').srcObject = null;
-      transmitiendoPantalla = false;
-    }
+    window.volverListaChatsMovil = function() {
+      document.getElementById("screen-chats").classList.remove("chat-abierto");
+    };
 
-    function inyectarAmigoListaLocal() {
-      let t = document.getElementById('inputPeerIdDestino').value.trim();
-      if(!t || !mySessionId) return;
-      let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
-      if(!list.includes(t)) { list.push(t); localStorage.setItem('wave_chats_' + mySessionId, JSON.stringify(list)); }
-      compilarRenderContactoLista();
-      cerrarCapaModal('connectModal');
-    }
+    window.abrirCapaModal = function(id) { document.getElementById(id).style.display = "flex"; };
+    window.cerrarCapaModal = function(id) { document.getElementById(id).style.display = "none"; };
 
-    function compilarRenderContactoLista() {
-      if (!mySessionId) return;
-      let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
-      const container = document.getElementById('chatListContainer');
-      container.innerHTML = '';
-      list.forEach(id => {
-        container.innerHTML += `<div class="chat-item" onclick="desplegarVentanaConversacionIndividual('${id}')"><div class="avatar">${id.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">${id.toUpperCase()}</h5></div>`;
+    function inicializarEscuchasSincronizacion() {
+      const qVideos = query(collection(db, "videos"), orderBy("timestamp", "desc"));
+      onSnapshot(qVideos, (snapshot) => {
+        matrizGlobalVideos = [];
+        snapshot.forEach(docSnap => {
+          matrizGlobalVideos.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        filtrarVideosSistema();
       });
-    }
 
-    async function enviarVideoEstructuraFirebase() {
-      if (!mySessionId) return alert("Debes iniciar sesión.");
-      let caption = document.getElementById('inputVideoCaption').value.trim() || "WaveTok Clip";
-      let url = document.getElementById('inputVideoUrlDirecta').value.trim();
-      if(!url) return alert("URL requerida.");
-      await window.addDoc(window.collection(window.fsdb, "videos"), {
-        author: mySessionEmail || "Anonimo", caption: caption, url: url, likes: 0, createdAt: window.serverTimestamp()
+      const qSeguidores = collection(db, "seguidores");
+      onSnapshot(qSeguidores, (snapshot) => {
+        mapaSeguimientoLocal = {};
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          if(d.usuario === usuarioActual.email) {
+            mapaSeguimientoLocal[d.siguiendo] = docSnap.id;
+          }
+        });
+        construirEstructuraVisualFeed();
       });
-      cerrarCapaModal('modalSubirVideo');
+
+      cargarListaContactosDesdeStorage();
     }
 
-    function cargarStickersEnPanel() {
-      renderizarPestanasCategorias();
-      renderizarGridStickers();
-    }
+    window.enviarVideoEstructuraFirebase = function() {
+      const url = document.getElementById("inputVideoUrlDirecta").value.trim();
+      const caption = document.getElementById("inputVideoCaption").value.trim();
+      if(!url) return alert("Especifica la URL del video.");
+      
+      addDoc(collection(db, "videos"), {
+        autor: usuarioActual.email,
+        url: url,
+        caption: caption || "Sin descripción adicional.",
+        likes: 0,
+        likesUsuarios: {},
+        guardadosUsuarios: {},
+        timestamp: serverTimestamp()
+      }).then(() => {
+        cerrarCapaModal('modalSubirVideo');
+        document.getElementById("inputVideoUrlDirecta").value = "";
+        document.getElementById("inputVideoCaption").value = "";
+      });
+    };
 
-    function renderizarPestanasCategorias() {
-      const tabsBox = document.getElementById('tabsCategoriasStickers');
-      const categorias = [...Object.keys(categoriasStickers), 'mios'];
-      tabsBox.innerHTML = categorias.map(cat =>
-        `<div class="sticker-cat-tab ${cat === categoriaStickerActual ? 'active' : ''}" onclick="cambiarCategoriaSticker('${cat}')">${NOMBRES_CATEGORIAS[cat]}</div>`
-      ).join('');
-    }
+    let matrizVideosFiltrados = [];
+    window.filtrarVideosSistema = function() {
+      const txt = document.getElementById("inputBuscarDescripcion").value.toLowerCase().trim();
+      if(!txt) {
+        matrizVideosFiltrados = [...matrizGlobalVideos];
+      } else {
+        matrizVideosFiltrados = matrizGlobalVideos.filter(v => v.caption.toLowerCase().includes(txt) || v.autor.toLowerCase().includes(txt));
+      }
+      indexVideoFeedEnPantalla = 0;
+      construirEstructuraVisualFeed();
+    };
 
-    function cambiarCategoriaSticker(cat) {
-      categoriaStickerActual = cat;
-      renderizarPestanasCategorias();
-      renderizarGridStickers();
-    }
+    function construirEstructuraVisualFeed() {
+      const container = document.getElementById("tokFeedIterator");
+      if(!container) return;
+      container.innerHTML = "";
 
-    function renderizarGridStickers() {
-      const grid = document.getElementById('containerGridStickers');
-      let lista = categoriaStickerActual === 'mios' ? stickersPersonalizados : categoriasStickers[categoriaStickerActual];
-
-      if (!lista || !lista.length) {
-        grid.innerHTML = `<div class="sticker-empty-msg">${categoriaStickerActual === 'mios' ? 'Aún no has subido stickers propios.' : 'Sin stickers en esta categoría.'}</div>`;
+      if(matrizVideosFiltrados.length === 0) {
+        container.innerHTML = "<div style='margin:auto; text-align:center; padding:20px; color:var(--text-dim)'>No hay videos disponibles en este feed.</div>";
+        document.getElementById("boxCommentsFeedVideo").innerHTML = "";
         return;
       }
 
-      grid.innerHTML = lista.map(item => {
-        const url = typeof item === 'string' ? item : item.url;
-        return `<img src="${url}" class="sticker-option" onclick="ejecutarDespachoSticker('${url}')">`;
-      }).join('');
-    }
+      matrizVideosFiltrados.forEach((vid, idx) => {
+        const post = document.createElement("div");
+        post.className = "tok-post";
+        post.id = `tokPostElementRef-${idx}`;
 
-    function conectarEscuchaStickersPersonalizados() {
-      if (!mySessionId) return;
-      if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
-      const q = window.query(window.collection(window.fsdb, "stickers_custom", mySessionId, "items"), window.orderBy("createdAt", "desc"));
-      unsubscribirStickersPersonalizados = window.onSnapshot(q, (snapshot) => {
-        stickersPersonalizados = [];
-        snapshot.forEach(doc => stickersPersonalizados.push({ id: doc.id, ...doc.data() }));
-        if (categoriaStickerActual === 'mios') renderizarGridStickers();
+        const isLiked = vid.likesUsuarios && vid.likesUsuarios[usuarioActual.email];
+        const isSaved = vid.guardadosUsuarios && vid.guardadosUsuarios[usuarioActual.email];
+        const sigId = mapaSeguimientoLocal[vid.autor];
+        const labelSiguiendo = sigId ? "<i class='fa-solid fa-check'></i>" : "<i class='fa-solid fa-plus'></i>";
+        const claseSiguiendo = sigId ? "siguiendo" : "";
+
+        post.innerHTML = `
+          <div class="tok-video-card">
+            <video class="tok-video" src="${vid.url}" loop playsinline onclick="alternarPlayVideoElemento(this)"></video>
+            
+            <div class="tok-top-overlay">
+              <div class="tok-author-avatar" title="${vid.autor}">${vid.autor.charAt(0).toUpperCase()}</div>
+            </div>
+
+            <div class="tok-actions">
+              <div class="tok-actions-avatar-wrap">
+                <div class="tok-actions-avatar">${vid.autor.charAt(0).toUpperCase()}</div>
+                <div class="follow-badge ${claseSiguiendo}" onclick="event.stopPropagation(); alternarSeguimientoAutor('${vid.autor}')">${labelSiguiendo}</div>
+              </div>
+              <button class="circle-action ${isLiked?'activo':''}" onclick="event.stopPropagation(); alternarLikeVideoFirebase('${vid.id}', ${isLiked})"><i class="fa-solid fa-heart"></i></button>
+              <span>${vid.likes || 0}</span>
+              <button class="circle-action" onclick="event.stopPropagation(); enfocarPanelComentariosRef()"><i class="fa-solid fa-comment"></i></button>
+              <span>...</span>
+              <button class="circle-action ${isSaved?'activo guardado':''}" onclick="event.stopPropagation(); alternarGuardadoVideoFirebase('${vid.id}', ${isSaved})"><i class="fa-solid fa-bookmark"></i></button>
+            </div>
+
+            <div class="tok-meta">
+              <h3>@${vid.autor.split("@")[0]}</h3>
+              <p id="descTextoPost-${vid.id}">${vid.caption}</p>
+              ${vid.caption.length > 50 ? `<span class="btn-ver-mas" onclick="event.stopPropagation(); alternarExpansionTextoDesc('${vid.id}')">más</span>` : ''}
+            </div>
+          </div>
+        `;
+        container.appendChild(post);
       });
+
+      if(document.getElementById("screen-plataforma").classList.contains("active")) {
+        reproducirVideoIndiceActual();
+      }
     }
 
-    function subirStickerPersonalizado(input) {
-      if (!mySessionId) { alert("Debes iniciar sesión."); return; }
-      if (!input.files[0]) return;
-      const archivo = input.files[0];
-      if (archivo.size > 900 * 1024) { alert("El sticker es muy pesado. Usa una imagen menor a 900KB."); input.value = ''; return; }
+    window.alternarExpansionTextoDesc = function(id) {
+      const p = document.getElementById(`descTextoPost-${id}`);
+      if(p) p.classList.toggle("expandido");
+    };
 
-      let lector = new FileReader();
-      lector.onload = async (e) => {
-        await window.addDoc(window.collection(window.fsdb, "stickers_custom", mySessionId, "items"), {
-          url: e.target.result, createdAt: window.serverTimestamp()
+    window.alternarPlayVideoElemento = function(el) {
+      if(el.paused) el.play().catch(()=>{}); else el.pause();
+    };
+
+    window.controlNavegacionFeed = function(dir) {
+      let nIndex = indexVideoFeedEnPantalla + dir;
+      if(nIndex >= 0 && nIndex < matrizVideosFiltrados.length) {
+        indexVideoFeedEnPantalla = nIndex;
+        const targetElement = document.getElementById(`tokPostElementRef-${indexVideoFeedEnPantalla}`);
+        if(targetElement) targetElement.scrollIntoView({ behavior: "smooth" });
+        reproducirVideoIndiceActual();
+      }
+    };
+
+    function reproducirVideoIndiceActual() {
+      pausarTodosLosVideosFeed();
+      const pAct = document.getElementById(`tokPostElementRef-${indexVideoFeedEnPantalla}`);
+      if(pAct) {
+        const vid = pAct.querySelector("video");
+        if(vid) vid.play().catch(()=>{});
+      }
+      conectarCanalComentariosVideoActual();
+    }
+
+    function pausarTodosLosVideosFeed() {
+      document.querySelectorAll(".tok-video").forEach(v => v.pause());
+    }
+
+    window.alternarLikeVideoFirebase = function(id, yaDioLike) {
+      const r = doc(db, "videos", id);
+      const campo = `likesUsuarios.${usuarioActual.email.replace(/\./g, "_")}`;
+      if(yaDioLike) {
+        updateDoc(r, { likes: increment(-1), [campo]: deleteDoc() });
+      } else {
+        updateDoc(r, { likes: increment(1), [campo]: true });
+      }
+    };
+
+    window.alternarGuardadoVideoFirebase = function(id, yaGuardado) {
+      const r = doc(db, "videos", id);
+      const campo = `guardadosUsuarios.${usuarioActual.email.replace(/\./g, "_")}`;
+      updateDoc(r, { [campo]: yaGuardado ? deleteDoc() : true });
+    };
+
+    window.alternarSeguimientoAutor = function(autorDestino) {
+      if(autorDestino === usuarioActual.email) return;
+      const existId = mapaSeguimientoLocal[autorDestino];
+      if(existId) {
+        deleteDoc(doc(db, "seguidores", existId));
+      } else {
+        addDoc(collection(db, "seguidores"), { usuario: usuarioActual.email, siguiendo: autorDestino });
+      }
+    };
+
+    window.alternarPanelComentariosMovil = function() {
+      const p = document.getElementById("panelComentariosFeed");
+      const b = document.getElementById("comentariosBackdrop");
+      if(p) p.classList.toggle("open");
+      if(b) b.classList.toggle("open");
+    };
+
+    window.enfocarPanelComentariosRef = function() {
+      if(window.innerWidth <= 768) {
+        alternarPanelComentariosMovil();
+      } else {
+        document.getElementById("inputNewCommentFeed").focus();
+      }
+    };
+
+    let desuscribirComentariosSnap = null;
+    function conectarCanalComentariosVideoActual() {
+      if(desuscribirComentariosSnap) { desuscribirComentariosSnap(); desuscribirComentariosSnap = null; }
+      const container = document.getElementById("boxCommentsFeedVideo");
+      if(!container) return;
+      container.innerHTML = "";
+
+      const vAct = matrizVideosFiltrados[indexVideoFeedEnPantalla];
+      if(!vAct) return;
+
+      const q = query(collection(db, "videos", vAct.id, "comentarios"), orderBy("timestamp", "asc"));
+      desuscribirComentariosSnap = onSnapshot(q, (snapshot) => {
+        container.innerHTML = "";
+        snapshot.forEach(d => {
+          const c = d.data();
+          const div = document.createElement("div");
+          div.className = "comment-line";
+          div.innerHTML = `<b>@${c.usuario.split("@")[0]}:</b> ${c.texto}`;
+          container.appendChild(div);
         });
-        categoriaStickerActual = 'mios';
-        renderizarPestanasCategorias();
-        input.value = '';
-      };
-      lector.readAsDataURL(archivo);
-    }
-
-    function alternarCapaStickers() {
-      const box = document.getElementById('popoverStickersBox');
-      box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
-    }
-    async function ejecutarDespachoSticker(url) {
-      if(!currentTargetPeerId || !mySessionId) return;
-      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-        sender: mySessionId, text: url, type: "sticker", timestamp: window.serverTimestamp()
+        container.scrollTop = container.scrollHeight;
       });
-      alternarCapaStickers();
     }
 
-    function destruirCredencialesSesion() {
-      window.signOut(window.fbAuth);
-      peerInstance = null;
-      currentTargetPeerId = null;
-      if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
-      stickersPersonalizados = [];
-      categoriaStickerActual = 'emojis';
-      document.getElementById('chatDetailHeader').style.visibility = 'hidden';
-      document.getElementById('chatInputBarArea').style.display = 'none';
-      document.getElementById('msgBox').innerHTML = '<div id="chatEmptyState" style="margin:auto; text-align:center; color:var(--text-dim);"><i class="fa-solid fa-comments" style="font-size:2.5rem; color:rgba(255,235,59,0.3); margin-bottom:10px; display:block;"></i><p>Selecciona un contacto o conecta uno nuevo para empezar a chatear.</p></div>';
+    window.agregarComentarioVideoActual = function() {
+      const input = document.getElementById("inputNewCommentFeed");
+      const txt = input.value.trim();
+      if(!txt) return;
+
+      const vAct = matrizVideosFiltrados[indexVideoFeedEnPantalla];
+      if(!vAct) return;
+
+      addDoc(collection(db, "videos", vAct.id, "comentarios"), {
+        usuario: usuarioActual.email,
+        texto: txt,
+        timestamp: serverTimestamp()
+      }).then(() => { input.value = ""; });
+    };
+
+    window.inyectarAmigoListaLocal = function() {
+      const peerId = document.getElementById("inputPeerIdDestino").value.trim();
+      if(!peerId) return alert("Inserta un ID válido.");
+      
+      if(!listaContactosAmigos.includes(peerId)) {
+        listaContactosAmigos.push(peerId);
+        guardarListaContactosEnStorage();
+        renderizarListaContactosUI();
+      }
+      cerrarCapaModal('connectModal');
+      document.getElementById("inputPeerIdDestino").value = "";
+    };
+
+    function guardarListaContactosEnStorage() {
+      if(usuarioActual) {
+        localStorage.setItem("wavetok_contacts_"+usuarioActual.email, JSON.stringify(listaContactosAmigos));
+      }
     }
-    function abrirCapaModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function cerrarCapaModal(id) { document.getElementById(id).style.display = 'none'; }
+    function cargarListaContactosDesdeStorage() {
+      if(usuarioActual) {
+        const d = localStorage.getItem("wavetok_contacts_"+usuarioActual.email);
+        listaContactosAmigos = d ? JSON.parse(d) : [];
+        renderizarListaContactosUI();
+      }
+    }
+
+    function renderizarListaContactosUI() {
+      const c = document.getElementById("chatListContainer");
+      if(!c) return;
+      c.innerHTML = "";
+
+      if(listaContactosAmigos.length === 0) {
+        c.innerHTML = "<p style='color:var(--text-dim); text-align:center; padding:20px; font-size:0.85rem;'>No hay contactos vinculados.</p>";
+        return;
+      }
+
+      listaContactosAmigos.forEach(peerId => {
+        const item = document.createElement("div");
+        item.className = "chat-item" + (contactoSeleccionadoChat === peerId ? " active" : "");
+        item.onclick = () => abrirConversacionChatPrivado(peerId);
+        item.innerHTML = `
+          <div class="avatar">${peerId.charAt(0).toUpperCase()}</div>
+          <div style="flex:1; overflow:hidden;">
+            <h5 style="color:white; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${peerId}</h5>
+            <span style="font-size:0.75rem; color:var(--text-dim);">Conexión directa</span>
+          </div>
+        `;
+        c.appendChild(item);
+      });
+    }
+
+    let desuscribirMensajesSnap = null;
+    function abrirConversacionChatPrivado(peerId) {
+      contactoSeleccionadoChat = peerId;
+      document.getElementById("screen-chats").classList.add("chat-abierto");
+      document.getElementById("chatEmptyState").style.display = "none";
+      document.getElementById("chatDetailHeader").style.visibility = "visible";
+      document.getElementById("chatInputBarArea").style.display = "flex";
+      document.getElementById("targetChatName").innerText = peerId;
+
+      renderizarListaContactosUI();
+      inicializarControlesStickersPopover();
+
+      if(desuscribirMensajesSnap) { desuscribirMensajesSnap(); desuscribirMensajesSnap = null; }
+
+      const idSalaUnico = [usuarioActual.email.replace(/[^a-zA-Z0-9]/g, ""), peerId.replace(/[^a-zA-Z0-9]/g, "")].sort().join("_CONV_");
+      const q = query(collection(db, "chats_privados", idSalaUnico, "mensajes"), orderBy("timestamp", "asc"));
+      
+      const box = document.getElementById("msgBox");
+      desuscribirMensajesSnap = onSnapshot(q, (snapshot) => {
+        box.innerHTML = "";
+        snapshot.forEach(docSnap => {
+          const m = docSnap.data();
+          const b = document.createElement("div");
+          const esMio = m.remitente === usuarioActual.email;
+          b.className = "bubble " + (esMio ? "sent" : "recv");
+
+          if(m.tipo === "sticker") {
+            b.innerHTML = `<img src="${m.contenido}" class="sticker-msg-render" alt="sticker">`;
+          } else if(m.tipo === "imagen") {
+            b.innerHTML = `<img src="${m.contenido}" class="chat-img-render" alt="imagen" onclick="window.open('${m.contenido}')">`;
+          } else if(m.tipo === "audio") {
+            b.innerHTML = `<audio src="${m.contenido}" controls class="chat-audio-render"></audio>`;
+          } else {
+            b.innerHTML = `<span>${m.contenido}</span>`;
+          }
+          box.appendChild(b);
+        });
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    function inyectarMensajeEstructuraFirestore(tipo, payload) {
+      if(!contactoSeleccionadoChat) return;
+      const idSalaUnico = [usuarioActual.email.replace(/[^a-zA-Z0-9]/g, ""), contactoSeleccionadoChat.replace(/[^a-zA-Z0-9]/g, "")].sort().join("_CONV_");
+      
+      addDoc(collection(db, "chats_privados", idSalaUnico, "mensajes"), {
+        remitente: usuarioActual.email,
+        tipo: tipo,
+        contenido: payload,
+        timestamp: serverTimestamp()
+      });
+    }
+
+    window.enviarMensajeTextoBase = function() {
+      const input = document.getElementById("chatInput");
+      const txt = input.value.trim();
+      if(!txt) return;
+      inyectarMensajeEstructuraFirestore("texto", txt);
+      input.value = "";
+    };
+
+    window.procesarImagenBinariaChat = function(inputElement) {
+      const file = inputElement.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        inyectarMensajeEstructuraFirestore("imagen", e.target.result);
+      };
+      reader.readAsDataURL(file);
+      inputElement.value = "";
+    };
+
+    window.alternarCapaStickers = function() {
+      const p = document.getElementById("popoverStickersBox");
+      if(!p) return;
+      p.style.display = (p.style.display === "flex") ? "none" : "flex";
+    };
+
+    function inicializarControlesStickersPopover() {
+      const tabs = document.getElementById("tabsCategoriasStickers");
+      const grid = document.getElementById("containerGridStickers");
+      if(!tabs || !grid) return;
+
+      tabs.innerHTML = "";
+      Object.keys(coleccionStickersEstaticos).forEach(cat => {
+        const btn = document.createElement("div");
+        btn.className = "sticker-cat-tab" + (categoriaStickersSeleccionada === cat ? " active" : "");
+        btn.innerText = cat;
+        btn.onclick = () => { categoriaStickersSeleccionada = cat; inicializarControlesStickersPopover(); };
+        tabs.appendChild(btn);
+      });
+
+      grid.innerHTML = "";
+      const arr = coleccionStickersEstaticos[categoriaStickersSeleccionada] || [];
+      if(arr.length === 0) {
+        grid.innerHTML = `<div class="sticker-empty-msg">No hay stickers en esta pestaña.</div>`;
+      } else {
+        arr.forEach(url => {
+          const img = document.createElement("img");
+          img.className = "sticker-option";
+          img.src = url;
+          img.onclick = () => {
+            inyectarMensajeEstructuraFirestore("sticker", url);
+            document.getElementById("popoverStickersBox").style.display = "none";
+          };
+          grid.appendChild(img);
+        });
+      }
+    }
+
+    window.subirStickerPersonalizado = function(input) {
+      const f = input.files[0];
+      if(!f) return;
+      const r = new FileReader();
+      r.onload = function(e) {
+        coleccionStickersEstaticos["Mis Stickers"].push(e.target.result);
+        categoriaStickersSeleccionada = "Mis Stickers";
+        inicializarControlesStickersPopover();
+      };
+      r.readAsDataURL(f);
+      input.value = "";
+    };
+
+    window.gestionarMecanismoAudioGrabacion = function() {
+      const icon = document.getElementById("btnIconoMicrofonoAudio");
+      if(!grabadoraMediosVoz) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          grabadoraMediosVoz = new MediaRecorder(stream);
+          fragmentosAudioGrabados = [];
+          grabadoraMediosVoz.ondataavailable = (e) => { if(e.data.size > 0) fragmentosAudioGrabados.push(e.data); };
+          grabadoraMediosVoz.onstop = () => {
+            const blob = new Blob(fragmentosAudioGrabados, { type: 'audio/webm' });
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              inyectarMensajeEstructuraFirestore("audio", event.target.result);
+            };
+            reader.readAsDataURL(blob);
+            grabadoraMediosVoz = null;
+            stream.getTracks().forEach(t => t.stop());
+          };
+          grabadoraMediosVoz.start();
+          if(icon) icon.classList.add("mic-recording");
+        }).catch(err => console.error("No se pudo inicializar audio:", err));
+      } else {
+        grabadoraMediosVoz.stop();
+        if(icon) icon.classList.remove("mic-recording");
+      }
+    };
   </script>
 </body>
 </html>
