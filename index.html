@@ -87,9 +87,19 @@
     .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.02); }
     .my-code-footer b { color: var(--accent); letter-spacing: 0.5px; }
 
-    .call-overlay-container { display: none; position: fixed; top: 20px; right: 20px; width: 340px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 10px; box-shadow: 0 4px 15px black; }
-    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
-    .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #222; }
+    /* CONTENEDOR DE LA LLAMADA OPTIMIZADO */
+    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 420px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); transition: width 0.3s ease; }
+    .call-overlay-container.expanded { width: 650px; } /* Se ensancha al compartir pantalla */
+    
+    /* CUADRÍCULA DE VIDEO FLEXIBLE */
+    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; position: relative; }
+    .video-grid-call.fullscreen-active { grid-template-columns: 1fr; } /* Estira el video principal al máximo */
+    .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #1c2732; transition: all 0.3s ease; }
+    .video-grid-call video.fullscreen-mode { aspect-ratio: 16/9; object-fit: contain; }
+
+    .media-controls-row { display: flex; justify-content: center; gap: 15px; margin: 5px 0; }
+    .circle-btn-media { width: 44px; height: 44px; border-radius: 50%; background: #233138; border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; }
+    .circle-btn-media.disabled { background: var(--danger); color: white; border-color: var(--danger); }
 
     .profile-container { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
     .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; width: 100%; }
@@ -196,11 +206,9 @@
       <div class="top-bar"><h3>Mi Perfil</h3></div>
       <div class="profile-container">
         <h2 id="txtLabelPerfilID" style="color: var(--accent);">@</h2>
-        
         <button class="btn-danger" onclick="cerrarSesionYCambiarID()">
           <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión / Cambiar ID
         </button>
-        
         <div class="my-grid" id="gridMisVideosPublicados"></div>
       </div>
     </div>
@@ -211,10 +219,21 @@
 
   <div class="call-overlay-container" id="panelLlamadaActiva">
     <h5 id="txtEstadoLlamada" style="color: white; text-align: center;">Conectando...</h5>
-    <div class="video-grid-call">
+    
+    <div class="video-grid-call" id="containerVideoGridCall">
       <video id="localStreamVideo" autoplay muted playsinline></video>
       <video id="remoteStreamVideo" autoplay playsinline></video>
     </div>
+
+    <div class="media-controls-row">
+      <button class="circle-btn-media" id="btnMuteMicHardware" onclick="conmutarEstadoSilenciarAudio()">
+        <i class="fa-solid fa-microphone"></i>
+      </button>
+      <button class="circle-btn-media" id="btnMuteCamHardware" onclick="conmutarEstadoApagarCamara()">
+        <i class="fa-solid fa-video"></i>
+      </button>
+    </div>
+
     <div style="display:flex; gap:10px;">
       <button class="btn-solid" style="flex:1; background:#0288d1; color:white;" id="btnCompartirPantallaCall" onclick="toggleCompartirPantallaWebRTC()"><i class="fa-solid fa-desktop"></i> Compartir Pantalla</button>
       <button class="btn-danger" style="flex:1;" onclick="cortarLlamadaWebRTC()">Colgar</button>
@@ -286,6 +305,7 @@
     let miStreamLocal = null, llamadaActualWebRTC = null;
     let transmisorPantallaTrack = null;
     let transmitiendoPantalla = false;
+    let audioHabilitado = true, videoHabilitado = true;
 
     let unsubscribirEscuchaFirestore = null;
     let unsubscribirFeedVideos = null;
@@ -339,6 +359,9 @@
         if(confirm(`¿Contestar llamada de ${incomingCall.peer.toUpperCase()}?`)) {
           navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             miStreamLocal = stream;
+            audioHabilitado = true; videoHabilitado = true;
+            actualizarEstilosBotonesHardware();
+
             document.getElementById('panelLlamadaActiva').style.display = 'flex';
             document.getElementById('localStreamVideo').srcObject = stream;
             document.getElementById('txtEstadoLlamada').innerText = "Conectado";
@@ -350,6 +373,139 @@
           });
         }
       });
+    }
+
+    function iniciarLlamadaVozVideo(conVideo) {
+      document.getElementById('panelLlamadaActiva').style.display = 'flex';
+      document.getElementById('btnCompartirPantallaCall').style.display = conVideo ? 'block' : 'none';
+      transmitiendoPantalla = false;
+      audioHabilitado = true; videoHabilitado = conVideo;
+      actualizarEstilosBotonesHardware();
+
+      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
+        miStreamLocal = stream;
+        document.getElementById('localStreamVideo').srcObject = stream;
+        let call = peerInstance.call(currentTargetPeerId, stream);
+        llamadaActualWebRTC = call;
+        call.on('stream', (remoteStream) => {
+          document.getElementById('remoteStreamVideo').srcObject = remoteStream;
+        });
+      });
+    }
+
+    /* CONTROL DE MICROFONO Y CAMARA (ON/OFF) */
+    function conmutarEstadoSilenciarAudio() {
+      if (!miStreamLocal) return;
+      audioHabilitado = !audioHabilitado;
+      miStreamLocal.getAudioTracks().forEach(track => track.enabled = audioHabilitado);
+      actualizarEstilosBotonesHardware();
+    }
+
+    function conmutarEstadoApagarCamara() {
+      if (!miStreamLocal || miStreamLocal.getVideoTracks().length === 0) return;
+      videoHabilitado = !videoHabilitado;
+      miStreamLocal.getVideoTracks().forEach(track => track.enabled = videoHabilitado);
+      actualizarEstilosBotonesHardware();
+    }
+
+    function actualizarEstilosBotonesHardware() {
+      const btnMic = document.getElementById('btnMuteMicHardware');
+      const btnCam = document.getElementById('btnMuteCamHardware');
+
+      if (audioHabilitado) {
+        btnMic.classList.remove('disabled');
+        btnMic.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+      } else {
+        btnMic.classList.add('disabled');
+        btnMic.innerHTML = `<i class="fa-solid fa-microphone-slash"></i>`;
+      }
+
+      if (videoHabilitado) {
+        btnCam.classList.remove('disabled');
+        btnCam.innerHTML = `<i class="fa-solid fa-video"></i>`;
+      } else {
+        btnCam.classList.add('disabled');
+        btnCam.innerHTML = `<i class="fa-solid fa-video-slash"></i>`;
+      }
+    }
+
+    /* COMPARTIR PANTALLA EXPANDIDO (ESTIRADO AUTOMÁTICO) */
+    function toggleCompartirPantallaWebRTC() {
+      if(!llamadaActualWebRTC) return;
+
+      const overlay = document.getElementById('panelLlamadaActiva');
+      const grid = document.getElementById('containerVideoGridCall');
+      const localVid = document.getElementById('localStreamVideo');
+      const remoteVid = document.getElementById('remoteStreamVideo');
+
+      if(!transmitiendoPantalla) {
+        navigator.mediaDevices.getDisplayMedia({ video: true }).then((screenStream) => {
+          transmisorPantallaTrack = screenStream.getVideoTracks()[0];
+          let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+          if(videoSender) videoSender.replaceTrack(transmisorPantallaTrack);
+          
+          localVid.srcObject = screenStream;
+          transmitiendoPantalla = true;
+          document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-video"></i> Usar Cámara`;
+          
+          // Efecto Estirar: Ajustamos las clases de la interfaz para expandir la vista
+          overlay.classList.add('expanded');
+          grid.classList.add('fullscreen-active');
+          remoteVid.classList.add('fullscreen-mode');
+
+          transmisorPantallaTrack.onended = () => { detenerTransmisionPantalla(); };
+        }).catch(() => {});
+      } else {
+        detenerTransmisionPantalla();
+      }
+    }
+
+    function detenerTransmisionPantalla() {
+      if(!transmitiendoPantalla) return;
+
+      const overlay = document.getElementById('panelLlamadaActiva');
+      const grid = document.getElementById('containerVideoGridCall');
+      const remoteVid = document.getElementById('remoteStreamVideo');
+
+      navigator.mediaDevices.getUserMedia({ video: true }).then((camStream) => {
+        let camaraTrack = camStream.getVideoTracks()[0];
+        let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+        if(videoSender) videoSender.replaceTrack(camaraTrack);
+        
+        if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
+        let oldTracks = miStreamLocal.getVideoTracks();
+        oldTracks.forEach(t => t.stop());
+        miStreamLocal.addTrack(camaraTrack);
+        
+        document.getElementById('localStreamVideo').srcObject = miStreamLocal;
+        transmitiendoPantalla = false;
+        document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-desktop"></i> Compartir Pantalla`;
+        
+        // Restauramos dimensiones originales de la cuadrícula
+        overlay.classList.remove('expanded');
+        grid.classList.remove('fullscreen-active');
+        remoteVid.classList.remove('fullscreen-mode');
+        
+        videoHabilitado = true;
+        actualizarEstilosBotonesHardware();
+      });
+    }
+
+    function cortarLlamadaWebRTC() {
+      if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
+      if(llamadaActualWebRTC) llamadaActualWebRTC.close();
+      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
+      
+      const overlay = document.getElementById('panelLlamadaActiva');
+      const grid = document.getElementById('containerVideoGridCall');
+      const remoteVid = document.getElementById('remoteStreamVideo');
+      
+      overlay.classList.remove('expanded');
+      grid.classList.remove('fullscreen-active');
+      remoteVid.classList.remove('fullscreen-mode');
+      
+      overlay.style.display = 'none';
+      transmitiendoPantalla = false;
     }
 
     function escucharFeedVideosGlobal() {
@@ -373,7 +529,6 @@
       });
     }
 
-    /* FILTRADO POR DESCRIPCIÓN */
     function filtrarVideosPorDescripcion() {
       let busqueda = document.getElementById('inputBuscarDescripcion').value.toLowerCase().trim();
       if(!busqueda) {
@@ -526,67 +681,6 @@
         });
         box.scrollTop = box.scrollHeight;
       });
-    }
-
-    function iniciarLlamadaVozVideo(conVideo) {
-      document.getElementById('panelLlamadaActiva').style.display = 'flex';
-      document.getElementById('btnCompartirPantallaCall').style.display = conVideo ? 'block' : 'none';
-      transmitiendoPantalla = false;
-
-      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
-        miStreamLocal = stream;
-        document.getElementById('localStreamVideo').srcObject = stream;
-        let call = peerInstance.call(currentTargetPeerId, stream);
-        llamadaActualWebRTC = call;
-        call.on('stream', (remoteStream) => {
-          document.getElementById('remoteStreamVideo').srcObject = remoteStream;
-        });
-      });
-    }
-
-    function toggleCompartirPantallaWebRTC() {
-      if(!llamadaActualWebRTC) return;
-
-      if(!transmitiendoPantalla) {
-        navigator.mediaDevices.getDisplayMedia({ video: true }).then((screenStream) => {
-          transmisorPantallaTrack = screenStream.getVideoTracks()[0];
-          let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if(videoSender) videoSender.replaceTrack(transmisorPantallaTrack);
-          
-          document.getElementById('localStreamVideo').srcObject = screenStream;
-          transmitiendoPantalla = true;
-          document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-video"></i> Usar Cámara`;
-          transmisorPantallaTrack.onended = () => { detenerTransmisionPantalla(); };
-        }).catch(() => {});
-      } else {
-        detenerTransmisionPantalla();
-      }
-    }
-
-    function detenerTransmisionPantalla() {
-      if(!transmitiendoPantalla) return;
-      navigator.mediaDevices.getUserMedia({ video: true }).then((camStream) => {
-        let camaraTrack = camStream.getVideoTracks()[0];
-        let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-        if(videoSender) videoSender.replaceTrack(camaraTrack);
-        
-        if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
-        let oldTracks = miStreamLocal.getVideoTracks();
-        oldTracks.forEach(t => t.stop());
-        miStreamLocal.addTrack(camaraTrack);
-        
-        document.getElementById('localStreamVideo').srcObject = miStreamLocal;
-        transmitiendoPantalla = false;
-        document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-desktop"></i> Compartir Pantalla`;
-      });
-    }
-
-    function cortarLlamadaWebRTC() {
-      if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
-      if(llamadaActualWebRTC) llamadaActualWebRTC.close();
-      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
-      document.getElementById('panelLlamadaActiva').style.display = 'none';
-      transmitiendoPantalla = false;
     }
 
     function controlarReproduccionYAudio(videoElement) {
