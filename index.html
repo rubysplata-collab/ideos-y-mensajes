@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Premium Mobile & Desktop</title>
+  <title>WaveTok & WaveChat - Premium Multimedia</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -21,10 +21,10 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; flex-direction: row; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-    /* BARRA LATERAL (ESCRITORIO) */
-    .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; z-index: 100; }
+    /* MENU LATERAL ORIGINAL */
+    .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; z-index: 10; }
     .brand h2 { color: var(--accent); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
     .side-menu { display: flex; flex-direction: column; gap: 8px; }
     .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
@@ -32,63 +32,79 @@
     .menu-item i { font-size: 1.2rem; width: 25px; }
     .separator { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; padding-left: 15px; margin-top: 10px; }
 
-    /* BARRA INFERIOR (MÓVIL) */
+    /* MENU INFERIOR (SOLO PARA CELULARES) */
     .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: var(--bg-sidebar); border-top: 1px solid rgba(255,255,255,0.08); justify-content: space-around; align-items: center; z-index: 1000; padding: 5px 0; }
-    .mobile-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; gap: 4px; font-weight: 500; transition: color 0.2s; }
+    .mobile-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; gap: 4px; font-weight: 500; }
     .mobile-nav-item i { font-size: 1.3rem; }
     .mobile-nav-item.active { color: var(--accent); }
 
-    .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: black; height: 100%; overflow: hidden; }
+    .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: black; height: 100%; }
     .screen { display: none; width: 100%; height: 100%; flex-direction: column; background: var(--bg-dark); }
     .screen.active { display: flex; }
     
     .top-bar { background: var(--bg-sidebar); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 15px; }
     .search-box-container { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 250px; }
     .search-box-container input { background: none; border: none; outline: none; color: white; font-size: 0.9rem; width: 100%; margin-left: 8px; }
+    .search-box-container i { color: var(--text-dim); }
 
-    .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; }
+    /* FEED DE VÍDEOS REESCRITO */
+    .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; height: 100%; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; }
     .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
     .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; cursor: pointer; }
     
-    .tok-actions { position: absolute; right: 25px; bottom: 100px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 99; }
+    .tok-actions { position: absolute; right: 25px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 99; }
     .circle-action { background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
     .tok-actions span { font-size: 0.8rem; color: white; margin-top: -10px; text-shadow: 1px 1px 3px black; }
-    .tok-meta { position: absolute; left: 30px; bottom: 100px; z-index: 10; max-width: 60%; text-shadow: 1px 1px 5px black; }
+    .tok-meta { position: absolute; left: 30px; bottom: 40px; z-index: 10; max-width: 60%; text-shadow: 1px 1px 5px black; }
 
     .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 15; }
     .nav-arrow:hover { background: var(--accent); color: black; }
     .arrow-left { left: 20px; }
     .arrow-right { right: 20px; }
 
-    /* CHATS PRIVADOS */
-    .chat-layout { display: flex; flex: 1; height: 100%; overflow: hidden; }
-    .chats-master { width: 320px; background: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; }
-    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; }
+    /* INTERFAZ DE CHAT ORIGINAL */
+    .chat-layout { display: flex; flex: 1; height: 100%; width: 100%; overflow: hidden; }
+    .chats-master { width: 320px; background: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; flex-shrink: 0; }
+    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; }
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
     .chat-item:hover, .chat-item.active { background: rgba(255,255,255,0.03); }
     .avatar { width: 40px; height: 40px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
 
-    .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 30px; }
-    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 5px; position: relative; }
+    .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 5px; position: relative; box-shadow: 0 1px 2px rgba(0,0,0,0.3); }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
     
-    /* ENTORNO STICKERS */
-    .sticker-msg-render { width: 130px; height: 130px; object-fit: contain; display: block; margin-top: 5px; }
-    .input-bar-wrapper { position: relative; width: 100%; display: flex; flex-direction: column; }
-    .sticker-popover { display: none; position: absolute; bottom: 70px; right: 20px; width: 280px; height: 220px; background: #1f2c34; border: 1px solid var(--accent); border-radius: 15px; z-index: 1200; padding: 10px; flex-direction: column; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
-    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 5px; padding-right: 2px; }
-    .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; transition: transform 0.1s; border-radius: 8px; }
-    .sticker-option:hover { transform: scale(1.1); background: rgba(255,255,255,0.05); }
+    .chat-img-render { max-width: 100%; max-height: 220px; border-radius: 10px; object-fit: cover; margin-top: 5px; display: block; }
+    .chat-audio-render { max-width: 100%; outline: none; margin-top: 3px; height: 36px; }
+    .sticker-msg-render { width: 130px; height: 130px; object-fit: contain; display: block; }
 
-    .input-bar { padding: 15px 25px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 15px; width: 100%; }
-    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
-    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
+    /* ÁREA DE ENTRADA Y POPOVER DE STICKERS */
+    .input-bar-container { position: relative; background: var(--bg-sidebar); width: 100%; display: flex; flex-direction: column; }
+    .input-bar { padding: 15px 25px; display: flex; align-items: center; gap: 15px; width: 100%; }
+    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; font-size: 0.95rem; }
+    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; transition: transform 0.1s; }
+    .input-bar i:active { transform: scale(0.9); }
+    .mic-recording { color: var(--danger) !important; animation: pulseMic 1s infinite alternate; }
 
-    /* RESPONSIVE LAYOUT (MOVIL) */
+    .sticker-popover { display: none; position: absolute; bottom: 75px; right: 80px; width: 300px; height: 240px; background: #1f2c34; border: 2px solid var(--accent); border-radius: 15px; z-index: 200; padding: 12px; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,0.7); }
+    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 8px; }
+    .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 8px; transition: transform 0.1s; }
+    .sticker-option:hover { transform: scale(1.15); background: rgba(255,255,255,0.05); }
+
+    @keyframes pulseMic { from { opacity: 0.5; } to { opacity: 1; } }
+
+    .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.02); }
+    .my-code-footer b { color: var(--accent); }
+
+    /* CONTENEDOR DE LA LLAMADA */
+    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 400px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
+    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
+    .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #1c2732; }
+
+    /* ADAPTACIÓN MÓVIL SUTIL (MEDIA QUERIES SIN DESTRUIR PC) */
     @media (max-width: 768px) {
-      body { flex-direction: column; }
       .sidebar { display: none; }
       .mobile-nav { display: flex; }
       .main-content { height: calc(100vh - 65px); }
@@ -97,27 +113,18 @@
       .chats-master.hidden-mobile { display: none; }
       .chats-detail { width: 100%; height: 100%; display: none; }
       .chats-detail.active-mobile { display: flex; }
-      .tok-actions { right: 15px; bottom: 90px; }
-      .tok-meta { left: 15px; bottom: 90px; max-width: 80%; }
-      .nav-arrow { width: 35px; height: 35px; font-size: 0.9rem; }
-      .arrow-left { left: 10px; }
-      .arrow-right { right: 10px; }
-      .messages-container { padding: 15px; }
-      .sticker-popover { right: 10px; width: 90%; max-width: 280px; }
+      .sticker-popover { right: 10px; left: 10px; width: auto; bottom: 70px; }
+      .tok-actions { bottom: 90px; right: 15px; }
+      .tok-meta { bottom: 90px; left: 15px; max-width: 75%; }
     }
-
-    /* LLAMADAS */
-    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 420px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
-    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
-    .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
 
     .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center; }
     .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 90%; max-width: 360px; text-align: center; }
     .modal-box input { width:100%; padding:12px; margin:15px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; outline:none; text-align:center; }
     .btn-solid { background: var(--accent); color:black; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
     .btn-danger { background: var(--danger); color:white; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
-    .back-chat-btn { display: none; color: var(--accent); font-size: 1.2rem; cursor: pointer; align-items: center; }
-    @media (max-width: 768px) { .back-chat-btn { display: flex; } }
+    .back-btn-m { display: none; color: var(--accent); align-items: center; cursor: pointer; font-weight: 600; }
+    @media (max-width: 768px) { .back-btn-m { display: flex; } }
   </style>
 </head>
 <body>
@@ -129,7 +136,7 @@
       <div class="menu-item" id="menu-chat" onclick="navegarHacia('chat')"><i class="fa-solid fa-comment-dots"></i> <span>Chats privados</span></div>
       <div class="menu-item" id="menu-profile" onclick="navegarHacia('profile')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
     </nav>
-    <div class="separator">Herramientas</div>
+    <div class="separator">Descubrir</div>
     <div class="side-menu">
       <div class="menu-item" onclick="abrirModalSubir()"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Subir video</span></div>
     </div>
@@ -138,7 +145,7 @@
   <nav class="mobile-nav">
     <div class="mobile-nav-item active" id="mmenu-tok" onclick="navegarHacia('tok')"><i class="fa-solid fa-house"></i><span>Para ti</span></div>
     <div class="mobile-nav-item" id="mmenu-chat" onclick="navegarHacia('chat')"><i class="fa-solid fa-comment-dots"></i><span>Chats</span></div>
-    <div class="mobile-nav-item" onclick="abrirModalSubir()"><i class="fa-solid fa-square-plus" style="font-size:1.6rem; color:var(--accent);"></i><span>Subir</span></div>
+    <div class="mobile-nav-item" onclick="abrirModalSubir()"><i class="fa-solid fa-square-plus" style="font-size:1.5rem; color:var(--accent);"></i><span>Subir</span></div>
     <div class="mobile-nav-item" id="mmenu-profile" onclick="navegarHacia('profile')"><i class="fa-solid fa-user"></i><span>Perfil</span></div>
   </nav>
 
@@ -148,7 +155,8 @@
       <div class="top-bar">
         <h3>Explorar</h3>
         <div class="search-box-container">
-          <input type="text" id="inputBuscarDescripcion" placeholder="Buscar..." oninput="filtrarVideosPorDescripcion()">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="inputBuscarDescripcion" placeholder="Buscar por descripción..." oninput="filtrarVideosPorDescripcion()">
         </div>
       </div>
       <div class="tok-feed-container">
@@ -160,37 +168,39 @@
 
     <div class="screen" id="screen-chat">
       <div class="chat-layout">
-        <div class="chats-master" id="panelMasterChat">
-          <div class="top-bar" style="padding: 15px;"><button class="btn-solid" style="width: 100%;" onclick="abrirModalConexion()">+ Conectar Amigo</button></div>
+        <div class="chats-master" id="chatMasterListPanel">
+          <div class="top-bar" style="padding: 15px;"><button class="btn-solid" style="width:100%;" onclick="abrirModalConexion()"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button></div>
           <div style="flex:1; overflow-y:auto;" id="chatListContainer"></div>
         </div>
         
-        <div class="chats-detail" id="panelDetailChat">
-          <div class="top-bar" id="chatDetailHeader" style="display: none;">
-            <div class="back-chat-btn" onclick="regresarListaChatsMovil()"><i class="fa-solid fa-chevron-left"></i>&nbsp;Atrás</div>
+        <div class="chats-detail" id="chatDetailConversacionPanel">
+          <div class="top-bar" id="chatDetailHeader" style="display: none; justify-content: space-between; width: 100%;">
+            <div class="back-btn-m" onclick="irAtrasListaMóvil()"><i class="fa-solid fa-chevron-left"></i>&nbsp;Atrás</div>
             <h4 id="targetChatName" style="color: white;">Amigo</h4>
-            <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem;">
-              <i class="fa-solid fa-phone" style="cursor:pointer;" onclick="iniciarLlamadaVozVideo(false)"></i>
-              <i class="fa-solid fa-video" style="cursor:pointer;" onclick="iniciarLlamadaVozVideo(true)"></i>
+            <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem; cursor: pointer;">
+              <i class="fa-solid fa-phone" onclick="iniciarLlamadaVozVideo(false)"></i>
+              <i class="fa-solid fa-video" onclick="iniciarLlamadaVozVideo(true)"></i>
             </div>
           </div>
           
           <div class="messages-container" id="msgBox"></div>
           
-          <div class="input-bar-wrapper">
-            <div class="sticker-popover" id="boxPanelStickers">
-              <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--accent); margin-bottom:5px; font-weight:bold;">
-                <span>Selecciona un Sticker</span>
-                <i class="fa-solid fa-xmark" style="cursor:pointer; color:white;" onclick="toggleCapaStickers()"></i>
+          <div class="input-bar-container">
+            <div class="sticker-popover" id="popoverStickersBox">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--accent); font-weight:bold;">
+                <span>Enviar Sticker</span>
+                <i class="fa-solid fa-xmark" style="cursor:pointer; color:white;" onclick="alternarCapaStickers()"></i>
               </div>
-              <div class="sticker-grid" id="gridStickersItems"></div>
+              <div class="sticker-grid" id="containerGridStickers"></div>
             </div>
 
             <div class="input-bar" id="chatInputBarArea" style="display: none;">
-              <label for="chatInputFileImage" style="display:flex; align-items:center; margin:0;"><i class="fa-solid fa-paperclip"></i></label>
+              <label for="chatInputFileImage" style="margin: 0; padding: 0; display: flex; align-items: center;"><i class="fa-solid fa-paperclip"></i></label>
               <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="procesarYEnviarFotoChat(this)">
+              
               <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
-              <i class="fa-regular fa-face-smile" onclick="toggleCapaStickers()"></i>
+              
+              <i class="fa-regular fa-face-smile" onclick="alternarCapaStickers()"></i>
               <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="invertirEstadoGrabacionAudio()"></i>
               <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
             </div>
@@ -201,11 +211,13 @@
 
     <div class="screen" id="screen-profile">
       <div class="top-bar"><h3>Mi Perfil</h3></div>
-      <div class="profile-container" style="padding:30px; text-align:center;">
-        <h2 id="txtLabelPerfilID" style="color: var(--accent); margin-bottom:20px;">@</h2>
-        <button class="btn-danger" onclick="cerrarSesionYCambiarID()">Cerrar Sesión</button>
+      <div class="profile-container" style="padding:40px; text-align:center;">
+        <h2 id="txtLabelPerfilID" style="color: var(--accent); margin-bottom:15px;">@</h2>
+        <button class="btn-danger" onclick="cerrarSesionYCambiarID()">Cerrar Sesión / Cambiar ID</button>
       </div>
     </div>
+
+    <div class="my-code-footer" id="labelFooterMyCode">Tu código: <b>Desconectado</b></div>
   </main>
 
   <div class="call-overlay-container" id="panelLlamadaActiva">
@@ -214,15 +226,15 @@
       <video id="localStreamVideo" autoplay muted playsinline></video>
       <video id="remoteStreamVideo" autoplay playsinline></video>
     </div>
-    <div style="display:flex; gap:10px;">
-      <button class="btn-solid" style="flex:1; background:#0288d1; color:white;" id="btnCompartirPantallaCall" onclick="toggleCompartirPantallaWebRTC()">Pantalla</button>
+    <div style="display:flex; gap:10px; margin-top:5px;">
+      <button class="btn-solid" style="flex:1; background:#0288d1; color:white;" id="btnCompartirPantallaCall" onclick="toggleCompartirPantallaWebRTC()"><i class="fa-solid fa-desktop"></i> Pantalla</button>
       <button class="btn-danger" style="flex:1;" onclick="cortarLlamadaWebRTC()">Colgar</button>
     </div>
   </div>
 
-  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;"><div class="modal-box"><h2>Crear tu ID WaveTok</h2><input type="text" id="inputUsernameUnico" placeholder="Ingresa tu ID"><button class="btn-solid" style="width:100%;" onclick="registrarNodoCliente()">Ingresar</button></div></div>
-  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Vincular Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID de tu amigo"><button class="btn-solid" style="width: 100%;" onclick="conectarConPeerAmigo()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
-  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="Pega URL .mp4"><input type="text" id="inputVideoCaption" placeholder="Descripción"><button class="btn-solid" style="width:100%;" onclick="guardarVideoEditadoDB()">Subir</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cancelar</p></div></div>
+  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;"><div class="modal-box"><h2 style="color:var(--accent);">Crear tu ID WaveTok</h2><input type="text" id="inputUsernameUnico" placeholder="Tu nombre único de usuario"><button class="btn-solid" style="width:100%;" onclick="registrarNodoCliente()">Ingresar</button></div></div>
+  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Vincular Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID exacto"><button class="btn-solid" style="width: 100%;" onclick="conectarConPeerAmigo()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
+  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="Pega URL directa .mp4 o stream"><input type="text" id="inputVideoCaption" placeholder="¿De qué trata?"><button class="btn-solid" style="width: 100%;" onclick="guardarVideoEditadoDB()">Subir</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cancelar</p></div></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -240,21 +252,23 @@
     const app = initializeApp(firebaseConfig);
     window.fsdb = getFirestore(app);
     window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp;
+    
     window.inicializarPlataformaCompleta();
   </script>
 
   <script>
     let peerInstance = null, mySessionId = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
-    let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false, unsubscribirEscuchaFirestore = null, unsubscribirFeedVideos = null;
+    let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
+    let unsubscribirEscuchaFirestore = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
 
-    // Lista de Stickers embebidos con Emojis HD para evitar dependencias de archivos locales
-    const listaStickersDisponibles = [
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp", // Risa
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp", // Risa extrema
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp", // Enamorado
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp", // Gafas sol
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.webp", // Ojos
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp"  // Fuego
+    // Galería integrada de Emojis Animados HD en formato WebP para Stickers estables
+    const bibliotecaStickers = [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.webp",
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp"
     ];
 
     window.inicializarPlataformaCompleta = () => {
@@ -266,12 +280,13 @@
         document.getElementById('modalRegistroInicial').style.display = 'none';
         levantarInstanciaPeer(mySessionId);
         document.getElementById('txtLabelPerfilID').innerText = `@${mySessionId}`;
+        document.getElementById('labelFooterMyCode').innerHTML = `Tu código: <b>${mySessionId}</b>`;
       }
     };
 
     function registrarNodoCliente() {
       let user = document.getElementById('inputUsernameUnico').value.trim();
-      if (!user) return;
+      if (!user) return alert("Define un nombre.");
       mySessionId = user;
       localStorage.setItem('wt_session_peer_id', mySessionId);
       document.getElementById('modalRegistroInicial').style.display = 'none';
@@ -282,7 +297,7 @@
       peerInstance = new Peer(idMio, { config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] } });
       peerInstance.on('open', () => { renderizarListaChats(); });
       peerInstance.on('call', (incomingCall) => {
-        if(confirm(`¿Contestar llamada de ${incomingCall.peer}?`)) {
+        if(confirm(`¿Contestar llamada entrante de ${incomingCall.peer}?`)) {
           navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             miStreamLocal = stream;
             document.getElementById('panelLlamadaActiva').style.display = 'flex';
@@ -295,39 +310,39 @@
       });
     }
 
+    function cargarStickersEnPanel() {
+      const grid = document.getElementById('containerGridStickers');
+      grid.innerHTML = '';
+      bibliotecaStickers.forEach(url => {
+        grid.innerHTML += `<img src="${url}" class="sticker-option" onclick="enviarStickerDirecto('${url}')">`;
+      });
+    }
+
+    function alternarCapaStickers() {
+      const box = document.getElementById('popoverStickersBox');
+      box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    async function enviarStickerDirecto(url) {
+      if(!currentTargetPeerId) return;
+      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+        sender: mySessionId,
+        text: url,
+        type: "sticker",
+        timestamp: window.serverTimestamp()
+      });
+      alternarCapaStickers();
+    }
+
     function navegarHacia(pantalla) {
       document.querySelectorAll('.tok-video').forEach(v => v.pause());
       document.querySelectorAll('.menu-item, .mobile-nav-item').forEach(m => m.classList.remove('active'));
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       
       document.getElementById(`screen-${pantalla}`).classList.add('active');
-      if(document.getElementById(`menu-${pantscale}`)) document.getElementById(`menu-${pantalla}`).classList.add('active');
+      if(document.getElementById(`menu-${pantalla}`)) document.getElementById(`menu-${pantscale}`)?.classList.add('active');
       if(document.getElementById(`mmenu-${pantalla}`)) document.getElementById(`mmenu-${pantalla}`).classList.add('active');
-    }
-
-    function cargarStickersEnPanel() {
-      const grid = document.getElementById('gridStickersItems');
-      grid.innerHTML = '';
-      listaStickersDisponibles.forEach(url => {
-        grid.innerHTML += `<img src="${url}" class="sticker-option" onclick="enviarStickerDirecto('${url}')">`;
-      });
-    }
-
-    function toggleCapaStickers() {
-      const box = document.getElementById('boxPanelStickers');
-      box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
-    }
-
-    async function enviarStickerDirecto(urlSticker) {
-      if(!currentTargetPeerId) return;
-      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-        sender: mySessionId,
-        text: urlSticker,
-        type: "sticker",
-        timestamp: window.serverTimestamp()
-      });
-      toggleCapaStickers();
     }
 
     function desplegarChatIndividual(id) {
@@ -337,15 +352,15 @@
       document.getElementById('chatInputBarArea').style.display = 'flex';
       
       if(window.innerWidth <= 768) {
-        document.getElementById('panelMasterChat').classList.add('hidden-mobile');
-        document.getElementById('panelDetailChat').classList.add('active-mobile');
+        document.getElementById('chatMasterListPanel').classList.add('hidden-mobile');
+        document.getElementById('chatDetailConversacionPanel').classList.add('active-mobile');
       }
       escucharMensajesFirestore(id);
     }
 
-    function regresarListaChatsMovil() {
-      document.getElementById('panelMasterChat').classList.remove('hidden-mobile');
-      document.getElementById('panelDetailChat').classList.remove('active-mobile');
+    function irAtrasListaMóvil() {
+      document.getElementById('chatMasterListPanel').classList.remove('hidden-mobile');
+      document.getElementById('chatDetailConversacionPanel').classList.remove('active-mobile');
     }
 
     function escucharMensajesFirestore(targetId) {
@@ -361,6 +376,10 @@
           let esMio = d.sender === mySessionId;
           if(d.type === "sticker") {
             box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${d.sender}:</b><img src="${d.text}" class="sticker-msg-render"/></div>`;
+          } else if(d.type === "image") {
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${d.sender}:</b><img src="${d.text}" class="chat-img-render"/></div>`;
+          } else if(d.type === "audio") {
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${d.sender}:</b><audio src="${d.text}" controls class="chat-audio-render"></audio></div>`;
           } else {
             box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${d.sender}:</b><br>${d.text}</div>`;
           }
@@ -382,12 +401,89 @@
       input.value = '';
     }
 
+    function procesarYEnviarFotoChat(input) {
+      if(!currentTargetPeerId || !input.files[0]) return;
+      let lector = new FileReader();
+      lector.onload = async (e) => {
+        let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+        await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+          sender: mySessionId,
+          text: e.target.result,
+          type: "image",
+          timestamp: window.serverTimestamp()
+        });
+      };
+      lector.readAsDataURL(input.files[0]);
+    }
+
+    function invertirEstadoGrabacionAudio() {
+      if (!currentTargetPeerId) return;
+      const btnMic = document.getElementById('btnIconoMicrofonoAudio');
+
+      if (!estaGrabandoAudio) {
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+          grabadorAudioMedia = new MediaRecorder(stream);
+          fragmentosAudioGrabados = [];
+          grabadorAudioMedia.ondataavailable = e => fragmentosAudioGrabados.push(e.data);
+          grabadorAudioMedia.onstop = () => {
+            let audioBlob = new Blob(fragmentosAudioGrabados, { type: 'audio/mp3' });
+            let lector = new FileReader();
+            lector.onload = async (e) => {
+              let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+              await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+                sender: mySessionId,
+                text: e.target.result,
+                type: "audio",
+                timestamp: window.serverTimestamp()
+              });
+            };
+            lector.readAsDataURL(audioBlob);
+          };
+          grabadorAudioMedia.start();
+          estaGrabandoAudio = true;
+          btnMic.classList.add('mic-recording');
+        });
+      } else {
+        if (grabadorAudioMedia) grabadorAudioMedia.stop();
+        estaGrabandoAudio = false;
+        btnMic.classList.remove('mic-recording');
+      }
+    }
+
+    function iniciarLlamadaVozVideo(conVideo) {
+      document.getElementById('panelLlamadaActiva').style.display = 'flex';
+      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
+        miStreamLocal = stream;
+        document.getElementById('localStreamVideo').srcObject = stream;
+        let call = peerInstance.call(currentTargetPeerId, stream);
+        llamadaActualWebRTC = call;
+        call.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
+      });
+    }
+
+    function toggleCompartirPantallaWebRTC() {
+      if(!transmitiendoPantalla) {
+        navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+          transmisorPantallaTrack = stream.getVideoTracks()[0];
+          let sender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+          if(sender) sender.replaceTrack(transmisorPantallaTrack);
+          document.getElementById('localStreamVideo').srcObject = stream;
+          transmitiendoPantalla = true;
+        });
+      }
+    }
+
+    function cortarLlamadaWebRTC() {
+      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
+      document.getElementById('panelLlamadaActiva').style.display = 'none';
+    }
+
     function escucharFeedVideosGlobal() {
       const q = window.query(window.collection(window.fsdb, "videos"), window.orderBy("createdAt", "desc"));
       window.onSnapshot(q, (snapshot) => {
         let items = [];
         snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-        masterVideoArray = items.length ? items : [{ id:"def", author:"System", caption:"Bienvenido", url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }];
+        masterVideoArray = items.length ? items : [{ id:"def", author:"System", caption:"No hay clips", url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }];
         filtrarVideosPorDescripcion();
       });
     }
@@ -404,7 +500,7 @@
       vidsFiltradosArray.forEach(vid => {
         container.innerHTML += `
           <div class="tok-post">
-            <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline></video>
+            <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline onclick="if(this.paused)this.play();else this.pause();"></video>
             <div class="tok-actions">
               <div class="circle-action"><i class="fa-solid fa-heart"></i></div><span>${vid.likes||0}</span>
               <div class="circle-action"><i class="fa-solid fa-comment"></i></div>
@@ -422,26 +518,7 @@
         wrapper.children[currentFeedIndex]?.querySelector('video')?.pause();
         currentFeedIndex = target;
         wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
-        wrapper.children[currentFeedIndex]?.querySelector('video')?.play().catch(()=>{});
       }
-    }
-
-    function toggleCompartirPantallaWebRTC() {
-      if(!transmitiendoPantalla) {
-        navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
-          transmisorPantallaTrack = stream.getVideoTracks()[0];
-          let sender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if(sender) sender.replaceTrack(transmisorPantallaTrack);
-          document.getElementById('localStreamVideo').srcObject = null;
-          document.getElementById('localStreamVideo').srcObject = stream;
-          transmitiendoPantalla = true;
-        });
-      }
-    }
-
-    function cortarLlamadaWebRTC() {
-      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
-      document.getElementById('panelLlamadaActiva').style.display = 'none';
     }
 
     function conectarConPeerAmigo() {
@@ -461,6 +538,14 @@
       list.forEach(id => {
         container.innerHTML += `<div class="chat-item" onclick="desplegarChatIndividual('${id}')"><div class="avatar">${id.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">${id.toUpperCase()}</h5></div>`;
       });
+    }
+
+    async function guardarVideoEditadoDB() {
+      let caption = document.getElementById('inputVideoCaption').value.trim() || "Clip";
+      let url = document.getElementById('inputVideoUrlDirecta').value.trim();
+      if(!url) return alert("URL obligatoria.");
+      await window.addDoc(window.collection(window.fsdb, "videos"), { author: mySessionId, caption: caption, url: url, likes: 0, createdAt: window.serverTimestamp() });
+      cerrarCapaModal('modalSubirVideo');
     }
 
     function cerrarSesionYCambiarID() { localStorage.removeItem('wt_session_peer_id'); location.reload(); }
