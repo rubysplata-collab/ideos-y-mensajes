@@ -34,7 +34,11 @@
     .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: black; }
     .screen { display: none; width: 100%; height: 100%; flex-direction: column; background: var(--bg-dark); }
     .screen.active { display: flex; }
-    .top-bar { background: var(--bg-sidebar); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    
+    .top-bar { background: var(--bg-sidebar); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 15px; }
+    .search-box-container { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 250px; }
+    .search-box-container input { background: none; border: none; outline: none; color: white; font-size: 0.9rem; width: 100%; margin-left: 8px; }
+    .search-box-container i { color: var(--text-dim); }
 
     .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; height: calc(100vh - 70px); overflow: hidden; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; }
@@ -87,8 +91,8 @@
     .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
     .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #222; }
 
-    .profile-container { padding: 40px; display: flex; flex-direction: column; gap: 30px; }
-    .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+    .profile-container { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+    .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; width: 100%; }
     .grid-card { position: relative; aspect-ratio: 9/16; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
     .grid-card video { width: 100%; height: 100%; object-fit: cover; }
     .grid-card .meta-card { position: absolute; bottom: 8px; left: 8px; font-size: 0.8rem; text-shadow: 1px 1px 2px black; }
@@ -97,7 +101,7 @@
     .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 360px; text-align: center; }
     .modal-box input { width:100%; padding:12px; margin:15px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; text-align:center; outline:none; }
     .btn-solid { background: var(--accent); color:black; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
-    .btn-danger { background: var(--danger); color:white; border:none; padding:8px 15px; border-radius:20px; font-weight:bold; cursor:pointer; }
+    .btn-danger { background: var(--danger); color:white; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -128,7 +132,13 @@
   <main class="main-content">
 
     <div class="screen active" id="screen-tok">
-      <div class="top-bar"><h3>Explorar</h3></div>
+      <div class="top-bar">
+        <h3>Explorar</h3>
+        <div class="search-box-container">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="inputBuscarDescripcion" placeholder="Buscar por descripción..." oninput="filtrarVideosPorDescripcion()">
+        </div>
+      </div>
       <div class="tok-feed-container">
         <button class="nav-arrow arrow-left" onclick="cambiarVideoFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
         <button class="nav-arrow arrow-right" onclick="cambiarVideoFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
@@ -186,6 +196,11 @@
       <div class="top-bar"><h3>Mi Perfil</h3></div>
       <div class="profile-container">
         <h2 id="txtLabelPerfilID" style="color: var(--accent);">@</h2>
+        
+        <button class="btn-danger" onclick="cerrarSesionYCambiarID()">
+          <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión / Cambiar ID
+        </button>
+        
         <div class="my-grid" id="gridMisVideosPublicados"></div>
       </div>
     </div>
@@ -266,7 +281,7 @@
 
   <script>
     let peerInstance = null, mySessionId = "", currentTargetPeerId = null;
-    let cacheVideoBase64 = "", masterVideoArray = [];
+    let cacheVideoBase64 = "", masterVideoArray = [], vidsFiltradosArray = [];
     let currentFeedIndex = 0; 
     let miStreamLocal = null, llamadaActualWebRTC = null;
     let transmisorPantallaTrack = null;
@@ -276,8 +291,7 @@
     let unsubscribirFeedVideos = null;
     let unsubscribirComentarios = null;
     
-    // Rastreadores de comentarios contextuales
-    let modoCajonComentarios = "video"; // "video" o "foto"
+    let modoCajonComentarios = "video"; 
     let idElementoComentadoActual = null;
     let salaIdFotoComentadaActual = null;
 
@@ -308,6 +322,13 @@
     function actualizarEtiquetasDeID(id) {
       document.getElementById('txtLabelPerfilID').innerText = `@${id}`;
       document.getElementById('labelFooterMyCode').innerHTML = `Este es tu código: <b>${id}</b>`;
+    }
+
+    function cerrarSesionYCambiarID() {
+      if(confirm("¿Seguro que deseas cerrar sesión y cambiar tu nombre de ID?")) {
+        localStorage.removeItem('wt_session_peer_id');
+        location.reload();
+      }
     }
 
     function levantarInstanciaPeer(idMio) {
@@ -347,9 +368,21 @@
         } else if(masterVideoArray.length === 0) {
           masterVideoArray = [{ id: "backup_def", author: "SYSTEM", caption: "Sube un video estable.", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 0 }];
         }
-        renderizarFeedPrincipalVideos();
+        filtrarVideosPorDescripcion();
         renderizarMiPerfilCuadrilla();
       });
+    }
+
+    /* FILTRADO POR DESCRIPCIÓN */
+    function filtrarVideosPorDescripcion() {
+      let busqueda = document.getElementById('inputBuscarDescripcion').value.toLowerCase().trim();
+      if(!busqueda) {
+        vidsFiltradosArray = [...masterVideoArray];
+      } else {
+        vidsFiltradosArray = masterVideoArray.filter(v => v.caption && v.caption.toLowerCase().includes(busqueda));
+      }
+      currentFeedIndex = 0;
+      renderizarFeedPrincipalVideos();
     }
 
     function conectarConPeerAmigo() {
@@ -374,7 +407,6 @@
       input.value = '';
     }
 
-    /* COMPRESIÓN DE FOTOS PRE-ENVÍO (EVITA MENSAJES VACÍOS) */
     function procesarYEnviarFotoChat(input) {
       if (!currentTargetPeerId || !input.files[0]) return;
       let file = input.files[0];
@@ -415,7 +447,6 @@
       lector.readAsDataURL(file);
     }
 
-    /* GRABACIÓN DE AUDIO */
     function invertirEstadoGrabacionAudio() {
       if (!currentTargetPeerId) return;
       const btnMic = document.getElementById('btnIconoMicrofonoAudio');
@@ -453,7 +484,6 @@
       }
     }
 
-    /* ESCUCHA DE CHAT EN VIVO + BOTÓN COMENTAR EN IMÁGENES */
     function escucharMensajesFirestore(targetId) {
       if(unsubscribirEscuchaFirestore) unsubscribirEscuchaFirestore();
       let salaId = [mySessionId, targetId].sort().join("_CH_");
@@ -473,14 +503,19 @@
             box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><div class="share-card" onclick="navegarHacia('tok')">🎬 <b>Clip Compartido:</b><br>${parts[1]}</div></div>`;
           } 
           else if(datos.type === "image") {
-            box.innerHTML += `
-              <div class="bubble ${esMio?'sent':'recv'}">
-                <b>@${datos.sender}:</b>
-                <img src="${datos.text}" class="chat-img-render"/>
-                <button class="btn-comentar-foto" onclick="abrirCajonComentariosFoto('${salaId}', '${msgId}')">
-                  <i class="fa-regular fa-comment"></i> Comentar foto
-                </button>
-              </div>`;
+            let srcImg = (datos.text && datos.text.startsWith('data:image')) ? datos.text : '';
+            if(srcImg) {
+              box.innerHTML += `
+                <div class="bubble ${esMio?'sent':'recv'}">
+                  <b>@${datos.sender}:</b>
+                  <img src="${srcImg}" class="chat-img-render"/>
+                  <button class="btn-comentar-foto" onclick="abrirCajonComentariosFoto('${salaId}', '${msgId}')">
+                    <i class="fa-regular fa-comment"></i> Comentar foto
+                  </button>
+                </div>`;
+            } else {
+              box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${datos.sender}:</b><br>⚠️ Imagen corrupta o muy pesada.</div>`;
+            }
           } 
           else if(datos.type === "audio") {
             box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${datos.sender}:</b><audio src="${datos.text}" controls class="chat-audio-render"></audio></div>`;
@@ -493,7 +528,6 @@
       });
     }
 
-    /* SISTEMA DE LLAMADAS Y COMPARTIR PANTALLA (WebRTC) */
     function iniciarLlamadaVozVideo(conVideo) {
       document.getElementById('panelLlamadaActiva').style.display = 'flex';
       document.getElementById('btnCompartirPantallaCall').style.display = conVideo ? 'block' : 'none';
@@ -514,19 +548,14 @@
       if(!llamadaActualWebRTC) return;
 
       if(!transmitiendoPantalla) {
-        // Activar captura de pantalla
         navigator.mediaDevices.getDisplayMedia({ video: true }).then((screenStream) => {
           transmisorPantallaTrack = screenStream.getVideoTracks()[0];
-          
           let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if(videoSender) {
-            videoSender.replaceTrack(transmisorPantallaTrack);
-          }
+          if(videoSender) videoSender.replaceTrack(transmisorPantallaTrack);
           
           document.getElementById('localStreamVideo').srcObject = screenStream;
           transmitiendoPantalla = true;
           document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-video"></i> Usar Cámara`;
-
           transmisorPantallaTrack.onended = () => { detenerTransmisionPantalla(); };
         }).catch(() => {});
       } else {
@@ -539,13 +568,9 @@
       navigator.mediaDevices.getUserMedia({ video: true }).then((camStream) => {
         let camaraTrack = camStream.getVideoTracks()[0];
         let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-        if(videoSender) {
-          videoSender.replaceTrack(camaraTrack);
-        }
+        if(videoSender) videoSender.replaceTrack(camaraTrack);
         
         if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
-        
-        // Actualizar stream local
         let oldTracks = miStreamLocal.getVideoTracks();
         oldTracks.forEach(t => t.stop());
         miStreamLocal.addTrack(camaraTrack);
@@ -564,20 +589,25 @@
       transmitiendoPantalla = false;
     }
 
-    /* CONTROL DE FLUJO DEL FEED DE VIDEOS (CORREGIDO PAUSA) */
     function controlarReproduccionYAudio(videoElement) {
       if (videoElement.paused) {
         videoElement.muted = false; 
         videoElement.play().catch(()=>{});
       } else {
-        videoElement.pause(); // Pausa limpia sin mutear
+        videoElement.pause();
       }
     }
 
     function renderizarFeedPrincipalVideos() {
       const container = document.getElementById('tokFeedIterator');
       container.innerHTML = '';
-      masterVideoArray.forEach((vid, idx) => {
+      
+      if(vidsFiltradosArray.length === 0) {
+        container.innerHTML = `<div style="color:var(--text-dim); text-align:center; width:100%; margin-top:200px;">No se encontraron videos con esa descripción.</div>`;
+        return;
+      }
+
+      vidsFiltradosArray.forEach((vid, idx) => {
         container.innerHTML += `
           <div class="tok-post">
             <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline onclick="controlarReproduccionYAudio(this)"></video>
@@ -593,22 +623,21 @@
             </div>
           </div>`;
       });
-      const wrapper = document.getElementById('tokFeedIterator');
-      wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
+      container.scrollLeft = currentFeedIndex * container.clientWidth;
     }
 
     function cambiarVideoFeed(dir) {
       const wrapper = document.getElementById('tokFeedIterator');
       let target = currentFeedIndex + dir;
-      if (target >= 0 && target < masterVideoArray.length) {
-        let prevVideo = wrapper.children[currentFeedIndex].querySelector('video');
+      if (target >= 0 && target < vidsFiltradosArray.length) {
+        let prevVideo = wrapper.children[currentFeedIndex]?.querySelector('video');
         if(prevVideo) prevVideo.pause();
 
         cerrarCajonComentarios();
         currentFeedIndex = target;
         wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
         
-        let activeVideo = wrapper.children[currentFeedIndex].querySelector('video');
+        let activeVideo = wrapper.children[currentFeedIndex]?.querySelector('video');
         if(activeVideo) {
           activeVideo.muted = false;
           activeVideo.play().catch(()=>{
@@ -619,7 +648,6 @@
       }
     }
 
-    /* GESTIÓN CENTRALIZADA DE COMENTARIOS (VIDEOS Y FOTOS) */
     function abrirCajonComentariosVideo(vId) {
       modoCajonComentarios = "video";
       idElementoComentadoActual = vId;
@@ -631,12 +659,7 @@
       modoCajonComentarios = "foto";
       idElementoComentadoActual = msgId;
       salaIdFotoComentadaActual = salaId;
-      
       document.getElementById('labelTituloCajonComentarios').innerText = "Comentarios de la Foto";
-      
-      // Forzar visualización del cajón flotante sobre la interfaz
-      document.getElementById('drawerComentarios').style.display = 'flex';
-      
       desplegarYEscucharComentariosSubcollection(window.query(window.collection(window.fsdb, "salas", salaId, "mensajes", msgId, "comentarios"), window.orderBy("createdAt", "asc")));
     }
 
@@ -644,12 +667,9 @@
       const input = document.getElementById('inputNuevoComentario');
       if(!input.value.trim() || !idElementoComentadoActual) return;
 
-      let subRef;
-      if(modoCajonComentarios === "video") {
-        subRef = window.collection(window.fsdb, "videos", idElementoComentadoActual, "comentarios");
-      } else {
-        subRef = window.collection(window.fsdb, "salas", salaIdFotoComentadaActual, "mensajes", idElementoComentadoActual, "comentarios");
-      }
+      let subRef = (modoCajonComentarios === "video") ? 
+        window.collection(window.fsdb, "videos", idElementoComentadoActual, "comentarios") :
+        window.collection(window.fsdb, "salas", salaIdFotoComentadaActual, "mensajes", idElementoComentadoActual, "comentarios");
 
       window.addDoc(subRef, {
         user: mySessionId || "Anónimo",
@@ -659,12 +679,8 @@
       input.value = '';
     }
 
-    function despuesDeAsegurarCajon() {
-      document.getElementById('drawerComentarios').style.display = 'flex';
-    }
-
     function desplegarYEscucharComentariosSubcollection(consulta) {
-      despuesDeAsegurarCajon();
+      document.getElementById('drawerComentarios').style.display = 'flex';
       if(unsubscribirComentarios) unsubscribirComentarios();
       const listContainer = document.getElementById('boxListaComentarios');
       
@@ -680,17 +696,16 @@
 
     function cerrarCajonComentarios() { document.getElementById('drawerComentarios').style.display = 'none'; }
 
-    // Otras utilidades funcionales del ecosistema
     async function reaccionarLikeVideoFirestore(vId) {
       if(vId.startsWith("backup_")) return;
       await window.updateDoc(window.doc(window.fsdb, "videos", vId), { likes: window.increment(1) });
     }
 
     async function compartirVideoPorChat(idx) {
-      let video = masterVideoArray[idx];
+      let video = vidsFiltradosArray[idx];
       let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
       let target = currentTargetPeerId || list[0];
-      if(!target) return alert("Primero añade un amigo en la pestaña de chats.");
+      if(!target) return alert("Primero vincula un amigo en la pestaña de chats.");
 
       let salaId = [mySessionId, target].sort().join("_CH_");
       await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
@@ -779,7 +794,10 @@
       cerrarCajonComentarios();
       if(document.getElementById(`menu-${pantalla}`)) document.getElementById(`menu-${pantalla}`).classList.add('active');
       document.getElementById(`screen-${pantalla}`).classList.add('active');
-      if(pantalla === 'tok') renderizarFeedPrincipalVideos();
+      if(pantalla === 'tok') {
+        document.getElementById('inputBuscarDescripcion').value = "";
+        filtrarVideosPorDescripcion();
+      }
     }
 
     function abrirModalConexion() { document.getElementById('connectModal').style.display = 'flex'; }
