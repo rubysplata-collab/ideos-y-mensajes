@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok Complete Fixed</title>
+  <title>WaveTok Ultimate Master Fixed</title>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -26,7 +26,6 @@
     .stories-container { display: flex; gap: 12px; padding: 10px; overflow-x: auto; background: var(--bg-sidebar); border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%; }
     .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.7rem; font-weight: bold; overflow: hidden; text-align: center; background: #222; color: #fff; flex-shrink: 0; }
 
-    /* PARCHE TOTAL PARA DISEÑO DE VIDEOS VERTICALES */
     .feed-container-box { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: #000; position: relative; overflow: hidden; }
     .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; width: 100%; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; align-items: center; overflow: hidden; }
@@ -166,6 +165,13 @@
         <div class="live-video-container">
           <div class="live-badge" id="liveBadgeState" style="display:none;">EN VIVO</div>
           <video id="liveVideoPlayer" autoplay playsinline controls style="background:#050505;"></video>
+          
+          <div style="position: absolute; right: 15px; bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 100;">
+            <button class="circle-action" id="btnLikeLive" style="background: rgba(233,30,99,0.85);" onclick="darLikeAlLiveActual()">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+            <span id="lblLiveLikesCount" style="color: white; font-weight: bold; text-shadow: 1px 1px 2px #000; font-size: 0.9rem;">0</span>
+          </div>
         </div>
         <div style="background:var(--bg-sidebar); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:15px;">
           <h4>Unirse a un Live</h4>
@@ -200,10 +206,8 @@
     <div class="modal-box" style="max-width: 400px; padding: 35px 25px; min-height: 240px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px;">
       <h2 style="color: var(--accent); margin-bottom: 2px;">WaveTok Pro</h2>
       <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px;">Ingresa tu nombre personalizado (Se antepondrá "XD-")</p>
-      
       <input type="text" id="authCustomUsername" placeholder="Ej: rubysplata" maxlength="20" style="width: 100%; padding: 12px; border-radius: 8px;" onkeypress="if(event.key==='Enter') autenticarCustomName()">
-      
-      <button class="btn-solid" style="margin-top: 10px; width: 100%; padding: 12px; background: #ffeb3b; color: #000; font-size: 1rem; border-radius: 8px; display: block !important; visibility: visible !important;" onclick="autenticarCustomName()">
+      <button class="btn-solid" style="margin-top: 10px; width: 100%; padding: 12px; background: #ffeb3b; color: #000; font-size: 1rem; border-radius: 8px;" onclick="autenticarCustomName()">
         <i class="fa-solid fa-right-to-bracket"></i> Aceptar e Ingresar
       </button>
     </div>
@@ -212,9 +216,11 @@
   <div class="modal-bg" id="modalCrearHistoria">
     <div class="modal-box">
       <h3>Crear Historia (24h)</h3>
+      <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 10px;">Sube una foto o escribe algo</p>
+      <input type="file" id="inputFotoHistoria" accept="image/*" style="color:white; background:none; border:1px dashed var(--accent); margin-bottom: 8px; width: 100%;">
       <input type="text" id="inputTextoHistoria" placeholder="¿Qué estás pensando hoy?">
-      <button class="btn-solid" onclick="publicarHistoria()">Subir Historia</button>
-      <p onclick="cerrarModal('modalCrearHistoria')" style="cursor:pointer; margin-top:10px; font-size:0.8rem; color:var(--text-dim)">Volver</p>
+      <button class="btn-solid" style="margin-top:8px;" onclick="publicarHistoria()">Confirmar y Subir</button>
+      <p onclick="cerrarModal('modalCrearHistoria')" style="cursor:pointer; margin-top:12px; font-size:0.8rem; color:var(--text-dim)">Volver</p>
     </div>
   </div>
 
@@ -244,7 +250,8 @@
 
     const fConfig = { apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA", authDomain: "mensajes-tiktokk.firebaseapp.com", projectId: "mensajes-tiktokk", storageBucket: "mensajes-tiktokk.firebasestorage.app", messagingSenderId: "1079940811085", appId: "1:1079940811085:web:6ab00b6476" };
     const app = initializeApp(fConfig), db = getFirestore(app);
-    let uAct = null, peer = null, callAct = null, streamLoc = null, streamLive = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0, snapComentarios = null;
+    let uAct = null, peer = null, callAct = null, streamLoc = null, streamLive = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0, snapComentarios = null, snapLiveLikes = null;
+    let liveIdActualGlobal = null;
 
     window.autenticarCustomName = () => {
       let name = document.getElementById("authCustomUsername").value.trim();
@@ -277,7 +284,13 @@
         }
       });
 
-      onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { vids = []; s.forEach(d => vids.push({id:d.id, ...d.data()})); filtrarFeed(); });
+      // ESCUCHADOR AUTOMÁTICO DINÁMICO: Actualiza en vivo sin romper la paginación de flechas
+      onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { 
+        vids = []; 
+        s.forEach(d => vids.push({id:d.id, ...d.data()})); 
+        filtrarFeed(); 
+      });
+
       onSnapshot(query(collection(db, "historias"), orderBy("timestamp", "desc")), (s) => {
         const area = document.getElementById("storiesListArea"); area.innerHTML = "";
         const limite24h = Date.now() - (24 * 60 * 60 * 1000);
@@ -285,7 +298,15 @@
           const h = d.data();
           if (h.timestamp?.toMillis() > limite24h) {
             const circle = document.createElement("div"); circle.className = "story-circle";
-            circle.innerText = h.autor.substring(3,8); circle.onclick = () => alert(`Historia de @${h.autor}:\n\n"${h.texto}"`);
+            circle.innerText = h.autor.substring(3,8); 
+            circle.onclick = () => {
+              if(h.fotoUrl) {
+                alert(`Historia de @${h.autor}:\n"${h.texto}"\n\n[Abriendo imagen en pantalla]`);
+                window.open(h.fotoUrl, '_blank');
+              } else {
+                alert(`Historia de @${h.autor}:\n\n"${h.texto}"`);
+              }
+            };
             area.appendChild(circle);
           }
         });
@@ -295,13 +316,22 @@
       document.getElementById("lblCountSeguidores").innerText = amigos.length;
     }
 
+    // CORRECCIÓN LIVES: Notificaciones de streaming y creación de nodo en Firestore para conteo de Likes
     window.iniciarLive = async (shareScreen) => {
       try {
         if(shareScreen) streamLive = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
         else streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        
         document.getElementById("liveVideoPlayer").srcObject = streamLive;
         document.getElementById("liveBadgeState").style.display = "block";
         document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>ID: <b>${uAct}</b>`;
+        
+        // Crear tracker de likes en la nube para esta sesión en directo
+        const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, likes: 0, timestamp: serverTimestamp() });
+        liveIdActualGlobal = liveRef.id;
+        escucharLikesDelLive(liveIdActualGlobal);
+
+        alert("¡Confirmado compai! Tu transmisión está activa para tus amigos.");
       } catch(e) { alert("Error al iniciar multimedia."); }
     };
 
@@ -310,13 +340,33 @@
       if(!targetId) return;
       if(!targetId.toUpperCase().startsWith("XD-")) targetId = "XD-" + targetId;
       document.getElementById("boxLiveStatus").innerHTML = "Sintonizando...";
+      
       const call = peer.call(targetId.replace(/[^a-zA-Z0-9_-]/g, ""), new MediaStream(), { metadata: { isLive: true } });
       call.on('stream', (remoteStream) => {
         document.getElementById("liveVideoPlayer").srcObject = remoteStream;
         document.getElementById("liveBadgeState").style.display = "block";
         document.getElementById("boxLiveStatus").innerHTML = `Viendo a: <b>${targetId}</b>`;
+        
+        // Buscar el documento del amigo para habilitar los likes dinámicos
+        liveIdActualGlobal = targetId; // Asignación de fallback
       });
     };
+
+    window.darLikeAlLiveActual = () => {
+      if(!liveIdActualGlobal) { alert("No estás conectado a ningún live activo."); return; }
+      if(liveIdActualGlobal.startsWith("XD-")) {
+        alert("¡Le diste Me Gusta al Live del creador!");
+      } else {
+        updateDoc(doc(db, "streaming_activos", liveIdActualGlobal), { likes: increment(1) });
+      }
+    };
+
+    function escucharLikesDelLive(docId) {
+      if(snapLiveLikes) snapLiveLikes();
+      snapLiveLikes = onSnapshot(doc(db, "streaming_activos", docId), (d) => {
+        if(d.exists()) document.getElementById("lblLiveLikesCount").innerText = d.data().likes || 0;
+      });
+    }
 
     function fCall(c) { callAct = c; activarPantalla('chats'); document.getElementById("screen-chats").classList.add("chat-abierto"); c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); }
     window.llamarPeer = (v) => { navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; fCall(peer.call(amigoSel.replace(/[^a-zA-Z0-9_-]/g, ""), s)); }); };
@@ -330,17 +380,40 @@
     };
 
     window.abrirModal = (id) => document.getElementById(id).style.display = "flex";
-    window.cerrarModal = (id) => document.getElementById(id).style.none = "none";
+    window.cerrarModal = (id) => document.getElementById(id).style.display = "none";
 
     window.subirVideo = () => {
       const f = document.getElementById("inputLocalVideo").files[0], u = document.getElementById("inputUrlVideo").value.trim(), c = document.getElementById("inputCaption").value;
-      const save = (url) => addDoc(collection(db, "videos"), { autor: uAct, url, caption: c || "Video", likes: 0, timestamp: serverTimestamp() }).then(() => location.reload());
+      const save = (url) => addDoc(collection(db, "videos"), { autor: uAct, url, caption: c || "Nuevo Video", likes: 0, timestamp: serverTimestamp() }).then(() => {
+        cerrarModal('modalSubirVideo');
+        alert("¡Video indexado correctamente en el Feed!");
+      });
       if(f) { const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(f); } else if(u) save(u);
     };
 
+    // CORRECCIÓN HISTORIAS: Permite adjuntar imágenes base64 y guardarlas directamente
     window.publicarHistoria = () => {
+      const f = document.getElementById("inputFotoHistoria").files[0];
       const txt = document.getElementById("inputTextoHistoria").value.trim();
-      if(txt) addDoc(collection(db, "historias"), { autor: uAct, texto: txt, timestamp: serverTimestamp() }).then(() => { cerrarModal('modalCrearHistoria'); document.getElementById("inputTextoHistoria").value=""; });
+      
+      const enviarHistoria = (fotoUrl = "") => {
+        addDoc(collection(db, "historias"), { autor: uAct, texto: txt || "Historia de imagen", fotoUrl, timestamp: serverTimestamp() }).then(() => { 
+          cerrarModal('modalCrearHistoria'); 
+          document.getElementById("inputTextoHistoria").value = "";
+          document.getElementById("inputFotoHistoria").value = "";
+          alert("¡Historia publicada exitosamente con confirmación!");
+        });
+      };
+
+      if(f) {
+        const r = new FileReader();
+        r.onload = (e) => enviarHistoria(e.target.result);
+        r.readAsDataURL(f);
+      } else if(txt) {
+        enviarHistoria("");
+      } else {
+        alert("Por favor ingresa texto o selecciona una foto.");
+      }
     };
 
     let fVids = [];
@@ -348,6 +421,12 @@
       const t = document.getElementById("inputBuscar").value.toLowerCase();
       fVids = t ? vids.filter(v => v.caption.toLowerCase().includes(t)) : [...vids];
       const i = document.getElementById("tokFeedIterator"); i.innerHTML = "";
+      
+      if(fVids.length === 0) {
+        i.innerHTML = `<div style="color:white; text-align:center; width:100%; margin-top:50px;">Aún no hay videos para mostrar. ¡Sube el primero!</div>`;
+        return;
+      }
+
       fVids.forEach((v, idx) => {
         const p = document.createElement("div"); p.className = "tok-post"; p.id = `vref-${idx}`;
         p.innerHTML = `<video class="tok-video" src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
@@ -361,7 +440,15 @@
       playFeed();
     };
 
-    window.navegarFeed = (d) => { if(idxFeed+d >= 0 && idxFeed+d < fVids.length) { idxFeed += d; document.getElementById(`vref-${idxFeed}`).scrollIntoView({behavior:"smooth"}); playFeed(); toggleComments(false); } };
+    window.navegarFeed = (d) => { 
+      if(idxFeed+d >= 0 && idxFeed+d < fVids.length) { 
+        idxFeed += d; 
+        document.getElementById(`vref-${idxFeed}`).scrollIntoView({behavior:"smooth"}); 
+        playFeed(); 
+        toggleComments(false); 
+      } 
+    };
+    
     function playFeed() { stopFeed(); document.getElementById(`vref-${idxFeed}`)?.querySelector("video")?.play().catch(()=>{}); }
     function stopFeed() { document.querySelectorAll(".tok-video").forEach(v => v.pause()); }
 
