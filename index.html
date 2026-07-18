@@ -71,6 +71,10 @@
     .live-video-container video { width: 100%; height: 100%; object-fit: contain; }
     .live-badge { position: absolute; top: 15px; left: 15px; background: var(--danger); color: white; padding: 4px 10px; font-weight: bold; border-radius: 4px; font-size: 0.8rem; z-index: 10; }
     
+    .live-controls { position: absolute; bottom: 15px; left: 15px; display: flex; gap: 10px; z-index: 100; }
+    .control-btn { background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(255,255,255,0.2); color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; }
+    .control-btn.disabled { background: var(--danger); border-color: var(--danger); }
+
     .btn-solid { background: var(--accent); color: black; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-danger { background: var(--danger); color: white; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; }
     
@@ -172,6 +176,11 @@
           <div class="live-badge" id="liveBadgeState" style="display:none;">EN VIVO</div>
           <video id="liveVideoPlayer" autoplay playsinline controls style="background:#050505;"></video>
           
+          <div class="live-controls">
+            <button class="control-btn" id="btnToggleMic" onclick="toggleMicMute()"><i class="fa-solid fa-microphone"></i></button>
+            <button class="control-btn" id="btnToggleCam" onclick="toggleCamMute()"><i class="fa-solid fa-video"></i></button>
+          </div>
+
           <div style="position: absolute; right: 15px; bottom: 15px; display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 100;">
             <button class="circle-action" id="btnLikeLive" style="background: rgba(233,30,99,0.85);" onclick="darLikeAlLiveActual()">
               <i class="fa-solid fa-heart"></i>
@@ -181,7 +190,7 @@
         </div>
         <div style="background:var(--bg-sidebar); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:15px;">
           <h4>Unirse a un Live</h4>
-          <input type="text" id="inputBuscarLive" placeholder="Nombre del creador (XD-...)" style="width:100%; padding:10px; background:#000; color:white; border-radius:6px; border:1px solid var(--accent); outline:none;">
+          <input type="text" id="inputBuscarLive" placeholder="Nombre del creador (Ej: xdxd)" style="width:100%; padding:10px; background:#000; color:white; border-radius:6px; border:1px solid var(--accent); outline:none;">
           <button class="btn-solid" onclick="verLiveAmigo()">Ver Transmisión</button>
           <div style="flex:1; border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:10px; font-size:0.85rem; color:var(--text-dim);" id="boxLiveStatus">
             Sin actividad de directo actual.
@@ -279,7 +288,8 @@
       cambiarTemaInter(localStorage.getItem("w_theme") || 'dark');
       document.getElementById("selectTema").value = localStorage.getItem("w_theme") || 'dark';
 
-      const cleanPeerId = uAct.replace(/[^a-zA-Z0-9_-]/g, "");
+      // MEJORA EXTRA: Se eliminan guiones y caracteres especiales para comunicación P2P limpia
+      const cleanPeerId = uAct.replace(/[^a-zA-Z0-9_]/g, "");
       peer = new Peer(cleanPeerId);
       
       peer.on('call', (c) => {
@@ -322,6 +332,11 @@
     }
 
     window.iniciarLive = async (shareScreen) => {
+      // PREGUNTA EL NOMBRE PERSONALIZADO DEL EN VIVO POR ALERTA PROMPT
+      let tituloLive = prompt("Ingresa el título o descripción de tu transmisión:", "Mi Streaming en Vivo 🚀");
+      if(tituloLive === null) return; // Si cancela, no inicia
+      if(!tituloLive.trim()) tituloLive = "Transmisión en directo";
+
       try {
         if(shareScreen) {
           streamLive = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
@@ -337,27 +352,68 @@
         if (streamLive) {
           document.getElementById("liveVideoPlayer").srcObject = streamLive;
           document.getElementById("liveBadgeState").style.display = "block";
-          document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>ID: <b>${uAct}</b>`;
+          document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>Título: <b>${tituloLive}</b><br>Creador: <b>${uAct}</b>`;
           
-          const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, likes: 0, timestamp: serverTimestamp() });
+          const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, titulo: tituloLive, likes: 0, timestamp: serverTimestamp() });
           liveIdActualGlobal = liveRef.id;
           escucharLikesDelLive(liveIdActualGlobal);
-          alert("¡Confirmado compai! Tu streaming está al aire.");
+          
+          // Resetea los íconos de los botones multimedia en pantalla
+          document.getElementById("btnToggleMic").classList.remove("disabled");
+          document.getElementById("btnToggleCam").classList.remove("disabled");
         }
       } catch(e) { 
         console.error(e);
-        alert("Acceso bloqueado. Por favor restablece permisos desde el candado de la barra y recarga."); 
+        alert("Acceso bloqueado. Por favor restablece los permisos desde el menú del navegador y recarga."); 
+      }
+    };
+
+    // FUNCIONES COMPLEMENTARIAS PARA APAGAR/PRENDER MICRÓFONO O CÁMARA
+    window.toggleMicMute = () => {
+      if(!streamLive) return alert("No estás transmitiendo actualmente.");
+      const audioTrack = streamLive.getAudioTracks()[0];
+      if(audioTrack) {
+        audioTrack.enabled = !audioTrack.enabled;
+        const btn = document.getElementById("btnToggleMic");
+        if(audioTrack.enabled) {
+          btn.classList.remove("disabled");
+          btn.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
+        } else {
+          btn.classList.add("disabled");
+          btn.innerHTML = `<i class="fa-solid fa-microphone-slash"></i>`;
+        }
+      } else {
+        alert("No se encontró ningún micrófono activo en esta transmisión.");
+      }
+    };
+
+    window.toggleCamMute = () => {
+      if(!streamLive) return alert("No estás transmitiendo actualmente.");
+      const videoTrack = streamLive.getVideoTracks()[0];
+      if(videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        const btn = document.getElementById("btnToggleCam");
+        if(videoTrack.enabled) {
+          btn.classList.remove("disabled");
+          btn.innerHTML = `<i class="fa-solid fa-video"></i>`;
+        } else {
+          btn.classList.add("disabled");
+          btn.innerHTML = `<i class="fa-solid fa-video-slash"></i>`;
+        }
       }
     };
 
     window.verLiveAmigo = () => {
       let targetId = document.getElementById("inputBuscarLive").value.trim();
       if(!targetId) return;
-      if(!targetId.toUpperCase().startsWith("XD-")) targetId = "XD-" + targetId;
+      if(!targetId.toUpperCase().startsWith("XD-") && !targetId.toLowerCase().startsWith("xd")) targetId = "XD-" + targetId;
       document.getElementById("boxLiveStatus").innerHTML = "Sintonizando...";
       
       const dummyStream = new MediaStream();
-      const call = peer.call(targetId.replace(/[^a-zA-Z0-9_-]/g, ""), dummyStream, { metadata: { isLive: true } });
+      // Elimina los guiones de la búsqueda para que conecte con el peer limpio 'xdxd'
+      const idLimpioParaLlamar = targetId.replace(/[^a-zA-Z0-9_]/g, "");
+      
+      const call = peer.call(idLimpioParaLlamar, dummyStream, { metadata: { isLive: true } });
       call.on('stream', (remoteStream) => {
         document.getElementById("liveVideoPlayer").srcObject = remoteStream;
         document.getElementById("liveBadgeState").style.display = "block";
@@ -368,7 +424,7 @@
 
     window.darLikeAlLiveActual = () => {
       if(!liveIdActualGlobal) { alert("No estás conectado a ningún live activo."); return; }
-      if(liveIdActualGlobal.startsWith("XD-")) {
+      if(liveIdActualGlobal.toLowerCase().includes("xd")) {
         alert("¡Le diste Me Gusta al Live del creador!");
       } else {
         updateDoc(doc(db, "streaming_activos", liveIdActualGlobal), { likes: increment(1) });
@@ -383,7 +439,7 @@
     }
 
     function fCall(c) { callAct = c; activarPantalla('chats'); document.getElementById("screen-chats").classList.add("chat-abierto"); c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); }
-    window.llamarPeer = (v) => { navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; fCall(peer.call(amigoSel.replace(/[^a-zA-Z0-9_-]/g, ""), s)); }); };
+    window.llamarPeer = (v) => { navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; fCall(peer.call(amigoSel.replace(/[^a-zA-Z0-9_]/g, ""), s)); }); };
 
     window.activarPantalla = (t) => {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -394,7 +450,7 @@
     };
 
     window.abrirModal = (id) => document.getElementById(id).style.display = "flex";
-    window.cerrarModal = (id) => document.getElementById(id).style.display = "none";
+    window.cerrarModal = (id) => document.getElementById(id).style.none = "none";
 
     window.subirVideo = () => {
       const f = document.getElementById("inputLocalVideo").files[0], u = document.getElementById("inputUrlVideo").value.trim(), c = document.getElementById("inputCaption").value;
