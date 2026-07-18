@@ -3,167 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Premium Multimedia</title>
-
+  <title>WaveTok Prefix</title>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
   <style>
-    :root {
-      --bg-dark: #0b0e14;
-      --bg-sidebar: #121b22;
-      --accent: #ffeb3b; /* Amarillo */
-      --text-main: #f5f5f7;
-      --text-dim: #8b9bb4;
-      --bubble-sent: #002d62;
-      --bubble-recv: #1f2c34;
-      --danger: #ff1744;
-    }
-
+    :root { --bg-dark: #0b0e14; --bg-sidebar: #121b22; --accent: #ffeb3b; --text-main: #f5f5f7; --text-dim: #8b9bb4; --danger: #ff1744; }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
     body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
-
-    /* MENÚ LATERAL */
-    .sidebar { width: 250px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; z-index: 10; }
-    .brand h2 { color: var(--accent); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
-    .side-menu { display: flex; flex-direction: column; gap: 8px; }
-    .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
-    .menu-item:hover, .menu-item.active { background: rgba(255, 235, 59, 0.1); color: var(--accent); }
-    .menu-item i { font-size: 1.2rem; width: 25px; }
-    .separator { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; padding-left: 15px; margin-top: 10px; }
-
-    /* LAYOUT PRINCIPAL GLOBAL */
+    
+    .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 20px; flex-shrink: 0; }
+    .brand h2 { color: var(--accent); font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 8px; padding-left: 10px; }
+    .side-menu { display: flex; flex-direction: column; gap: 6px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 10px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 8px; cursor: pointer; }
+    .menu-item:hover, .menu-item.active { background: rgba(255,235,59,0.1); color: var(--accent); }
+    
     .main-layout { flex: 1; display: flex; height: 100%; overflow: hidden; position: relative; }
-
-    /* PANTALLAS INDEPENDIENTES */
     .screen { display: none; width: 100%; height: 100%; }
     .screen.active { display: flex; }
-
-    /* ESTRUCTURA INTERNA DE LA SALA GLOBAL (3 COLUMNAS) */
-    .feed-container-box { width: 100%; max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: #000; position: relative; flex-shrink: 0; }
-    .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; }
-    .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; scroll-behavior: smooth; }
     
+    .feed-container-box { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: #000; position: relative; }
+    .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
+    .tok-wrapper { width: 100%; height: 100%; display: flex; align-items: center; }
     .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
-    .tok-video-card { position: relative; width: 100%; height: 100%; overflow: hidden; background: #111; display: flex; align-items: center; justify-content: center; }
-    .tok-video { width: 100%; height: 100%; object-fit: cover; background: #000; cursor: pointer; display: block; }
+    .tok-video { width: 100%; height: 100%; object-fit: contain; cursor: pointer; background: #000; }
     
-    .tok-top-overlay { position: absolute; top: 10px; right: 10px; z-index: 12; }
-    .tok-author-avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); }
+    .tok-actions { position: absolute; right: 12px; bottom: 30px; display: flex; flex-direction: column; gap: 12px; align-items: center; z-index: 99; }
+    .circle-action { background: rgba(30,44,52,0.85); border: 1px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
+    .tok-actions span { font-size: 0.75rem; text-shadow: 1px 1px 2px black; }
+    .tok-meta { position: absolute; left: 14px; bottom: 25px; z-index: 10; max-width: 75%; text-shadow: 1px 1px 4px black; }
     
-    .tok-actions { position: absolute; right: 15px; bottom: 30px; display: flex; flex-direction: column; gap: 14px; align-items: center; z-index: 99; }
-    .tok-actions-avatar-wrap { position: relative; margin-bottom: 4px; }
-    .tok-actions-avatar { width: 42px; height: 42px; border-radius: 50%; background: #233138; border: 2px solid var(--accent); display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: var(--accent); }
-    .follow-badge { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 18px; height: 18px; border-radius: 50%; background: var(--danger); color: white; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 2px solid var(--bg-dark); }
-    .follow-badge.siguiendo { background: #2e7d32; }
-    .circle-action { background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 46px; height: 46px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; transition: transform 0.1s; }
-    .circle-action:hover { transform: scale(1.1); color: var(--accent); }
-    .circle-action.activo { color: var(--danger); border-color: var(--danger); }
-    .circle-action.activo.guardado { color: var(--accent); border-color: var(--accent); }
-    .tok-actions span { font-size: 0.78rem; color: #fff; margin-top: -6px; font-weight: 600; text-align: center; text-shadow: 1px 1px 3px black; }
+    .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; z-index: 15; display: flex; align-items: center; justify-content: center; }
+    .arrow-left { left: 10px; } .arrow-right { right: 10px; }
+    .top-bar-feed { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
     
-    .tok-meta { position: absolute; left: 16px; bottom: 25px; z-index: 10; max-width: 75%; text-shadow: 1px 1px 5px rgba(0,0,0,0.9); }
-    .tok-meta h3 { color: white; margin-bottom: 5px; font-size: 1rem; }
-    .tok-meta p { color: #e1e1e6; font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .chats-master { width: 260px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
+    .chat-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
+    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; }
+    .chat-header { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .messages-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .bubble { max-width: 70%; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; color: white; word-break: break-word; }
+    .sent { background: #002d62; align-self: flex-end; }
+    .recv { background: #1f2c34; align-self: flex-start; }
     
-    .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: white; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 15; transition: background 0.2s; }
-    .nav-arrow:hover { background: var(--accent); color: black; }
-    .arrow-left { left: 15px; }
-    .arrow-right { right: 15px; }
-
-    .top-bar-feed { background: var(--bg-sidebar); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); height: 69px; }
-    .search-box-container { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 180px; }
-    .search-box-container input { background: none; border: none; outline: none; color: white; font-size: 0.85rem; width: 100%; margin-left: 8px; }
-
-    /* COMENTARIOS FEED */
-    .feed-comments-panel { height: 180px; background: #0e1318; border-top: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; padding: 12px; }
-    .comments-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem; margin-bottom: 8px; }
-    .comment-line b { color: var(--accent); }
-    .comment-input-area { display: flex; gap: 8px; }
-    .comment-input-area input { flex:1; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); padding: 8px 12px; border-radius: 15px; color: white; outline: none; font-size: 0.85rem; }
-
-    /* CHATS LISTA */
-    .chats-master { width: 280px; background: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; flex-shrink: 0; }
-    .top-bar-chats { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .chat-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
-    .chat-item:hover, .chat-item.active { background: rgba(255,255,255,0.03); }
-    .avatar { width: 38px; height: 38px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
-
-    /* CHAT DETALLE */
-    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; border-right: 1px solid rgba(255, 255, 255, 0.05); }
-    .chat-header { background: var(--bg-sidebar); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); height: 69px; }
-    .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
-
-    /* BURBUJAS */
-    .bubble { max-width: 65%; padding: 12px 16px; border-radius: 12px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 5px; }
-    .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
-    .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
-    .sticker-msg-render { width: 125px; height: 125px; object-fit: contain; display: block; }
-    .chat-img-render { max-width: 100%; max-height: 220px; border-radius: 10px; object-fit: cover; }
-    .chat-audio-render { max-width: 100%; height: 36px; }
-
-    /* ENTRADAS E INPUT BAR */
-    .input-bar-container { position: relative; background: var(--bg-sidebar); width: 100%; display: flex; flex-direction: column; }
-    .input-bar { padding: 15px 25px; display: flex; align-items: center; gap: 15px; }
-    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
-    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
-    .mic-recording { color: var(--danger) !important; animation: pulseMic 1s infinite alternate; }
-
-    .sticker-popover { display: none; position: absolute; bottom: 75px; right: 80px; width: 320px; height: 320px; background: #1f2c34; border: 2px solid var(--accent); border-radius: 15px; z-index: 200; padding: 12px; flex-direction: column; }
-    .sticker-cat-tabs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; flex-shrink: 0; }
-    .sticker-cat-tab { flex-shrink: 0; padding: 6px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--text-dim); background: rgba(255,255,255,0.05); cursor: pointer; white-space: nowrap; }
-    .sticker-cat-tab.active { background: var(--accent); color: black; }
-    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 8px; align-content: start; }
-    .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 8px; }
-
-    /* SALA DERECHA STREAMING */
-    .right-stream-panel { width: 340px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px; gap: 20px; flex-shrink: 0; }
-    .video-box-call { width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); position: relative; }
-    .video-box-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
-    .video-label { position: absolute; bottom: 8px; left: 10px; background: rgba(0,0,0,0.7); padding: 3px 8px; font-size: 0.75rem; border-radius: 4px; color: white; }
-
-    /* BOTONES INTERFAZ */
-    .btn-solid { background: var(--accent); color: black; border: none; padding: 11px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; font-size: 0.9rem; }
-    .btn-danger { background: var(--danger); color: white; border: none; padding: 11px 18px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; }
-
-    @keyframes pulseMic { from { opacity: 0.5; } to { opacity: 1; } }
-    .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); margin-top: auto; }
-    .my-code-footer b { color: var(--accent); }
-
-    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:3000; justify-content:center; align-items:center; }
-    .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 90%; max-width: 380px; text-align: center; }
-    .modal-box input { width:100%; padding:12px; margin:10px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; outline:none; text-align:center; }
-    .auth-error-msg { color: var(--danger); font-size: 0.8rem; min-height: 18px; margin-top: 4px; }
-    .auth-tabs { display: flex; gap: 10px; margin-bottom: 10px; }
-    .auth-tab { flex: 1; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-dim); background: rgba(255,255,255,0.03); }
-    .auth-tab.active { background: var(--accent); color: black; }
+    .input-bar { padding: 12px 20px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 12px; }
+    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 10px 15px; border-radius: 20px; color: white; outline: none; }
+    
+    .right-stream-panel { width: 280px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 15px; gap: 15px; }
+    .video-box-call { width: 100%; background: #000; border-radius: 10px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
+    .video-box-call video { width: 100%; height: 100%; object-fit: cover; }
+    
+    .btn-solid { background: var(--accent); color: black; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-danger { background: var(--danger); color: white; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; }
+    
+    .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; justify-content: center; align-items: center; }
+    .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 25px; border-radius: 15px; width: 90%; max-width: 360px; text-align: center; }
+    .modal-box input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: white; text-align: center; outline: none; }
     
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      .sidebar { width: 100%; height: 60px; flex-direction: row; align-items: center; justify-content: space-around; padding: 0 5px; gap: 0; order: 2; border-right: none; border-top: 1px solid rgba(255,255,255,0.08); position: fixed; bottom: 0; left: 0; z-index: 500; }
-      .brand, .separator, .my-code-footer { display: none; }
-      .side-menu { flex-direction: row; gap: 0; }
-      .menu-item { flex-direction: column; gap: 2px; padding: 6px 10px; font-size: 0.62rem; border-radius: 10px; }
-      .main-layout { order: 1; height: calc(100% - 60px); }
-      .feed-container-box { width: 100% !important; max-width: 100% !important; height: 100%; margin: 0 !important; }
-      .top-bar-feed { position: absolute; top: 0; left: 0; right: 0; z-index: 60; height: auto; padding: 12px 15px; background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); border-bottom: none; }
-      .top-bar-feed h3 { display: none; }
-      .tok-wrapper { flex-direction: column; overflow-y: scroll; overflow-x: hidden; scroll-snap-type: y mandatory; }
-      .tok-post { min-width: 100%; min-height: 100%; scroll-snap-align: start; scroll-snap-stop: always; }
-      .nav-arrow { display: none; }
-      .tok-actions { bottom: 90px; right: 12px; }
-      .tok-meta { bottom: 20px; left: 16px; max-width: 65%; }
-      .feed-comments-panel { position: absolute; left: 0; right: 0; bottom: 0; height: 50%; z-index: 80; border-radius: 18px 18px 0 0; transform: translateY(100%); transition: transform 0.25s ease; }
-      .feed-comments-panel.open { transform: translateY(0); }
-      .comment-toggle-fab { display: flex; position: absolute; right: 20px; bottom: 210px; z-index: 99; background: rgba(30, 44, 52, 0.85); width: 46px; height: 46px; border-radius: 50%; color: white; align-items: center; justify-content: center; font-size: 1.1rem; }
-      #screen-chats { flex-direction: column; }
-      .chats-master, .chats-detail, .right-stream-panel { width: 100%; height: 100%; }
-      #screen-chats .chats-master, #screen-chats .right-stream-panel { display: none; }
-      #screen-chats.chat-abierto .chats-detail { display: flex; }
-      #screen-chats:not(.chat-abierto) .chats-master { display: flex; }
-      .btn-volver-lista-chats { display: flex !important; }
+      .sidebar { width: 100%; height: 55px; flex-direction: row; justify-content: space-around; padding: 0; position: fixed; bottom: 0; z-index: 500; border-top: 1px solid rgba(255,255,255,0.08); }
+      .brand, .btn-solid:not(.chat-header .btn-solid), .right-stream-panel { display: none; }
+      .side-menu { flex-direction: row; width: 100%; justify-content: space-around; }
+      .main-layout { height: calc(100% - 55px); }
+      #screen-chats { flex-direction: column; } .chats-master, .chats-detail { width: 100%; }
+      #screen-chats.chat-abierto .chats-master { display: none; }
+      #screen-chats:not(.chat-abierto) .chats-detail { display: none; }
+      .btn-volver-chats { display: inline-block !important; margin-right: 8px; color: var(--accent); }
     }
-    .btn-volver-lista-chats { display: none; color: var(--accent); font-size: 1.2rem; cursor: pointer; margin-right: 10px; }
   </style>
 </head>
 <body>
@@ -171,373 +77,245 @@
   <aside class="sidebar">
     <div class="brand"><h2><i class="fa-solid fa-clapperboard"></i> WaveTok</h2></div>
     <nav class="side-menu">
-      <div class="menu-item active" id="btn-nav-plataforma" onclick="activarFiltroPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Para ti</span></div>
-      <div class="menu-item" id="btn-nav-chats" onclick="activarFiltroPantalla('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chat privado</span></div>
-      <div class="menu-item" id="btn-nav-perfil" onclick="activarFiltroPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
+      <div class="menu-item active" id="btn-plataforma" onclick="activarPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Feed</span></div>
+      <div class="menu-item" id="btn-chats" onclick="activarPantalla('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chats</span></div>
+      <div class="menu-item" id="btn-perfil" onclick="activarPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Perfil</span></div>
+      <div class="menu-item" onclick="abrirModal('modalSubirVideo')"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Subir</span></div>
     </nav>
-    <div class="separator">Herramientas</div>
-    <div class="side-menu">
-      <div class="menu-item" onclick="abrirCapaModal('modalSubirVideo')"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Publicar Video</span></div>
-    </div>
-    <div class="my-code-footer" id="labelFooterMyCode">Sesión: <b>Desconectado</b></div>
+    <div id="labelFooterMyCode" style="font-size:0.75rem; text-align:center; color:var(--text-dim); margin-top:auto;"></div>
   </aside>
 
   <div class="main-layout">
-
     <div class="screen active" id="screen-plataforma">
       <div class="feed-container-box">
         <div class="top-bar-feed">
           <h3>Para ti</h3>
-          <div class="search-box-container">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="inputBuscarDescripcion" placeholder="Buscar..." oninput="filtrarVideosSistema()">
-          </div>
+          <input type="text" id="inputBuscar" placeholder="Buscar..." oninput="filtrarFeed()" style="background:rgba(255,255,255,0.05); border:none; padding:6px 12px; border-radius:15px; color:white; width:140px;">
         </div>
         <div class="tok-feed-view">
-          <button class="nav-arrow arrow-left" onclick="controlNavegacionFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
-          <button class="nav-arrow arrow-right" onclick="controlNavegacionFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
+          <button class="nav-arrow arrow-left" onclick="navegarFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="nav-arrow arrow-right" onclick="navegarFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
           <div class="tok-wrapper" id="tokFeedIterator"></div>
-          <div class="comment-toggle-fab" onclick="alternarPanelComentariosMovil()"><i class="fa-solid fa-comment"></i></div>
-        </div>
-        <div class="feed-comments-panel" id="panelComentariosFeed">
-          <div class="comments-scroll" id="boxCommentsFeedVideo"></div>
-          <div class="comment-input-area">
-            <input type="text" id="inputNewCommentFeed" placeholder="Comentar..." onkeypress="if(event.key==='Enter') agregarComentarioVideoActual()">
-            <button class="btn-solid" style="width:auto; padding: 5px 15px;" onclick="agregarComentarioVideoActual()"><i class="fa-solid fa-paper-plane"></i></button>
-          </div>
         </div>
       </div>
     </div>
 
     <div class="screen" id="screen-chats">
       <div class="chats-master">
-        <div class="top-bar-chats">
-          <button class="btn-solid" onclick="abrirCapaModal('connectModal')"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button>
-        </div>
+        <div style="padding:10px;"><button class="btn-solid" onclick="abrirModal('connectModal')"><i class="fa-solid fa-user-plus"></i> Conectar con XD-Amigo</button></div>
         <div style="flex:1; overflow-y:auto;" id="chatListContainer"></div>
       </div>
-
       <div class="chats-detail">
-        <div class="chat-header" id="chatDetailHeader" style="visibility: hidden;">
+        <div class="chat-header" id="chatDetailHeader" style="visibility:hidden;">
           <div style="display:flex; align-items:center;">
-            <i class="fa-solid fa-arrow-left btn-volver-lista-chats" onclick="volverListaChatsMovil()"></i>
-            <h4 id="targetChatName" style="color: white;">Amigo</h4>
+            <i class="fa-solid fa-arrow-left btn-volver-chats" style="display:none; cursor:pointer;" onclick="document.getElementById('screen-chats').classList.remove('chat-abierto')"></i>
+            <h4 id="targetChatName" style="color:white;">Amigo</h4>
           </div>
-          <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem; cursor: pointer;">
-            <i class="fa-solid fa-phone" onclick="ejecutarEnlaceWebRTC(false)"></i>
-            <i class="fa-solid fa-video" onclick="ejecutarEnlaceWebRTC(true)"></i>
-          </div>
+          <div style="display:flex; gap:15px; color:var(--accent); cursor:pointer;"><i class="fa-solid fa-phone" onclick="llamarPeer(false)"></i><i class="fa-solid fa-video" onclick="llamarPeer(true)"></i></div>
         </div>
-
-        <div class="messages-container" id="msgBox">
-          <div id="chatEmptyState" style="margin:auto; text-align:center; color:var(--text-dim);">
-            <i class="fa-solid fa-comments" style="font-size:2.5rem; color:rgba(255,235,59,0.3); margin-bottom:10px; display:block;"></i>
-            <p>Selecciona un contacto o conecta uno nuevo para empezar a chatear.</p>
-          </div>
-        </div>
-
-        <div class="input-bar-container">
-          <div class="sticker-popover" id="popoverStickersBox">
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--accent); font-weight:bold;">
-              <span>Stickers</span>
-              <i class="fa-solid fa-xmark" style="cursor:pointer; color:white;" onclick="alternarCapaStickers()"></i>
-            </div>
-            <div class="sticker-cat-tabs" id="tabsCategoriasStickers"></div>
-            <div class="sticker-grid" id="containerGridStickers"></div>
-          </div>
-
-          <div class="input-bar" id="chatInputBarArea" style="display: none;">
-            <label for="chatInputFileImage" style="cursor:pointer; display: flex; align-items: center;"><i class="fa-solid fa-paperclip"></i></label>
-            <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="procesarImagenBinariaChat(this)">
-            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensajeTextoBase()">
-            <i class="fa-regular fa-face-smile" onclick="alternarCapaStickers()"></i>
-            <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="gestionarMecanismoAudioGrabacion()"></i>
-            <i class="fa-solid fa-paper-plane" onclick="enviarMensajeTextoBase()"></i>
-          </div>
+        <div class="messages-container" id="msgBox"></div>
+        <div class="input-bar" id="chatInputBarArea" style="display:none;">
+          <input type="text" id="chatInput" placeholder="Mensaje..." onkeypress="if(event.key==='Enter') enviarTexto()">
+          <i class="fa-solid fa-paper-plane" style="color:var(--accent); cursor:pointer;" onclick="enviarTexto()"></i>
         </div>
       </div>
-
       <div class="right-stream-panel">
-        <h5 style="color:var(--accent); font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:8px;"><i class="fa-solid fa-satellite-dish"></i> Sala de Video</h5>
-        <div class="video-box-call"><video id="localStreamVideo" autoplay muted playsinline></video><div class="video-label">Mi Cámara</div></div>
-        <div class="video-box-call"><video id="remoteStreamVideo" autoplay playsinline></video><div class="video-label" id="lblRemoteLabel">Remoto</div></div>
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:auto;">
-          <button class="btn-solid" style="background:#0288d1; color:white;" onclick="intercambiarCapturaPantallaWebRTC()"><i class="fa-solid fa-desktop"></i> Compartir Pantalla</button>
-          <button class="btn-danger" onclick="finalizarEnlaceLlamada()"><i class="fa-solid fa-phone-slash"></i> Colgar</button>
-        </div>
+        <div class="video-box-call"><video id="localVideo" autoplay muted playsinline></video></div>
+        <div class="video-box-call"><video id="remoteVideo" autoplay playsinline></video></div>
+        <button class="btn-danger" onclick="location.reload()"><i class="fa-solid fa-phone-slash"></i> Colgar</button>
       </div>
     </div>
 
     <div class="screen" id="screen-perfil">
-      <div class="top-bar-feed" style="width:100%;"><h3>Mi Perfil WaveTok</h3></div>
-      <div style="padding:5px; text-align:center; max-width:400px; margin: 40px auto;">
-        <div class="avatar" style="width:90px; height:90px; font-size:2.2rem; margin:0 auto 20px auto;" id="avatarPerfilGrande">U</div>
-        <h2 id="txtLabelPerfilID" style="color: var(--accent); margin-bottom:8px;">@ID</h2>
-        <p id="txtLabelPerfilEmail" style="color: var(--text-dim); margin-bottom:25px; font-size:0.85rem;"></p>
-        <button class="btn-danger" onclick="destruirCredencialesSesion()">Cerrar Sesión</button>
+      <div style="max-width:300px; margin:60px auto; text-align:center; display:flex; flex-direction:column; gap:15px;">
+        <h2 id="txtPerfilID" style="color:var(--accent);">@Usuario</h2>
+        <button class="btn-danger" onclick="cerrarSesionCustom()">Cerrar Sesión</button>
       </div>
     </div>
-
   </div>
 
-  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;">
+  <div class="modal-bg" id="modalRegistroInicial" style="display:flex;">
     <div class="modal-box">
-      <h2 style="color:var(--accent); margin-bottom:15px;"><i class="fa-solid fa-clapperboard"></i> WaveTok</h2>
-      <div class="auth-tabs">
-        <div class="auth-tab active" id="tabRegistro" onclick="cambiarPestanaAuth('registro')">Crear cuenta</div>
-        <div class="auth-tab" id="tabLogin" onclick="cambiarPestanaAuth('login')">Ya tengo cuenta</div>
-      </div>
-      <input type="email" id="inputEmailAuth" placeholder="Correo electrónico">
-      <input type="password" id="inputPassAuth" placeholder="Contraseña (mín. 6 caracteres)">
-      <div class="auth-error-msg" id="lblErrorAuth"></div>
-      <button class="btn-solid" id="btnAccionAuth" onclick="registrarUsuario()">Crear cuenta</button>
+      <h2 style="color:var(--accent); margin-bottom:10px;">WaveTok</h2>
+      <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:15px;">Ingresa tu nombre personalizado (Se antepondrá "XD-")</p>
+      <input type="text" id="authCustomUsername" placeholder="Ej: jheiler">
+      <button class="btn-solid" onclick="autenticarCustomName()">Entrar a la plataforma</button>
     </div>
   </div>
 
-  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Sincronizar Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID de tu amigo"><button class="btn-solid" onclick="inyectarAmigoListaLocal()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
-  
+  <div class="modal-bg" id="connectModal">
+    <div class="modal-box">
+      <h3>Buscar por Nombre</h3>
+      <input type="text" id="peerIdDestino" placeholder="Ej: XD-jheiler">
+      <button class="btn-solid" onclick="agregarAmigo()">Iniciar Chat</button>
+      <p onclick="cerrarModal('connectModal')" style="cursor:pointer; margin-top:10px; font-size:0.8rem; color:var(--text-dim)">Cancelar</p>
+    </div>
+  </div>
+
   <div class="modal-bg" id="modalSubirVideo">
     <div class="modal-box">
-      <h3>Publicar Video</h3>
-      <div style="margin: 15px 0; text-align: left;">
-        <label style="font-size: 0.85rem; color: var(--accent); font-weight: 600; display: block; margin-bottom: 5px;">Opción A: Subir desde dispositivo</label>
-        <input type="file" id="inputVideoArchivoLocal" accept="video/mp4,video/webm" style="background: #000; color: white; padding: 8px; width: 100%; border-radius: 8px; border: 1px dashed var(--accent);">
-      </div>
-      <div style="color: var(--text-dim); font-size: 0.8rem; margin: 5px 0;">— O —</div>
-      <div style="margin: 10px 0; text-align: left;">
-        <label style="font-size: 0.85rem; color: var(--text-dim); display: block; margin-bottom: 5px;">Opción B: Enlace .mp4 externo</label>
-        <input type="text" id="inputVideoUrlDirecta" placeholder="https://ejemplo.com/video.mp4">
-      </div>
-      <input type="text" id="inputVideoCaption" placeholder="Descripción...">
-      <button class="btn-solid" onclick="enviarVideoEstructuraFirebase()">Indexar al Feed</button>
-      <p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Volver</p>
+      <h3>Publicar</h3>
+      <input type="file" id="inputLocalVideo" accept="video/mp4,video/webm" style="color:white; background:none; border:1px dashed var(--accent);">
+      <input type="text" id="inputUrlVideo" placeholder="O pega URL .mp4">
+      <input type="text" id="inputCaption" placeholder="Descripción...">
+      <button class="btn-solid" onclick="subirVideo()">Publicar Video</button>
+      <p onclick="cerrarModal('modalSubirVideo')" style="cursor:pointer; margin-top:10px; font-size:0.8rem; color:var(--text-dim)">Volver</p>
     </div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA",
-      authDomain: "mensajes-tiktokk.firebaseapp.com",
-      projectId: "mensajes-tiktokk",
-      storageBucket: "mensajes-tiktokk.firebasestorage.app",
-      messagingSenderId: "1079940811085",
-      appId: "1:1079940811085:web:6ab00b6476"
-    };
+    const fConfig = { apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA", authDomain: "mensajes-tiktokk.firebaseapp.com", projectId: "mensajes-tiktokk", storageBucket: "mensajes-tiktokk.firebasestorage.app", messagingSenderId: "1079940811085", appId: "1:1079940811085:web:6ab00b6476" };
+    const app = initializeApp(fConfig), db = getFirestore(app);
+    let uAct = null, peer = null, callAct = null, streamLoc = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    let usuarioActual = null, peerGlobal = null, llamadaActivaPeer = null, streamLocalGlobal = null, streamPantallaGlobal = null;
-    let listaContactosAmigos = [], contactoSeleccionadoChat = null, modoAutenticacionActual = "registro";
-    let matrizGlobalVideos = [], indexVideoFeedEnPantalla = 0, mapaSeguimientoLocal = {}, grabadoraMediosVoz = null, fragmentosAudioGrabados = [];
-
-    const coleccionStickersEstaticos = {
-      "Memes": ["https://api.dicebear.com/7.x/bottts/svg?seed=funny", "https://api.dicebear.com/7.x/bottts/svg?seed=lol"],
-      "Reacciones": ["https://api.dicebear.com/7.x/thumbs/svg?seed=like", "https://api.dicebear.com/7.x/thumbs/svg?seed=love"]
-    };
-    let categoriaStickersSeleccionada = "Memes";
-
-    window.cambiarPestanaAuth = function(modo) {
-      modoAutenticacionActual = modo;
-      document.getElementById("tabRegistro").classList.toggle("active", modo === "registro");
-      document.getElementById("tabLogin").classList.toggle("active", modo === "login");
-      document.getElementById("btnAccionAuth").innerText = modo === "registro" ? "Crear cuenta" : "Iniciar Sesión";
-    };
-
-    window.registrarUsuario = function() {
-      const email = document.getElementById("inputEmailAuth").value.trim();
-      const pass = document.getElementById("inputPassAuth").value;
-      if(!email || !pass) return;
-      if(modoAutenticacionActual === "registro") createUserWithEmailAndPassword(auth, email, pass).catch(err => document.getElementById("lblErrorAuth").innerText = err.message);
-      else signInWithEmailAndPassword(auth, email, pass).catch(err => document.getElementById("lblErrorAuth").innerText = err.message);
-    };
-
-    window.destruirCredencialesSesion = function() { signOut(auth).then(() => location.reload()); };
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        usuarioActual = user;
-        document.getElementById("modalRegistroInicial").style.display = "none";
-        document.getElementById("txtLabelPerfilID").innerText = "@" + user.email.split("@")[0];
-        document.getElementById("txtLabelPerfilEmail").innerText = user.email;
-        document.getElementById("avatarPerfilGrande").innerText = user.email.charAt(0).toUpperCase();
-        inicializarComponentePeerJS(user);
-        inicializarEscuchasSincronizacion();
+    window.autenticarCustomName = () => {
+      let name = document.getElementById("authCustomUsername").value.trim();
+      if(!name) return alert("Por favor ingresa un nombre.");
+      
+      // Forzar que empiece por XD- obligatoriamente
+      if (!name.toUpperCase().startsWith("XD-")) {
+        name = "XD-" + name;
       }
-    });
-
-    function inicializarComponentePeerJS(user) {
-      const cleanId = user.email.replace(/[^a-zA-Z0-9]/g, "");
-      document.getElementById("labelFooterMyCode").innerHTML = `Mi ID: <b>${cleanId}</b>`;
-      peerGlobal = new Peer(cleanId);
-      peerGlobal.on('call', (incomingCall) => {
-        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-          streamLocalGlobal = stream;
-          document.getElementById("localStreamVideo").srcObject = stream;
-          incomingCall.answer(stream);
-          gestionarFlujoLlamadaRemota(incomingCall);
-        });
-      });
-    }
-
-    function gestionarFlujoLlamadaRemota(call) {
-      llamadaActivaPeer = call;
-      activarFiltroPantalla('chats');
-      document.getElementById("screen-chats").classList.add("chat-abierto");
-      call.on('stream', (remoteStream) => { document.getElementById("remoteStreamVideo").srcObject = remoteStream; });
-    }
-
-    window.ejecutarEnlaceWebRTC = function(conVideo) {
-      if(!contactoSeleccionadoChat) return;
-      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
-        streamLocalGlobal = stream;
-        document.getElementById("localStreamVideo").srcObject = stream;
-        gestionarFlujoLlamadaRemota(peerGlobal.call(contactoSeleccionadoChat.replace(/[^a-zA-Z0-9]/g, ""), stream));
-      });
-    };
-
-    window.intercambiarCapturaPantallaWebRTC = function() {
-      if(!llamadaActivaPeer) return;
-      navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
-        streamPantallaGlobal = stream;
-        const sender = llamadaActivaPeer.peerConnection.getSenders().find(s => s.track.kind === 'video');
-        if(sender) sender.replaceTrack(stream.getVideoTracks()[0]);
-        document.getElementById("localStreamVideo").srcObject = stream;
-      });
-    };
-
-    window.finalizarEnlaceLlamada = function() {
-      if(llamadaActivaPeer) llamadaActivaPeer.close();
-      if(streamLocalGlobal) streamLocalGlobal.getTracks().forEach(t => t.stop());
+      
+      localStorage.setItem("wavetok_user_logged", name);
       location.reload();
     };
 
-    window.activarFiltroPantalla = function(target) {
+    window.cerrarSesionCustom = () => {
+      localStorage.removeItem("wavetok_user_logged");
+      location.reload();
+    };
+
+    const sesionGuardada = localStorage.getItem("wavetok_user_logged");
+    if(sesionGuardada) {
+      uAct = sesionGuardada;
+      document.getElementById("modalRegistroInicial").style.display = "none";
+      document.getElementById("txtPerfilID").innerText = "@" + uAct;
+      document.getElementById("labelFooterMyCode").innerHTML = `Tu Nombre: <b>${uAct}</b>`;
+      
+      const cleanPeerId = uAct.replace(/[^a-zA-Z0-9_-]/g, "");
+      peer = new Peer(cleanPeerId);
+      
+      peer.on('call', (c) => { 
+        navigator.mediaDevices.getUserMedia({video:true, audio:true}).then(s => { 
+          streamLoc = s; 
+          document.getElementById("localVideo").srcObject = s; 
+          c.answer(s); 
+          fCall(c); 
+        }); 
+      });
+
+      onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { 
+        vids = []; s.forEach(d => vids.push({id:d.id, ...d.data()})); 
+        filtrarFeed(); 
+      });
+      
+      amigos = JSON.parse(localStorage.getItem("v_amigos_"+uAct) || "[]"); 
+      renderAmigos();
+    }
+
+    function fCall(c) { 
+      callAct = c; 
+      activarPantalla('chats'); 
+      document.getElementById("screen-chats").classList.add("chat-abierto"); 
+      c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); 
+    }
+
+    window.llamarPeer = (v) => { 
+      const cleanTargetId = amigoSel.replace(/[^a-zA-Z0-9_-]/g, "");
+      navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { 
+        streamLoc = s; 
+        document.getElementById("localVideo").srcObject = s; 
+        fCall(peer.call(cleanTargetId, s)); 
+      }); 
+    };
+
+    window.activarPantalla = (t) => {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
-      document.getElementById(`screen-${target}`).classList.add("active");
-      if(target === 'plataforma') reproducirVideoIndiceActual(); else pausarTodosLosVideosFeed();
+      document.getElementById(`screen-${t}`).classList.add("active");
+      document.getElementById(`btn-${t}`)?.classList.add("active");
+      if(t==='plataforma') playFeed(); else stopFeed();
     };
 
-    window.volverListaChatsMovil = function() { document.getElementById("screen-chats").classList.remove("chat-abierto"); };
-    window.abrirCapaModal = function(id) { document.getElementById(id).style.display = "flex"; };
-    window.cerrarCapaModal = function(id) { document.getElementById(id).style.display = "none"; };
+    window.abrirModal = (id) => document.getElementById(id).style.display = "flex";
+    window.cerrarModal = (id) => document.getElementById(id).style.display = "none";
 
-    function inicializarEscuchasSincronizacion() {
-      onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (snapshot) => {
-        matrizGlobalVideos = [];
-        snapshot.forEach(docSnap => matrizGlobalVideos.push({ id: docSnap.id, ...docSnap.data() }));
-        filtrarVideosSistema();
+    window.subirVideo = () => {
+      const f = document.getElementById("inputLocalVideo").files[0], u = document.getElementById("inputUrlVideo").value.trim(), c = document.getElementById("inputCaption").value;
+      const save = (url) => addDoc(collection(db, "videos"), { autor: uAct, url, caption: c || "Video", likes: 0, timestamp: serverTimestamp() }).then(() => location.reload());
+      if(f) { const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(f); } else if(u) save(u);
+    };
+
+    let fVids = [];
+    window.filtrarFeed = () => {
+      const t = document.getElementById("inputBuscar").value.toLowerCase();
+      fVids = t ? vids.filter(v => v.caption.toLowerCase().includes(t)) : [...vids];
+      const i = document.getElementById("tokFeedIterator"); i.innerHTML = "";
+      fVids.forEach((v, idx) => {
+        const p = document.createElement("div"); p.className = "tok-post"; p.id = `vref-${idx}`;
+        p.innerHTML = `<div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+          <video class="tok-video" src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
+          <div class="tok-actions"><button class="circle-action" onclick="event.stopPropagation(); updateDoc(doc(db,'videos','${v.id}'),{likes:increment(1)})"><i class="fa-solid fa-heart"></i></button><span>${v.likes}</span></div>
+          <div class="tok-meta"><h3>@${v.autor}</h3><p>${v.caption}</p></div></div>`;
+        i.appendChild(p);
       });
-      cargarListaContactosDesdeStorage();
-    }
+      playFeed();
+    };
 
-    window.enviarVideoEstructuraFirebase = function() {
-      const archivoInput = document.getElementById("inputVideoArchivoLocal");
-      const urlInput = document.getElementById("inputVideoUrlDirecta").value.trim();
-      const caption = document.getElementById("inputVideoCaption").value.trim();
+    window.navegarFeed = (d) => { if(idxFeed+d >= 0 && idxFeed+d < fVids.length) { idxFeed += d; document.getElementById(`vref-${idxFeed}`).scrollIntoView({behavior:"smooth"}); playFeed(); } };
+    function playFeed() { stopFeed(); document.getElementById(`vref-${idxFeed}`)?.querySelector("video")?.play().catch(()=>{}); }
+    function stopFeed() { document.querySelectorAll(".tok-video").forEach(v => v.pause()); }
 
-      const guardar = (urlFinal) => {
-        addDoc(collection(db, "videos"), {
-          autor: usuarioActual.email, url: urlFinal, caption: caption || "Video", likes: 0, likesUsuarios: {}, guardadosUsuarios: {}, timestamp: serverTimestamp()
-        }).then(() => { cerrarCapaModal('modalSubirVideo'); location.reload(); });
-      };
-
-      if (archivoInput && archivoInput.files.length > 0) {
-        const reader = new FileReader();
-        reader.onload = (e) => guardar(e.target.result);
-        reader.readAsDataURL(archivoInput.files[0]);
-      } else if (urlInput) {
-        guardar(urlInput);
+    window.agregarAmigo = () => { 
+      let id = document.getElementById("peerIdDestino").value.trim(); 
+      if(id) {
+        if (!id.toUpperCase().startsWith("XD-")) {
+          id = "XD-" + id;
+        }
+        if(!amigos.includes(id)) { 
+          amigos.push(id); 
+          localStorage.setItem("v_amigos_"+uAct, JSON.stringify(amigos)); 
+          renderAmigos(); 
+        } 
+        cerrarModal('connectModal'); 
+        abrirChat(id);
       }
     };
 
-    let matrizVideosFiltrados = [];
-    window.filtrarVideosSistema = function() {
-      const txt = document.getElementById("inputBuscarDescripcion").value.toLowerCase().trim();
-      matrizVideosFiltrados = txt ? matrizGlobalVideos.filter(v => v.caption.toLowerCase().includes(txt)) : [...matrizGlobalVideos];
-      construirEstructuraVisualFeed();
-    };
-
-    function construirEstructuraVisualFeed() {
-      const container = document.getElementById("tokFeedIterator");
-      if(!container) return; container.innerHTML = "";
-      matrizVideosFiltrados.forEach((vid, idx) => {
-        const post = document.createElement("div"); post.className = "tok-post"; post.id = `tokPostElementRef-${idx}`;
-        post.innerHTML = `
-          <div class="tok-video-card">
-            <video class="tok-video" src="${vid.url}" loop playsinline onclick="alternarPlayVideoElemento(this)"></video>
-            <div class="tok-actions">
-              <button class="circle-action" onclick="event.stopPropagation(); alternarLikeVideoFirebase('${vid.id}')"><i class="fa-solid fa-heart"></i></button>
-              <span>${vid.likes || 0}</span>
-            </div>
-            <div class="tok-meta"><h3>@${vid.autor.split("@")[0]}</h3><p>${vid.caption}</p></div>
-          </div>`;
-        container.appendChild(post);
-      });
-      reproducirVideoIndiceActual();
+    function renderAmigos() {
+      const c = document.getElementById("chatListContainer"); c.innerHTML = "";
+      amigos.forEach(a => { const d = document.createElement("div"); d.className = "chat-item"; d.onclick = () => abrirChat(a); d.innerHTML = `<h5>${a}</h5>`; c.appendChild(d); });
     }
 
-    window.alternarPlayVideoElemento = function(el) { if(el.paused) el.play(); else el.pause(); };
-
-    window.controlNavegacionFeed = function(dir) {
-      let nIndex = indexVideoFeedEnPantalla + dir;
-      if(nIndex >= 0 && nIndex < matrizVideosFiltrados.length) {
-        indexVideoFeedEnPantalla = nIndex;
-        document.getElementById(`tokPostElementRef-${indexVideoFeedEnPantalla}`).scrollIntoView({ behavior: "smooth" });
-        reproducirVideoIndiceActual();
-      }
-    };
-
-    function reproducirVideoIndiceActual() {
-      pausarTodosLosVideosFeed();
-      const pAct = document.getElementById(`tokPostElementRef-${indexVideoFeedEnPantalla}`);
-      if(pAct) { const v = pAct.querySelector("video"); if(v) v.play().catch(()=>{}); }
-    }
-
-    function pausarTodosLosVideosFeed() { document.querySelectorAll(".tok-video").forEach(v => v.pause()); }
-
-    window.inyectarAmigoListaLocal = function() {
-      const peerId = document.getElementById("inputPeerIdDestino").value.trim();
-      if(peerId && !listaContactosAmigos.includes(peerId)) {
-        listaContactosAmigos.push(peerId); guardarListaContactosEnStorage(); renderizarListaContactosUI();
-      }
-      cerrarCapaModal('connectModal');
-    };
-
-    function guardarListaContactosEnStorage() { localStorage.setItem("wavetok_contacts_"+usuarioActual.email, JSON.stringify(listaContactosAmigos)); }
-    function cargarListaContactosDesdeStorage() {
-      const d = localStorage.getItem("wavetok_contacts_"+usuarioActual.email);
-      listaContactosAmigos = d ? JSON.parse(d) : []; renderizarListaContactosUI();
-    }
-
-    function renderizarListaContactosUI() {
-      const c = document.getElementById("chatListContainer"); if(!c) return; c.innerHTML = "";
-      listaContactosAmigos.forEach(peerId => {
-        const item = document.createElement("div"); item.className = "chat-item";
-        item.onclick = () => abrirConversacionChatPrivado(peerId);
-        item.innerHTML = `<div class="avatar">${peerId.charAt(0).toUpperCase()}</div><div><h5>${peerId}</h5></div>`;
-        c.appendChild(item);
+    let snapMsg = null;
+    function abrirChat(a) {
+      amigoSel = a; document.getElementById("screen-chats").classList.add("chat-abierto");
+      document.getElementById("chatDetailHeader").style.visibility = "visible"; document.getElementById("chatInputBarArea").style.display = "flex";
+      document.getElementById("targetChatName").innerText = a; if(snapMsg) snapMsg();
+      
+      const sId = [uAct.replace(/[^a-zA-Z0-9_-]/g,""), a.replace(/[^a-zA-Z0-9_-]/g,"")].sort().join("___");
+      snapMsg = onSnapshot(query(collection(db, "chats_privados", sId, "mensajes"), orderBy("timestamp", "asc")), (s) => {
+        const b = document.getElementById("msgBox"); b.innerHTML = "";
+        s.forEach(d => { 
+          const m = d.data(); 
+          const div = document.createElement("div"); 
+          div.className = `bubble ${m.remitente===uAct?'sent':'recv'}`; 
+          div.innerText = m.contenido; 
+          b.appendChild(div); 
+        });
+        b.scrollTop = b.scrollHeight;
       });
     }
 
-    function abrirConversacionChatPrivado(peerId) {
-      contactoSeleccionadoChat = peerId;
-      document.getElementById("screen-chats").classList.add("chat-abierto");
-      document.getElementById("chatEmptyState").style.display = "none";
-      document.getElementById("chatDetailHeader").style.visibility = "visible";
-      document.getElementById("chatInputBarArea").style.display = "flex";
-      document.getElementById("targetChatName").innerText = peerId;
-    }
-
-    window.enviarMensajeTextoBase = function() {
-      const input = document.getElementById("chatInput"); if(!input.value.trim()) return;
-      input.value = "";
+    window.enviarTexto = () => {
+      const i = document.getElementById("chatInput"); if(!i.value.trim()) return;
+      const sId = [uAct.replace(/[^a-zA-Z0-9_-]/g,""), amigoSel.replace(/[^a-zA-Z0-9_-]/g,"")].sort().join("___");
+      addDoc(collection(db, "chats_privados", sId, "mensajes"), { remitente: uAct, contenido: i.value.trim(), timestamp: serverTimestamp() });
+      i.value = "";
     };
   </script>
 </body>
