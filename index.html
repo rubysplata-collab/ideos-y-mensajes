@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok Prefix</title>
+  <title>WaveTok Mega Pro</title>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
     :root { --bg-dark: #0b0e14; --bg-sidebar: #121b22; --accent: #ffeb3b; --text-main: #f5f5f7; --text-dim: #8b9bb4; --danger: #ff1744; }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    .light-theme { --bg-dark: #f0f2f5; --bg-sidebar: #ffffff; --accent: #007bff; --text-main: #1c1e21; --text-dim: #606770; --danger: #dc3545; }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s; }
     body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
     
     .sidebar { width: 240px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 20px; flex-shrink: 0; }
@@ -21,6 +23,10 @@
     .screen { display: none; width: 100%; height: 100%; }
     .screen.active { display: flex; }
     
+    /* HISTORIAS (STORIES) estilo Instagram */
+    .stories-container { display: flex; gap: 12px; padding: 10px; overflow-x: auto; background: var(--bg-sidebar); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.7rem; font-weight: bold; overflow: hidden; text-align: center; background: #222; color: #fff; flex-shrink: 0; }
+
     .feed-container-box { width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; height: 100%; background: #000; position: relative; }
     .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; background: #000; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; align-items: center; }
@@ -29,9 +35,15 @@
     
     .tok-actions { position: absolute; right: 12px; bottom: 30px; display: flex; flex-direction: column; gap: 12px; align-items: center; z-index: 99; }
     .circle-action { background: rgba(30,44,52,0.85); border: 1px solid rgba(255,255,255,0.1); width: 44px; height: 44px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; }
-    .tok-actions span { font-size: 0.75rem; text-shadow: 1px 1px 2px black; }
+    .tok-actions span { font-size: 0.75rem; text-shadow: 1px 1px 2px black; color: white; }
     .tok-meta { position: absolute; left: 14px; bottom: 25px; z-index: 10; max-width: 75%; text-shadow: 1px 1px 4px black; }
     
+    /* CAJA DE COMENTARIOS IN-FEED */
+    .comments-drawer { position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: var(--bg-sidebar); border-top-left-radius: 15px; border-top-right-radius: 15px; transform: translateY(100%); transition: transform 0.3s; z-index: 200; display: flex; flex-direction: column; padding: 15px; }
+    .comments-drawer.open { transform: translateY(0); }
+    .comments-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
+    .comment-item { font-size: 0.85rem; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 6px; }
+
     .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; z-index: 15; display: flex; align-items: center; justify-content: center; }
     .arrow-left { left: 10px; } .arrow-right { right: 10px; }
     .top-bar-feed { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
@@ -46,7 +58,7 @@
     .recv { background: #1f2c34; align-self: flex-start; }
     
     .input-bar { padding: 12px 20px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 12px; }
-    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 10px 15px; border-radius: 20px; color: white; outline: none; }
+    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 10px 15px; border-radius: 20px; color: var(--text-main); outline: none; }
     
     .right-stream-panel { width: 280px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 15px; gap: 15px; }
     .video-box-call { width: 100%; background: #000; border-radius: 10px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
@@ -68,7 +80,6 @@
       #screen-chats { flex-direction: column; } .chats-master, .chats-detail { width: 100%; }
       #screen-chats.chat-abierto .chats-master { display: none; }
       #screen-chats:not(.chat-abierto) .chats-detail { display: none; }
-      .btn-volver-chats { display: inline-block !important; margin-right: 8px; color: var(--accent); }
     }
   </style>
 </head>
@@ -81,6 +92,7 @@
       <div class="menu-item" id="btn-chats" onclick="activarPantalla('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chats</span></div>
       <div class="menu-item" id="btn-perfil" onclick="activarPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Perfil</span></div>
       <div class="menu-item" onclick="abrirModal('modalSubirVideo')"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Subir</span></div>
+      <div class="menu-item" onclick="abrirModal('modalCrearHistoria')"><i class="fa-solid fa-bolt" style="color:#ff9800"></i> <span>Historia</span></div>
     </nav>
     <div id="labelFooterMyCode" style="font-size:0.75rem; text-align:center; color:var(--text-dim); margin-top:auto;"></div>
   </aside>
@@ -92,10 +104,25 @@
           <h3>Para ti</h3>
           <input type="text" id="inputBuscar" placeholder="Buscar..." oninput="filtrarFeed()" style="background:rgba(255,255,255,0.05); border:none; padding:6px 12px; border-radius:15px; color:white; width:140px;">
         </div>
+        
+        <div class="stories-container" id="storiesListArea"></div>
+
         <div class="tok-feed-view">
           <button class="nav-arrow arrow-left" onclick="navegarFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
           <button class="nav-arrow arrow-right" onclick="navegarFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
           <div class="tok-wrapper" id="tokFeedIterator"></div>
+          
+          <div class="comments-drawer" id="commentsAreaDrawer">
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+              <h4>Comentarios</h4>
+              <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="toggleComments(false)"></i>
+            </div>
+            <div class="comments-list" id="boxCommentsList"></div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="inputNuevoComentario" placeholder="Escribe un comentario..." style="flex:1; background:rgba(255,255,255,0.05); border:none; padding:8px 12px; border-radius:20px; color:white; outline:none;">
+              <button class="btn-solid" style="width:auto; padding:8px 15px;" onclick="publicarComentario()">Enviar</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -127,8 +154,18 @@
     </div>
 
     <div class="screen" id="screen-perfil">
-      <div style="max-width:300px; margin:60px auto; text-align:center; display:flex; flex-direction:column; gap:15px;">
+      <div style="max-width:300px; margin:40px auto; text-align:center; display:flex; flex-direction:column; gap:15px;">
         <h2 id="txtPerfilID" style="color:var(--accent);">@Usuario</h2>
+        <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:10px; font-size:0.9rem;">
+          <p>Seguidores: <b id="lblCountSeguidores">0</b></p>
+        </div>
+        <div>
+          <label style="font-size:0.8rem; color:var(--text-dim);">Tema de la Interfaz:</label>
+          <select id="selectTema" onchange="cambiarTemaInter(this.value)" style="width:100%; padding:10px; margin-top:5px; background:black; color:white; border-radius:6px; border:1px solid var(--accent);">
+            <option value="dark">Modo Oscuro</option>
+            <option value="light">Modo Claro</option>
+          </select>
+        </div>
         <button class="btn-danger" onclick="cerrarSesionCustom()">Cerrar Sesión</button>
       </div>
     </div>
@@ -136,10 +173,18 @@
 
   <div class="modal-bg" id="modalRegistroInicial" style="display:flex;">
     <div class="modal-box">
-      <h2 style="color:var(--accent); margin-bottom:10px;">WaveTok</h2>
-      <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:15px;">Ingresa tu nombre personalizado (Se antepondrá "XD-")</p>
+      <h2>WaveTok Pro</h2>
       <input type="text" id="authCustomUsername" placeholder="Ej: jheiler">
-      <button class="btn-solid" onclick="autenticarCustomName()">Entrar a la plataforma</button>
+      <button class="btn-solid" onclick="autenticarCustomName()">Entrar con mi XD-Nombre</button>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modalCrearHistoria">
+    <div class="modal-box">
+      <h3>Crear Historia (24h)</h3>
+      <input type="text" id="inputTextoHistoria" placeholder="¿Qué estás pensando hoy?">
+      <button class="btn-solid" onclick="publicarHistoria()">Subir Historia</button>
+      <p onclick="cerrarModal('modalCrearHistoria')" style="cursor:pointer; margin-top:10px; font-size:0.8rem; color:var(--text-dim)">Volver</p>
     </div>
   </div>
 
@@ -147,14 +192,14 @@
     <div class="modal-box">
       <h3>Buscar por Nombre</h3>
       <input type="text" id="peerIdDestino" placeholder="Ej: XD-jheiler">
-      <button class="btn-solid" onclick="agregarAmigo()">Iniciar Chat</button>
+      <button class="btn-solid" onclick="agregarAmigo()">Iniciar Chat / Seguir</button>
       <p onclick="cerrarModal('connectModal')" style="cursor:pointer; margin-top:10px; font-size:0.8rem; color:var(--text-dim)">Cancelar</p>
     </div>
   </div>
 
   <div class="modal-bg" id="modalSubirVideo">
     <div class="modal-box">
-      <h3>Publicar</h3>
+      <h3>Publicar Video</h3>
       <input type="file" id="inputLocalVideo" accept="video/mp4,video/webm" style="color:white; background:none; border:1px dashed var(--accent);">
       <input type="text" id="inputUrlVideo" placeholder="O pega URL .mp4">
       <input type="text" id="inputCaption" placeholder="Descripción...">
@@ -169,25 +214,18 @@
 
     const fConfig = { apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA", authDomain: "mensajes-tiktokk.firebaseapp.com", projectId: "mensajes-tiktokk", storageBucket: "mensajes-tiktokk.firebasestorage.app", messagingSenderId: "1079940811085", appId: "1:1079940811085:web:6ab00b6476" };
     const app = initializeApp(fConfig), db = getFirestore(app);
-    let uAct = null, peer = null, callAct = null, streamLoc = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0;
+    let uAct = null, peer = null, callAct = null, streamLoc = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0, snapComentarios = null;
 
     window.autenticarCustomName = () => {
       let name = document.getElementById("authCustomUsername").value.trim();
-      if(!name) return alert("Por favor ingresa un nombre.");
-      
-      // Forzar que empiece por XD- obligatoriamente
-      if (!name.toUpperCase().startsWith("XD-")) {
-        name = "XD-" + name;
-      }
-      
+      if(!name) return;
+      if (!name.toUpperCase().startsWith("XD-")) name = "XD-" + name;
       localStorage.setItem("wavetok_user_logged", name);
       location.reload();
     };
 
-    window.cerrarSesionCustom = () => {
-      localStorage.removeItem("wavetok_user_logged");
-      location.reload();
-    };
+    window.cerrarSesionCustom = () => { localStorage.removeItem("wavetok_user_logged"); location.reload(); };
+    window.cambiarTemaInter = (t) => { document.body.className = t === 'light' ? 'light-theme' : ''; localStorage.setItem("w_theme", t); };
 
     const sesionGuardada = localStorage.getItem("wavetok_user_logged");
     if(sesionGuardada) {
@@ -195,49 +233,37 @@
       document.getElementById("modalRegistroInicial").style.display = "none";
       document.getElementById("txtPerfilID").innerText = "@" + uAct;
       document.getElementById("labelFooterMyCode").innerHTML = `Tu Nombre: <b>${uAct}</b>`;
-      
-      const cleanPeerId = uAct.replace(/[^a-zA-Z0-9_-]/g, "");
-      peer = new Peer(cleanPeerId);
-      
-      peer.on('call', (c) => { 
-        navigator.mediaDevices.getUserMedia({video:true, audio:true}).then(s => { 
-          streamLoc = s; 
-          document.getElementById("localVideo").srcObject = s; 
-          c.answer(s); 
-          fCall(c); 
-        }); 
+      cambiarTemaInter(localStorage.getItem("w_theme") || 'dark');
+      document.getElementById("selectTema").value = localStorage.getItem("w_theme") || 'dark';
+
+      peer = new Peer(uAct.replace(/[^a-zA-Z0-9_-]/g, ""));
+      peer.on('call', (c) => { navigator.mediaDevices.getUserMedia({video:true, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; c.answer(s); fCall(c); }); });
+
+      onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { vids = []; s.forEach(d => vids.push({id:d.id, ...d.data()})); filtrarFeed(); });
+      onSnapshot(query(collection(db, "historias"), orderBy("timestamp", "desc")), (s) => {
+        const area = document.getElementById("storiesListArea"); area.innerHTML = "";
+        const limite24h = Date.now() - (24 * 60 * 60 * 1000);
+        s.forEach(d => {
+          const h = d.data();
+          if (h.timestamp?.toMillis() > limite24h) {
+            const circle = document.createElement("div"); circle.className = "story-circle";
+            circle.innerText = h.autor.substring(3,8); circle.onclick = () => alert(`Historia de @${h.autor}:\n\n"${h.texto}"`);
+            area.appendChild(circle);
+          }
+        });
       });
 
-      onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { 
-        vids = []; s.forEach(d => vids.push({id:d.id, ...d.data()})); 
-        filtrarFeed(); 
-      });
-      
-      amigos = JSON.parse(localStorage.getItem("v_amigos_"+uAct) || "[]"); 
-      renderAmigos();
+      amigos = JSON.parse(localStorage.getItem("v_amigos_"+uAct) || "[]"); renderAmigos();
+      document.getElementById("lblCountSeguidores").innerText = amigos.length;
     }
 
-    function fCall(c) { 
-      callAct = c; 
-      activarPantalla('chats'); 
-      document.getElementById("screen-chats").classList.add("chat-abierto"); 
-      c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); 
-    }
-
-    window.llamarPeer = (v) => { 
-      const cleanTargetId = amigoSel.replace(/[^a-zA-Z0-9_-]/g, "");
-      navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { 
-        streamLoc = s; 
-        document.getElementById("localVideo").srcObject = s; 
-        fCall(peer.call(cleanTargetId, s)); 
-      }); 
-    };
+    function fCall(c) { callAct = c; activarPantalla('chats'); document.getElementById("screen-chats").classList.add("chat-abierto"); c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); }
+    window.llamarPeer = (v) => { navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; fCall(peer.call(amigoSel.replace(/[^a-zA-Z0-9_-]/g, ""), s)); }); };
 
     window.activarPantalla = (t) => {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
       document.getElementById(`screen-${t}`).classList.add("active");
-      document.getElementById(`btn-${t}`)?.classList.add("active");
       if(t==='plataforma') playFeed(); else stopFeed();
     };
 
@@ -250,6 +276,11 @@
       if(f) { const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(f); } else if(u) save(u);
     };
 
+    window.publicarHistoria = () => {
+      const txt = document.getElementById("inputTextoHistoria").value.trim();
+      if(txt) addDoc(collection(db, "historias"), { autor: uAct, texto: txt, timestamp: serverTimestamp() }).then(() => { cerrarModal('modalCrearHistoria'); document.getElementById("inputTextoHistoria").value=""; });
+    };
+
     let fVids = [];
     window.filtrarFeed = () => {
       const t = document.getElementById("inputBuscar").value.toLowerCase();
@@ -259,30 +290,46 @@
         const p = document.createElement("div"); p.className = "tok-post"; p.id = `vref-${idx}`;
         p.innerHTML = `<div style="position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
           <video class="tok-video" src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
-          <div class="tok-actions"><button class="circle-action" onclick="event.stopPropagation(); updateDoc(doc(db,'videos','${v.id}'),{likes:increment(1)})"><i class="fa-solid fa-heart"></i></button><span>${v.likes}</span></div>
+          <div class="tok-actions">
+            <button class="circle-action" onclick="event.stopPropagation(); updateDoc(doc(db,'videos','${v.id}'),{likes:increment(1)})"><i class="fa-solid fa-heart" style="color:red"></i></button><span>${v.likes}</span>
+            <button class="circle-action" onclick="event.stopPropagation(); toggleComments(true, '${v.id}')"><i class="fa-solid fa-comment"></i></button>
+          </div>
           <div class="tok-meta"><h3>@${v.autor}</h3><p>${v.caption}</p></div></div>`;
         i.appendChild(p);
       });
       playFeed();
     };
 
-    window.navegarFeed = (d) => { if(idxFeed+d >= 0 && idxFeed+d < fVids.length) { idxFeed += d; document.getElementById(`vref-${idxFeed}`).scrollIntoView({behavior:"smooth"}); playFeed(); } };
+    window.navegarFeed = (d) => { if(idxFeed+d >= 0 && idxFeed+d < fVids.length) { idxFeed += d; document.getElementById(`vref-${idxFeed}`).scrollIntoView({behavior:"smooth"}); playFeed(); toggleComments(false); } };
     function playFeed() { stopFeed(); document.getElementById(`vref-${idxFeed}`)?.querySelector("video")?.play().catch(()=>{}); }
     function stopFeed() { document.querySelectorAll(".tok-video").forEach(v => v.pause()); }
+
+    let currentVidId = null;
+    window.toggleComments = (show, vidId = null) => {
+      const d = document.getElementById("commentsAreaDrawer");
+      if(show) { d.classList.add("open"); currentVidId = vidId; cargarComentarios(vidId); } else { d.classList.remove("open"); if(snapComentarios) snapComentarios(); }
+    };
+
+    function cargarComentarios(vidId) {
+      if(snapComentarios) snapComentarios();
+      snapComentarios = onSnapshot(query(collection(db, "videos", vidId, "comentarios"), orderBy("timestamp", "asc")), (s) => {
+        const b = document.getElementById("boxCommentsList"); b.innerHTML = "";
+        s.forEach(doc => { const c = doc.data(); b.innerHTML += `<div class="comment-item"><b>@${c.autor}:</b> ${c.texto}</div>`; });
+      });
+    }
+
+    window.publicarComentario = () => {
+      const i = document.getElementById("inputNuevoComentario"); if(!i.value.trim() || !currentVidId) return;
+      addDoc(collection(db, "videos", currentVidId, "comentarios"), { autor: uAct, texto: i.value.trim(), timestamp: serverTimestamp() });
+      i.value = "";
+    };
 
     window.agregarAmigo = () => { 
       let id = document.getElementById("peerIdDestino").value.trim(); 
       if(id) {
-        if (!id.toUpperCase().startsWith("XD-")) {
-          id = "XD-" + id;
-        }
-        if(!amigos.includes(id)) { 
-          amigos.push(id); 
-          localStorage.setItem("v_amigos_"+uAct, JSON.stringify(amigos)); 
-          renderAmigos(); 
-        } 
-        cerrarModal('connectModal'); 
-        abrirChat(id);
+        if (!id.toUpperCase().startsWith("XD-")) id = "XD-" + id;
+        if(!amigos.includes(id)) { amigos.push(id); localStorage.setItem("v_amigos_"+uAct, JSON.stringify(amigos)); renderAmigos(); }
+        cerrarModal('connectModal'); abrirChat(id);
       }
     };
 
@@ -296,17 +343,10 @@
       amigoSel = a; document.getElementById("screen-chats").classList.add("chat-abierto");
       document.getElementById("chatDetailHeader").style.visibility = "visible"; document.getElementById("chatInputBarArea").style.display = "flex";
       document.getElementById("targetChatName").innerText = a; if(snapMsg) snapMsg();
-      
       const sId = [uAct.replace(/[^a-zA-Z0-9_-]/g,""), a.replace(/[^a-zA-Z0-9_-]/g,"")].sort().join("___");
       snapMsg = onSnapshot(query(collection(db, "chats_privados", sId, "mensajes"), orderBy("timestamp", "asc")), (s) => {
         const b = document.getElementById("msgBox"); b.innerHTML = "";
-        s.forEach(d => { 
-          const m = d.data(); 
-          const div = document.createElement("div"); 
-          div.className = `bubble ${m.remitente===uAct?'sent':'recv'}`; 
-          div.innerText = m.contenido; 
-          b.appendChild(div); 
-        });
+        s.forEach(d => { const m = d.data(); const div = document.createElement("div"); div.className = `bubble ${m.remitente===uAct?'sent':'recv'}`; div.innerText = m.contenido; b.appendChild(div); });
         b.scrollTop = b.scrollHeight;
       });
     }
