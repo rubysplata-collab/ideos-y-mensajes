@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok Ultimate Master Fixed</title>
+  <title>WaveTok Ultimate Fixed</title>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -46,21 +46,23 @@
     .arrow-left { left: 10px; } .arrow-right { right: 10px; }
     .top-bar-feed { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; width: 100%; }
     
-    #screen-chats { padding: 0; }
-    .chats-master { width: 260px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
-    .chat-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
-    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; }
-    .chat-header { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .messages-container { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-    .bubble { max-width: 70%; padding: 10px 14px; border-radius: 10px; font-size: 0.9rem; color: white; word-break: break-word; }
-    .sent { background: #002d62; align-self: flex-end; }
-    .recv { background: #1f2c34; align-self: flex-start; }
+    #screen-chats { padding: 0; display: none; flex-direction: row; }
+    #screen-chats.active { display: flex; }
+    .chats-master { width: 280px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; flex-shrink: 0; }
+    .chat-item { display: flex; align-items: center; gap: 10px; padding: 14px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
+    .chat-item:hover { background: rgba(255,255,255,0.02); }
+    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; min-width: 0; }
+    .chat-header { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+    .messages-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; background: #0b141a; }
+    .bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; color: white; word-break: break-word; }
+    .sent { background: #005c4b; align-self: flex-end; border-bottom-right-radius: 2px; }
+    .recv { background: #202c33; align-self: flex-start; border-bottom-left-radius: 2px; }
     
-    .input-bar { padding: 12px 20px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 12px; }
-    .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 10px 15px; border-radius: 20px; color: var(--text-main); outline: none; }
+    .input-bar { padding: 10px 15px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+    .input-bar input { flex: 1; background: rgba(255,255,255,0.08); border: none; padding: 12px 16px; border-radius: 24px; color: var(--text-main); outline: none; font-size: 0.95rem; }
     
-    .right-stream-panel { width: 280px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 15px; gap: 15px; }
-    .video-box-call { width: 100%; background: #000; border-radius: 10px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
+    .right-stream-panel { width: 200px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 10px; gap: 10px; flex-shrink: 0; border-left: 1px solid rgba(255,255,255,0.05); }
+    .video-box-call { width: 100%; background: #000; border-radius: 8px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
     .video-box-call video { width: 100%; height: 100%; object-fit: cover; }
     
     .live-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; height: calc(100% - 60px); margin-top: 15px; }
@@ -77,11 +79,14 @@
     
     @media (max-width: 768px) {
       body { flex-direction: column; }
-      .sidebar { width: 100%; height: 55px; flex-direction: row; justify-content: space-around; padding: 0; position: fixed; bottom: 0; z-index: 500; border-top: 1px solid rgba(255,255,255,0.08); }
-      .brand, .btn-solid:not(.chat-header .btn-solid), .right-stream-panel { display: none; }
+      .sidebar { width: 100%; height: 60px; flex-direction: row; justify-content: space-around; padding: 0; position: fixed; bottom: 0; z-index: 500; border-top: 1px solid rgba(255,255,255,0.08); border-right: none; }
+      .brand, .btn-solid:not(.chat-header style, .chats-master .btn-solid), .right-stream-panel { display: none !important; }
       .side-menu { flex-direction: row; width: 100%; justify-content: space-around; }
-      .main-layout { height: calc(100% - 55px); }
-      #screen-chats { flex-direction: column; } .chats-master, .chats-detail { width: 100%; }
+      .main-layout { height: calc(100% - 60px); }
+      
+      #screen-chats.active { flex-direction: column; } 
+      .chats-master { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .chats-detail { width: 100%; height: 60%; }
       .live-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -203,11 +208,11 @@
   </div>
 
   <div class="modal-bg" id="modalRegistroInicial" style="display:flex;">
-    <div class="modal-box" style="max-width: 400px; padding: 35px 25px; min-height: 240px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px;">
-      <h2 style="color: var(--accent); margin-bottom: 2px;">WaveTok Pro</h2>
-      <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 8px;">Ingresa tu nombre personalizado (Se antepondrá "XD-")</p>
-      <input type="text" id="authCustomUsername" placeholder="Ej: rubysplata" maxlength="20" style="width: 100%; padding: 12px; border-radius: 8px;" onkeypress="if(event.key==='Enter') autenticarCustomName()">
-      <button class="btn-solid" style="margin-top: 10px; width: 100%; padding: 12px; background: #ffeb3b; color: #000; font-size: 1rem; border-radius: 8px;" onclick="autenticarCustomName()">
+    <div class="modal-box" style="max-width: 380px; padding: 30px 20px; display: flex; flex-direction: column; gap: 15px; align-items: center; justify-content: center;">
+      <h2 style="color: var(--accent);">WaveTok Pro</h2>
+      <p style="font-size: 0.85rem; color: var(--text-dim);">Ingresa tu nombre personalizado (Se antepondrá "XD-")</p>
+      <input type="text" id="authCustomUsername" placeholder="Ej: rubysplata" maxlength="20" style="width: 100%; padding: 12px; border-radius: 8px; font-size: 1rem;" onkeypress="if(event.key==='Enter') autenticarCustomName()">
+      <button class="btn-solid" style="width: 100%; padding: 12px; font-size: 1rem; display: block !important; visibility: visible !important;" onclick="autenticarCustomName()">
         <i class="fa-solid fa-right-to-bracket"></i> Aceptar e Ingresar
       </button>
     </div>
@@ -284,7 +289,6 @@
         }
       });
 
-      // ESCUCHADOR AUTOMÁTICO DINÁMICO: Actualiza en vivo sin romper la paginación de flechas
       onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { 
         vids = []; 
         s.forEach(d => vids.push({id:d.id, ...d.data()})); 
@@ -301,7 +305,7 @@
             circle.innerText = h.autor.substring(3,8); 
             circle.onclick = () => {
               if(h.fotoUrl) {
-                alert(`Historia de @${h.autor}:\n"${h.texto}"\n\n[Abriendo imagen en pantalla]`);
+                alert(`Historia de @${h.autor}:\n"${h.texto}"\n\n[Abriendo imagen adjunta]`);
                 window.open(h.fotoUrl, '_blank');
               } else {
                 alert(`Historia de @${h.autor}:\n\n"${h.texto}"`);
@@ -316,23 +320,30 @@
       document.getElementById("lblCountSeguidores").innerText = amigos.length;
     }
 
-    // CORRECCIÓN LIVES: Notificaciones de streaming y creación de nodo en Firestore para conteo de Likes
     window.iniciarLive = async (shareScreen) => {
       try {
-        if(shareScreen) streamLive = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
-        else streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if(shareScreen) {
+          streamLive = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        } else {
+          try {
+            streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          } catch(err) {
+            streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          }
+        }
         
         document.getElementById("liveVideoPlayer").srcObject = streamLive;
         document.getElementById("liveBadgeState").style.display = "block";
         document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>ID: <b>${uAct}</b>`;
         
-        // Crear tracker de likes en la nube para esta sesión en directo
         const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, likes: 0, timestamp: serverTimestamp() });
         liveIdActualGlobal = liveRef.id;
         escucharLikesDelLive(liveIdActualGlobal);
 
-        alert("¡Confirmado compai! Tu transmisión está activa para tus amigos.");
-      } catch(e) { alert("Error al iniciar multimedia."); }
+        alert("¡Confirmado compai! Tu streaming está al aire.");
+      } catch(e) { 
+        alert("Permiso multimedia denegado. Haz clic en el candado de la barra del navegador para activarlo."); 
+      }
     };
 
     window.verLiveAmigo = () => {
@@ -341,14 +352,13 @@
       if(!targetId.toUpperCase().startsWith("XD-")) targetId = "XD-" + targetId;
       document.getElementById("boxLiveStatus").innerHTML = "Sintonizando...";
       
-      const call = peer.call(targetId.replace(/[^a-zA-Z0-9_-]/g, ""), new MediaStream(), { metadata: { isLive: true } });
+      const dummyStream = new MediaStream();
+      const call = peer.call(targetId.replace(/[^a-zA-Z0-9_-]/g, ""), dummyStream, { metadata: { isLive: true } });
       call.on('stream', (remoteStream) => {
         document.getElementById("liveVideoPlayer").srcObject = remoteStream;
         document.getElementById("liveBadgeState").style.display = "block";
         document.getElementById("boxLiveStatus").innerHTML = `Viendo a: <b>${targetId}</b>`;
-        
-        // Buscar el documento del amigo para habilitar los likes dinámicos
-        liveIdActualGlobal = targetId; // Asignación de fallback
+        liveIdActualGlobal = targetId; 
       });
     };
 
@@ -386,22 +396,22 @@
       const f = document.getElementById("inputLocalVideo").files[0], u = document.getElementById("inputUrlVideo").value.trim(), c = document.getElementById("inputCaption").value;
       const save = (url) => addDoc(collection(db, "videos"), { autor: uAct, url, caption: c || "Nuevo Video", likes: 0, timestamp: serverTimestamp() }).then(() => {
         cerrarModal('modalSubirVideo');
-        alert("¡Video indexado correctamente en el Feed!");
+        idxFeed = 0;
+        alert("¡Video publicado con éxito en el Feed!");
       });
       if(f) { const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(f); } else if(u) save(u);
     };
 
-    // CORRECCIÓN HISTORIAS: Permite adjuntar imágenes base64 y guardarlas directamente
     window.publicarHistoria = () => {
       const f = document.getElementById("inputFotoHistoria").files[0];
       const txt = document.getElementById("inputTextoHistoria").value.trim();
       
       const enviarHistoria = (fotoUrl = "") => {
-        addDoc(collection(db, "historias"), { autor: uAct, texto: txt || "Historia de imagen", fotoUrl, timestamp: serverTimestamp() }).then(() => { 
+        addDoc(collection(db, "historias"), { autor: uAct, texto: txt || "Historia de foto", fotoUrl, timestamp: serverTimestamp() }).then(() => { 
           cerrarModal('modalCrearHistoria'); 
           document.getElementById("inputTextoHistoria").value = "";
           document.getElementById("inputFotoHistoria").value = "";
-          alert("¡Historia publicada exitosamente con confirmación!");
+          alert("¡Historia publicada exitosamente!");
         });
       };
 
@@ -412,7 +422,7 @@
       } else if(txt) {
         enviarHistoria("");
       } else {
-        alert("Por favor ingresa texto o selecciona una foto.");
+        alert("Por favor escribe una descripción o adjunta una imagen.");
       }
     };
 
@@ -466,12 +476,6 @@
       });
     }
 
-    window.publicarComentario = () => {
-      const i = document.getElementById("inputNuevoComentario"); if(!i.value.trim() || !currentVidId) return;
-      addDoc(collection(db, "videos", currentVidId, "comentarios"), { autor: uAct, texto: i.value.trim(), timestamp: serverTimestamp() });
-      i.value = "";
-    };
-
     window.agregarAmigo = () => { 
       let id = document.getElementById("peerIdDestino").value.trim(); 
       if(id) {
@@ -488,21 +492,39 @@
 
     let snapMsg = null;
     function abrirChat(a) {
-      amigoSel = a; document.getElementById("screen-chats").classList.add("chat-abierto");
-      document.getElementById("chatDetailHeader").style.visibility = "visible"; document.getElementById("chatInputBarArea").style.display = "flex";
-      document.getElementById("targetChatName").innerText = a; if(snapMsg) snapMsg();
-      const sId = [uAct.replace(/[^a-zA-Z0-9_-]/g,""), a.replace(/[^a-zA-Z0-9_-]/g,"")].sort().join("___");
+      amigoSel = a; 
+      document.getElementById("chatDetailHeader").style.visibility = "visible"; 
+      document.getElementById("chatInputBarArea").style.display = "flex";
+      document.getElementById("targetChatName").innerText = a; 
+      if(snapMsg) snapMsg();
+      
+      // ID Limpio y ordenado alfabéticamente para mantener salas idénticas
+      const sId = [uAct, a].sort().join("___");
+      
       snapMsg = onSnapshot(query(collection(db, "chats_privados", sId, "mensajes"), orderBy("timestamp", "asc")), (s) => {
         const b = document.getElementById("msgBox"); b.innerHTML = "";
-        s.forEach(d => { const m = d.data(); const div = document.createElement("div"); div.className = `bubble ${m.remitente===uAct?'sent':'recv'}`; div.innerText = m.contenido; b.appendChild(div); });
-        b.scrollTop = b.scrollHeight;
+        s.forEach(d => { 
+          const m = d.data(); 
+          const div = document.createElement("div"); 
+          div.className = `bubble ${m.remitente===uAct?'sent':'recv'}`; 
+          div.innerText = m.contenido; 
+          b.appendChild(div); 
+        });
+        // Auto Scroll instantáneo al recibir o enviar un mensaje en el celular
+        setTimeout(() => { b.scrollTop = b.scrollHeight; }, 50);
       });
     }
 
     window.enviarTexto = () => {
-      const i = document.getElementById("chatInput"); if(!i.value.trim()) return;
-      const sId = [uAct.replace(/[^a-zA-Z0-9_-]/g,""), amigoSel.replace(/[^a-zA-Z0-9_-]/g,"")].sort().join("___");
-      addDoc(collection(db, "chats_privados", sId, "mensajes"), { remitente: uAct, contenido: i.value.trim(), timestamp: serverTimestamp() });
+      const i = document.getElementById("chatInput"); 
+      if(!i.value.trim() || !amigoSel) return;
+      const sId = [uAct, amigoSel].sort().join("___");
+      
+      addDoc(collection(db, "chats_privados", sId, "mensajes"), { 
+        remitente: uAct, 
+        contenido: i.value.trim(), 
+        timestamp: serverTimestamp() 
+      });
       i.value = "";
     };
   </script>
