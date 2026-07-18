@@ -96,10 +96,17 @@
     .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
     .mic-recording { color: var(--danger) !important; animation: pulseMic 1s infinite alternate; }
 
-    .sticker-popover { display: none; position: absolute; bottom: 75px; right: 80px; width: 300px; height: 240px; background: #1f2c34; border: 2px solid var(--accent); border-radius: 15px; z-index: 200; padding: 12px; flex-direction: column; }
-    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 8px; }
+    .sticker-popover { display: none; position: absolute; bottom: 75px; right: 80px; width: 320px; height: 320px; background: #1f2c34; border: 2px solid var(--accent); border-radius: 15px; z-index: 200; padding: 12px; flex-direction: column; }
+    .sticker-cat-tabs { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 4px; flex-shrink: 0; }
+    .sticker-cat-tab { flex-shrink: 0; padding: 6px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; color: var(--text-dim); background: rgba(255,255,255,0.05); cursor: pointer; white-space: nowrap; }
+    .sticker-cat-tab.active { background: var(--accent); color: black; }
+    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 8px; align-content: start; }
     .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; border-radius: 8px; }
     .sticker-option:hover { transform: scale(1.1); background: rgba(255,255,255,0.05); }
+    .sticker-empty-msg { grid-column: 1 / -1; color: var(--text-dim); font-size: 0.8rem; text-align: center; padding: 15px 5px; }
+    .sticker-upload-row { flex-shrink: 0; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 8px; }
+    .sticker-upload-label { display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255,235,59,0.1); color: var(--accent); border: 1px dashed var(--accent); border-radius: 10px; padding: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .sticker-upload-label:hover { background: rgba(255,235,59,0.18); }
 
     /* SALA DERECHA STRMING */
     .right-stream-panel { width: 340px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px; gap: 20px; flex-shrink: 0; }
@@ -137,7 +144,8 @@
   <aside class="sidebar">
     <div class="brand"><h2><i class="fa-solid fa-clapperboard"></i> WaveTok</h2></div>
     <nav class="side-menu">
-      <div class="menu-item active" id="btn-nav-plataforma" onclick="activarFiltroPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Para ti (Sala)</span></div>
+      <div class="menu-item active" id="btn-nav-plataforma" onclick="activarFiltroPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Para ti</span></div>
+      <div class="menu-item" id="btn-nav-chats" onclick="activarFiltroPantalla('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chat privado</span></div>
       <div class="menu-item" id="btn-nav-perfil" onclick="activarFiltroPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
     </nav>
     <div class="separator">Herramientas</div>
@@ -150,8 +158,7 @@
   <div class="main-layout">
 
     <div class="screen active" id="screen-plataforma">
-
-      <div class="feed-container-box">
+      <div class="feed-container-box" style="width:100%; max-width:460px; margin:0 auto; border-right:none;">
         <div class="top-bar-feed">
           <h3>Para ti</h3>
           <div class="search-box-container">
@@ -172,6 +179,9 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="screen" id="screen-chats">
 
       <div class="chats-master">
         <div class="top-bar-chats">
@@ -189,7 +199,12 @@
           </div>
         </div>
 
-        <div class="messages-container" id="msgBox"></div>
+        <div class="messages-container" id="msgBox">
+          <div id="chatEmptyState" style="margin:auto; text-align:center; color:var(--text-dim);">
+            <i class="fa-solid fa-comments" style="font-size:2.5rem; color:rgba(255,235,59,0.3); margin-bottom:10px; display:block;"></i>
+            <p>Selecciona un contacto o conecta uno nuevo para empezar a chatear.</p>
+          </div>
+        </div>
 
         <div class="input-bar-container">
           <div class="sticker-popover" id="popoverStickersBox">
@@ -197,7 +212,14 @@
               <span>Stickers</span>
               <i class="fa-solid fa-xmark" style="cursor:pointer; color:white;" onclick="alternarCapaStickers()"></i>
             </div>
+            <div class="sticker-cat-tabs" id="tabsCategoriasStickers"></div>
             <div class="sticker-grid" id="containerGridStickers"></div>
+            <div class="sticker-upload-row">
+              <label for="inputSubirStickerPersonalizado" class="sticker-upload-label">
+                <i class="fa-solid fa-upload"></i> Subir mi sticker (PNG/GIF)
+              </label>
+              <input type="file" id="inputSubirStickerPersonalizado" accept="image/png,image/gif,image/webp" style="display:none;" onchange="subirStickerPersonalizado(this)">
+            </div>
           </div>
 
           <div class="input-bar" id="chatInputBarArea" style="display: none;">
@@ -307,7 +329,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -323,7 +345,7 @@
     window.fsdb = getFirestore(app);
     window.fbAuth = getAuth(app);
 
-    window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp; window.doc = doc; window.updateDoc = updateDoc; window.increment = increment;
+    window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp; window.doc = doc; window.updateDoc = updateDoc; window.increment = increment; window.deleteDoc = deleteDoc;
     window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     window.onAuthStateChanged = onAuthStateChanged;
@@ -337,15 +359,47 @@
     let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
     let unsubscribirEscuchaFirestore = null, unsubscribirComentariosVideo = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
     let pestanaAuthActual = 'registro';
+    let categoriaStickerActual = 'emojis';
+    let stickersPersonalizados = [];
+    let unsubscribirStickersPersonalizados = null;
 
-    const bibliotecaStickers = [
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp",
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp",
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp",
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.webp",
-      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp"
-    ];
+    // Biblioteca de stickers organizada por categorías (Noto Emoji, dominio público / Google Fonts)
+    const categoriasStickers = {
+      emojis: [
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f971/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f62d/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f631/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f643/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f92f/512.webp"
+      ],
+      reacciones: [
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44d/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44e/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/2764_fe0f/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f4af/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f64f/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f44f/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f389/512.webp"
+      ],
+      animales: [
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f436/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f431/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43c/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f98a/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f984/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f419/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f428/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f43f_fe0f/512.webp",
+        "https://fonts.gstatic.com/s/e/notoemoji/latest/1f427/512.webp"
+      ]
+    };
+    const NOMBRES_CATEGORIAS = { emojis: 'Emojis', reacciones: 'Reacciones', animales: 'Animales', mios: 'Mis Stickers' };
 
     window.desplegarSecuenciaInicioBase = () => {
       cargarStickersEnPanel();
@@ -361,18 +415,24 @@
           document.getElementById('txtLabelPerfilID').innerText = `@${mySessionId.substring(0, 8)}`;
           document.getElementById('txtLabelPerfilEmail').innerText = mySessionEmail;
           document.getElementById('avatarPerfilGrande').innerText = (mySessionEmail || mySessionId).substring(0,2).toUpperCase();
-          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>${mySessionEmail || mySessionId.substring(0,8)}</b>`;
+          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>${obtenerNombreVisible()}</b>`;
           compilarRenderContactoLista();
+          conectarEscuchaStickersPersonalizados();
         } else {
           mySessionId = "";
           mySessionEmail = "";
+          stickersPersonalizados = [];
+          if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
           document.getElementById('modalRegistroInicial').style.display = 'flex';
           document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>Desconectado</b>`;
         }
       });
     };
 
-    function cambiarPestanaAuth(modo) {
+    function obtenerNombreVisible() {
+      if (!mySessionEmail) return "Anonimo";
+      return mySessionEmail.split('@')[0];
+    }
       pestanaAuthActual = modo;
       document.getElementById('lblErrorAuth').innerText = '';
       const tabRegistro = document.getElementById('tabRegistro');
@@ -574,7 +634,7 @@
       if(!targetVideo || targetVideo.id === "def") return;
 
       await window.addDoc(window.collection(window.fsdb, "videos", targetVideo.id, "comentarios"), {
-        author: mySessionEmail || "Anonimo", text: input.value.trim(), createdAt: window.serverTimestamp()
+        author: obtenerNombreVisible(), text: input.value.trim(), createdAt: window.serverTimestamp()
       });
       input.value = '';
     }
@@ -736,12 +796,68 @@
     }
 
     function cargarStickersEnPanel() {
+      renderizarPestanasCategorias();
+      renderizarGridStickers();
+    }
+
+    function renderizarPestanasCategorias() {
+      const tabsBox = document.getElementById('tabsCategoriasStickers');
+      const categorias = [...Object.keys(categoriasStickers), 'mios'];
+      tabsBox.innerHTML = categorias.map(cat =>
+        `<div class="sticker-cat-tab ${cat === categoriaStickerActual ? 'active' : ''}" onclick="cambiarCategoriaSticker('${cat}')">${NOMBRES_CATEGORIAS[cat]}</div>`
+      ).join('');
+    }
+
+    function cambiarCategoriaSticker(cat) {
+      categoriaStickerActual = cat;
+      renderizarPestanasCategorias();
+      renderizarGridStickers();
+    }
+
+    function renderizarGridStickers() {
       const grid = document.getElementById('containerGridStickers');
-      grid.innerHTML = '';
-      bibliotecaStickers.forEach(url => {
-        grid.innerHTML += `<img src="${url}" class="sticker-option" onclick="ejecutarDespachoSticker('${url}')">`;
+      let lista = categoriaStickerActual === 'mios' ? stickersPersonalizados : categoriasStickers[categoriaStickerActual];
+
+      if (!lista || !lista.length) {
+        grid.innerHTML = `<div class="sticker-empty-msg">${categoriaStickerActual === 'mios' ? 'Aún no has subido stickers propios.' : 'Sin stickers en esta categoría.'}</div>`;
+        return;
+      }
+
+      grid.innerHTML = lista.map(item => {
+        const url = typeof item === 'string' ? item : item.url;
+        return `<img src="${url}" class="sticker-option" onclick="ejecutarDespachoSticker('${url}')">`;
+      }).join('');
+    }
+
+    function conectarEscuchaStickersPersonalizados() {
+      if (!mySessionId) return;
+      if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
+      const q = window.query(window.collection(window.fsdb, "stickers_custom", mySessionId, "items"), window.orderBy("createdAt", "desc"));
+      unsubscribirStickersPersonalizados = window.onSnapshot(q, (snapshot) => {
+        stickersPersonalizados = [];
+        snapshot.forEach(doc => stickersPersonalizados.push({ id: doc.id, ...doc.data() }));
+        if (categoriaStickerActual === 'mios') renderizarGridStickers();
       });
     }
+
+    function subirStickerPersonalizado(input) {
+      if (!mySessionId) { alert("Debes iniciar sesión."); return; }
+      if (!input.files[0]) return;
+      const archivo = input.files[0];
+      if (archivo.size > 900 * 1024) { alert("El sticker es muy pesado. Usa una imagen menor a 900KB."); input.value = ''; return; }
+
+      let lector = new FileReader();
+      lector.onload = async (e) => {
+        await window.addDoc(window.collection(window.fsdb, "stickers_custom", mySessionId, "items"), {
+          url: e.target.result, createdAt: window.serverTimestamp()
+        });
+        categoriaStickerActual = 'mios';
+        renderizarPestanasCategorias();
+        input.value = '';
+      };
+      lector.readAsDataURL(archivo);
+    }
+
     function alternarCapaStickers() {
       const box = document.getElementById('popoverStickersBox');
       box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
@@ -759,9 +875,12 @@
       window.signOut(window.fbAuth);
       peerInstance = null;
       currentTargetPeerId = null;
+      if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
+      stickersPersonalizados = [];
+      categoriaStickerActual = 'emojis';
       document.getElementById('chatDetailHeader').style.visibility = 'hidden';
       document.getElementById('chatInputBarArea').style.display = 'none';
-      document.getElementById('msgBox').innerHTML = '';
+      document.getElementById('msgBox').innerHTML = '<div id="chatEmptyState" style="margin:auto; text-align:center; color:var(--text-dim);"><i class="fa-solid fa-comments" style="font-size:2.5rem; color:rgba(255,235,59,0.3); margin-bottom:10px; display:block;"></i><p>Selecciona un contacto o conecta uno nuevo para empezar a chatear.</p></div>';
     }
     function abrirCapaModal(id) { document.getElementById(id).style.display = 'flex'; }
     function cerrarCapaModal(id) { document.getElementById(id).style.display = 'none'; }
