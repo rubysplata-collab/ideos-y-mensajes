@@ -12,7 +12,7 @@
     :root {
       --bg-dark: #0b0e14;
       --bg-sidebar: #121b22;
-      --accent: #00e676; 
+      --accent: #ffeb3b; /* CAMBIADO A AMARILLO */
       --text-main: #f5f5f7;
       --text-dim: #8b9bb4;
       --bubble-sent: #002d62;
@@ -28,7 +28,7 @@
     .brand h2 { color: var(--accent); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
     .side-menu { display: flex; flex-direction: column; gap: 8px; }
     .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
-    .menu-item:hover, .menu-item.active { background: rgba(0, 230, 118, 0.1); color: var(--accent); }
+    .menu-item:hover, .menu-item.active { background: rgba(255, 235, 59, 0.1); color: var(--accent); }
     .menu-item i { font-size: 1.2rem; width: 25px; }
     .separator { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; padding-left: 15px; margin-top: 10px; }
 
@@ -103,7 +103,7 @@
     .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
     .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #1c2732; }
 
-    /* ADAPTACIÓN MÓVIL SUTIL (MEDIA QUERIES SIN DESTRUIR PC) */
+    /* ADAPTACIÓN MÓVIL SUTIL */
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .mobile-nav { display: flex; }
@@ -261,7 +261,6 @@
     let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
     let unsubscribirEscuchaFirestore = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
 
-    // Galería integrada de Emojis Animados HD en formato WebP para Stickers estables
     const bibliotecaStickers = [
       "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp",
       "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp",
@@ -341,7 +340,7 @@
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       
       document.getElementById(`screen-${pantalla}`).classList.add('active');
-      if(document.getElementById(`menu-${pantalla}`)) document.getElementById(`menu-${pantscale}`)?.classList.add('active');
+      if(document.getElementById(`menu-${pantalla}`)) document.getElementById(`menu-${pantalla}`).classList.add('active');
       if(document.getElementById(`mmenu-${pantalla}`)) document.getElementById(`mmenu-${pantalla}`).classList.add('active');
     }
 
