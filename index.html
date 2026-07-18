@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok & WaveChat - Premium Multimedia</title>
+  <title>WaveTok & WaveChat - Premium Mobile & Desktop</title>
   
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -21,9 +21,10 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; flex-direction: row; }
 
-    .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; }
+    /* BARRA LATERAL (ESCRITORIO) */
+    .sidebar { width: 260px; background-color: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; padding: 20px 10px; gap: 25px; flex-shrink: 0; z-index: 100; }
     .brand h2 { color: var(--accent); font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 10px; padding-left: 10px; }
     .side-menu { display: flex; flex-direction: column; gap: 8px; }
     .menu-item { display: flex; align-items: center; gap: 15px; padding: 12px 15px; color: var(--text-main); text-decoration: none; font-weight: 600; border-radius: 10px; cursor: pointer; transition: background 0.2s; }
@@ -31,116 +32,115 @@
     .menu-item i { font-size: 1.2rem; width: 25px; }
     .separator { font-size: 0.75rem; text-transform: uppercase; color: var(--text-dim); letter-spacing: 1px; padding-left: 15px; margin-top: 10px; }
 
-    .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: black; }
+    /* BARRA INFERIOR (MÓVIL) */
+    .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: var(--bg-sidebar); border-top: 1px solid rgba(255,255,255,0.08); justify-content: space-around; align-items: center; z-index: 1000; padding: 5px 0; }
+    .mobile-nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-dim); font-size: 0.75rem; cursor: pointer; gap: 4px; font-weight: 500; transition: color 0.2s; }
+    .mobile-nav-item i { font-size: 1.3rem; }
+    .mobile-nav-item.active { color: var(--accent); }
+
+    .main-content { flex: 1; display: flex; flex-direction: column; position: relative; background: black; height: 100%; overflow: hidden; }
     .screen { display: none; width: 100%; height: 100%; flex-direction: column; background: var(--bg-dark); }
     .screen.active { display: flex; }
     
     .top-bar { background: var(--bg-sidebar); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.05); gap: 15px; }
     .search-box-container { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 8px 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); width: 250px; }
     .search-box-container input { background: none; border: none; outline: none; color: white; font-size: 0.9rem; width: 100%; margin-left: 8px; }
-    .search-box-container i { color: var(--text-dim); }
 
-    .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; height: calc(100vh - 70px); overflow: hidden; }
+    .tok-feed-container { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; }
     .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; background: #000; }
     .tok-video { width: 100%; height: 100%; object-fit: contain; background: #000; cursor: pointer; }
     
-    .tok-actions { position: absolute; right: 25px; bottom: 80px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 999; }
+    .tok-actions { position: absolute; right: 25px; bottom: 100px; display: flex; flex-direction: column; gap: 15px; align-items: center; z-index: 99; }
     .circle-action { background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 48px; height: 48px; border-radius: 50%; color: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; }
     .tok-actions span { font-size: 0.8rem; color: white; margin-top: -10px; text-shadow: 1px 1px 3px black; }
-    .tok-meta { position: absolute; left: 30px; bottom: 40px; z-index: 10; max-width: 60%; text-shadow: 1px 1px 5px black; }
+    .tok-meta { position: absolute; left: 30px; bottom: 100px; z-index: 10; max-width: 60%; text-shadow: 1px 1px 5px black; }
 
     .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2); color: white; width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 15; }
     .nav-arrow:hover { background: var(--accent); color: black; }
     .arrow-left { left: 20px; }
     .arrow-right { right: 20px; }
 
-    .comments-drawer { display: none; position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; background: rgba(18, 27, 34, 0.98); border-top: 2px solid var(--accent); z-index: 2000; flex-direction: column; padding: 20px; border-radius: 20px 20px 0 0; }
-    .comments-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; margin-bottom: 10px; }
-    .comment-item { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 10px; font-size: 0.9rem; }
-
-    .chat-layout { display: flex; flex: 1; height: 100%; }
+    /* CHATS PRIVADOS */
+    .chat-layout { display: flex; flex: 1; height: 100%; overflow: hidden; }
     .chats-master { width: 320px; background: var(--bg-sidebar); border-right: 1px solid rgba(255, 255, 255, 0.05); display: flex; flex-direction: column; }
     .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; }
     .chat-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
     .chat-item:hover, .chat-item.active { background: rgba(255,255,255,0.03); }
     .avatar { width: 40px; height: 40px; border-radius: 50%; background: #233138; display: flex; align-items: center; justify-content: center; font-weight: bold; color: var(--accent); }
 
-    .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+    .messages-container { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-bottom: 30px; }
     .bubble { max-width: 65%; padding: 12px 16px; border-radius: 15px; font-size: 0.95rem; color: white; display: flex; flex-direction: column; gap: 5px; position: relative; }
     .sent { background-color: var(--bubble-sent); align-self: flex-end; border-bottom-right-radius: 2px; }
     .recv { background-color: var(--bubble-recv); align-self: flex-start; border-bottom-left-radius: 2px; }
-    .share-card { background: #1c2732; border: 1px solid var(--accent); border-radius: 12px; padding: 12px; cursor: pointer; min-width: 180px; }
     
-    .chat-img-render { max-width: 100%; max-height: 220px; border-radius: 10px; object-fit: cover; margin-top: 5px; border: 1px solid rgba(255,255,255,0.1); display: block; }
-    .btn-comentar-foto { background: none; border: none; color: var(--accent); font-size: 0.8rem; cursor: pointer; text-align: left; padding: 4px 2px 0 2px; display: inline-flex; align-items: center; gap: 5px; font-weight: 600; width: max-content; }
-    .chat-audio-render { max-width: 100%; outline: none; margin-top: 3px; height: 36px; }
+    /* ENTORNO STICKERS */
+    .sticker-msg-render { width: 130px; height: 130px; object-fit: contain; display: block; margin-top: 5px; }
+    .input-bar-wrapper { position: relative; width: 100%; display: flex; flex-direction: column; }
+    .sticker-popover { display: none; position: absolute; bottom: 70px; right: 20px; width: 280px; height: 220px; background: #1f2c34; border: 1px solid var(--accent); border-radius: 15px; z-index: 1200; padding: 10px; flex-direction: column; box-shadow: 0 5px 20px rgba(0,0,0,0.6); }
+    .sticker-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; overflow-y: auto; flex: 1; margin-top: 5px; padding-right: 2px; }
+    .sticker-option { width: 100%; aspect-ratio: 1; object-fit: contain; cursor: pointer; transition: transform 0.1s; border-radius: 8px; }
+    .sticker-option:hover { transform: scale(1.1); background: rgba(255,255,255,0.05); }
 
-    .input-bar { padding: 15px 25px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 15px; }
+    .input-bar { padding: 15px 25px; background: var(--bg-sidebar); display: flex; align-items: center; gap: 15px; width: 100%; }
     .input-bar input { flex: 1; background: rgba(255,255,255,0.05); border: none; padding: 12px 20px; border-radius: 25px; color: white; outline: none; }
-    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; transition: transform 0.1s; }
-    .input-bar i:active { transform: scale(0.85); }
-    .mic-recording { color: var(--danger) !important; animation: pulseMic 1s infinite alternate; }
+    .input-bar i { font-size: 1.3rem; color: var(--accent); cursor: pointer; }
 
-    @keyframes pulseMic { from { opacity: 0.5; } to { opacity: 1; } }
+    /* RESPONSIVE LAYOUT (MOVIL) */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { display: none; }
+      .mobile-nav { display: flex; }
+      .main-content { height: calc(100vh - 65px); }
+      .chat-layout { flex-direction: column; }
+      .chats-master { width: 100%; height: 100%; }
+      .chats-master.hidden-mobile { display: none; }
+      .chats-detail { width: 100%; height: 100%; display: none; }
+      .chats-detail.active-mobile { display: flex; }
+      .tok-actions { right: 15px; bottom: 90px; }
+      .tok-meta { left: 15px; bottom: 90px; max-width: 80%; }
+      .nav-arrow { width: 35px; height: 35px; font-size: 0.9rem; }
+      .arrow-left { left: 10px; }
+      .arrow-right { right: 10px; }
+      .messages-container { padding: 15px; }
+      .sticker-popover { right: 10px; width: 90%; max-width: 280px; }
+    }
 
-    .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.02); }
-    .my-code-footer b { color: var(--accent); letter-spacing: 0.5px; }
+    /* LLAMADAS */
+    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 420px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); }
+    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; }
+    .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
 
-    /* CONTENEDOR DE LA LLAMADA OPTIMIZADO */
-    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 420px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .call-overlay-container.expanded { width: 720px; height: auto; } 
-    
-    /* CUADRÍCULA DE VIDEO FLEXIBLE */
-    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; position: relative; width: 100%; transition: all 0.3s ease; }
-    .video-grid-call.fullscreen-active { grid-template-columns: 1fr; } 
-    .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #1c2732; transition: all 0.3s ease; }
-    
-    /* Forzar que el video remoto se estire completamente */
-    .video-grid-call video.fullscreen-mode { aspect-ratio: 16/9; object-fit: fill !important; width: 100%; height: 100%; }
-
-    .media-controls-row { display: flex; justify-content: center; gap: 15px; margin: 5px 0; }
-    .circle-btn-media { width: 44px; height: 44px; border-radius: 50%; background: #233138; border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; }
-    .circle-btn-media:hover { background: #2b3d47; }
-    .circle-btn-media.disabled { background: var(--danger); color: white; border-color: var(--danger); }
-
-    .profile-container { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-    .my-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; width: 100%; }
-    .grid-card { position: relative; aspect-ratio: 9/16; background: black; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-    .grid-card video { width: 100%; height: 100%; object-fit: cover; }
-    .grid-card .meta-card { position: absolute; bottom: 8px; left: 8px; font-size: 0.8rem; text-shadow: 1px 1px 2px black; }
-
-    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center; }
-    .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 360px; text-align: center; }
-    .modal-box input { width:100%; padding:12px; margin:15px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; text-align:center; outline:none; }
+    .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:3000; justify-content:center; align-items:center; }
+    .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 30px; border-radius: 20px; width: 90%; max-width: 360px; text-align: center; }
+    .modal-box input { width:100%; padding:12px; margin:15px 0; border-radius:8px; border:1px solid rgba(255,255,255,0.1); background:#000; color:white; outline:none; text-align:center; }
     .btn-solid { background: var(--accent); color:black; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
     .btn-danger { background: var(--danger); color:white; border:none; padding:10px 20px; border-radius:20px; font-weight:bold; cursor:pointer; }
+    .back-chat-btn { display: none; color: var(--accent); font-size: 1.2rem; cursor: pointer; align-items: center; }
+    @media (max-width: 768px) { .back-chat-btn { display: flex; } }
   </style>
 </head>
 <body>
 
   <aside class="sidebar">
-    <div class="brand">
-      <h2><i class="fa-solid fa-clapperboard"></i> WaveTok</h2>
-    </div>
+    <div class="brand"><h2><i class="fa-solid fa-clapperboard"></i> WaveTok</h2></div>
     <nav class="side-menu">
-      <div class="menu-item active" id="menu-tok" onclick="navegarHacia('tok')">
-        <i class="fa-solid fa-house"></i> <span>Para ti</span>
-      </div>
-      <div class="menu-item" id="menu-chat" onclick="navegarHacia('chat')">
-        <i class="fa-solid fa-comment-dots"></i> <span>Chats privados</span>
-      </div>
-      <div class="menu-item" id="menu-profile" onclick="navegarHacia('profile')">
-        <i class="fa-solid fa-user"></i> <span>Mi Perfil</span>
-      </div>
+      <div class="menu-item active" id="menu-tok" onclick="navegarHacia('tok')"><i class="fa-solid fa-house"></i> <span>Para ti</span></div>
+      <div class="menu-item" id="menu-chat" onclick="navegarHacia('chat')"><i class="fa-solid fa-comment-dots"></i> <span>Chats privados</span></div>
+      <div class="menu-item" id="menu-profile" onclick="navegarHacia('profile')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
     </nav>
-    <div class="separator">Descubrir</div>
+    <div class="separator">Herramientas</div>
     <div class="side-menu">
-      <div class="menu-item" onclick="abrirModalSubir()">
-        <i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Subir video</span>
-      </div>
+      <div class="menu-item" onclick="abrirModalSubir()"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Subir video</span></div>
     </div>
   </aside>
+
+  <nav class="mobile-nav">
+    <div class="mobile-nav-item active" id="mmenu-tok" onclick="navegarHacia('tok')"><i class="fa-solid fa-house"></i><span>Para ti</span></div>
+    <div class="mobile-nav-item" id="mmenu-chat" onclick="navegarHacia('chat')"><i class="fa-solid fa-comment-dots"></i><span>Chats</span></div>
+    <div class="mobile-nav-item" onclick="abrirModalSubir()"><i class="fa-solid fa-square-plus" style="font-size:1.6rem; color:var(--accent);"></i><span>Subir</span></div>
+    <div class="mobile-nav-item" id="mmenu-profile" onclick="navegarHacia('profile')"><i class="fa-solid fa-user"></i><span>Perfil</span></div>
+  </nav>
 
   <main class="main-content">
 
@@ -148,8 +148,7 @@
       <div class="top-bar">
         <h3>Explorar</h3>
         <div class="search-box-container">
-          <i class="fa-solid fa-magnifying-glass"></i>
-          <input type="text" id="inputBuscarDescripcion" placeholder="Buscar por descripción..." oninput="filtrarVideosPorDescripcion()">
+          <input type="text" id="inputBuscarDescripcion" placeholder="Buscar..." oninput="filtrarVideosPorDescripcion()">
         </div>
       </div>
       <div class="tok-feed-container">
@@ -157,49 +156,44 @@
         <button class="nav-arrow arrow-right" onclick="cambiarVideoFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
         <div class="tok-wrapper" id="tokFeedIterator"></div>
       </div>
-
-      <div class="comments-drawer" id="drawerComentarios">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-          <h4 id="labelTituloCajonComentarios">Comentarios</h4>
-          <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="cerrarCajonComentarios()"></i>
-        </div>
-        <div class="comments-list" id="boxListaComentarios"></div>
-        <div class="input-bar" style="padding:0;">
-          <input type="text" id="inputNuevoComentario" placeholder="Añade un comentario..." onkeypress="if(event.key==='Enter') despacharEnvioComentario()">
-          <i class="fa-solid fa-paper-plane" onclick="despacharEnvioComentario()"></i>
-        </div>
-      </div>
     </div>
 
     <div class="screen" id="screen-chat">
       <div class="chat-layout">
-        <div class="chats-master">
-          <div class="top-bar" style="padding: 15px;">
-            <button class="btn-solid" style="width: 100%;" onclick="abrirModalConexion()"><i class="fa-solid fa-user-plus"></i> Conectar Amigo</button>
-          </div>
+        <div class="chats-master" id="panelMasterChat">
+          <div class="top-bar" style="padding: 15px;"><button class="btn-solid" style="width: 100%;" onclick="abrirModalConexion()">+ Conectar Amigo</button></div>
           <div style="flex:1; overflow-y:auto;" id="chatListContainer"></div>
         </div>
-        <div class="chats-detail">
-          <div class="top-bar" id="chatDetailHeader" style="display: none; justify-content: space-between; width: 100%;">
+        
+        <div class="chats-detail" id="panelDetailChat">
+          <div class="top-bar" id="chatDetailHeader" style="display: none;">
+            <div class="back-chat-btn" onclick="regresarListaChatsMovil()"><i class="fa-solid fa-chevron-left"></i>&nbsp;Atrás</div>
             <h4 id="targetChatName" style="color: white;">Amigo</h4>
-            <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem; cursor: pointer;">
-              <i class="fa-solid fa-phone" onclick="iniciarLlamadaVozVideo(false)"></i>
-              <i class="fa-solid fa-video" onclick="iniciarLlamadaVozVideo(true)"></i>
+            <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem;">
+              <i class="fa-solid fa-phone" style="cursor:pointer;" onclick="iniciarLlamadaVozVideo(false)"></i>
+              <i class="fa-solid fa-video" style="cursor:pointer;" onclick="iniciarLlamadaVozVideo(true)"></i>
             </div>
           </div>
           
           <div class="messages-container" id="msgBox"></div>
           
-          <div class="input-bar" id="chatInputBarArea" style="display: none;">
-            <label for="chatInputFileImage" style="margin: 0; padding: 0; display: flex; align-items: center;">
-              <i class="fa-solid fa-paperclip"></i>
-            </label>
-            <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="procesarYEnviarFotoChat(this)">
-            
-            <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
-            
-            <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="invertirEstadoGrabacionAudio()"></i>
-            <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
+          <div class="input-bar-wrapper">
+            <div class="sticker-popover" id="boxPanelStickers">
+              <div style="display:flex; justify-content:space-between; font-size:0.85rem; color:var(--accent); margin-bottom:5px; font-weight:bold;">
+                <span>Selecciona un Sticker</span>
+                <i class="fa-solid fa-xmark" style="cursor:pointer; color:white;" onclick="toggleCapaStickers()"></i>
+              </div>
+              <div class="sticker-grid" id="gridStickersItems"></div>
+            </div>
+
+            <div class="input-bar" id="chatInputBarArea" style="display: none;">
+              <label for="chatInputFileImage" style="display:flex; align-items:center; margin:0;"><i class="fa-solid fa-paperclip"></i></label>
+              <input type="file" id="chatInputFileImage" accept="image/*" style="display: none;" onchange="procesarYEnviarFotoChat(this)">
+              <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') enviarMensaje()">
+              <i class="fa-regular fa-face-smile" onclick="toggleCapaStickers()"></i>
+              <i class="fa-solid fa-microphone" id="btnIconoMicrofonoAudio" onclick="invertirEstadoGrabacionAudio()"></i>
+              <i class="fa-solid fa-paper-plane" onclick="enviarMensaje()"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -207,69 +201,28 @@
 
     <div class="screen" id="screen-profile">
       <div class="top-bar"><h3>Mi Perfil</h3></div>
-      <div class="profile-container">
-        <h2 id="txtLabelPerfilID" style="color: var(--accent);">@</h2>
-        <button class="btn-danger" onclick="cerrarSesionYCambiarID()">
-          <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión / Cambiar ID
-        </button>
-        <div class="my-grid" id="gridMisVideosPublicados"></div>
+      <div class="profile-container" style="padding:30px; text-align:center;">
+        <h2 id="txtLabelPerfilID" style="color: var(--accent); margin-bottom:20px;">@</h2>
+        <button class="btn-danger" onclick="cerrarSesionYCambiarID()">Cerrar Sesión</button>
       </div>
     </div>
-
-    <div class="my-code-footer" id="labelFooterMyCode">Este es tu código: <b>Desconectado</b></div>
-
   </main>
 
   <div class="call-overlay-container" id="panelLlamadaActiva">
     <h5 id="txtEstadoLlamada" style="color: white; text-align: center;">Conectando...</h5>
-    
-    <div class="video-grid-call" id="containerVideoGridCall">
+    <div class="video-grid-call">
       <video id="localStreamVideo" autoplay muted playsinline></video>
       <video id="remoteStreamVideo" autoplay playsinline></video>
     </div>
-
-    <div class="media-controls-row">
-      <button class="circle-btn-media" id="btnMuteMicHardware" onclick="conmutarEstadoSilenciarAudio()">
-        <i class="fa-solid fa-microphone"></i>
-      </button>
-      <button class="circle-btn-media" id="btnMuteCamHardware" onclick="conmutarEstadoApagarCamara()">
-        <i class="fa-solid fa-video"></i>
-      </button>
-    </div>
-
     <div style="display:flex; gap:10px;">
-      <button class="btn-solid" style="flex:1; background:#0288d1; color:white;" id="btnCompartirPantallaCall" onclick="toggleCompartirPantallaWebRTC()"><i class="fa-solid fa-desktop"></i> Compartir Pantalla</button>
+      <button class="btn-solid" style="flex:1; background:#0288d1; color:white;" id="btnCompartirPantallaCall" onclick="toggleCompartirPantallaWebRTC()">Pantalla</button>
       <button class="btn-danger" style="flex:1;" onclick="cortarLlamadaWebRTC()">Colgar</button>
     </div>
   </div>
 
-  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;">
-    <div class="modal-box">
-      <h2 style="color: var(--accent);">Crear tu ID WaveTok</h2>
-      <input type="text" id="inputUsernameUnico" placeholder="Ingresa tu ID personalizado">
-      <button class="btn-solid" style="width: 100%;" onclick="registrarNodoCliente()">Ingresar</button>
-    </div>
-  </div>
-
-  <div class="modal-bg" id="connectModal">
-    <div class="modal-box">
-      <h3>Vincular Amigo</h3>
-      <input type="text" id="inputPeerIdDestino" placeholder="ID exacto de tu amigo">
-      <button class="btn-solid" style="width: 100%;" onclick="conectarConPeerAmigo()">Vincular</button>
-      <p onclick="cerrarModal()" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p>
-    </div>
-  </div>
-
-  <div class="modal-bg" id="modalSubirVideo">
-    <div class="modal-box">
-      <h3>Publicar Video</h3>
-      <input type="text" id="inputVideoUrlDirecta" placeholder="Pega URL .mp4 o usa el archivo de abajo">
-      <input type="file" id="inputVideoFileSource" accept="video/*" onchange="cargarPrevisualizacionVideo(this)">
-      <input type="text" id="inputVideoCaption" placeholder="¿De qué trata tu video?">
-      <button class="btn-solid" style="width: 100%;" onclick="guardarVideoEditadoDB()">🚀 Subir a Firestore</button>
-      <p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cancelar</p>
-    </div>
-  </div>
+  <div class="modal-bg" id="modalRegistroInicial" style="display: flex;"><div class="modal-box"><h2>Crear tu ID WaveTok</h2><input type="text" id="inputUsernameUnico" placeholder="Ingresa tu ID"><button class="btn-solid" style="width:100%;" onclick="registrarNodoCliente()">Ingresar</button></div></div>
+  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Vincular Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID de tu amigo"><button class="btn-solid" style="width: 100%;" onclick="conectarConPeerAmigo()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
+  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="Pega URL .mp4"><input type="text" id="inputVideoCaption" placeholder="Descripción"><button class="btn-solid" style="width:100%;" onclick="guardarVideoEditadoDB()">Subir</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cancelar</p></div></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -285,292 +238,140 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const fsdb = getFirestore(app);
-
-    window.fsdb = fsdb;
-    window.addDoc = addDoc;
-    window.doc = doc;
-    window.updateDoc = updateDoc;
-    window.increment = increment;
-    window.collection = collection;
-    window.query = query;
-    window.orderBy = orderBy;
-    window.onSnapshot = onSnapshot;
-    window.serverTimestamp = serverTimestamp;
-    
+    window.fsdb = getFirestore(app);
+    window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp;
     window.inicializarPlataformaCompleta();
   </script>
 
   <script>
-    let peerInstance = null, mySessionId = "", currentTargetPeerId = null;
-    let cacheVideoBase64 = "", masterVideoArray = [], vidsFiltradosArray = [];
-    let currentFeedIndex = 0; 
-    let miStreamLocal = null, llamadaActualWebRTC = null;
-    let transmisorPantallaTrack = null;
-    let transmitiendoPantalla = false;
-    let audioHabilitado = true, videoHabilitado = true;
+    let peerInstance = null, mySessionId = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
+    let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false, unsubscribirEscuchaFirestore = null, unsubscribirFeedVideos = null;
 
-    let unsubscribirEscuchaFirestore = null;
-    let unsubscribirFeedVideos = null;
-    let unsubscribirComentarios = null;
-    
-    let modoCajonComentarios = "video"; 
-    let idElementoComentadoActual = null;
-    let salaIdFotoComentadaActual = null;
-
-    let grabadorAudioMedia = null, fragmentosAudioGrabados = [];
-    let estaGrabandoAudio = false;
+    // Lista de Stickers embebidos con Emojis HD para evitar dependencias de archivos locales
+    const listaStickersDisponibles = [
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f606/512.webp", // Risa
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f923/512.webp", // Risa extrema
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60d/512.webp", // Enamorado
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f60e/512.webp", // Gafas sol
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f440/512.webp", // Ojos
+      "https://fonts.gstatic.com/s/e/notoemoji/latest/1f525/512.webp"  // Fuego
+    ];
 
     window.inicializarPlataformaCompleta = () => {
       mySessionId = localStorage.getItem('wt_session_peer_id') || "";
+      cargarStickersEnPanel();
       escucharFeedVideosGlobal();
 
       if (mySessionId) {
         document.getElementById('modalRegistroInicial').style.display = 'none';
         levantarInstanciaPeer(mySessionId);
-        actualizarEtiquetasDeID(mySessionId);
+        document.getElementById('txtLabelPerfilID').innerText = `@${mySessionId}`;
       }
     };
 
     function registrarNodoCliente() {
       let user = document.getElementById('inputUsernameUnico').value.trim();
-      if (!user) return alert("Ingresa un identificador válido.");
+      if (!user) return;
       mySessionId = user;
       localStorage.setItem('wt_session_peer_id', mySessionId);
       document.getElementById('modalRegistroInicial').style.display = 'none';
-      levantarInstanciaPeer(mySessionId);
-      actualizarEtiquetasDeID(mySessionId);
-    }
-
-    function actualizarEtiquetasDeID(id) {
-      document.getElementById('txtLabelPerfilID').innerText = `@${id}`;
-      document.getElementById('labelFooterMyCode').innerHTML = `Este es tu código: <b>${id}</b>`;
-    }
-
-    function cerrarSesionYCambiarID() {
-      if(confirm("¿Seguro que deseas cerrar sesión y cambiar tu nombre de ID?")) {
-        localStorage.removeItem('wt_session_peer_id');
-        location.reload();
-      }
+      location.reload();
     }
 
     function levantarInstanciaPeer(idMio) {
-      peerInstance = new Peer(idMio, {
-        config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
-      });
+      peerInstance = new Peer(idMio, { config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] } });
       peerInstance.on('open', () => { renderizarListaChats(); });
-      
       peerInstance.on('call', (incomingCall) => {
-        if(confirm(`¿Contestar llamada entrante de ${incomingCall.peer.toUpperCase()}?`)) {
+        if(confirm(`¿Contestar llamada de ${incomingCall.peer}?`)) {
           navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             miStreamLocal = stream;
-            audioHabilitado = true; videoHabilitado = true;
-            actualizarEstilosBotonesHardware();
-
             document.getElementById('panelLlamadaActiva').style.display = 'flex';
             document.getElementById('localStreamVideo').srcObject = stream;
-            document.getElementById('txtEstadoLlamada').innerText = "En llamada";
-            
             incomingCall.answer(stream);
             llamadaActualWebRTC = incomingCall;
-            
-            incomingCall.on('stream', (remoteStream) => {
-              const remoteVideo = document.getElementById('remoteStreamVideo');
-              remoteVideo.srcObject = remoteStream;
-              remoteVideo.play().catch(()=>{});
-            });
-          }).catch((err) => {
-            console.error("Error al capturar medios al responder: ", err);
-            // Contestar solo audio o sin stream si falla la cámara en Opera
-            incomingCall.answer();
+            incomingCall.on('stream', (rStream) => { document.getElementById('remoteStreamVideo').srcObject = rStream; });
           });
         }
       });
     }
 
-    function iniciarLlamadaVozVideo(conVideo) {
-      document.getElementById('panelLlamadaActiva').style.display = 'flex';
-      document.getElementById('btnCompartirPantallaCall').style.display = conVideo ? 'block' : 'none';
-      transmitiendoPantalla = false;
-      audioHabilitado = true; videoHabilitado = conVideo;
-      actualizarEstilosBotonesHardware();
-
-      navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
-        miStreamLocal = stream;
-        document.getElementById('localStreamVideo').srcObject = stream;
-        document.getElementById('txtEstadoLlamada').innerText = "Llamando...";
-        
-        let call = peerInstance.call(currentTargetPeerId, stream);
-        llamadaActualWebRTC = call;
-        
-        call.on('stream', (remoteStream) => {
-          document.getElementById('txtEstadoLlamada').innerText = "Conectado";
-          const remoteVideo = document.getElementById('remoteStreamVideo');
-          remoteVideo.srcObject = remoteStream;
-          remoteVideo.play().catch(()=>{});
-        });
-      }).catch(err => alert("Permiso de multimedia denegado o dispositivo ocupado."));
+    function navegarHacia(pantalla) {
+      document.querySelectorAll('.tok-video').forEach(v => v.pause());
+      document.querySelectorAll('.menu-item, .mobile-nav-item').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      
+      document.getElementById(`screen-${pantalla}`).classList.add('active');
+      if(document.getElementById(`menu-${pantscale}`)) document.getElementById(`menu-${pantalla}`).classList.add('active');
+      if(document.getElementById(`mmenu-${pantalla}`)) document.getElementById(`mmenu-${pantalla}`).classList.add('active');
     }
 
-    /* CONTROL DE MICROFONO Y CAMARA (ON/OFF) */
-    function conmutarEstadoSilenciarAudio() {
-      if (!miStreamLocal) return;
-      audioHabilitado = !audioHabilitado;
-      miStreamLocal.getAudioTracks().forEach(track => track.enabled = audioHabilitado);
-      actualizarEstilosBotonesHardware();
-    }
-
-    function conmutarEstadoApagarCamara() {
-      if (!miStreamLocal || miStreamLocal.getVideoTracks().length === 0) return;
-      videoHabilitado = !videoHabilitado;
-      miStreamLocal.getVideoTracks().forEach(track => track.enabled = videoHabilitado);
-      actualizarEstilosBotonesHardware();
-    }
-
-    function actualizarEstilosBotonesHardware() {
-      const btnMic = document.getElementById('btnMuteMicHardware');
-      const btnCam = document.getElementById('btnMuteCamHardware');
-
-      if (audioHabilitado) {
-        btnMic.classList.remove('disabled');
-        btnMic.innerHTML = `<i class="fa-solid fa-microphone"></i>`;
-      } else {
-        btnMic.classList.add('disabled');
-        btnMic.innerHTML = `<i class="fa-solid fa-microphone-slash"></i>`;
-      }
-
-      if (videoHabilitado) {
-        btnCam.classList.remove('disabled');
-        btnCam.innerHTML = `<i class="fa-solid fa-video"></i>`;
-      } else {
-        btnCam.classList.add('disabled');
-        btnCam.innerHTML = `<i class="fa-solid fa-video-slash"></i>`;
-      }
-    }
-
-    /* COMPARTIR PANTALLA EXPANDIDO (ESTIRADO COMPLETO) */
-    function toggleCompartirPantallaWebRTC() {
-      if(!llamadaActualWebRTC) return;
-
-      const overlay = document.getElementById('panelLlamadaActiva');
-      const grid = document.getElementById('containerVideoGridCall');
-      const localVid = document.getElementById('localStreamVideo');
-      const remoteVid = document.getElementById('remoteStreamVideo');
-
-      if(!transmitiendoPantalla) {
-        navigator.mediaDevices.getDisplayMedia({ video: true }).then((screenStream) => {
-          transmisorPantallaTrack = screenStream.getVideoTracks()[0];
-          let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-          if(videoSender) videoSender.replaceTrack(transmisorPantallaTrack);
-          
-          localVid.srcObject = screenStream;
-          transmitiendoPantalla = true;
-          document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-video"></i> Usar Cámara`;
-          
-          // Efecto Estirar pantalla al 100% de manera forzada
-          overlay.classList.add('expanded');
-          grid.classList.add('fullscreen-active');
-          remoteVid.classList.add('fullscreen-mode');
-
-          transmisorPantallaTrack.onended = () => { detenerTransmisionPantalla(); };
-        }).catch(() => {});
-      } else {
-        detenerTransmisionPantalla();
-      }
-    }
-
-    function detenerTransmisionPantalla() {
-      if(!transmitiendoPantalla) return;
-
-      const overlay = document.getElementById('panelLlamadaActiva');
-      const grid = document.getElementById('containerVideoGridCall');
-      const remoteVid = document.getElementById('remoteStreamVideo');
-
-      navigator.mediaDevices.getUserMedia({ video: true }).then((camStream) => {
-        let camaraTrack = camStream.getVideoTracks()[0];
-        let videoSender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
-        if(videoSender) videoSender.replaceTrack(camaraTrack);
-        
-        if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
-        let oldTracks = miStreamLocal.getVideoTracks();
-        oldTracks.forEach(t => t.stop());
-        miStreamLocal.addTrack(camaraTrack);
-        
-        document.getElementById('localStreamVideo').srcObject = miStreamLocal;
-        transmitiendoPantalla = false;
-        document.getElementById('btnCompartirPantaranCall').innerHTML = `<i class="fa-solid fa-desktop"></i> Compartir Pantalla`;
-        
-        // Restaurar dimensiones
-        overlay.classList.remove('expanded');
-        grid.classList.remove('fullscreen-active');
-        remoteVid.classList.remove('fullscreen-mode');
-        
-        videoHabilitado = true;
-        actualizarEstilosBotonesHardware();
+    function cargarStickersEnPanel() {
+      const grid = document.getElementById('gridStickersItems');
+      grid.innerHTML = '';
+      listaStickersDisponibles.forEach(url => {
+        grid.innerHTML += `<img src="${url}" class="sticker-option" onclick="enviarStickerDirecto('${url}')">`;
       });
     }
 
-    function cortarLlamadaWebRTC() {
-      if(transmisorPantallaTrack) transmisorPantallaTrack.stop();
-      if(llamadaActualWebRTC) llamadaActualWebRTC.close();
-      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
-      
-      const overlay = document.getElementById('panelLlamadaActiva');
-      const grid = document.getElementById('containerVideoGridCall');
-      const remoteVid = document.getElementById('remoteStreamVideo');
-      
-      overlay.classList.remove('expanded');
-      grid.classList.remove('fullscreen-active');
-      remoteVid.classList.remove('fullscreen-mode');
-      
-      overlay.style.display = 'none';
-      transmitiendoPantalla = false;
+    function toggleCapaStickers() {
+      const box = document.getElementById('boxPanelStickers');
+      box.style.display = (box.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    function escucharFeedVideosGlobal() {
-      if(unsubscribirFeedVideos) unsubscribirFeedVideos();
-      const q = window.query(window.collection(window.fsdb, "videos"), window.orderBy("createdAt", "desc"));
+    async function enviarStickerDirecto(urlSticker) {
+      if(!currentTargetPeerId) return;
+      let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
+      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
+        sender: mySessionId,
+        text: urlSticker,
+        type: "sticker",
+        timestamp: window.serverTimestamp()
+      });
+      toggleCapaStickers();
+    }
 
-      unsubscribirFeedVideos = window.onSnapshot(q, (snapshot) => {
-        let nuevosVideos = [];
+    function desplegarChatIndividual(id) {
+      currentTargetPeerId = id;
+      document.getElementById('targetChatName').innerText = id.toUpperCase();
+      document.getElementById('chatDetailHeader').style.display = 'flex';
+      document.getElementById('chatInputBarArea').style.display = 'flex';
+      
+      if(window.innerWidth <= 768) {
+        document.getElementById('panelMasterChat').classList.add('hidden-mobile');
+        document.getElementById('panelDetailChat').classList.add('active-mobile');
+      }
+      escucharMensajesFirestore(id);
+    }
+
+    function regresarListaChatsMovil() {
+      document.getElementById('panelMasterChat').classList.remove('hidden-mobile');
+      document.getElementById('panelDetailChat').classList.remove('active-mobile');
+    }
+
+    function escucharMensajesFirestore(targetId) {
+      if(unsubscribirEscuchaFirestore) unsubscribirEscuchaFirestore();
+      let salaId = [mySessionId, targetId].sort().join("_CH_");
+      const q = window.query(window.collection(window.fsdb, "salas", salaId, "mensajes"), window.orderBy("timestamp", "asc"));
+      const box = document.getElementById('msgBox');
+
+      unsubscribirEscuchaFirestore = window.onSnapshot(q, (snapshot) => {
+        box.innerHTML = '';
         snapshot.forEach((doc) => {
           let d = doc.data();
-          nuevosVideos.push({ id: doc.id, author: d.author, caption: d.caption, url: d.url, likes: d.likes || 0 });
+          let esMio = d.sender === mySessionId;
+          if(d.type === "sticker") {
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${d.sender}:</b><img src="${d.text}" class="sticker-msg-render"/></div>`;
+          } else {
+            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${d.sender}:</b><br>${d.text}</div>`;
+          }
         });
-
-        if(nuevosVideos.length > 0) {
-          masterVideoArray = nuevosVideos;
-        } else if(masterVideoArray.length === 0) {
-          masterVideoArray = [{ id: "backup_def", author: "SYSTEM", caption: "Sube un video estable.", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4", likes: 0 }];
-        }
-        filtrarVideosPorDescripcion();
-        renderizarMiPerfilCuadrilla();
+        box.scrollTop = box.scrollHeight;
       });
-    }
-
-    function filtrarVideosPorDescripcion() {
-      let busqueda = document.getElementById('inputBuscarDescripcion').value.toLowerCase().trim();
-      if(!busqueda) {
-        vidsFiltradosArray = [...masterVideoArray];
-      } else {
-        vidsFiltradosArray = masterVideoArray.filter(v => v.caption && v.caption.toLowerCase().includes(busqueda));
-      }
-      currentFeedIndex = 0;
-      renderizarFeedPrincipalVideos();
-    }
-
-    function conectarConPeerAmigo() {
-      let target = document.getElementById('inputPeerIdDestino').value.trim();
-      if(!target) return;
-      almacenarAmigoEnLista(target);
-      cerrarModal();
-      desplegarChatIndividual(target);
     }
 
     async function enviarMensaje() {
       const input = document.getElementById('chatInput');
-      if (!input.value.trim() || !currentTargetPeerId) return;
-      
+      if(!input.value.trim() || !currentTargetPeerId) return;
       let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
       await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
         sender: mySessionId,
@@ -581,159 +382,34 @@
       input.value = '';
     }
 
-    function procesarYEnviarFotoChat(input) {
-      if (!currentTargetPeerId || !input.files[0]) return;
-      let file = input.files[0];
-      let lector = new FileReader();
-      
-      lector.onload = function(e) {
-        let img = new Image();
-        img.src = e.target.result;
-        img.onload = async function() {
-          let canvas = document.createElement('canvas');
-          let max_size = 500; 
-          let width = img.width;
-          let height = img.height;
-          
-          if (width > height) {
-            if (width > max_size) { height *= max_size / width; width = max_size; }
-          } else {
-            if (height > max_size) { width *= max_size / height; height = max_size; }
-          }
-          
-          canvas.width = width;
-          canvas.height = height;
-          let ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          
-          let fotoComprimidaBase64 = canvas.toDataURL('image/jpeg', 0.6);
-          let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-          
-          await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-            sender: mySessionId,
-            text: fotoComprimidaBase64, 
-            type: "image",
-            timestamp: window.serverTimestamp()
-          });
-          input.value = ""; 
-        };
-      };
-      lector.readAsDataURL(file);
-    }
-
-    function invertirEstadoGrabacionAudio() {
-      if (!currentTargetPeerId) return;
-      const btnMic = document.getElementById('btnIconoMicrofonoAudio');
-
-      if (!estaGrabandoAudio) {
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-          grabadorAudioMedia = new MediaRecorder(stream);
-          fragmentosAudioGrabados = [];
-          grabadorAudioMedia.ondataavailable = e => fragmentosAudioGrabados.push(e.data);
-          
-          grabadorAudioMedia.onstop = () => {
-            let audioBlob = new Blob(fragmentosAudioGrabados, { type: 'audio/mp3' });
-            let lector = new FileReader();
-            lector.onload = async (e) => {
-              let salaId = [mySessionId, currentTargetPeerId].sort().join("_CH_");
-              await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-                sender: mySessionId,
-                text: e.target.result, 
-                type: "audio",
-                timestamp: window.serverTimestamp()
-              });
-            };
-            lector.readAsDataURL(audioBlob);
-            stream.getTracks().forEach(track => track.stop());
-          };
-
-          grabadorAudioMedia.start();
-          estaGrabandoAudio = true;
-          btnMic.classList.add('mic-recording');
-        }).catch(() => alert("No se pudo acceder al micrófono"));
-      } else {
-        if (grabadorAudioMedia) grabadorAudioMedia.stop();
-        estaGrabandoAudio = false;
-        btnMic.classList.remove('mic-recording');
-      }
-    }
-
-    function escucharMensajesFirestore(targetId) {
-      if(unsubscribirEscuchaFirestore) unsubscribirEscuchaFirestore();
-      let salaId = [mySessionId, targetId].sort().join("_CH_");
-      
-      const q = window.query(window.collection(window.fsdb, "salas", salaId, "mensajes"), window.orderBy("timestamp", "asc"));
-      const box = document.getElementById('msgBox');
-
-      unsubscribirEscuchaFirestore = window.onSnapshot(q, (snapshot) => {
-        box.innerHTML = '';
-        snapshot.forEach((doc) => {
-          let datos = doc.data();
-          let msgId = doc.id;
-          let esMio = datos.sender === mySessionId;
-          
-          if(datos.text && datos.text.startsWith('SHARE_VD:::')) {
-            let parts = datos.text.split(':::');
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><div class="share-card" onclick="navegarHacia('tok')">🎬 <b>Clip Compartido:</b><br>${parts[1]}</div></div>`;
-          } 
-          else if(datos.type === "image") {
-            let srcImg = (datos.text && datos.text.startsWith('data:image')) ? datos.text : '';
-            if(srcImg) {
-              box.innerHTML += `
-                <div class="bubble ${esMio?'sent':'recv'}">
-                  <b>@${datos.sender}:</b>
-                  <img src="${srcImg}" class="chat-img-render"/>
-                  <button class="btn-comentar-foto" onclick="abrirCajonComentariosFoto('${salaId}', '${msgId}')">
-                    <i class="fa-regular fa-comment"></i> Comentar foto
-                  </button>
-                </div>`;
-            } else {
-              box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${datos.sender}:</b><br>⚠️ Imagen corrupta o muy pesada.</div>`;
-            }
-          } 
-          else if(datos.type === "audio") {
-            box.innerHTML += `<div class="bubble ${esMio?'sent':'recv'}"><b>@${datos.sender}:</b><audio src="${datos.text}" controls class="chat-audio-render"></audio></div>`;
-          } 
-          else {
-            box.innerHTML += `<div class="bubble ${esMio ? 'sent' : 'recv'}"><b>@${datos.sender}:</b><br>${datos.text}</div>`;
-          }
-        });
-        box.scrollTop = box.scrollHeight;
+    function escucharFeedVideosGlobal() {
+      const q = window.query(window.collection(window.fsdb, "videos"), window.orderBy("createdAt", "desc"));
+      window.onSnapshot(q, (snapshot) => {
+        let items = [];
+        snapshot.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+        masterVideoArray = items.length ? items : [{ id:"def", author:"System", caption:"Bienvenido", url:"https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }];
+        filtrarVideosPorDescripcion();
       });
     }
 
-    function controlarReproduccionYAudio(videoElement) {
-      if (videoElement.paused) {
-        videoElement.muted = false; 
-        videoElement.play().catch(()=>{});
-      } else {
-        videoElement.pause();
-      }
+    function filtrarVideosPorDescripcion() {
+      let b = document.getElementById('inputBuscarDescripcion').value.toLowerCase().trim();
+      vidsFiltradosArray = b ? masterVideoArray.filter(v => v.caption?.toLowerCase().includes(b)) : [...masterVideoArray];
+      renderizarFeedPrincipalVideos();
     }
 
     function renderizarFeedPrincipalVideos() {
       const container = document.getElementById('tokFeedIterator');
       container.innerHTML = '';
-      
-      if(vidsFiltradosArray.length === 0) {
-        container.innerHTML = `<div style="color:var(--text-dim); text-align:center; width:100%; margin-top:200px;">No se encontraron videos con esa descripción.</div>`;
-        return;
-      }
-
-      vidsFiltradosArray.forEach((vid, idx) => {
+      vidsFiltradosArray.forEach(vid => {
         container.innerHTML += `
           <div class="tok-post">
-            <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline onclick="controlarReproduccionYAudio(this)"></video>
+            <video class="tok-video" src="${vid.url}" loop autoplay muted playsinline></video>
             <div class="tok-actions">
-              <div class="circle-action" onclick="reaccionarLikeVideoFirestore('${vid.id}')"><i class="fa-solid fa-heart"></i></div>
-              <span>${vid.likes}</span>
-              <div class="circle-action" onclick="abrirCajonComentariosVideo('${vid.id}')"><i class="fa-solid fa-comment"></i></div>
-              <div class="circle-action" onclick="compartirVideoPorChat(${idx})"><i class="fa-solid fa-share"></i></div>
+              <div class="circle-action"><i class="fa-solid fa-heart"></i></div><span>${vid.likes||0}</span>
+              <div class="circle-action"><i class="fa-solid fa-comment"></i></div>
             </div>
-            <div class="tok-meta">
-              <h3>@${vid.author}</h3>
-              <p>${vid.caption}</p>
-            </div>
+            <div class="tok-meta"><h3>@${vid.author}</h3><p>${vid.caption}</p></div>
           </div>`;
       });
       container.scrollLeft = currentFeedIndex * container.clientWidth;
@@ -743,140 +419,39 @@
       const wrapper = document.getElementById('tokFeedIterator');
       let target = currentFeedIndex + dir;
       if (target >= 0 && target < vidsFiltradosArray.length) {
-        let prevVideo = wrapper.children[currentFeedIndex]?.querySelector('video');
-        if(prevVideo) prevVideo.pause();
-
-        cerrarCajonComentarios();
+        wrapper.children[currentFeedIndex]?.querySelector('video')?.pause();
         currentFeedIndex = target;
         wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
-        
-        let activeVideo = wrapper.children[currentFeedIndex]?.querySelector('video');
-        if(activeVideo) {
-          activeVideo.muted = false;
-          activeVideo.play().catch(()=>{
-            activeVideo.muted = true;
-            activeVideo.play().catch(()=>{});
-          });
-        }
+        wrapper.children[currentFeedIndex]?.querySelector('video')?.play().catch(()=>{});
       }
     }
 
-    function abrirCajonComentariosVideo(vId) {
-      modoCajonComentarios = "video";
-      idElementoComentadoActual = vId;
-      document.getElementById('labelTituloCajonComentarios').innerText = "Comentarios del Video";
-      desplegarYEscucharComentariosSubcollection(window.query(window.collection(window.fsdb, "videos", vId, "comentarios"), window.orderBy("createdAt", "asc")));
-    }
-
-    function abrirCajonComentariosFoto(salaId, msgId) {
-      modoCajonComentarios = "foto";
-      idElementoComentadoActual = msgId;
-      salaIdFotoComentadaActual = salaId;
-      document.getElementById('labelTituloCajonComentarios').innerText = "Comentarios de la Foto";
-      desplegarYEscucharComentariosSubcollection(window.query(window.collection(window.fsdb, "salas", salaId, "mensajes", msgId, "comentarios"), window.orderBy("createdAt", "asc")));
-    }
-
-    function despacharEnvioComentario() {
-      const input = document.getElementById('inputNuevoComentario');
-      if(!input.value.trim() || !idElementoComentadoActual) return;
-
-      let subRef = (modoCajonComentarios === "video") ? 
-        window.collection(window.fsdb, "videos", idElementoComentadoActual, "comentarios") :
-        window.collection(window.fsdb, "salas", salaIdFotoComentadaActual, "mensajes", idElementoComentadoActual, "comentarios");
-
-      window.addDoc(subRef, {
-        user: mySessionId || "Anónimo",
-        text: input.value.trim(),
-        createdAt: window.serverTimestamp()
-      });
-      input.value = '';
-    }
-
-    function desplegarYEscucharComentariosSubcollection(consulta) {
-      document.getElementById('drawerComentarios').style.display = 'flex';
-      if(unsubscribirComentarios) unsubscribirComentarios();
-      const listContainer = document.getElementById('boxListaComentarios');
-      
-      unsubscribirComentarios = window.onSnapshot(consulta, (snapshot) => {
-        listContainer.innerHTML = '';
-        snapshot.forEach(doc => {
-          let c = doc.data();
-          listContainer.innerHTML += `<div class="comment-item"><b>@${c.user}:</b> ${c.text}</div>`;
+    function toggleCompartirPantallaWebRTC() {
+      if(!transmitiendoPantalla) {
+        navigator.mediaDevices.getDisplayMedia({ video: true }).then((stream) => {
+          transmisorPantallaTrack = stream.getVideoTracks()[0];
+          let sender = llamadaActualWebRTC.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+          if(sender) sender.replaceTrack(transmisorPantallaTrack);
+          document.getElementById('localStreamVideo').srcObject = null;
+          document.getElementById('localStreamVideo').srcObject = stream;
+          transmitiendoPantalla = true;
         });
-        listContainer.scrollTop = listContainer.scrollHeight;
-      });
-    }
-
-    function cerrarCajonComentarios() { document.getElementById('drawerComentarios').style.display = 'none'; }
-
-    async function reaccionarLikeVideoFirestore(vId) {
-      if(vId.startsWith("backup_")) return;
-      await window.updateDoc(window.doc(window.fsdb, "videos", vId), { likes: window.increment(1) });
-    }
-
-    async function compartirVideoPorChat(idx) {
-      let video = vidsFiltradosArray[idx];
-      let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
-      let target = currentTargetPeerId || list[0];
-      if(!target) return alert("Primero vincula un amigo en la pestaña de chats.");
-
-      let salaId = [mySessionId, target].sort().join("_CH_");
-      await window.addDoc(window.collection(window.fsdb, "salas", salaId, "mensajes"), {
-        sender: mySessionId,
-        text: `SHARE_VD:::${video.caption}:::${video.url}`,
-        type: "share",
-        timestamp: window.serverTimestamp()
-      });
-      alert("¡Video compartido en tu chat privado!");
-    }
-
-    async function guardarVideoEditadoDB() {
-      let caption = document.getElementById('inputVideoCaption').value.trim() || "Nuevo Clip";
-      let url = document.getElementById('inputVideoUrlDirecta').value.trim() || cacheVideoBase64;
-      if(!url) return alert("Inserta un enlace .mp4 o carga un archivo local.");
-
-      await window.addDoc(window.collection(window.fsdb, "videos"), {
-        author: mySessionId || "Anónimo",
-        caption: caption,
-        url: url,
-        likes: 0,
-        createdAt: window.serverTimestamp()
-      });
-
-      document.getElementById('inputVideoUrlDirecta').value = '';
-      document.getElementById('inputVideoCaption').value = '';
-      cacheVideoBase64 = "";
-      cerrarCapaModal('modalSubirVideo');
-      navegarHacia('tok');
-    }
-
-    function cargarPrevisualizacionVideo(input) {
-      if(input.files[0]) {
-        let r = new FileReader();
-        r.onload = (e) => { cacheVideoBase64 = e.target.result; };
-        r.readAsDataURL(input.files[0]);
       }
     }
 
-    function renderizarMiPerfilCuadrilla() {
-      const grid = document.getElementById('gridMisVideosPublicados');
-      grid.innerHTML = '';
-      let misVideos = masterVideoArray.filter(v => v.author === mySessionId);
-      misVideos.forEach(vid => {
-        grid.innerHTML += `
-          <div class="grid-card">
-            <video src="${vid.url}" muted playsinline></video>
-            <div class="meta-card"><i class="fa-solid fa-heart"></i> ${vid.likes}</div>
-          </div>`;
-      });
+    function cortarLlamadaWebRTC() {
+      if(miStreamLocal) miStreamLocal.getTracks().forEach(t => t.stop());
+      document.getElementById('panelLlamadaActiva').style.display = 'none';
     }
 
-    function desplegarChatIndividual(id) {
-      currentTargetPeerId = id;
-      document.getElementById('targetChatName').innerText = id.toUpperCase();
-      document.getElementById('chatDetailHeader').style.display = 'flex';
-      document.getElementById('chatInputBarArea').style.display = 'flex';
-      escucharMensajesFirestore(id);
+    function conectarConPeerAmigo() {
+      let t = document.getElementById('inputPeerIdDestino').value.trim();
+      if(!t) return;
+      let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
+      if(!list.includes(t)) { list.push(t); localStorage.setItem('wave_chats', JSON.stringify(list)); }
+      renderizarListaChats();
+      cerrarCapaModal('connectModal');
+      desplegarChatIndividual(t);
     }
 
     function renderizarListaChats() {
@@ -884,40 +459,14 @@
       const container = document.getElementById('chatListContainer');
       container.innerHTML = '';
       list.forEach(id => {
-        container.innerHTML += `
-          <div class="chat-item ${currentTargetPeerId === id ? 'active':''}" onclick="desplegarChatIndividual('${id}')">
-            <div class="avatar">${id.substring(0,2).toUpperCase()}</div>
-            <div style="margin-left:12px;">
-              <h5 style="color:white;">${id.toUpperCase()}</h5>
-            </div>
-          </div>`;
+        container.innerHTML += `<div class="chat-item" onclick="desplegarChatIndividual('${id}')"><div class="avatar">${id.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">${id.toUpperCase()}</h5></div>`;
       });
     }
 
-    function almacenarAmigoEnLista(id) {
-      let list = JSON.parse(localStorage.getItem('wave_chats') || '[]');
-      if(!list.includes(id)) { list.push(id); localStorage.setItem('wave_chats', JSON.stringify(list)); }
-      renderizarListaChats();
-    }
-
-    function navegarHacia(pantalla) {
-      document.querySelectorAll('.tok-video').forEach(v => v.pause());
-      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      cerrarCajonComentarios();
-      if(document.getElementById(`menu-${pantalla}`)) document.getElementById(`menu-${pantalla}`).classList.add('active');
-      document.getElementById(`screen-${pantalla}`).classList.add('active');
-      if(pantalla === 'tok') {
-        document.getElementById('inputBuscarDescripcion').value = "";
-        filtrarVideosPorDescripcion();
-      }
-    }
-
+    function cerrarSesionYCambiarID() { localStorage.removeItem('wt_session_peer_id'); location.reload(); }
     function abrirModalConexion() { document.getElementById('connectModal').style.display = 'flex'; }
     function abrirModalSubir() { document.getElementById('modalSubirVideo').style.display = 'flex'; }
-    function cerrarModal() { document.getElementById('connectModal').style.display = 'none'; }
     function cerrarCapaModal(id) { document.getElementById(id).style.display = 'none'; }
   </script>
 </body>
 </html>
-
