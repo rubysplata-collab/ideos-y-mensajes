@@ -137,6 +137,68 @@
     .auth-tabs { display: flex; gap: 10px; margin-bottom: 10px; }
     .auth-tab { flex: 1; padding: 8px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; color: var(--text-dim); background: rgba(255,255,255,0.03); }
     .auth-tab.active { background: var(--accent); color: black; }
+    /* ===================== MODO MÓVIL (estilo TikTok) ===================== */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+
+      /* La barra lateral se convierte en barra inferior de navegación */
+      .sidebar {
+        width: 100%; height: 60px; flex-direction: row; align-items: center; justify-content: space-around;
+        padding: 0 5px; gap: 0; order: 2; border-right: none; border-top: 1px solid rgba(255,255,255,0.08);
+        position: fixed; bottom: 0; left: 0; z-index: 500;
+      }
+      .brand, .separator, .my-code-footer { display: none; }
+      .side-menu { flex-direction: row; gap: 0; }
+      .menu-item { flex-direction: column; gap: 2px; padding: 6px 10px; font-size: 0.62rem; border-radius: 10px; }
+      .menu-item span { font-size: 0.62rem; }
+      .menu-item i { font-size: 1.25rem; width: auto; }
+
+      .main-layout { order: 1; height: calc(100% - 60px); }
+
+      /* Pantalla "Para ti": feed vertical a pantalla completa, deslizable con el dedo */
+      #screen-plataforma { padding: 0; }
+      .feed-container-box { width: 100% !important; max-width: 100% !important; height: 100%; margin: 0 !important; }
+      .top-bar-feed {
+        position: absolute; top: 0; left: 0; right: 0; z-index: 60; height: auto; padding: 12px 15px;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.6), transparent); border-bottom: none;
+      }
+      .top-bar-feed h3 { display: none; }
+      .search-box-container { width: 140px; background: rgba(0,0,0,0.4); }
+
+      .tok-feed-view { height: 100%; }
+      .tok-wrapper { flex-direction: column; overflow-y: scroll; overflow-x: hidden; scroll-snap-type: y mandatory; }
+      .tok-post { min-width: 100%; min-height: 100%; scroll-snap-align: start; scroll-snap-stop: always; }
+      .nav-arrow { display: none; } /* en móvil se navega deslizando el dedo, no con flechas */
+      .tok-actions { bottom: 90px; right: 12px; }
+      .tok-meta { bottom: 20px; left: 16px; max-width: 65%; }
+
+      /* Comentarios como panel deslizante desde abajo (como TikTok), no ocupan espacio fijo */
+      .feed-comments-panel {
+        position: absolute; left: 0; right: 0; bottom: 0; height: 50%; z-index: 80;
+        border-radius: 18px 18px 0 0; transform: translateY(100%); transition: transform 0.25s ease;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+      }
+      .feed-comments-panel.open { transform: translateY(0); }
+      .comment-toggle-fab {
+        display: flex; position: absolute; right: 20px; bottom: 210px; z-index: 99;
+        background: rgba(30, 44, 52, 0.85); border: 1px solid rgba(255,255,255,0.1); width: 46px; height: 46px;
+        border-radius: 50%; color: white; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer;
+      }
+      .comments-backdrop { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.4); z-index: 75; }
+      .comments-backdrop.open { display: block; }
+
+      /* Pantalla de chats: apilada verticalmente, con navegación simple entre lista y conversación */
+      #screen-chats { flex-direction: column; }
+      .chats-master, .chats-detail, .right-stream-panel { width: 100%; height: 100%; border-right: none; }
+      #screen-chats .chats-master, #screen-chats .right-stream-panel { display: none; }
+      #screen-chats.chat-abierto .chats-detail { display: flex; }
+      #screen-chats:not(.chat-abierto) .chats-detail { display: none; }
+      #screen-chats:not(.chat-abierto) .chats-master { display: flex; }
+      .btn-volver-lista-chats { display: flex !important; }
+
+      .modal-box { max-width: 92%; }
+    }
+    .btn-volver-lista-chats { display: none; color: var(--accent); font-size: 1.2rem; cursor: pointer; margin-right: 10px; }
   </style>
 </head>
 <body>
@@ -170,8 +232,10 @@
           <button class="nav-arrow arrow-left" onclick="controlNavegacionFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
           <button class="nav-arrow arrow-right" onclick="controlNavegacionFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
           <div class="tok-wrapper" id="tokFeedIterator"></div>
+          <div class="comments-backdrop" id="comentariosBackdrop" onclick="alternarPanelComentariosMovil()"></div>
+          <div class="comment-toggle-fab" onclick="alternarPanelComentariosMovil()"><i class="fa-solid fa-comment"></i></div>
         </div>
-        <div class="feed-comments-panel">
+        <div class="feed-comments-panel" id="panelComentariosFeed">
           <div class="comments-scroll" id="boxCommentsFeedVideo"></div>
           <div class="comment-input-area">
             <input type="text" id="inputNewCommentFeed" placeholder="Comentar..." onkeypress="if(event.key==='Enter') agregarComentarioVideoActual()">
@@ -192,7 +256,10 @@
 
       <div class="chats-detail">
         <div class="chat-header" id="chatDetailHeader" style="visibility: hidden;">
-          <h4 id="targetChatName" style="color: white;">Amigo</h4>
+          <div style="display:flex; align-items:center;">
+            <i class="fa-solid fa-arrow-left btn-volver-lista-chats" onclick="volverListaChatsMovil()"></i>
+            <h4 id="targetChatName" style="color: white;">Amigo</h4>
+          </div>
           <div style="display: flex; gap: 20px; color: var(--accent); font-size: 1.2rem; cursor: pointer;">
             <i class="fa-solid fa-phone" onclick="ejecutarEnlaceWebRTC(false)"></i>
             <i class="fa-solid fa-video" onclick="ejecutarEnlaceWebRTC(true)"></i>
@@ -433,6 +500,8 @@
       if (!mySessionEmail) return "Anonimo";
       return mySessionEmail.split('@')[0];
     }
+
+    function cambiarPestanaAuth(modo) {
       pestanaAuthActual = modo;
       document.getElementById('lblErrorAuth').innerText = '';
       const tabRegistro = document.getElementById('tabRegistro');
@@ -573,6 +642,11 @@
             <div class="tok-meta"><h3>@${vid.author}</h3><p>${vid.caption}</p></div>
           </div>`;
       });
+      const wrapperListener = document.getElementById('tokFeedIterator');
+      if (wrapperListener && !wrapperListener.dataset.scrollBound) {
+        wrapperListener.addEventListener('scroll', gestionarScrollManualFeed);
+        wrapperListener.dataset.scrollBound = "1";
+      }
       controlSecuenciaAudioVideoFeed();
     }
 
@@ -582,6 +656,10 @@
       } else {
         vidNode.pause();
       }
+    }
+
+    function esVistaMovil() {
+      return window.matchMedia('(max-width: 768px)').matches;
     }
 
     function controlNavegacionFeed(dir) {
@@ -597,7 +675,11 @@
       if(!wrapper) return;
       wrapper.querySelectorAll('video').forEach(v => v.pause());
 
-      wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
+      if (esVistaMovil()) {
+        wrapper.scrollTop = currentFeedIndex * wrapper.clientHeight;
+      } else {
+        wrapper.scrollLeft = currentFeedIndex * wrapper.clientWidth;
+      }
 
       setTimeout(() => {
         let targetVideo = document.getElementById(`feedVideoElemento_${currentFeedIndex}`);
@@ -607,6 +689,35 @@
           conectarEscuchaComentariosVideo(vidsFiltradosArray[currentFeedIndex].id);
         }
       }, 250);
+    }
+
+    // En móvil el usuario navega deslizando el dedo (scroll-snap); detectamos en qué video quedó para
+    // reproducirlo, pausar los demás, y cargar sus comentarios — igual que con las flechas en escritorio.
+    let temporizadorScrollFeed = null;
+    function gestionarScrollManualFeed() {
+      if (!esVistaMovil()) return;
+      clearTimeout(temporizadorScrollFeed);
+      temporizadorScrollFeed = setTimeout(() => {
+        const wrapper = document.getElementById('tokFeedIterator');
+        if (!wrapper || !wrapper.clientHeight) return;
+        const nuevoIndice = Math.round(wrapper.scrollTop / wrapper.clientHeight);
+        if (nuevoIndice !== currentFeedIndex && nuevoIndice >= 0 && nuevoIndice < vidsFiltradosArray.length) {
+          currentFeedIndex = nuevoIndice;
+          wrapper.querySelectorAll('video').forEach(v => v.pause());
+          let targetVideo = document.getElementById(`feedVideoElemento_${currentFeedIndex}`);
+          if (targetVideo) {
+            targetVideo.muted = false;
+            targetVideo.play().catch(()=>{});
+            conectarEscuchaComentariosVideo(vidsFiltradosArray[currentFeedIndex].id);
+          }
+        }
+      }, 120);
+    }
+
+    // Panel de comentarios como hoja deslizante desde abajo (solo en móvil)
+    function alternarPanelComentariosMovil() {
+      document.getElementById('panelComentariosFeed').classList.toggle('open');
+      document.getElementById('comentariosBackdrop').classList.toggle('open');
     }
 
     function conectarEscuchaComentariosVideo(videoId) {
@@ -651,9 +762,14 @@
       document.getElementById('chatDetailHeader').style.visibility = 'visible';
       document.getElementById('chatInputBarArea').style.display = 'flex';
       document.getElementById('lblRemoteLabel').innerText = `Remoto: ${id.toUpperCase()}`;
+      document.getElementById('screen-chats').classList.add('chat-abierto');
 
       document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
       escucharMensajesFirestore(id);
+    }
+
+    function volverListaChatsMovil() {
+      document.getElementById('screen-chats').classList.remove('chat-abierto');
     }
 
     function escucharMensajesFirestore(targetId) {
