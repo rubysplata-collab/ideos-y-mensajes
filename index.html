@@ -88,17 +88,20 @@
     .my-code-footer b { color: var(--accent); letter-spacing: 0.5px; }
 
     /* CONTENEDOR DE LA LLAMADA OPTIMIZADO */
-    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 420px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); transition: width 0.3s ease; }
-    .call-overlay-container.expanded { width: 650px; } /* Se ensancha al compartir pantalla */
+    .call-overlay-container { display: none; position: fixed; top: 15px; right: 15px; width: 420px; background: #121b22; border: 2px solid var(--accent); border-radius: 15px; padding: 15px; z-index: 2000; flex-direction: column; gap: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.8); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .call-overlay-container.expanded { width: 720px; height: auto; } 
     
     /* CUADRÍCULA DE VIDEO FLEXIBLE */
-    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; position: relative; }
-    .video-grid-call.fullscreen-active { grid-template-columns: 1fr; } /* Estira el video principal al máximo */
+    .video-grid-call { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #000; border-radius: 10px; overflow: hidden; position: relative; width: 100%; transition: all 0.3s ease; }
+    .video-grid-call.fullscreen-active { grid-template-columns: 1fr; } 
     .video-grid-call video { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: #1c2732; transition: all 0.3s ease; }
-    .video-grid-call video.fullscreen-mode { aspect-ratio: 16/9; object-fit: contain; }
+    
+    /* Forzar que el video remoto se estire completamente */
+    .video-grid-call video.fullscreen-mode { aspect-ratio: 16/9; object-fit: fill !important; width: 100%; height: 100%; }
 
     .media-controls-row { display: flex; justify-content: center; gap: 15px; margin: 5px 0; }
     .circle-btn-media { width: 44px; height: 44px; border-radius: 50%; background: #233138; border: 1px solid rgba(255,255,255,0.1); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: all 0.2s; }
+    .circle-btn-media:hover { background: #2b3d47; }
     .circle-btn-media.disabled { background: var(--danger); color: white; border-color: var(--danger); }
 
     .profile-container { padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
@@ -352,11 +355,13 @@
     }
 
     function levantarInstanciaPeer(idMio) {
-      peerInstance = new Peer(idMio);
+      peerInstance = new Peer(idMio, {
+        config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }
+      });
       peerInstance.on('open', () => { renderizarListaChats(); });
       
       peerInstance.on('call', (incomingCall) => {
-        if(confirm(`¿Contestar llamada de ${incomingCall.peer.toUpperCase()}?`)) {
+        if(confirm(`¿Contestar llamada entrante de ${incomingCall.peer.toUpperCase()}?`)) {
           navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             miStreamLocal = stream;
             audioHabilitado = true; videoHabilitado = true;
@@ -364,12 +369,20 @@
 
             document.getElementById('panelLlamadaActiva').style.display = 'flex';
             document.getElementById('localStreamVideo').srcObject = stream;
-            document.getElementById('txtEstadoLlamada').innerText = "Conectado";
+            document.getElementById('txtEstadoLlamada').innerText = "En llamada";
+            
             incomingCall.answer(stream);
             llamadaActualWebRTC = incomingCall;
+            
             incomingCall.on('stream', (remoteStream) => {
-              document.getElementById('remoteStreamVideo').srcObject = remoteStream;
+              const remoteVideo = document.getElementById('remoteStreamVideo');
+              remoteVideo.srcObject = remoteStream;
+              remoteVideo.play().catch(()=>{});
             });
+          }).catch((err) => {
+            console.error("Error al capturar medios al responder: ", err);
+            // Contestar solo audio o sin stream si falla la cámara en Opera
+            incomingCall.answer();
           });
         }
       });
@@ -385,12 +398,18 @@
       navigator.mediaDevices.getUserMedia({ video: conVideo, audio: true }).then((stream) => {
         miStreamLocal = stream;
         document.getElementById('localStreamVideo').srcObject = stream;
+        document.getElementById('txtEstadoLlamada').innerText = "Llamando...";
+        
         let call = peerInstance.call(currentTargetPeerId, stream);
         llamadaActualWebRTC = call;
+        
         call.on('stream', (remoteStream) => {
-          document.getElementById('remoteStreamVideo').srcObject = remoteStream;
+          document.getElementById('txtEstadoLlamada').innerText = "Conectado";
+          const remoteVideo = document.getElementById('remoteStreamVideo');
+          remoteVideo.srcObject = remoteStream;
+          remoteVideo.play().catch(()=>{});
         });
-      });
+      }).catch(err => alert("Permiso de multimedia denegado o dispositivo ocupado."));
     }
 
     /* CONTROL DE MICROFONO Y CAMARA (ON/OFF) */
@@ -429,7 +448,7 @@
       }
     }
 
-    /* COMPARTIR PANTALLA EXPANDIDO (ESTIRADO AUTOMÁTICO) */
+    /* COMPARTIR PANTALLA EXPANDIDO (ESTIRADO COMPLETO) */
     function toggleCompartirPantallaWebRTC() {
       if(!llamadaActualWebRTC) return;
 
@@ -448,7 +467,7 @@
           transmitiendoPantalla = true;
           document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-video"></i> Usar Cámara`;
           
-          // Efecto Estirar: Ajustamos las clases de la interfaz para expandir la vista
+          // Efecto Estirar pantalla al 100% de manera forzada
           overlay.classList.add('expanded');
           grid.classList.add('fullscreen-active');
           remoteVid.classList.add('fullscreen-mode');
@@ -479,9 +498,9 @@
         
         document.getElementById('localStreamVideo').srcObject = miStreamLocal;
         transmitiendoPantalla = false;
-        document.getElementById('btnCompartirPantallaCall').innerHTML = `<i class="fa-solid fa-desktop"></i> Compartir Pantalla`;
+        document.getElementById('btnCompartirPantaranCall').innerHTML = `<i class="fa-solid fa-desktop"></i> Compartir Pantalla`;
         
-        // Restauramos dimensiones originales de la cuadrícula
+        // Restaurar dimensiones
         overlay.classList.remove('expanded');
         grid.classList.remove('fullscreen-active');
         remoteVid.classList.remove('fullscreen-mode');
@@ -901,3 +920,4 @@
   </script>
 </body>
 </html>
+
