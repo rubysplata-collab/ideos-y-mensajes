@@ -51,7 +51,8 @@
     .chats-master { width: 280px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; flex-shrink: 0; }
     .chat-item { display: flex; align-items: center; gap: 10px; padding: 14px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
     .chat-item:hover { background: rgba(255,255,255,0.02); }
-    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; min-width: 0; }
+    
+    .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; min-height: 0; min-width: 0; }
     .chat-header { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
     .messages-container { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 0; background: #0b141a; }
     .bubble { max-width: 75%; padding: 10px 14px; border-radius: 12px; font-size: 0.95rem; color: white; word-break: break-word; }
@@ -84,9 +85,9 @@
       .side-menu { flex-direction: row; width: 100%; justify-content: space-around; }
       .main-layout { height: calc(100% - 60px); }
       
-      #screen-chats.active { flex-direction: column; } 
-      .chats-master { width: 100%; height: 40%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
-      .chats-detail { width: 100%; height: 60%; }
+      #screen-chats.active { flex-direction: column; height: 100%; } 
+      .chats-master { width: 100%; height: 35%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
+      .chats-detail { width: 100%; height: 65%; }
       .live-grid { grid-template-columns: 1fr; }
     }
   </style>
@@ -328,21 +329,24 @@
           try {
             streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
           } catch(err) {
+            console.log("Fallo el audio completo, iniciando con backup multimedia seguro...");
             streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
           }
         }
         
-        document.getElementById("liveVideoPlayer").srcObject = streamLive;
-        document.getElementById("liveBadgeState").style.display = "block";
-        document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>ID: <b>${uAct}</b>`;
-        
-        const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, likes: 0, timestamp: serverTimestamp() });
-        liveIdActualGlobal = liveRef.id;
-        escucharLikesDelLive(liveIdActualGlobal);
-
-        alert("¡Confirmado compai! Tu streaming está al aire.");
+        if (streamLive) {
+          document.getElementById("liveVideoPlayer").srcObject = streamLive;
+          document.getElementById("liveBadgeState").style.display = "block";
+          document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>ID: <b>${uAct}</b>`;
+          
+          const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, likes: 0, timestamp: serverTimestamp() });
+          liveIdActualGlobal = liveRef.id;
+          escucharLikesDelLive(liveIdActualGlobal);
+          alert("¡Confirmado compai! Tu streaming está al aire.");
+        }
       } catch(e) { 
-        alert("Permiso multimedia denegado. Haz clic en el candado de la barra del navegador para activarlo."); 
+        console.error(e);
+        alert("Acceso bloqueado. Por favor restablece permisos desde el candado de la barra y recarga."); 
       }
     };
 
@@ -498,7 +502,6 @@
       document.getElementById("targetChatName").innerText = a; 
       if(snapMsg) snapMsg();
       
-      // ID Limpio y ordenado alfabéticamente para mantener salas idénticas
       const sId = [uAct, a].sort().join("___");
       
       snapMsg = onSnapshot(query(collection(db, "chats_privados", sId, "mensajes"), orderBy("timestamp", "asc")), (s) => {
@@ -510,8 +513,7 @@
           div.innerText = m.contenido; 
           b.appendChild(div); 
         });
-        // Auto Scroll instantáneo al recibir o enviar un mensaje en el celular
-        setTimeout(() => { b.scrollTop = b.scrollHeight; }, 50);
+        setTimeout(() => { b.scrollTop = b.scrollHeight; }, 100);
       });
     }
 
