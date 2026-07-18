@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WaveTok Mega Pro</title>
+  <title>WaveTok Mega Pro Live</title>
   <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
@@ -20,10 +20,9 @@
     .menu-item:hover, .menu-item.active { background: rgba(255,235,59,0.1); color: var(--accent); }
     
     .main-layout { flex: 1; display: flex; height: 100%; overflow: hidden; position: relative; }
-    .screen { display: none; width: 100%; height: 100%; }
-    .screen.active { display: flex; }
+    .screen { display: none; width: 100%; height: 100%; padding: 20px; overflow-y: auto; }
+    .screen.active { display: flex; flex-direction: column; }
     
-    /* HISTORIAS (STORIES) estilo Instagram */
     .stories-container { display: flex; gap: 12px; padding: 10px; overflow-x: auto; background: var(--bg-sidebar); border-bottom: 1px solid rgba(255,255,255,0.05); }
     .story-circle { width: 60px; height: 60px; border-radius: 50%; border: 3px solid var(--accent); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.7rem; font-weight: bold; overflow: hidden; text-align: center; background: #222; color: #fff; flex-shrink: 0; }
 
@@ -38,7 +37,6 @@
     .tok-actions span { font-size: 0.75rem; text-shadow: 1px 1px 2px black; color: white; }
     .tok-meta { position: absolute; left: 14px; bottom: 25px; z-index: 10; max-width: 75%; text-shadow: 1px 1px 4px black; }
     
-    /* CAJA DE COMENTARIOS IN-FEED */
     .comments-drawer { position: absolute; bottom: 0; left: 0; right: 0; height: 50%; background: var(--bg-sidebar); border-top-left-radius: 15px; border-top-right-radius: 15px; transform: translateY(100%); transition: transform 0.3s; z-index: 200; display: flex; flex-direction: column; padding: 15px; }
     .comments-drawer.open { transform: translateY(0); }
     .comments-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; }
@@ -46,8 +44,9 @@
 
     .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); color: white; width: 38px; height: 38px; border-radius: 50%; cursor: pointer; z-index: 15; display: flex; align-items: center; justify-content: center; }
     .arrow-left { left: 10px; } .arrow-right { right: 10px; }
-    .top-bar-feed { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; }
+    .top-bar-feed { background: var(--bg-sidebar); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; height: 60px; width: 100%; }
     
+    #screen-chats { padding: 0; }
     .chats-master { width: 260px; background: var(--bg-sidebar); border-right: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column; }
     .chat-item { display: flex; align-items: center; gap: 10px; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.02); cursor: pointer; }
     .chats-detail { flex: 1; display: flex; flex-direction: column; background: #0b141a; height: 100%; }
@@ -64,6 +63,11 @@
     .video-box-call { width: 100%; background: #000; border-radius: 10px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
     .video-box-call video { width: 100%; height: 100%; object-fit: cover; }
     
+    .live-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; height: calc(100% - 60px); margin-top: 15px; }
+    .live-video-container { background: #000; border-radius: 12px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .live-video-container video { width: 100%; height: 100%; object-fit: contain; }
+    .live-badge { position: absolute; top: 15px; left: 15px; background: var(--danger); color: white; padding: 4px 10px; font-weight: bold; border-radius: 4px; font-size: 0.8rem; z-index: 10; }
+    
     .btn-solid { background: var(--accent); color: black; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
     .btn-danger { background: var(--danger); color: white; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer; width: 100%; }
     
@@ -78,8 +82,7 @@
       .side-menu { flex-direction: row; width: 100%; justify-content: space-around; }
       .main-layout { height: calc(100% - 55px); }
       #screen-chats { flex-direction: column; } .chats-master, .chats-detail { width: 100%; }
-      #screen-chats.chat-abierto .chats-master { display: none; }
-      #screen-chats:not(.chat-abierto) .chats-detail { display: none; }
+      .live-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -90,6 +93,7 @@
     <nav class="side-menu">
       <div class="menu-item active" id="btn-plataforma" onclick="activarPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Feed</span></div>
       <div class="menu-item" id="btn-chats" onclick="activarPantalla('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chats</span></div>
+      <div class="menu-item" id="btn-lives" onclick="activarPantalla('lives')"><i class="fa-solid fa-headset" style="color:#e91e63"></i> <span>Lives</span></div>
       <div class="menu-item" id="btn-perfil" onclick="activarPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Perfil</span></div>
       <div class="menu-item" onclick="abrirModal('modalSubirVideo')"><i class="fa-solid fa-circle-plus" style="color:var(--accent)"></i> <span>Subir</span></div>
       <div class="menu-item" onclick="abrirModal('modalCrearHistoria')"><i class="fa-solid fa-bolt" style="color:#ff9800"></i> <span>Historia</span></div>
@@ -98,20 +102,17 @@
   </aside>
 
   <div class="main-layout">
-    <div class="screen active" id="screen-plataforma">
+    <div class="screen active" id="screen-plataforma" style="padding:0;">
       <div class="feed-container-box">
         <div class="top-bar-feed">
           <h3>Para ti</h3>
           <input type="text" id="inputBuscar" placeholder="Buscar..." oninput="filtrarFeed()" style="background:rgba(255,255,255,0.05); border:none; padding:6px 12px; border-radius:15px; color:white; width:140px;">
         </div>
-        
         <div class="stories-container" id="storiesListArea"></div>
-
         <div class="tok-feed-view">
           <button class="nav-arrow arrow-left" onclick="navegarFeed(-1)"><i class="fa-solid fa-chevron-left"></i></button>
           <button class="nav-arrow arrow-right" onclick="navegarFeed(1)"><i class="fa-solid fa-chevron-right"></i></button>
           <div class="tok-wrapper" id="tokFeedIterator"></div>
-          
           <div class="comments-drawer" id="commentsAreaDrawer">
             <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
               <h4>Comentarios</h4>
@@ -135,7 +136,6 @@
       <div class="chats-detail">
         <div class="chat-header" id="chatDetailHeader" style="visibility:hidden;">
           <div style="display:flex; align-items:center;">
-            <i class="fa-solid fa-arrow-left btn-volver-chats" style="display:none; cursor:pointer;" onclick="document.getElementById('screen-chats').classList.remove('chat-abierto')"></i>
             <h4 id="targetChatName" style="color:white;">Amigo</h4>
           </div>
           <div style="display:flex; gap:15px; color:var(--accent); cursor:pointer;"><i class="fa-solid fa-phone" onclick="llamarPeer(false)"></i><i class="fa-solid fa-video" onclick="llamarPeer(true)"></i></div>
@@ -150,6 +150,30 @@
         <div class="video-box-call"><video id="localVideo" autoplay muted playsinline></video></div>
         <div class="video-box-call"><video id="remoteVideo" autoplay playsinline></video></div>
         <button class="btn-danger" onclick="location.reload()"><i class="fa-solid fa-phone-slash"></i> Colgar</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-lives">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:10px;">
+        <h2>WaveLive Transmisiones</h2>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-solid" style="padding:8px 15px;" onclick="iniciarLive(false)"><i class="fa-solid fa-camera"></i> Transmitir Cámara</button>
+          <button class="btn-solid" style="padding:8px 15px; background:#00e676;" onclick="iniciarLive(true)"><i class="fa-solid fa-desktop"></i> Compartir Pantalla</button>
+        </div>
+      </div>
+      <div class="live-grid">
+        <div class="live-video-container">
+          <div class="live-badge" id="liveBadgeState" style="display:none;">EN VIVO</div>
+          <video id="liveVideoPlayer" autoplay playsinline controls style="background:#050505;"></video>
+        </div>
+        <div style="background:var(--bg-sidebar); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:15px;">
+          <h4>Unirse a un Live</h4>
+          <input type="text" id="inputBuscarLive" placeholder="Nombre del creador (XD-...)" style="width:100%; padding:10px; background:#000; color:white; border-radius:6px; border:1px solid var(--accent); outline:none;">
+          <button class="btn-solid" onclick="verLiveAmigo()">Ver Transmisión</button>
+          <div style="flex:1; border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:10px; font-size:0.85rem; color:var(--text-dim);" id="boxLiveStatus">
+            Sin actividad de directo actual.
+          </div>
+        </div>
       </div>
     </div>
 
@@ -214,7 +238,7 @@
 
     const fConfig = { apiKey: "AIzaSyBB3UvcGKDXdiCo3cX4nKiDVdFR31d4ytA", authDomain: "mensajes-tiktokk.firebaseapp.com", projectId: "mensajes-tiktokk", storageBucket: "mensajes-tiktokk.firebasestorage.app", messagingSenderId: "1079940811085", appId: "1:1079940811085:web:6ab00b6476" };
     const app = initializeApp(fConfig), db = getFirestore(app);
-    let uAct = null, peer = null, callAct = null, streamLoc = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0, snapComentarios = null;
+    let uAct = null, peer = null, callAct = null, streamLoc = null, streamLive = null, amigos = [], amigoSel = null, vids = [], idxFeed = 0, snapComentarios = null, listreamsListeners = [];
 
     window.autenticarCustomName = () => {
       let name = document.getElementById("authCustomUsername").value.trim();
@@ -236,8 +260,20 @@
       cambiarTemaInter(localStorage.getItem("w_theme") || 'dark');
       document.getElementById("selectTema").value = localStorage.getItem("w_theme") || 'dark';
 
-      peer = new Peer(uAct.replace(/[^a-zA-Z0-9_-]/g, ""));
-      peer.on('call', (c) => { navigator.mediaDevices.getUserMedia({video:true, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; c.answer(s); fCall(c); }); });
+      // Creación del nodo PeerJS (Limpiando caracteres raros)
+      const cleanPeerId = uAct.replace(/[^a-zA-Z0-9_-]/g, "");
+      peer = new Peer(cleanPeerId);
+      
+      peer.on('call', (c) => {
+        // Distinguir si es una llamada normal o una solicitud de ver un Live
+        if(c.metadata && c.metadata.isLive) {
+          if(streamLive) {
+            c.answer(streamLive); // Si soy el streamer, le devuelvo mi señal de video directamente
+          }
+        } else {
+          navigator.mediaDevices.getUserMedia({video:true, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; c.answer(s); fCall(c); });
+        }
+      });
 
       onSnapshot(query(collection(db, "videos"), orderBy("timestamp", "desc")), (s) => { vids = []; s.forEach(d => vids.push({id:d.id, ...d.data()})); filtrarFeed(); });
       onSnapshot(query(collection(db, "historias"), orderBy("timestamp", "desc")), (s) => {
@@ -257,6 +293,41 @@
       document.getElementById("lblCountSeguidores").innerText = amigos.length;
     }
 
+    // GESTIÓN DE LIVE STREAMING (SOPORTE COMPARTIR PANTALLA)
+    window.iniciarLive = async (shareScreen) => {
+      try {
+        if(shareScreen) {
+          streamLive = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+        } else {
+          streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        }
+        document.getElementById("liveVideoPlayer").srcObject = streamLive;
+        document.getElementById("liveBadgeState").style.display = "block";
+        document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás transmitiendo en vivo!</b><br>Tus amigos pueden ingresar buscando tu nombre: <b>${uAct}</b>`;
+      } catch(e) {
+        alert("No se pudo iniciar el stream o compartir pantalla.");
+      }
+    };
+
+    window.verLiveAmigo = () => {
+      let targetId = document.getElementById("inputBuscarLive").value.trim();
+      if(!targetId) return alert("Ingresa un ID válido");
+      if(!targetId.toUpperCase().startsWith("XD-")) targetId = "XD-" + targetId;
+
+      document.getElementById("boxLiveStatus").innerHTML = "Conectando al Live...";
+      // Llamamos al emisor con una metadata especial indicando que queremos sintonizar su transmisión
+      const call = peer.call(targetId.replace(/[^a-zA-Z0-9_-]/g, ""), new MediaStream(), { metadata: { isLive: true } });
+      
+      call.on('stream', (remoteStream) => {
+        document.getElementById("liveVideoPlayer").srcObject = remoteStream;
+        document.getElementById("liveBadgeState").style.display = "block";
+        document.getElementById("boxLiveStatus").innerHTML = `Sintonizando en directo a: <b>${targetId}</b>`;
+      });
+      call.on('error', () => {
+        document.getElementById("boxLiveStatus").innerHTML = "El usuario no está transmitiendo o el ID no existe.";
+      });
+    };
+
     function fCall(c) { callAct = c; activarPantalla('chats'); document.getElementById("screen-chats").classList.add("chat-abierto"); c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); }
     window.llamarPeer = (v) => { navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; fCall(peer.call(amigoSel.replace(/[^a-zA-Z0-9_-]/g, ""), s)); }); };
 
@@ -264,6 +335,7 @@
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
       document.getElementById(`screen-${t}`).classList.add("active");
+      document.getElementById(`btn-${t}`)?.classList.add("active");
       if(t==='plataforma') playFeed(); else stopFeed();
     };
 
