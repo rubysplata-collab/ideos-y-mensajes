@@ -37,14 +37,14 @@
 
     /* PANTALLAS INDEPENDIENTES */
     .screen { display: none; width: 100%; height: 100%; }
-    .screen.active { display: flex; }
+    .screen.active { display: flex; justify-content: center; }
 
     /* ESTRUCTURA INTERNA DE LA SALA GLOBAL (3 COLUMNAS) */
     .feed-container-box { width: 400px; display: flex; flex-direction: column; height: 100%; background: #000; border-right: 1px solid rgba(255, 255, 255, 0.05); position: relative; flex-shrink: 0; }
     .tok-feed-view { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; background: #000; overflow: hidden; }
     .tok-wrapper { width: 100%; height: 100%; display: flex; overflow: hidden; scroll-behavior: smooth; }
     .tok-post { min-width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center; gap: 14px; background: #000; }
-    .tok-video-card { position: relative; width: 240px; max-width: 88%; aspect-ratio: 9/16; border-radius: 16px; overflow: hidden; background: #111; box-shadow: 0 10px 40px rgba(0,0,0,0.55); flex-shrink: 0; }
+    .tok-video-card { position: relative; width: 340px; max-width: 88%; aspect-ratio: 9/16; border-radius: 16px; overflow: hidden; background: #111; box-shadow: 0 10px 40px rgba(0,0,0,0.55); flex-shrink: 0; }
     .tok-video { width: 100%; height: 100%; object-fit: cover; background: #000; cursor: pointer; display: block; }
     .tok-top-overlay { position: absolute; top: 10px; right: 10px; z-index: 12; }
     .tok-author-avatar { width: 28px; height: 28px; border-radius: 50%; background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.25); display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; color: var(--accent); }
@@ -234,7 +234,7 @@
   <div class="main-layout">
 
     <div class="screen active" id="screen-plataforma">
-      <div class="feed-container-box" style="width:100%; max-width:460px; margin:0 auto; border-right:none;">
+      <div class="feed-container-box" style="width:100%; max-width:600px; margin:0 auto; border-right:none;">
         <div class="top-bar-feed">
           <h3>Para ti</h3>
           <div class="search-box-container">
@@ -347,8 +347,16 @@
     </div>
 
     <div class="screen" id="screen-juegos" style="padding:0; flex-direction: column;">
-      <div class="top-bar-feed" style="width:100%;"><h3><i class="fa-solid fa-gamepad" style="color:#00e676;"></i> Juegos</h3></div>
-      <iframe src="https://poki.com/" style="flex:1; width:100%; height:100%; border:none;" allow="fullscreen; autoplay; gamepad; xr-spatial-tracking" title="Poki"></iframe>
+      <div class="top-bar-feed" style="width:100%; flex-wrap:wrap; gap:8px; height:auto; padding:12px 20px;">
+        <h3><i class="fa-solid fa-gamepad" style="color:#00e676;"></i> Juegos</h3>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn-solid" style="width:auto; padding:6px 14px; font-size:0.8rem;" onclick="cambiarJuegoActivo('https://www.crazygames.com/embed/2048')">2048</button>
+          <button class="btn-solid" style="width:auto; padding:6px 14px; font-size:0.8rem;" onclick="cambiarJuegoActivo('https://www.crazygames.com/embed/subway-surfers')">Subway Surfers</button>
+          <button class="btn-solid" style="width:auto; padding:6px 14px; font-size:0.8rem;" onclick="cambiarJuegoActivo('https://www.crazygames.com/embed/moto-x3m')">Moto X3M</button>
+          <button class="btn-solid" style="width:auto; padding:6px 14px; font-size:0.8rem;" onclick="cambiarJuegoActivo('https://www.crazygames.com/embed/basketball-stars')">Basketball Stars</button>
+        </div>
+      </div>
+      <iframe id="iframeJuegoActivo" src="https://www.crazygames.com/embed/2048" style="flex:1; width:100%; height:100%; border:none;" allow="fullscreen; autoplay; gamepad" title="Juego"></iframe>
     </div>
 
     <div class="screen" id="screen-perfil">
@@ -792,6 +800,10 @@
       });
 
       llamadaVisor.on('error', () => alert("No se pudo conectar con la transmisión de @" + nombreAnfitrion));
+    }
+
+    function cambiarJuegoActivo(url) {
+      document.getElementById('iframeJuegoActivo').src = url;
     }
 
     function activarFiltroPantalla(pantalla) {
@@ -1332,3 +1344,4 @@
   </script>
 </body>
 </html>
+    
