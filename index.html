@@ -131,6 +131,8 @@
     .btn-link { background: none; border: none; color: var(--text-dim); font-size: 0.85rem; cursor: pointer; text-decoration: underline; margin-top: 12px; }
 
     @keyframes pulseMic { from { opacity: 0.5; } to { opacity: 1; } }
+    @keyframes entradaToast { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    #toastNotificacionLive.visible { display: block !important; animation: entradaToast 0.3s ease; }
     .my-code-footer { background: #070a0e; text-align: center; padding: 8px; font-size: 0.85rem; color: var(--text-dim); margin-top: auto; }
     .my-code-footer b { color: var(--accent); }
 
@@ -214,6 +216,17 @@
   </style>
 </head>
 <body>
+
+  <div id="toastNotificacionLive" style="display:none; position:fixed; top:20px; right:20px; z-index:5000; background:#1f2c34; border:1px solid #e91e63; border-radius:12px; padding:14px 18px; color:white; cursor:pointer; box-shadow:0 8px 25px rgba(0,0,0,0.5); max-width:280px;" onclick="irAVerLiveDesdeToast()">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <i class="fa-solid fa-tower-broadcast" style="color:#e91e63; font-size:1.3rem;"></i>
+      <div>
+        <p style="font-weight:bold; font-size:0.9rem;" id="toastLiveTexto">@usuario salió en vivo</p>
+        <span style="font-size:0.75rem; color:var(--text-dim);">Toca para ver</span>
+      </div>
+    </div>
+  </div>
+
 
   <aside class="sidebar">
     <div class="brand"><h2><i class="fa-solid fa-clapperboard"></i> WaveTok</h2></div>
@@ -335,10 +348,20 @@
         </div>
       </div>
       <div style="flex:1; display:flex; overflow:hidden;">
-        <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#000; position:relative;" id="cajaLiveVisor">
-          <p style="color:var(--text-dim);" id="lblLiveVacio">Selecciona un directo de la lista o inicia el tuyo.</p>
-          <video id="videoLiveActivo" autoplay playsinline style="width:100%; height:100%; object-fit:contain; display:none;"></video>
-          <div id="badgeLiveEnVivo" style="display:none; position:absolute; top:15px; left:15px; background:var(--danger); color:white; padding:4px 12px; border-radius:5px; font-weight:bold; font-size:0.8rem;">● EN VIVO</div>
+        <div style="flex:2; display:flex; flex-direction:column; overflow:hidden;">
+          <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#000; position:relative;" id="cajaLiveVisor">
+            <p style="color:var(--text-dim);" id="lblLiveVacio">Selecciona un directo de la lista o inicia el tuyo.</p>
+            <video id="videoLiveActivo" autoplay playsinline style="width:100%; height:100%; object-fit:contain; display:none;"></video>
+            <div id="badgeLiveEnVivo" style="display:none; position:absolute; top:15px; left:15px; background:var(--danger); color:white; padding:4px 12px; border-radius:5px; font-weight:bold; font-size:0.8rem;">● EN VIVO</div>
+            <div id="badgeEspectadoresLive" style="display:none; position:absolute; top:15px; right:15px; background:rgba(0,0,0,0.6); color:white; padding:4px 12px; border-radius:5px; font-size:0.8rem;"><i class="fa-solid fa-eye"></i> <span id="valorEspectadoresLive">0</span></div>
+          </div>
+          <div style="height:180px; background:var(--bg-sidebar); border-top:1px solid rgba(255,255,255,0.05); display:none; flex-direction:column; padding:10px;" id="panelChatLive">
+            <div id="mensajesChatLive" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:4px; font-size:0.82rem; margin-bottom:8px;"></div>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="inputChatLive" placeholder="Comentar en el directo..." style="flex:1; background:rgba(255,255,255,0.05); border:none; padding:8px 12px; border-radius:15px; color:white; outline:none;" onkeypress="if(event.key==='Enter') enviarMensajeChatLive()">
+              <button class="btn-solid" style="width:auto; padding:6px 14px;" onclick="enviarMensajeChatLive()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
         </div>
         <div style="width:280px; background:var(--bg-sidebar); border-left:1px solid rgba(255,255,255,0.05); overflow-y:auto;" id="listaLivesActivos">
           <p style="color:var(--text-dim); font-size:0.85rem; padding:15px;">Cargando transmisiones...</p>
@@ -451,6 +474,17 @@
     </div>
   </div>
 
+  <div class="modal-bg" id="modalPerfilPublico">
+    <div class="modal-box wide">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+        <div class="avatar" style="width:55px; height:55px; font-size:1.4rem;" id="avatarPerfilPublico">U</div>
+        <h3 id="nombrePerfilPublico" style="color:var(--accent);">@usuario</h3>
+      </div>
+      <div id="listaVideosPerfilPublico" style="max-height:50vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+      <button class="btn-solid" style="margin-top:15px;" onclick="cerrarCapaModal('modalPerfilPublico')">Cerrar</button>
+    </div>
+  </div>
+
   <div class="modal-bg" id="modalIniciarLive">
     <div class="modal-box">
       <h3 style="color:#e91e63;"><i class="fa-solid fa-tower-broadcast"></i> Iniciar transmisión</h3>
@@ -462,12 +496,22 @@
     </div>
   </div>
 
-  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="URL .mp4 externa"><input type="text" id="inputVideoCaption" placeholder="Descripción..."><button class="btn-solid" onclick="enviarVideoEstructuraFirebase()">Indexar al Feed</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Volver</p></div></div>
+  <div class="modal-bg" id="modalSubirVideo"><div class="modal-box">
+    <h3>Publicar Video</h3>
+    <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:8px;">Sube un clip corto (máx. ~800KB) o pega un enlace .mp4 externo.</p>
+    <input type="file" id="inputVideoArchivo" accept="video/mp4,video/webm" style="color:white; background:none; border:1px dashed var(--accent); padding:8px; border-radius:8px;">
+    <p style="font-size:0.75rem; color:var(--text-dim); margin:8px 0;">— o —</p>
+    <input type="text" id="inputVideoUrlDirecta" placeholder="URL .mp4 externa">
+    <input type="text" id="inputVideoCaption" placeholder="Descripción...">
+    <div class="auth-error-msg" id="lblErrorSubirVideo"></div>
+    <button class="btn-solid" onclick="enviarVideoEstructuraFirebase()">Indexar al Feed</button>
+    <p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Volver</p>
+  </div></div>
 
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc, setDoc, getDoc, where, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -484,7 +528,7 @@
     window.fbAuth = getAuth(app);
 
     window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp; window.doc = doc; window.updateDoc = updateDoc; window.increment = increment; window.deleteDoc = deleteDoc;
-    window.setDoc = setDoc; window.getDoc = getDoc; window.where = where;
+    window.setDoc = setDoc; window.getDoc = getDoc; window.where = where; window.limit = limit;
     window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     window.onAuthStateChanged = onAuthStateChanged;
@@ -496,6 +540,8 @@
   <script>
     let peerInstance = null, mySessionId = "", mySessionEmail = "", miNombreUsuario = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
     let streamLiveLocal = null, transmitiendoLiveActivo = false, idLiveActivoPropio = null, unsubscribirListaLives = null, unsubscribirVisorLive = null;
+    let idLiveChatActual = null, unsubscribirChatLive = null;
+    let unsubsNotifsMensajes = [];
     let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
     let unsubscribirEscuchaFirestore = null, unsubscribirComentariosVideo = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
     let pestanaAuthActual = 'registro';
@@ -555,6 +601,7 @@
           document.getElementById('txtLabelPerfilEmail').innerText = mySessionEmail;
           compilarRenderContactoLista();
           conectarEscuchaStickersPersonalizados();
+          conectarNotificacionesLivesSeguidos();
 
           // Revisa si ya tiene un nombre de usuario único configurado; si no, se lo pedimos.
           try {
@@ -748,15 +795,18 @@
       document.getElementById('lblLiveVacio').style.display = 'none';
       document.getElementById('badgeLiveEnVivo').style.display = 'block';
       document.getElementById('badgeLiveEnVivo').innerText = '● EN VIVO — ' + titulo;
+      document.getElementById('badgeEspectadoresLive').style.display = 'block';
       document.getElementById('btnIniciarLive').style.display = 'none';
       document.getElementById('btnFinalizarLive').style.display = 'inline-flex';
 
       const refLive = window.doc(window.fsdb, "streams_activos", mySessionId);
       await window.setDoc(refLive, {
-        uid: mySessionId, username: obtenerNombreVisible(), titulo: titulo, activo: true, iniciado: window.serverTimestamp()
+        uid: mySessionId, username: obtenerNombreVisible(), titulo: titulo, activo: true, espectadores: 0, iniciado: window.serverTimestamp()
       });
       idLiveActivoPropio = mySessionId;
       transmitiendoLiveActivo = true;
+      conectarEspectadoresPropios(mySessionId);
+      conectarChatDeLive(mySessionId);
     }
 
     async function finalizarTransmisionEnVivo() {
@@ -769,13 +819,23 @@
       video.style.display = 'none';
       document.getElementById('lblLiveVacio').style.display = 'block';
       document.getElementById('badgeLiveEnVivo').style.display = 'none';
+      document.getElementById('badgeEspectadoresLive').style.display = 'none';
       document.getElementById('btnIniciarLive').style.display = 'inline-flex';
       document.getElementById('btnFinalizarLive').style.display = 'none';
+      desconectarChatDeLive();
 
       if (idLiveActivoPropio) {
         try { await window.deleteDoc(window.doc(window.fsdb, "streams_activos", idLiveActivoPropio)); } catch(e) {}
         idLiveActivoPropio = null;
       }
+    }
+
+    function conectarEspectadoresPropios(uidPropio) {
+      window.onSnapshot(window.doc(window.fsdb, "streams_activos", uidPropio), (docSnap) => {
+        if (docSnap.exists()) {
+          document.getElementById('valorEspectadoresLive').innerText = docSnap.data().espectadores || 0;
+        }
+      });
     }
 
     function conectarListaLivesActivos() {
@@ -797,16 +857,22 @@
               <div style="margin-left:10px; overflow:hidden;">
                 <h5 style="color:white;">@${d.username}</h5>
                 <p style="font-size:0.75rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.titulo || 'Sin título'}</p>
-                <span style="font-size:0.7rem; color:var(--danger);">● En vivo</span>
+                <span style="font-size:0.7rem; color:var(--danger);">● En vivo · <i class="fa-solid fa-eye"></i> ${d.espectadores || 0}</span>
               </div>
             </div>`;
         });
       });
     }
 
+    let uidLiveViendoActualmente = null;
     function verTransmisionEnVivo(uidAnfitrion, nombreAnfitrion) {
       if (!peerInstance) return alert("Espera a que tu sesión termine de cargar.");
       if (uidAnfitrion === mySessionId) return;
+
+      // Si ya estabas viendo otro live, primero salimos de ese para no dejar el contador de espectadores inflado.
+      if (uidLiveViendoActualmente && uidLiveViendoActualmente !== uidAnfitrion) {
+        salirDelLiveActual();
+      }
 
       const video = document.getElementById('videoLiveActivo');
       video.muted = false;
@@ -820,9 +886,53 @@
         video.srcObject = remoteStream;
         video.style.display = 'block';
         document.getElementById('badgeLiveEnVivo').style.display = 'block';
+        uidLiveViendoActualmente = uidAnfitrion;
+        window.updateDoc(window.doc(window.fsdb, "streams_activos", uidAnfitrion), { espectadores: window.increment(1) }).catch(()=>{});
+        conectarChatDeLive(uidAnfitrion);
       });
 
       llamadaVisor.on('error', () => alert("No se pudo conectar con la transmisión de @" + nombreAnfitrion));
+    }
+
+    function salirDelLiveActual() {
+      if (uidLiveViendoActualmente) {
+        window.updateDoc(window.doc(window.fsdb, "streams_activos", uidLiveViendoActualmente), { espectadores: window.increment(-1) }).catch(()=>{});
+        uidLiveViendoActualmente = null;
+      }
+      desconectarChatDeLive();
+    }
+
+    // ===== Chat en vivo dentro de la transmisión =====
+    function conectarChatDeLive(uidAnfitrion) {
+      desconectarChatDeLive();
+      idLiveChatActual = uidAnfitrion;
+      document.getElementById('panelChatLive').style.display = 'flex';
+      const q = window.query(window.collection(window.fsdb, "streams_activos", uidAnfitrion, "chat_vivo"), window.orderBy("ts", "asc"));
+      unsubscribirChatLive = window.onSnapshot(q, (snapshot) => {
+        const box = document.getElementById('mensajesChatLive');
+        box.innerHTML = '';
+        snapshot.forEach(docSnap => {
+          const m = docSnap.data();
+          box.innerHTML += `<div><b style="color:var(--accent);">@${m.autor}:</b> <span style="color:white;">${m.texto}</span></div>`;
+        });
+        box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    function desconectarChatDeLive() {
+      if (unsubscribirChatLive) { unsubscribirChatLive(); unsubscribirChatLive = null; }
+      idLiveChatActual = null;
+      document.getElementById('panelChatLive').style.display = 'none';
+      document.getElementById('mensajesChatLive').innerHTML = '';
+    }
+
+    async function enviarMensajeChatLive() {
+      const input = document.getElementById('inputChatLive');
+      if (!input.value.trim() || !idLiveChatActual || !mySessionId) return;
+      await window.addDoc(window.collection(window.fsdb, "streams_activos", idLiveChatActual, "chat_vivo"), {
+        autor: obtenerNombreVisible(), texto: input.value.trim(), ts: window.serverTimestamp()
+      });
+      input.value = '';
     }
 
     function cambiarJuegoActivo(url) {
@@ -844,6 +954,8 @@
 
       if (pantalla === 'lives') {
         conectarListaLivesActivos();
+      } else if (uidLiveViendoActualmente) {
+        salirDelLiveActual();
       }
     }
 
@@ -881,27 +993,27 @@
 
       vidsFiltradosArray.forEach((vid, ind) => {
         const iniciales = (vid.author || "AN").substring(0, 2).toUpperCase();
-        const siguiendo = obtenerSetLocal('wt_siguiendo').includes(vid.author);
+        const siguiendo = obtenerSetLocal('wt_siguiendo').includes(vid.authorUid);
         const meGusta = obtenerSetLocal('wt_likes').includes(vid.id);
         const guardado = obtenerSetLocal('wt_guardados').includes(vid.id);
+        const esMio = vid.authorUid && vid.authorUid === mySessionId;
 
         container.innerHTML += `
           <div class="tok-post">
             <div class="tok-video-card">
               <video class="tok-video" src="${vid.url}" loop id="feedVideoElemento_${ind}" onclick="controlEstadoReproductor(this)"></video>
               <div class="tok-top-overlay"><div class="tok-author-avatar">${iniciales}</div></div>
+              ${esMio ? `<div class="circle-action" style="position:absolute; top:10px; left:10px; width:32px; height:32px; font-size:0.9rem; background:rgba(255,23,68,0.75);" onclick="eliminarVideoPropio('${vid.id}')"><i class="fa-solid fa-trash"></i></div>` : ''}
               <div class="tok-meta">
-                <h3>@${vid.author}</h3>
+                <h3 style="cursor:pointer;" onclick="abrirPerfilPublico('${vid.authorUid||''}', '${vid.author}')">@${vid.author}</h3>
                 <p id="captionTexto_${vid.id}">${vid.caption}</p>
                 <span class="btn-ver-mas" onclick="alternarCaptionCompleta('${vid.id}')">más</span>
               </div>
             </div>
             <div class="tok-actions">
               <div class="tok-actions-avatar-wrap">
-                <div class="tok-actions-avatar">${iniciales}</div>
-                <div class="follow-badge ${siguiendo ? 'siguiendo' : ''}" id="followBadge_${vid.author}" onclick="alternarSeguirAutor('${vid.author}')">
-                  <i class="fa-solid ${siguiendo ? 'fa-check' : 'fa-plus'}"></i>
-                </div>
+                <div class="tok-actions-avatar" style="cursor:pointer;" onclick="abrirPerfilPublico('${vid.authorUid||''}', '${vid.author}')">${iniciales}</div>
+                ${vid.authorUid && vid.authorUid !== mySessionId ? `<div class="follow-badge ${siguiendo ? 'siguiendo' : ''}" id="followBadge_${vid.authorUid}" onclick="alternarSeguirAutor('${vid.authorUid}', '${vid.author}')"><i class="fa-solid ${siguiendo ? 'fa-check' : 'fa-plus'}"></i></div>` : ''}
               </div>
               <div class="circle-action ${meGusta ? 'activo' : ''}" id="likeBtn_${vid.id}" onclick="inyectarLikeVideoBase('${vid.id}')"><i class="fa-solid fa-heart"></i></div><span>${vid.likes||0}</span>
               <div class="circle-action" onclick="alternarPanelComentariosMovil()"><i class="fa-solid fa-comment"></i></div><span id="commentCountVal_${vid.id}">···</span>
@@ -998,14 +1110,21 @@
       unsubscribirComentariosVideo = window.onSnapshot(q, (snapshot) => {
         const box = document.getElementById('boxCommentsFeedVideo');
         box.innerHTML = '';
-        snapshot.forEach(doc => {
-          let c = doc.data();
-          box.innerHTML += `<div class="comment-line"><b>@${c.author}:</b> ${c.text}</div>`;
+        snapshot.forEach(docSnap => {
+          let c = docSnap.data();
+          const esMio = c.authorUid && c.authorUid === mySessionId;
+          box.innerHTML += `<div class="comment-line" style="display:flex; justify-content:space-between; align-items:center; gap:8px;"><span><b>@${c.author}:</b> ${c.text}</span>${esMio ? `<i class="fa-solid fa-trash" style="cursor:pointer; color:var(--text-dim); font-size:0.8rem;" onclick="eliminarComentarioPropio('${videoId}', '${docSnap.id}')"></i>` : ''}</div>`;
         });
         box.scrollTop = box.scrollHeight;
         const contador = document.getElementById(`commentCountVal_${videoId}`);
         if (contador) contador.innerText = snapshot.size;
       });
+    }
+
+    async function eliminarComentarioPropio(videoId, comentarioId) {
+      try {
+        await window.deleteDoc(window.doc(window.fsdb, "videos", videoId, "comentarios", comentarioId));
+      } catch (e) { /* silencioso */ }
     }
 
     async function agregarComentarioVideoActual() {
@@ -1015,7 +1134,7 @@
       if(!targetVideo || targetVideo.id === "def") return;
 
       await window.addDoc(window.collection(window.fsdb, "videos", targetVideo.id, "comentarios"), {
-        author: obtenerNombreVisible(), text: input.value.trim(), createdAt: window.serverTimestamp()
+        author: obtenerNombreVisible(), authorUid: mySessionId, text: input.value.trim(), createdAt: window.serverTimestamp()
       });
       input.value = '';
     }
@@ -1082,18 +1201,48 @@
       } catch (e) { /* el usuario canceló el diálogo de compartir, no hacemos nada */ }
     }
 
-    function alternarSeguirAutor(autor) {
-      if (!autor || !mySessionId) return;
+    async function abrirPerfilPublico(uidAutor, nombreAutor) {
+      document.getElementById('nombrePerfilPublico').innerText = `@${nombreAutor}`;
+      document.getElementById('avatarPerfilPublico').innerText = (nombreAutor || 'AN').substring(0,2).toUpperCase();
+      const cont = document.getElementById('listaVideosPerfilPublico');
+      cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem;">Cargando videos...</p>`;
+      abrirCapaModal('modalPerfilPublico');
+
+      if (!uidAutor) {
+        cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem;">No se encontraron videos de este usuario.</p>`;
+        return;
+      }
+      const videosAutor = masterVideoArray.filter(v => v.authorUid === uidAutor);
+      if (!videosAutor.length) {
+        cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem;">Este usuario aún no ha publicado videos.</p>`;
+        return;
+      }
+      cont.innerHTML = videosAutor.map(v => `
+        <div style="display:flex; gap:10px; align-items:center; background:rgba(255,255,255,0.03); border-radius:10px; padding:8px;">
+          <video src="${v.url}" style="width:60px; height:80px; object-fit:cover; border-radius:6px; background:#000;" muted></video>
+          <div style="flex:1; overflow:hidden;">
+            <p style="font-size:0.85rem; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${v.caption}</p>
+            <span style="font-size:0.75rem; color:var(--text-dim);"><i class="fa-solid fa-heart" style="color:var(--danger);"></i> ${v.likes||0}</span>
+          </div>
+        </div>`).join('');
+    }
+
+    function alternarSeguirAutor(autorUid, autorNombre) {
+      if (!autorUid || !mySessionId) return;
       let lista = obtenerSetLocal('wt_siguiendo');
-      const badge = document.getElementById(`followBadge_${autor}`);
-      if (lista.includes(autor)) {
-        lista = lista.filter(a => a !== autor);
+      const badge = document.getElementById(`followBadge_${autorUid}`);
+      if (lista.includes(autorUid)) {
+        lista = lista.filter(a => a !== autorUid);
         if (badge) { badge.classList.remove('siguiendo'); badge.innerHTML = '<i class="fa-solid fa-plus"></i>'; }
       } else {
-        lista.push(autor);
+        lista.push(autorUid);
         if (badge) { badge.classList.add('siguiendo'); badge.innerHTML = '<i class="fa-solid fa-check"></i>'; }
       }
       guardarSetLocal('wt_siguiendo', lista);
+      // Guardamos también el nombre visible de cada UID seguido, para mostrarlo en notificaciones sin otra consulta.
+      let nombres = JSON.parse(localStorage.getItem('wt_nombres_seguidos_' + mySessionId) || '{}');
+      nombres[autorUid] = autorNombre;
+      localStorage.setItem('wt_nombres_seguidos_' + mySessionId, JSON.stringify(nombres));
     }
 
     function alternarCaptionCompleta(idVideoDoc) {
@@ -1108,6 +1257,7 @@
       document.getElementById('chatInputBarArea').style.display = 'flex';
       document.getElementById('lblRemoteLabel').innerText = `Remoto: ${nombreVisible || id.substring(0,8)}`;
       document.getElementById('screen-chats').classList.add('chat-abierto');
+      marcarChatComoLeido(id);
 
       document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
       escucharMensajesFirestore(id);
@@ -1259,19 +1409,79 @@
       container.innerHTML = '';
       list.forEach(contacto => {
         const nombre = contacto.username || contacto.uid.substring(0,8);
-        container.innerHTML += `<div class="chat-item" onclick="desplegarVentanaConversacionIndividual('${contacto.uid}', '${nombre}')"><div class="avatar">${nombre.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">@${nombre}</h5></div>`;
+        container.innerHTML += `<div class="chat-item" id="chatItem_${contacto.uid}" onclick="desplegarVentanaConversacionIndividual('${contacto.uid}', '${nombre}')"><div class="avatar">${nombre.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px; flex:1;">@${nombre}</h5><span id="puntoNoLeido_${contacto.uid}" style="display:none; width:10px; height:10px; border-radius:50%; background:var(--danger);"></span></div>`;
       });
+      conectarNotificacionesMensajesNuevos(list);
+    }
+
+    // Avisa con un puntito rojo si llegó un mensaje nuevo de un contacto mientras no tenías esa conversación abierta.
+    // Solo funciona con la app abierta (no es una notificación push del sistema operativo).
+    function conectarNotificacionesMensajesNuevos(listaContactos) {
+      unsubsNotifsMensajes.forEach(fn => fn());
+      unsubsNotifsMensajes = [];
+      listaContactos.forEach(contacto => {
+        const salaId = [mySessionId, contacto.uid].sort().join("_CH_");
+        const q = window.query(window.collection(window.fsdb, "salas", salaId, "mensajes"), window.orderBy("timestamp", "desc"), window.limit(1));
+        const unsub = window.onSnapshot(q, (snapshot) => {
+          if (snapshot.empty) return;
+          const ultimo = snapshot.docs[0].data();
+          if (ultimo.sender === mySessionId) return; // no notificar tus propios mensajes
+          const marcaLeido = parseInt(localStorage.getItem('wt_leido_' + mySessionId + '_' + contacto.uid) || '0');
+          const tsUltimo = ultimo.timestamp?.toMillis ? ultimo.timestamp.toMillis() : Date.now();
+          const chatAbiertoConEste = currentTargetPeerId === contacto.uid && document.getElementById('screen-chats').classList.contains('active') && document.getElementById('screen-chats').classList.contains('chat-abierto');
+          const punto = document.getElementById(`puntoNoLeido_${contacto.uid}`);
+          if (punto) punto.style.display = (tsUltimo > marcaLeido && !chatAbiertoConEste) ? 'block' : 'none';
+        });
+        unsubsNotifsMensajes.push(unsub);
+      });
+    }
+
+    function marcarChatComoLeido(uidContacto) {
+      localStorage.setItem('wt_leido_' + mySessionId + '_' + uidContacto, Date.now().toString());
+      const punto = document.getElementById(`puntoNoLeido_${uidContacto}`);
+      if (punto) punto.style.display = 'none';
     }
 
     async function enviarVideoEstructuraFirebase() {
       if (!mySessionId) return alert("Debes iniciar sesión.");
+      const lblError = document.getElementById('lblErrorSubirVideo');
+      lblError.innerText = '';
       let caption = document.getElementById('inputVideoCaption').value.trim() || "WaveTok Clip";
       let url = document.getElementById('inputVideoUrlDirecta').value.trim();
-      if(!url) return alert("URL requerida.");
-      await window.addDoc(window.collection(window.fsdb, "videos"), {
-        author: mySessionEmail || "Anonimo", caption: caption, url: url, likes: 0, createdAt: window.serverTimestamp()
-      });
-      cerrarCapaModal('modalSubirVideo');
+      const archivo = document.getElementById('inputVideoArchivo').files[0];
+
+      const guardarEnFirestore = async (urlFinal) => {
+        await window.addDoc(window.collection(window.fsdb, "videos"), {
+          author: obtenerNombreVisible(), authorUid: mySessionId, caption: caption, url: urlFinal, likes: 0, guardados: 0, compartidos: 0, createdAt: window.serverTimestamp()
+        });
+        document.getElementById('inputVideoArchivo').value = '';
+        document.getElementById('inputVideoUrlDirecta').value = '';
+        document.getElementById('inputVideoCaption').value = '';
+        cerrarCapaModal('modalSubirVideo');
+      };
+
+      if (archivo) {
+        if (archivo.size > 800 * 1024) {
+          lblError.innerText = "El video es muy pesado. Usa uno menor a 800KB, o pega un enlace .mp4 externo.";
+          return;
+        }
+        const lector = new FileReader();
+        lector.onload = (e) => guardarEnFirestore(e.target.result);
+        lector.readAsDataURL(archivo);
+      } else if (url) {
+        await guardarEnFirestore(url);
+      } else {
+        lblError.innerText = "Sube un video o pega una URL .mp4.";
+      }
+    }
+
+    async function eliminarVideoPropio(idVideoDoc) {
+      if (!confirm("¿Eliminar este video? Esta acción no se puede deshacer.")) return;
+      try {
+        await window.deleteDoc(window.doc(window.fsdb, "videos", idVideoDoc));
+      } catch (e) {
+        alert("No se pudo eliminar el video.");
+      }
     }
 
     function cargarStickersEnPanel() {
@@ -1352,6 +1562,7 @@
 
     function destruirCredencialesSesion() {
       if (transmitiendoLiveActivo) finalizarTransmisionEnVivo();
+      if (uidLiveViendoActualmente) salirDelLiveActual();
       window.signOut(window.fbAuth);
       peerInstance = null;
       currentTargetPeerId = null;
@@ -1367,5 +1578,3 @@
   </script>
 </body>
 </html>
-
-    
