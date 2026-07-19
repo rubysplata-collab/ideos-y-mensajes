@@ -330,7 +330,7 @@
       <div class="top-bar-feed" style="width:100%;">
         <h3><i class="fa-solid fa-tower-broadcast" style="color:#e91e63;"></i> En vivo</h3>
         <div style="display:flex; gap:8px;">
-          <button class="btn-solid" style="width:auto; padding:8px 16px; background:#e91e63; color:white;" id="btnIniciarLive" onclick="iniciarTransmisionEnVivo()"><i class="fa-solid fa-video"></i> Transmitir</button>
+          <button class="btn-solid" style="width:auto; padding:8px 16px; background:#e91e63; color:white;" id="btnIniciarLive" onclick="abrirCapaModal('modalIniciarLive')"><i class="fa-solid fa-video"></i> Transmitir</button>
           <button class="btn-danger" style="width:auto; padding:8px 16px; display:none;" id="btnFinalizarLive" onclick="finalizarTransmisionEnVivo()"><i class="fa-solid fa-stop"></i> Finalizar</button>
         </div>
       </div>
@@ -450,7 +450,20 @@
       <button class="btn-solid" onclick="guardarNombreUsuarioUnico()">Guardar</button>
     </div>
   </div>
+
+  <div class="modal-bg" id="modalIniciarLive">
+    <div class="modal-box">
+      <h3 style="color:#e91e63;"><i class="fa-solid fa-tower-broadcast"></i> Iniciar transmisión</h3>
+      <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">Se activará tu cámara y micrófono, y cualquier usuario podrá verte en vivo mientras dure la transmisión.</p>
+      <input type="text" id="inputTituloLive" placeholder="Título del directo (ej: Jugando fútbol ⚽)" maxlength="60">
+      <div class="auth-error-msg" id="lblErrorIniciarLive"></div>
+      <button class="btn-solid" style="background:#e91e63; color:white;" onclick="confirmarInicioLive()">Sí, salir en vivo</button>
+      <p onclick="cerrarCapaModal('modalIniciarLive')" style="margin-top:12px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cancelar</p>
+    </div>
+  </div>
+
   <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="URL .mp4 externa"><input type="text" id="inputVideoCaption" placeholder="Descripción..."><button class="btn-solid" onclick="enviarVideoEstructuraFirebase()">Indexar al Feed</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Volver</p></div></div>
+
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -712,13 +725,20 @@
 
     // ===================== EN VIVO (Lives) =====================
 
-    async function iniciarTransmisionEnVivo() {
+    function confirmarInicioLive() {
+      const titulo = document.getElementById('inputTituloLive').value.trim() || 'Transmisión sin título';
+      document.getElementById('lblErrorIniciarLive').innerText = '';
+      cerrarCapaModal('modalIniciarLive');
+      iniciarTransmisionEnVivo(titulo);
+    }
+
+    async function iniciarTransmisionEnVivo(titulo) {
       if (!mySessionId) return alert("Debes iniciar sesión.");
       if (transmitiendoLiveActivo) return;
       try {
         streamLiveLocal = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       } catch (e) {
-        return alert("No se pudo acceder a tu cámara/micrófono.");
+        return alert("No se pudo acceder a tu cámara/micrófono. Revisa los permisos del navegador.");
       }
 
       const video = document.getElementById('videoLiveActivo');
@@ -727,12 +747,13 @@
       video.style.display = 'block';
       document.getElementById('lblLiveVacio').style.display = 'none';
       document.getElementById('badgeLiveEnVivo').style.display = 'block';
+      document.getElementById('badgeLiveEnVivo').innerText = '● EN VIVO — ' + titulo;
       document.getElementById('btnIniciarLive').style.display = 'none';
       document.getElementById('btnFinalizarLive').style.display = 'inline-flex';
 
       const refLive = window.doc(window.fsdb, "streams_activos", mySessionId);
       await window.setDoc(refLive, {
-        uid: mySessionId, username: obtenerNombreVisible(), activo: true, iniciado: window.serverTimestamp()
+        uid: mySessionId, username: obtenerNombreVisible(), titulo: titulo, activo: true, iniciado: window.serverTimestamp()
       });
       idLiveActivoPropio = mySessionId;
       transmitiendoLiveActivo = true;
@@ -762,19 +783,20 @@
       const q = window.query(window.collection(window.fsdb, "streams_activos"), window.orderBy("iniciado", "desc"));
       unsubscribirListaLives = window.onSnapshot(q, (snapshot) => {
         const cont = document.getElementById('listaLivesActivos');
-        if (snapshot.empty) {
-          cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem; padding:15px;">Nadie está transmitiendo ahora mismo.</p>`;
+        const soloAjenos = snapshot.docs.filter(d => d.data().uid !== mySessionId);
+        if (!soloAjenos.length) {
+          cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem; padding:15px;">Nadie está transmitiendo ahora mismo. Vuelve más tarde o inicia tú el primer directo.</p>`;
           return;
         }
-        cont.innerHTML = '';
-        snapshot.forEach(docSnap => {
+        cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.75rem; padding:12px 15px 4px;">Toca un directo para verlo:</p>`;
+        soloAjenos.forEach(docSnap => {
           const d = docSnap.data();
-          if (d.uid === mySessionId) return; // no mostrarme a mí mismo en la lista de espectador
           cont.innerHTML += `
             <div class="chat-item" onclick="verTransmisionEnVivo('${d.uid}', '${d.username}')">
               <div class="avatar" style="background:#e91e63;">${(d.username||'??').substring(0,2).toUpperCase()}</div>
-              <div style="margin-left:10px;">
+              <div style="margin-left:10px; overflow:hidden;">
                 <h5 style="color:white;">@${d.username}</h5>
+                <p style="font-size:0.75rem; color:var(--text-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${d.titulo || 'Sin título'}</p>
                 <span style="font-size:0.7rem; color:var(--danger);">● En vivo</span>
               </div>
             </div>`;
@@ -789,6 +811,7 @@
       const video = document.getElementById('videoLiveActivo');
       video.muted = false;
       document.getElementById('lblLiveVacio').style.display = 'none';
+      document.getElementById('badgeLiveEnVivo').innerText = '● Viendo a @' + nombreAnfitrion;
 
       const dummyStream = new MediaStream(); // el espectador no envía cámara, solo recibe
       const llamadaVisor = peerInstance.call(uidAnfitrion, dummyStream, { metadata: { isLive: true } });
@@ -1344,4 +1367,5 @@
   </script>
 </body>
 </html>
+
     
