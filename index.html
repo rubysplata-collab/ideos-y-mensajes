@@ -220,6 +220,8 @@
     <nav class="side-menu">
       <div class="menu-item active" id="btn-nav-plataforma" onclick="activarFiltroPantalla('plataforma')"><i class="fa-solid fa-layer-group"></i> <span>Para ti</span></div>
       <div class="menu-item" id="btn-nav-chats" onclick="activarFiltroPantalla('chats')"><i class="fa-solid fa-comment-dots"></i> <span>Chat privado</span></div>
+      <div class="menu-item" id="btn-nav-lives" onclick="activarFiltroPantalla('lives')"><i class="fa-solid fa-tower-broadcast" style="color:#e91e63"></i> <span>En vivo</span></div>
+      <div class="menu-item" id="btn-nav-juegos" onclick="activarFiltroPantalla('juegos')"><i class="fa-solid fa-gamepad" style="color:#00e676"></i> <span>Juegos</span></div>
       <div class="menu-item" id="btn-nav-perfil" onclick="activarFiltroPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
     </nav>
     <div class="separator">Herramientas</div>
@@ -324,12 +326,38 @@
 
     </div>
 
+    <div class="screen" id="screen-lives" style="flex-direction: column;">
+      <div class="top-bar-feed" style="width:100%;">
+        <h3><i class="fa-solid fa-tower-broadcast" style="color:#e91e63;"></i> En vivo</h3>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-solid" style="width:auto; padding:8px 16px; background:#e91e63; color:white;" id="btnIniciarLive" onclick="iniciarTransmisionEnVivo()"><i class="fa-solid fa-video"></i> Transmitir</button>
+          <button class="btn-danger" style="width:auto; padding:8px 16px; display:none;" id="btnFinalizarLive" onclick="finalizarTransmisionEnVivo()"><i class="fa-solid fa-stop"></i> Finalizar</button>
+        </div>
+      </div>
+      <div style="flex:1; display:flex; overflow:hidden;">
+        <div style="flex:1; display:flex; align-items:center; justify-content:center; background:#000; position:relative;" id="cajaLiveVisor">
+          <p style="color:var(--text-dim);" id="lblLiveVacio">Selecciona un directo de la lista o inicia el tuyo.</p>
+          <video id="videoLiveActivo" autoplay playsinline style="width:100%; height:100%; object-fit:contain; display:none;"></video>
+          <div id="badgeLiveEnVivo" style="display:none; position:absolute; top:15px; left:15px; background:var(--danger); color:white; padding:4px 12px; border-radius:5px; font-weight:bold; font-size:0.8rem;">● EN VIVO</div>
+        </div>
+        <div style="width:280px; background:var(--bg-sidebar); border-left:1px solid rgba(255,255,255,0.05); overflow-y:auto;" id="listaLivesActivos">
+          <p style="color:var(--text-dim); font-size:0.85rem; padding:15px;">Cargando transmisiones...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen-juegos" style="padding:0; flex-direction: column;">
+      <div class="top-bar-feed" style="width:100%;"><h3><i class="fa-solid fa-gamepad" style="color:#00e676;"></i> Juegos</h3></div>
+      <iframe src="https://poki.com/" style="flex:1; width:100%; height:100%; border:none;" allow="fullscreen; autoplay; gamepad; xr-spatial-tracking" title="Poki"></iframe>
+    </div>
+
     <div class="screen" id="screen-perfil">
       <div class="top-bar-feed" style="width:100%;"><h3>Mi Perfil WaveTok</h3></div>
       <div style="padding:5px; text-align:center; max-width:400px; margin: 40px auto;">
         <div class="avatar" style="width:90px; height:90px; font-size:2.2rem; margin:0 auto 20px auto;" id="avatarPerfilGrande">U</div>
         <h2 id="txtLabelPerfilID" style="color: var(--accent); margin-bottom:8px;">@ID</h2>
-        <p id="txtLabelPerfilEmail" style="color: var(--text-dim); margin-bottom:25px; font-size:0.85rem;"></p>
+        <p id="txtLabelPerfilEmail" style="color: var(--text-dim); margin-bottom:8px; font-size:0.85rem;"></p>
+        <p onclick="abrirEdicionNombreUsuario()" style="color:var(--accent); font-size:0.8rem; cursor:pointer; text-decoration:underline; margin-bottom:25px;">Cambiar nombre de usuario</p>
         <button class="btn-danger" onclick="destruirCredencialesSesion()">Cerrar Sesión</button>
       </div>
     </div>
@@ -403,12 +431,22 @@
     </div>
   </div>
 
-  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Sincronizar Amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="ID de tu amigo"><button class="btn-solid" onclick="inyectarAmigoListaLocal()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
+  <div class="modal-bg" id="connectModal"><div class="modal-box"><h3>Conectar amigo</h3><input type="text" id="inputPeerIdDestino" placeholder="Nombre de usuario (ej: rubysplata)"><div class="auth-error-msg" id="lblErrorConectar"></div><button class="btn-solid" onclick="inyectarAmigoListaLocal()">Vincular</button><p onclick="cerrarCapaModal('connectModal')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p></div></div>
+
+  <div class="modal-bg" id="modalNombreUsuario">
+    <div class="modal-box">
+      <h3 style="color:var(--accent);">Elige tu nombre de usuario</h3>
+      <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:10px;">Único, sin espacios. Tus amigos te encontrarán por este nombre.</p>
+      <input type="text" id="inputNuevoNombreUsuario" placeholder="ej: rubysplata" maxlength="20">
+      <div class="auth-error-msg" id="lblErrorNombreUsuario"></div>
+      <button class="btn-solid" onclick="guardarNombreUsuarioUnico()">Guardar</button>
+    </div>
+  </div>
   <div class="modal-bg" id="modalSubirVideo"><div class="modal-box"><h3>Publicar Video</h3><input type="text" id="inputVideoUrlDirecta" placeholder="URL .mp4 externa"><input type="text" id="inputVideoCaption" placeholder="Descripción..."><button class="btn-solid" onclick="enviarVideoEstructuraFirebase()">Indexar al Feed</button><p onclick="cerrarCapaModal('modalSubirVideo')" style="margin-top:15px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Volver</p></div></div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, doc, updateDoc, increment, deleteDoc, setDoc, getDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     const firebaseConfig = {
@@ -425,6 +463,7 @@
     window.fbAuth = getAuth(app);
 
     window.addDoc = addDoc; window.collection = collection; window.query = query; window.orderBy = orderBy; window.onSnapshot = onSnapshot; window.serverTimestamp = serverTimestamp; window.doc = doc; window.updateDoc = updateDoc; window.increment = increment; window.deleteDoc = deleteDoc;
+    window.setDoc = setDoc; window.getDoc = getDoc; window.where = where;
     window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
     window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     window.onAuthStateChanged = onAuthStateChanged;
@@ -434,7 +473,8 @@
   </script>
 
   <script>
-    let peerInstance = null, mySessionId = "", mySessionEmail = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
+    let peerInstance = null, mySessionId = "", mySessionEmail = "", miNombreUsuario = "", currentTargetPeerId = null, masterVideoArray = [], vidsFiltradosArray = [], currentFeedIndex = 0;
+    let streamLiveLocal = null, transmitiendoLiveActivo = false, idLiveActivoPropio = null, unsubscribirListaLives = null, unsubscribirVisorLive = null;
     let miStreamLocal = null, llamadaActualWebRTC = null, transmisorPantallaTrack = null, transmitiendoPantalla = false;
     let unsubscribirEscuchaFirestore = null, unsubscribirComentariosVideo = null, grabadorAudioMedia = null, fragmentosAudioGrabados = [], estaGrabandoAudio = false;
     let pestanaAuthActual = 'registro';
@@ -485,21 +525,32 @@
       escucharFeedVideosGlobal();
 
       // Escucha el estado real de autenticación de Firebase (reemplaza el localStorage anterior)
-      window.onAuthStateChanged(window.fbAuth, (user) => {
+      window.onAuthStateChanged(window.fbAuth, async (user) => {
         if (user) {
           mySessionId = user.uid;
           mySessionEmail = user.email || "";
           document.getElementById('modalRegistroInicial').style.display = 'none';
           inicializarCanalesPeerMecanismo(mySessionId);
-          document.getElementById('txtLabelPerfilID').innerText = `@${mySessionId.substring(0, 8)}`;
           document.getElementById('txtLabelPerfilEmail').innerText = mySessionEmail;
-          document.getElementById('avatarPerfilGrande').innerText = (mySessionEmail || mySessionId).substring(0,2).toUpperCase();
-          document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>${obtenerNombreVisible()}</b>`;
           compilarRenderContactoLista();
           conectarEscuchaStickersPersonalizados();
+
+          // Revisa si ya tiene un nombre de usuario único configurado; si no, se lo pedimos.
+          try {
+            const perfilSnap = await window.getDoc(window.doc(window.fsdb, "usuarios_perfil", mySessionId));
+            if (perfilSnap.exists() && perfilSnap.data().username) {
+              miNombreUsuario = perfilSnap.data().username;
+              actualizarUIConNombreUsuario();
+            } else {
+              document.getElementById('modalNombreUsuario').style.display = 'flex';
+            }
+          } catch (e) {
+            actualizarUIConNombreUsuario();
+          }
         } else {
           mySessionId = "";
           mySessionEmail = "";
+          miNombreUsuario = "";
           stickersPersonalizados = [];
           if (unsubscribirStickersPersonalizados) unsubscribirStickersPersonalizados();
           document.getElementById('modalRegistroInicial').style.display = 'flex';
@@ -508,9 +559,54 @@
       });
     };
 
+    function actualizarUIConNombreUsuario() {
+      const visible = obtenerNombreVisible();
+      document.getElementById('txtLabelPerfilID').innerText = `@${visible}`;
+      document.getElementById('avatarPerfilGrande').innerText = visible.substring(0,2).toUpperCase();
+      document.getElementById('labelFooterMyCode').innerHTML = `Sesión: <b>${visible}</b>`;
+    }
+
     function obtenerNombreVisible() {
+      if (miNombreUsuario) return miNombreUsuario;
       if (!mySessionEmail) return "Anonimo";
       return mySessionEmail.split('@')[0];
+    }
+
+    async function guardarNombreUsuarioUnico() {
+      const lblError = document.getElementById('lblErrorNombreUsuario');
+      let nombre = document.getElementById('inputNuevoNombreUsuario').value.trim().toLowerCase();
+      lblError.innerText = '';
+
+      if (!/^[a-z0-9_]{3,20}$/.test(nombre)) {
+        lblError.innerText = "Usa entre 3 y 20 caracteres: letras, números o guion bajo.";
+        return;
+      }
+
+      try {
+        const refUsername = window.doc(window.fsdb, "usernames", nombre);
+        const existente = await window.getDoc(refUsername);
+        if (existente.exists() && existente.data().uid !== mySessionId) {
+          lblError.innerText = "Ese nombre de usuario ya está en uso.";
+          return;
+        }
+
+        await window.setDoc(refUsername, { uid: mySessionId });
+        await window.setDoc(window.doc(window.fsdb, "usuarios_perfil", mySessionId), {
+          username: nombre, email: mySessionEmail
+        }, { merge: true });
+
+        miNombreUsuario = nombre;
+        actualizarUIConNombreUsuario();
+        document.getElementById('modalNombreUsuario').style.display = 'none';
+      } catch (e) {
+        lblError.innerText = "Error al guardar. Intenta de nuevo.";
+      }
+    }
+
+    function abrirEdicionNombreUsuario() {
+      document.getElementById('inputNuevoNombreUsuario').value = miNombreUsuario || '';
+      document.getElementById('lblErrorNombreUsuario').innerText = '';
+      document.getElementById('modalNombreUsuario').style.display = 'flex';
     }
 
     function cambiarPestanaAuth(modo) {
@@ -586,6 +682,14 @@
       if (peerInstance) return; // evita reinicializar si ya hay una conexión activa
       peerInstance = new Peer(idMio, { config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] } });
       peerInstance.on('call', (incomingCall) => {
+        // Un espectador entrando a mi transmisión en vivo: respondo automático con mi cámara, sin diálogo de confirmación.
+        if (incomingCall.metadata && incomingCall.metadata.isLive) {
+          if (transmitiendoLiveActivo && streamLiveLocal) {
+            incomingCall.answer(streamLiveLocal);
+          }
+          return;
+        }
+        // Llamada normal de chat privado: sí pedimos confirmación antes de encender cámara/mic.
         if(confirm(`¿Contestar transmisión de ${incomingCall.peer}?`)) {
           navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
             miStreamLocal = stream;
@@ -596,6 +700,98 @@
           });
         }
       });
+    }
+
+    // ===================== EN VIVO (Lives) =====================
+
+    async function iniciarTransmisionEnVivo() {
+      if (!mySessionId) return alert("Debes iniciar sesión.");
+      if (transmitiendoLiveActivo) return;
+      try {
+        streamLiveLocal = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      } catch (e) {
+        return alert("No se pudo acceder a tu cámara/micrófono.");
+      }
+
+      const video = document.getElementById('videoLiveActivo');
+      video.srcObject = streamLiveLocal;
+      video.muted = true; // evita el eco de tu propia voz mientras transmites
+      video.style.display = 'block';
+      document.getElementById('lblLiveVacio').style.display = 'none';
+      document.getElementById('badgeLiveEnVivo').style.display = 'block';
+      document.getElementById('btnIniciarLive').style.display = 'none';
+      document.getElementById('btnFinalizarLive').style.display = 'inline-flex';
+
+      const refLive = window.doc(window.fsdb, "streams_activos", mySessionId);
+      await window.setDoc(refLive, {
+        uid: mySessionId, username: obtenerNombreVisible(), activo: true, iniciado: window.serverTimestamp()
+      });
+      idLiveActivoPropio = mySessionId;
+      transmitiendoLiveActivo = true;
+    }
+
+    async function finalizarTransmisionEnVivo() {
+      if (streamLiveLocal) streamLiveLocal.getTracks().forEach(t => t.stop());
+      transmitiendoLiveActivo = false;
+      streamLiveLocal = null;
+
+      const video = document.getElementById('videoLiveActivo');
+      video.srcObject = null;
+      video.style.display = 'none';
+      document.getElementById('lblLiveVacio').style.display = 'block';
+      document.getElementById('badgeLiveEnVivo').style.display = 'none';
+      document.getElementById('btnIniciarLive').style.display = 'inline-flex';
+      document.getElementById('btnFinalizarLive').style.display = 'none';
+
+      if (idLiveActivoPropio) {
+        try { await window.deleteDoc(window.doc(window.fsdb, "streams_activos", idLiveActivoPropio)); } catch(e) {}
+        idLiveActivoPropio = null;
+      }
+    }
+
+    function conectarListaLivesActivos() {
+      if (unsubscribirListaLives) return;
+      const q = window.query(window.collection(window.fsdb, "streams_activos"), window.orderBy("iniciado", "desc"));
+      unsubscribirListaLives = window.onSnapshot(q, (snapshot) => {
+        const cont = document.getElementById('listaLivesActivos');
+        if (snapshot.empty) {
+          cont.innerHTML = `<p style="color:var(--text-dim); font-size:0.85rem; padding:15px;">Nadie está transmitiendo ahora mismo.</p>`;
+          return;
+        }
+        cont.innerHTML = '';
+        snapshot.forEach(docSnap => {
+          const d = docSnap.data();
+          if (d.uid === mySessionId) return; // no mostrarme a mí mismo en la lista de espectador
+          cont.innerHTML += `
+            <div class="chat-item" onclick="verTransmisionEnVivo('${d.uid}', '${d.username}')">
+              <div class="avatar" style="background:#e91e63;">${(d.username||'??').substring(0,2).toUpperCase()}</div>
+              <div style="margin-left:10px;">
+                <h5 style="color:white;">@${d.username}</h5>
+                <span style="font-size:0.7rem; color:var(--danger);">● En vivo</span>
+              </div>
+            </div>`;
+        });
+      });
+    }
+
+    function verTransmisionEnVivo(uidAnfitrion, nombreAnfitrion) {
+      if (!peerInstance) return alert("Espera a que tu sesión termine de cargar.");
+      if (uidAnfitrion === mySessionId) return;
+
+      const video = document.getElementById('videoLiveActivo');
+      video.muted = false;
+      document.getElementById('lblLiveVacio').style.display = 'none';
+
+      const dummyStream = new MediaStream(); // el espectador no envía cámara, solo recibe
+      const llamadaVisor = peerInstance.call(uidAnfitrion, dummyStream, { metadata: { isLive: true } });
+
+      llamadaVisor.on('stream', (remoteStream) => {
+        video.srcObject = remoteStream;
+        video.style.display = 'block';
+        document.getElementById('badgeLiveEnVivo').style.display = 'block';
+      });
+
+      llamadaVisor.on('error', () => alert("No se pudo conectar con la transmisión de @" + nombreAnfitrion));
     }
 
     function activarFiltroPantalla(pantalla) {
@@ -609,6 +805,10 @@
         document.querySelectorAll('.tok-video').forEach(v => v.pause());
       } else {
         controlSecuenciaAudioVideoFeed();
+      }
+
+      if (pantalla === 'lives') {
+        conectarListaLivesActivos();
       }
     }
 
@@ -866,12 +1066,12 @@
       if (p) p.classList.toggle('expandido');
     }
 
-    function desplegarVentanaConversacionIndividual(id) {
+    function desplegarVentanaConversacionIndividual(id, nombreVisible) {
       currentTargetPeerId = id;
-      document.getElementById('targetChatName').innerText = `@${id.toUpperCase()}`;
+      document.getElementById('targetChatName').innerText = `@${nombreVisible || id.substring(0,8)}`;
       document.getElementById('chatDetailHeader').style.visibility = 'visible';
       document.getElementById('chatInputBarArea').style.display = 'flex';
-      document.getElementById('lblRemoteLabel').innerText = `Remoto: ${id.toUpperCase()}`;
+      document.getElementById('lblRemoteLabel').innerText = `Remoto: ${nombreVisible || id.substring(0,8)}`;
       document.getElementById('screen-chats').classList.add('chat-abierto');
 
       document.querySelectorAll('.chat-item').forEach(item => item.classList.remove('active'));
@@ -991,13 +1191,30 @@
       transmitiendoPantalla = false;
     }
 
-    function inyectarAmigoListaLocal() {
-      let t = document.getElementById('inputPeerIdDestino').value.trim();
-      if(!t || !mySessionId) return;
-      let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
-      if(!list.includes(t)) { list.push(t); localStorage.setItem('wave_chats_' + mySessionId, JSON.stringify(list)); }
-      compilarRenderContactoLista();
-      cerrarCapaModal('connectModal');
+    async function inyectarAmigoListaLocal() {
+      const lblError = document.getElementById('lblErrorConectar');
+      lblError.innerText = '';
+      let nombre = document.getElementById('inputPeerIdDestino').value.trim().toLowerCase();
+      if(!nombre || !mySessionId) return;
+
+      if (nombre === miNombreUsuario) { lblError.innerText = "Ese eres tú."; return; }
+
+      try {
+        const snapUsername = await window.getDoc(window.doc(window.fsdb, "usernames", nombre));
+        if (!snapUsername.exists()) { lblError.innerText = "No existe ningún usuario con ese nombre."; return; }
+        const uidAmigo = snapUsername.data().uid;
+
+        let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
+        if (!list.some(c => c.uid === uidAmigo)) {
+          list.push({ uid: uidAmigo, username: nombre });
+          localStorage.setItem('wave_chats_' + mySessionId, JSON.stringify(list));
+        }
+        compilarRenderContactoLista();
+        document.getElementById('inputPeerIdDestino').value = '';
+        cerrarCapaModal('connectModal');
+      } catch (e) {
+        lblError.innerText = "Error al buscar. Intenta de nuevo.";
+      }
     }
 
     function compilarRenderContactoLista() {
@@ -1005,8 +1222,9 @@
       let list = JSON.parse(localStorage.getItem('wave_chats_' + mySessionId) || '[]');
       const container = document.getElementById('chatListContainer');
       container.innerHTML = '';
-      list.forEach(id => {
-        container.innerHTML += `<div class="chat-item" onclick="desplegarVentanaConversacionIndividual('${id}')"><div class="avatar">${id.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">${id.toUpperCase()}</h5></div>`;
+      list.forEach(contacto => {
+        const nombre = contacto.username || contacto.uid.substring(0,8);
+        container.innerHTML += `<div class="chat-item" onclick="desplegarVentanaConversacionIndividual('${contacto.uid}', '${nombre}')"><div class="avatar">${nombre.substring(0,2).toUpperCase()}</div><h5 style="color:white;margin-left:10px;">@${nombre}</h5></div>`;
       });
     }
 
@@ -1098,6 +1316,7 @@
     }
 
     function destruirCredencialesSesion() {
+      if (transmitiendoLiveActivo) finalizarTransmisionEnVivo();
       window.signOut(window.fbAuth);
       peerInstance = null;
       currentTargetPeerId = null;
