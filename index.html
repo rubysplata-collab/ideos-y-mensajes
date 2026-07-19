@@ -82,17 +82,25 @@
     .modal-box { background: var(--bg-sidebar); border: 1px solid var(--accent); padding: 25px; border-radius: 15px; width: 90%; max-width: 360px; text-align: center; }
     .modal-box input { width: 100%; padding: 10px; margin: 8px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); background: #000; color: white; text-align: center; outline: none; }
     
+    /* CORRECCIÓN DE DISEÑO MÓVIL Y VENTANAS ANGOSTAS */
     @media (max-width: 768px) {
-      body { flex-direction: column; }
+      body { flex-direction: column; overflow-y: auto; }
       .sidebar { width: 100%; height: 60px; flex-direction: row; justify-content: space-around; padding: 0; position: fixed; bottom: 0; z-index: 500; border-top: 1px solid rgba(255,255,255,0.08); border-right: none; }
-      .brand, .btn-solid:not(.chat-header style, .chats-master .btn-solid), .right-stream-panel { display: none !important; }
-      .side-menu { flex-direction: row; width: 100%; justify-content: space-around; }
-      .main-layout { height: calc(100% - 60px); }
+      .brand, .btn-solid:not(.chat-header style, .chats-master .btn-solid, #screen-lives .btn-solid), .right-stream-panel { display: none !important; }
+      .main-layout { height: calc(100% - 60px); flex: 1; display: flex; flex-direction: column; overflow: visible; }
+      .screen { height: auto; overflow-y: visible; padding-bottom: 80px; }
       
       #screen-chats.active { flex-direction: column; height: 100%; } 
       .chats-master { width: 100%; height: 35%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); }
       .chats-detail { width: 100%; height: 65%; }
-      .live-grid { grid-template-columns: 1fr; }
+      .live-grid { grid-template-columns: 1fr; height: auto; display: flex; flex-direction: column; gap: 20px; }
+      
+      /* Muestra el botón de buscar live en pantallas chicas */
+      #screen-lives .btn-solid {
+        display: flex !important;
+        margin-top: 10px;
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -190,7 +198,7 @@
         </div>
         <div style="background:var(--bg-sidebar); border-radius:12px; padding:15px; display:flex; flex-direction:column; gap:15px;">
           <h4>Unirse a un Live</h4>
-          <input type="text" id="inputBuscarLive" placeholder="Nombre del creador (Ej: xdxd)" style="width:100%; padding:10px; background:#000; color:white; border-radius:6px; border:1px solid var(--accent); outline:none;">
+          <input type="text" id="inputBuscarLive" placeholder="Nombre del creador (Ej: xdjheilery43)" style="width:100%; padding:10px; background:#000; color:white; border-radius:6px; border:1px solid var(--accent); outline:none;">
           <button class="btn-solid" onclick="verLiveAmigo()">Ver Transmisión</button>
           <div style="flex:1; border:1px solid rgba(255,255,255,0.05); border-radius:8px; padding:10px; font-size:0.85rem; color:var(--text-dim);" id="boxLiveStatus">
             Sin actividad de directo actual.
@@ -222,7 +230,7 @@
       <h2 style="color: var(--accent);">WaveTok Pro</h2>
       <p style="font-size: 0.85rem; color: var(--text-dim);">Ingresa tu nombre personalizado (Se antepondrá "XD-")</p>
       <input type="text" id="authCustomUsername" placeholder="Ej: rubysplata" maxlength="20" style="width: 100%; padding: 12px; border-radius: 8px; font-size: 1rem;" onkeypress="if(event.key==='Enter') autenticarCustomName()">
-      <button class="btn-solid" style="width: 100%; padding: 12px; font-size: 1rem; display: block !important; visibility: visible !important;" onclick="autenticarCustomName()">
+      <button class="btn-solid" style="width: 100%; padding: 12px; font-size: 1rem;" onclick="autenticarCustomName()">
         <i class="fa-solid fa-right-to-bracket"></i> Aceptar e Ingresar
       </button>
     </div>
@@ -288,7 +296,6 @@
       cambiarTemaInter(localStorage.getItem("w_theme") || 'dark');
       document.getElementById("selectTema").value = localStorage.getItem("w_theme") || 'dark';
 
-      // MEJORA EXTRA: Se eliminan guiones y caracteres especiales para comunicación P2P limpia
       const cleanPeerId = uAct.replace(/[^a-zA-Z0-9_]/g, "");
       peer = new Peer(cleanPeerId);
       
@@ -316,7 +323,7 @@
             circle.innerText = h.autor.substring(3,8); 
             circle.onclick = () => {
               if(h.fotoUrl) {
-                alert(`Historia de @${h.autor}:\n"${h.texto}"\n\n[Abriendo imagen adjunta]`);
+                alert(`Historia de @${h.autor}:\n"${h.texto}"`);
                 window.open(h.fotoUrl, '_blank');
               } else {
                 alert(`Historia de @${h.autor}:\n\n"${h.texto}"`);
@@ -332,10 +339,7 @@
     }
 
     window.iniciarLive = async (shareScreen) => {
-      // PREGUNTA EL NOMBRE PERSONALIZADO DEL EN VIVO POR ALERTA PROMPT
-      let tituloLive = prompt("Ingresa el título o descripción de tu transmisión:", "Mi Streaming en Vivo 🚀");
-      if(tituloLive === null) return; // Si cancela, no inicia
-      if(!tituloLive.trim()) tituloLive = "Transmisión en directo";
+      let tituloLive = "Mi Directo de WaveLive 🚀";
 
       try {
         if(shareScreen) {
@@ -344,7 +348,7 @@
           try {
             streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
           } catch(err) {
-            console.log("Fallo el audio completo, iniciando con backup multimedia seguro...");
+            console.log("Fallo audio, conectando cámara limpia de backup...");
             streamLive = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
           }
         }
@@ -352,25 +356,23 @@
         if (streamLive) {
           document.getElementById("liveVideoPlayer").srcObject = streamLive;
           document.getElementById("liveBadgeState").style.display = "block";
-          document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>Título: <b>${tituloLive}</b><br>Creador: <b>${uAct}</b>`;
+          document.getElementById("boxLiveStatus").innerHTML = `<b>¡Estás en vivo!</b><br>ID: <b>${uAct.replace(/[^a-zA-Z0-9_]/g, "")}</b>`;
           
           const liveRef = await addDoc(collection(db, "streaming_activos"), { creador: uAct, titulo: tituloLive, likes: 0, timestamp: serverTimestamp() });
           liveIdActualGlobal = liveRef.id;
           escucharLikesDelLive(liveIdActualGlobal);
           
-          // Resetea los íconos de los botones multimedia en pantalla
           document.getElementById("btnToggleMic").classList.remove("disabled");
           document.getElementById("btnToggleCam").classList.remove("disabled");
         }
       } catch(e) { 
         console.error(e);
-        alert("Acceso bloqueado. Por favor restablece los permisos desde el menú del navegador y recarga."); 
+        alert("Acceso bloqueado. Verifica los permisos de tu cámara."); 
       }
     };
 
-    // FUNCIONES COMPLEMENTARIAS PARA APAGAR/PRENDER MICRÓFONO O CÁMARA
     window.toggleMicMute = () => {
-      if(!streamLive) return alert("No estás transmitiendo actualmente.");
+      if(!streamLive) return;
       const audioTrack = streamLive.getAudioTracks()[0];
       if(audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
@@ -382,13 +384,11 @@
           btn.classList.add("disabled");
           btn.innerHTML = `<i class="fa-solid fa-microphone-slash"></i>`;
         }
-      } else {
-        alert("No se encontró ningún micrófono activo en esta transmisión.");
       }
     };
 
     window.toggleCamMute = () => {
-      if(!streamLive) return alert("No estás transmitiendo actualmente.");
+      if(!streamLive) return;
       const videoTrack = streamLive.getVideoTracks()[0];
       if(videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
@@ -406,29 +406,23 @@
     window.verLiveAmigo = () => {
       let targetId = document.getElementById("inputBuscarLive").value.trim();
       if(!targetId) return;
-      if(!targetId.toUpperCase().startsWith("XD-") && !targetId.toLowerCase().startsWith("xd")) targetId = "XD-" + targetId;
       document.getElementById("boxLiveStatus").innerHTML = "Sintonizando...";
       
       const dummyStream = new MediaStream();
-      // Elimina los guiones de la búsqueda para que conecte con el peer limpio 'xdxd'
       const idLimpioParaLlamar = targetId.replace(/[^a-zA-Z0-9_]/g, "");
       
       const call = peer.call(idLimpioParaLlamar, dummyStream, { metadata: { isLive: true } });
       call.on('stream', (remoteStream) => {
         document.getElementById("liveVideoPlayer").srcObject = remoteStream;
         document.getElementById("liveBadgeState").style.display = "block";
-        document.getElementById("boxLiveStatus").innerHTML = `Viendo a: <b>${targetId}</b>`;
-        liveIdActualGlobal = targetId; 
+        document.getElementById("boxLiveStatus").innerHTML = `Viendo a: <b>${idLimpioParaLlamar}</b>`;
+        liveIdActualGlobal = idLimpioParaLlamar; 
       });
     };
 
     window.darLikeAlLiveActual = () => {
-      if(!liveIdActualGlobal) { alert("No estás conectado a ningún live activo."); return; }
-      if(liveIdActualGlobal.toLowerCase().includes("xd")) {
-        alert("¡Le diste Me Gusta al Live del creador!");
-      } else {
-        updateDoc(doc(db, "streaming_activos", liveIdActualGlobal), { likes: increment(1) });
-      }
+      if(!liveIdActualGlobal) return;
+      alert("¡Le diste Me Gusta al Live!");
     };
 
     function escucharLikesDelLive(docId) {
@@ -438,26 +432,24 @@
       });
     }
 
-    function fCall(c) { callAct = c; activarPantalla('chats'); document.getElementById("screen-chats").classList.add("chat-abierto"); c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); }
+    function fCall(c) { callAct = c; activarPantalla('chats'); c.on('stream', s => document.getElementById("remoteVideo").srcObject = s); }
     window.llamarPeer = (v) => { navigator.mediaDevices.getUserMedia({video:v, audio:true}).then(s => { streamLoc = s; document.getElementById("localVideo").srcObject = s; fCall(peer.call(amigoSel.replace(/[^a-zA-Z0-9_]/g, ""), s)); }); };
 
     window.activarPantalla = (t) => {
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
       document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
       document.getElementById(`screen-${t}`).classList.add("active");
-      document.getElementById(`btn-${t}`)?.classList.add("active");
       if(t==='plataforma') playFeed(); else stopFeed();
     };
 
     window.abrirModal = (id) => document.getElementById(id).style.display = "flex";
-    window.cerrarModal = (id) => document.getElementById(id).style.none = "none";
+    window.cerrarModal = (id) => document.getElementById(id).style.none;
 
     window.subirVideo = () => {
       const f = document.getElementById("inputLocalVideo").files[0], u = document.getElementById("inputUrlVideo").value.trim(), c = document.getElementById("inputCaption").value;
       const save = (url) => addDoc(collection(db, "videos"), { autor: uAct, url, caption: c || "Nuevo Video", likes: 0, timestamp: serverTimestamp() }).then(() => {
         cerrarModal('modalSubirVideo');
         idxFeed = 0;
-        alert("¡Video publicado con éxito en el Feed!");
       });
       if(f) { const r = new FileReader(); r.onload = (e) => save(e.target.result); r.readAsDataURL(f); } else if(u) save(u);
     };
@@ -465,25 +457,12 @@
     window.publicarHistoria = () => {
       const f = document.getElementById("inputFotoHistoria").files[0];
       const txt = document.getElementById("inputTextoHistoria").value.trim();
-      
       const enviarHistoria = (fotoUrl = "") => {
-        addDoc(collection(db, "historias"), { autor: uAct, texto: txt || "Historia de foto", fotoUrl, timestamp: serverTimestamp() }).then(() => { 
+        addDoc(collection(db, "historias"), { autor: uAct, texto: txt || "", fotoUrl, timestamp: serverTimestamp() }).then(() => { 
           cerrarModal('modalCrearHistoria'); 
-          document.getElementById("inputTextoHistoria").value = "";
-          document.getElementById("inputFotoHistoria").value = "";
-          alert("¡Historia publicada exitosamente!");
         });
       };
-
-      if(f) {
-        const r = new FileReader();
-        r.onload = (e) => enviarHistoria(e.target.result);
-        r.readAsDataURL(f);
-      } else if(txt) {
-        enviarHistoria("");
-      } else {
-        alert("Por favor escribe una descripción o adjunta una imagen.");
-      }
+      if(f) { const r = new FileReader(); r.onload = (e) => enviarHistoria(e.target.result); r.readAsDataURL(f); } else if(txt) enviarHistoria("");
     };
 
     let fVids = [];
@@ -491,12 +470,6 @@
       const t = document.getElementById("inputBuscar").value.toLowerCase();
       fVids = t ? vids.filter(v => v.caption.toLowerCase().includes(t)) : [...vids];
       const i = document.getElementById("tokFeedIterator"); i.innerHTML = "";
-      
-      if(fVids.length === 0) {
-        i.innerHTML = `<div style="color:white; text-align:center; width:100%; margin-top:50px;">Aún no hay videos para mostrar. ¡Sube el primero!</div>`;
-        return;
-      }
-
       fVids.forEach((v, idx) => {
         const p = document.createElement("div"); p.className = "tok-post"; p.id = `vref-${idx}`;
         p.innerHTML = `<video class="tok-video" src="${v.url}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
@@ -515,22 +488,19 @@
         idxFeed += d; 
         document.getElementById(`vref-${idxFeed}`).scrollIntoView({behavior:"smooth"}); 
         playFeed(); 
-        toggleComments(false); 
       } 
     };
     
     function playFeed() { stopFeed(); document.getElementById(`vref-${idxFeed}`)?.querySelector("video")?.play().catch(()=>{}); }
     function stopFeed() { document.querySelectorAll(".tok-video").forEach(v => v.pause()); }
 
-    let currentVidId = null;
     window.toggleComments = (show, vidId = null) => {
       const d = document.getElementById("commentsAreaDrawer");
-      if(show) { d.classList.add("open"); currentVidId = vidId; cargarComentarios(vidId); } else { d.classList.remove("open"); if(snapComentarios) snapComentarios(); }
+      if(show) { d.classList.add("open"); cargarComentarios(vidId); } else d.classList.remove("open");
     };
 
     function cargarComentarios(vidId) {
-      if(snapComentarios) snapComentarios();
-      snapComentarios = onSnapshot(query(collection(db, "videos", vidId, "comentarios"), orderBy("timestamp", "asc")), (s) => {
+      onSnapshot(query(collection(db, "videos", vidId, "comentarios"), orderBy("timestamp", "asc")), (s) => {
         const b = document.getElementById("boxCommentsList"); b.innerHTML = "";
         s.forEach(doc => { const c = doc.data(); b.innerHTML += `<div class="comment-item"><b>@${c.autor}:</b> ${c.texto}</div>`; });
       });
@@ -557,9 +527,7 @@
       document.getElementById("chatInputBarArea").style.display = "flex";
       document.getElementById("targetChatName").innerText = a; 
       if(snapMsg) snapMsg();
-      
       const sId = [uAct, a].sort().join("___");
-      
       snapMsg = onSnapshot(query(collection(db, "chats_privados", sId, "mensajes"), orderBy("timestamp", "asc")), (s) => {
         const b = document.getElementById("msgBox"); b.innerHTML = "";
         s.forEach(d => { 
@@ -569,7 +537,6 @@
           div.innerText = m.contenido; 
           b.appendChild(div); 
         });
-        setTimeout(() => { b.scrollTop = b.scrollHeight; }, 100);
       });
     }
 
@@ -577,12 +544,7 @@
       const i = document.getElementById("chatInput"); 
       if(!i.value.trim() || !amigoSel) return;
       const sId = [uAct, amigoSel].sort().join("___");
-      
-      addDoc(collection(db, "chats_privados", sId, "mensajes"), { 
-        remitente: uAct, 
-        contenido: i.value.trim(), 
-        timestamp: serverTimestamp() 
-      });
+      addDoc(collection(db, "chats_privados", sId, "mensajes"), { remitente: uAct, contenido: i.value.trim(), timestamp: serverTimestamp() });
       i.value = "";
     };
   </script>
