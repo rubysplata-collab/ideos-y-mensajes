@@ -754,10 +754,13 @@
       if (peerInstance) return; // evita reinicializar si ya hay una conexión activa
       peerInstance = new Peer(idMio, { config: { 'iceServers': [
         { 'urls': 'stun:stun.l.google.com:19302' },
+        { 'urls': 'stun:stun1.l.google.com:19302' },
         { 'urls': 'turn:openrelay.metered.ca:80', 'username': 'openrelayproject', 'credential': 'openrelayproject' },
         { 'urls': 'turn:openrelay.metered.ca:443', 'username': 'openrelayproject', 'credential': 'openrelayproject' },
-        { 'urls': 'turn:openrelay.metered.ca:443?transport=tcp', 'username': 'openrelayproject', 'credential': 'openrelayproject' }
-      ] } });
+        { 'urls': 'turn:openrelay.metered.ca:443?transport=tcp', 'username': 'openrelayproject', 'credential': 'openrelayproject' },
+        { 'urls': 'turn:relay1.expressturn.com:3478', 'username': 'efQXV3M3XVUJVLR4DA', 'credential': 'v4Q7Xy2reN0Aq9vI' }
+      ] }, debug: 1 });
+      peerInstance.on('error', (err) => { console.log('PeerJS error:', err.type, err); });
       peerInstance.on('call', (incomingCall) => {
         // Un espectador entrando a mi transmisión en vivo: respondo automático con mi cámara, sin diálogo de confirmación.
         if (incomingCall.metadata && incomingCall.metadata.isLive) {
