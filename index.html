@@ -236,6 +236,7 @@
       <div class="menu-item" id="btn-nav-lives" onclick="activarFiltroPantalla('lives')"><i class="fa-solid fa-tower-broadcast" style="color:#e91e63"></i> <span>En vivo</span></div>
       <div class="menu-item" id="btn-nav-juegos" onclick="activarFiltroPantalla('juegos')"><i class="fa-solid fa-gamepad" style="color:#00e676"></i> <span>Juegos</span></div>
       <div class="menu-item" id="btn-nav-perfil" onclick="activarFiltroPantalla('perfil')"><i class="fa-solid fa-user"></i> <span>Mi Perfil</span></div>
+      <div class="menu-item" id="btn-nav-ia" onclick="activarFiltroPantalla('ia')"><i class="fa-solid fa-robot" style="color:#8ab4f8;"></i> <span>Asistente IA</span></div>
     </nav>
     <div class="separator">Herramientas</div>
     <div class="side-menu">
@@ -397,6 +398,19 @@
       </div>
     </div>
 
+    <div class="screen" id="screen-ia" style="flex-direction: column; padding:0;">
+      <div class="top-bar-feed" style="width:100%;">
+        <h3><i class="fa-solid fa-robot" style="color:#8ab4f8;"></i> Asistente IA (Gemini)</h3>
+        <p onclick="abrirCapaModal('modalConfigurarApiKeyIA')" style="color:var(--accent); font-size:0.8rem; cursor:pointer; text-decoration:underline;">Configurar mi API Key</p>
+      </div>
+      <div id="chatIAMensajes" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; max-width:700px; margin:0 auto; width:100%;"></div>
+      <div style="padding:15px 20px; display:flex; gap:10px; max-width:700px; margin:0 auto; width:100%;">
+        <input type="text" id="inputMensajeIA" placeholder="Escríbele algo a Gemini..." style="flex:1; background:rgba(255,255,255,0.05); border:none; padding:12px 18px; border-radius:25px; color:white; outline:none;" onkeypress="if(event.key==='Enter') enviarMensajeAsistenteIA()">
+        <button class="btn-solid" style="width:auto; padding:10px 20px; background:#8ab4f8; color:black;" onclick="enviarMensajeAsistenteIA()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+    </div>
+
+
   </div>
 
   <!-- MODAL DE AUTENTICACIÓN (registro / inicio de sesión) -->
@@ -486,6 +500,18 @@
       </div>
       <div id="listaVideosPerfilPublico" style="max-height:50vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
       <button class="btn-solid" style="margin-top:15px;" onclick="cerrarCapaModal('modalPerfilPublico')">Cerrar</button>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="modalConfigurarApiKeyIA">
+    <div class="modal-box">
+      <h3 style="color:#8ab4f8;"><i class="fa-solid fa-key"></i> Tu API Key de Gemini</h3>
+      <p style="font-size:0.8rem; color:var(--text-dim); margin:10px 0;">Es gratuita. Se guarda solo en este navegador — nunca la enviamos a ningún servidor nuestro, así que es tu responsabilidad no compartirla.</p>
+      <input type="password" id="inputApiKeyGemini" placeholder="Pega tu API Key aquí">
+      <div class="auth-error-msg" id="lblErrorApiKeyIA"></div>
+      <button class="btn-solid" style="background:#8ab4f8; color:black;" onclick="guardarApiKeyGemini()">Guardar</button>
+      <a href="https://www.youtube.com/results?search_query=como+conseguir+api+key+de+google+gemini+gratis" target="_blank" rel="noopener" class="btn-link" style="display:block; margin-top:12px;"><i class="fa-brands fa-youtube"></i> ¿No sabes cómo conseguirla? Ver tutorial</a>
+      <p onclick="cerrarCapaModal('modalConfigurarApiKeyIA')" style="margin-top:12px; font-size:0.85rem; cursor:pointer; color:var(--text-dim)">Cerrar</p>
     </div>
   </div>
 
@@ -1086,6 +1112,79 @@
         ctx.fillStyle = i === 0 ? '#00e676' : '#ffeb3b';
         ctx.fillRect(seg.x * SNAKE_TAM_CELDA, seg.y * SNAKE_TAM_CELDA, SNAKE_TAM_CELDA - 2, SNAKE_TAM_CELDA - 2);
       });
+    }
+
+    // ===================== ASISTENTE IA (Gemini, con API Key propia del usuario) =====================
+
+    function obtenerApiKeyGemini() {
+      if (!mySessionId) return '';
+      return localStorage.getItem('wt_gemini_key_' + mySessionId) || '';
+    }
+
+    function guardarApiKeyGemini() {
+      const key = document.getElementById('inputApiKeyGemini').value.trim();
+      const lblError = document.getElementById('lblErrorApiKeyIA');
+      lblError.innerText = '';
+      if (!key) { lblError.innerText = "Pega una API Key válida."; return; }
+      if (!mySessionId) { lblError.innerText = "Debes iniciar sesión."; return; }
+      localStorage.setItem('wt_gemini_key_' + mySessionId, key);
+      document.getElementById('inputApiKeyGemini').value = '';
+      cerrarCapaModal('modalConfigurarApiKeyIA');
+      renderMensajeIA('sistema', 'API Key guardada. Ya puedes escribirle a Gemini.');
+    }
+
+    function renderMensajeIA(rol, texto) {
+      const box = document.getElementById('chatIAMensajes');
+      const esUsuario = rol === 'usuario';
+      const esSistema = rol === 'sistema';
+      const burbuja = document.createElement('div');
+      burbuja.style.cssText = `max-width:75%; padding:10px 15px; border-radius:12px; font-size:0.9rem; ${esUsuario ? 'align-self:flex-end; background:var(--bubble-sent); color:white;' : esSistema ? 'align-self:center; background:rgba(255,255,255,0.06); color:var(--text-dim); font-size:0.8rem;' : 'align-self:flex-start; background:var(--bubble-recv); color:white;'}`;
+      burbuja.innerText = texto;
+      box.appendChild(burbuja);
+      box.scrollTop = box.scrollHeight;
+    }
+
+    let historialChatIA = [];
+
+    async function enviarMensajeAsistenteIA() {
+      const input = document.getElementById('inputMensajeIA');
+      const texto = input.value.trim();
+      if (!texto) return;
+
+      const apiKey = obtenerApiKeyGemini();
+      if (!apiKey) {
+        renderMensajeIA('sistema', 'Primero configura tu API Key de Gemini (arriba a la derecha).');
+        abrirCapaModal('modalConfigurarApiKeyIA');
+        return;
+      }
+
+      renderMensajeIA('usuario', texto);
+      historialChatIA.push({ role: 'user', parts: [{ text: texto }] });
+      input.value = '';
+      renderMensajeIA('sistema', 'Gemini está escribiendo...');
+
+      try {
+        const respuesta = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: historialChatIA })
+        });
+        const data = await respuesta.json();
+
+        document.getElementById('chatIAMensajes').lastChild.remove(); // quita el "escribiendo..."
+
+        if (data.error) {
+          renderMensajeIA('sistema', 'Error: ' + (data.error.message || 'No se pudo contactar a Gemini. Revisa tu API Key.'));
+          return;
+        }
+
+        const textoRespuesta = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No obtuve respuesta.';
+        renderMensajeIA('asistente', textoRespuesta);
+        historialChatIA.push({ role: 'model', parts: [{ text: textoRespuesta }] });
+      } catch (e) {
+        document.getElementById('chatIAMensajes').lastChild.remove();
+        renderMensajeIA('sistema', 'Error de conexión. Revisa tu internet o tu API Key.');
+      }
     }
 
     function activarFiltroPantalla(pantalla) {
