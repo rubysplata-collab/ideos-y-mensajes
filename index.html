@@ -1108,38 +1108,172 @@ const AppBrowser = {
   id: 'browser',
   title: 'Navegador',
   icon: 'browser',
-  width: 720, height: 480,
+  width: 780, height: 520,
   render(body) {
     body.classList.add('app-fill');
     body.innerHTML = `
       <style>
         .br { display:flex; flex-direction:column; height:100%; }
-        .br-bar { display:flex; gap:8px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--border-soft); }
-        .br-bar button { background:transparent; border:none; color:var(--text-primary); font-size:14px; cursor:pointer; padding:4px 8px; border-radius:6px; }
-        .br-bar button:hover { background:rgba(255,255,255,0.1); }
-        .br-bar input { flex:1; background:rgba(255,255,255,0.06); border:1px solid var(--border-soft); border-radius:20px; padding:7px 14px; color:var(--text-primary); font-size:12.5px; outline:none; }
-        .br-page { flex:1; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; color:var(--text-secondary); text-align:center; padding:30px; }
-        .br-page b { color:var(--text-primary); font-size:16px; }
+        .br-bar { display:flex; gap:6px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--border-soft); }
+        .br-bar button { background:transparent; border:none; color:var(--text-primary); font-size:14px; cursor:pointer; padding:5px 9px; border-radius:6px; display:flex; align-items:center; justify-content:center; }
+        .br-bar button:hover:not(:disabled) { background:rgba(255,255,255,0.1); }
+        .br-bar button:disabled { opacity:0.3; cursor:default; }
+        .br-bar button svg { width:15px; height:15px; }
+        .br-url-wrap { flex:1; display:flex; align-items:center; background:rgba(255,255,255,0.06); border:1px solid var(--border-soft); border-radius:20px; padding:0 12px; }
+        .br-url-wrap.loading { border-color: var(--accent-light); }
+        .br-url-wrap input { flex:1; background:transparent; border:none; outline:none; color:var(--text-primary); font-size:12.5px; padding:7px 6px; }
+        .br-go { color:var(--text-secondary); font-size:11px; }
+        .br-newtab { white-space:nowrap; font-size:11px !important; border:1px solid var(--border-soft); }
+        .br-body { flex:1; position:relative; background:#fff; }
+        .br-frame { width:100%; height:100%; border:none; display:block; }
+        .br-start { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; background:var(--mica-window); color:var(--text-primary); }
+        .br-start .logo svg { width:64px; height:64px; }
+        .br-start h2 { margin:0; font-weight:500; font-size:20px; }
+        .br-links { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:520px; }
+        .br-links button { background:rgba(255,255,255,0.07); border:1px solid var(--border-soft); color:var(--text-primary); padding:8px 14px; border-radius:8px; font-size:12.5px; cursor:pointer; }
+        .br-links button:hover { background:rgba(255,255,255,0.14); }
+        .br-hint { font-size:11.5px; color:var(--text-secondary); max-width:440px; text-align:center; line-height:1.5; }
+        .br-blocked { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; background:var(--mica-window); color:var(--text-primary); padding:30px; text-align:center; }
+        .br-blocked.show { display:flex; }
+        .br-blocked b { font-size:15px; }
+        .br-blocked p { color:var(--text-secondary); font-size:12.5px; max-width:420px; line-height:1.5; margin:0; }
+        .br-blocked a { color: var(--accent-light); }
       </style>
       <div class="br">
         <div class="br-bar">
-          <button>←</button><button>→</button><button>⟳</button>
-          <input id="br-url" value="webos://inicio" />
+          <button id="br-back" title="Atrás" disabled></button>
+          <button id="br-fwd" title="Adelante" disabled></button>
+          <button id="br-reload" title="Recargar"></button>
+          <button id="br-home" title="Inicio"></button>
+          <div class="br-url-wrap" id="br-url-wrap">
+            <input id="br-url" placeholder="Escribe una URL o búsqueda y presiona Enter" />
+          </div>
+          <button class="br-newtab" id="br-open-newtab" title="Abrir en una pestaña nueva">Abrir en pestaña ↗</button>
         </div>
-        <div class="br-page">
-          <div style="font-size:40px;">🌐</div>
-          <b>Navegador de WebOS 11</b>
-          <div>Este es un navegador simulado sin conexión real a internet.<br>Está pensado como demostración dentro del escritorio.</div>
+        <div class="br-body">
+          <div class="br-start" id="br-start">
+            <div class="logo"></div>
+            <h2>Navegador de WebOS 11</h2>
+            <div class="br-links" id="br-quick-links"></div>
+            <div class="br-hint">Escribe una dirección arriba y presiona Enter para navegar de verdad. Algunos sitios (Google, YouTube, redes sociales) no permiten mostrarse dentro de otra página por seguridad — en esos casos usa "Abrir en pestaña nueva".</div>
+          </div>
+          <div class="br-blocked" id="br-blocked">
+            <b>Este sitio no permite mostrarse aquí</b>
+            <p>Muchos sitios bloquean ser incrustados en otras páginas (cabecera X-Frame-Options / CSP). Ábrelo directamente en una pestaña nueva.</p>
+          </div>
+          <iframe class="br-frame" id="br-frame" style="display:none"></iframe>
         </div>
       </div>
     `;
-    const input = body.querySelector('#br-url');
-    input.addEventListener('keydown', e => {
+
+    const urlInput = body.querySelector('#br-url');
+    const urlWrap = body.querySelector('#br-url-wrap');
+    const frame = body.querySelector('#br-frame');
+    const startPage = body.querySelector('#br-start');
+    const blockedPage = body.querySelector('#br-blocked');
+    const backBtn = body.querySelector('#br-back');
+    const fwdBtn = body.querySelector('#br-fwd');
+    const reloadBtn = body.querySelector('#br-reload');
+    const homeBtn = body.querySelector('#br-home');
+    const newTabBtn = body.querySelector('#br-open-newtab');
+    const quickLinks = body.querySelector('#br-quick-links');
+
+    backBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    fwdBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    reloadBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 1 2.3 5.6M4 12V6m0 6h6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    homeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
+    startPage.querySelector('.logo').innerHTML = ICONS.browser;
+
+    const suggested = [
+      { label: 'example.com', url: 'https://example.com' },
+      { label: 'Wikipedia', url: 'https://www.wikipedia.org' },
+      { label: 'MDN Web Docs', url: 'https://developer.mozilla.org' },
+      { label: 'Anthropic', url: 'https://www.anthropic.com' }
+    ];
+    suggested.forEach(s => {
+      const b = document.createElement('button');
+      b.textContent = s.label;
+      b.addEventListener('click', () => navigate(s.url));
+      quickLinks.appendChild(b);
+    });
+
+    let stack = [];
+    let index = -1;
+
+    function normalize(raw) {
+      const v = raw.trim();
+      if (!v) return null;
+      const looksLikeUrl = /^https?:\/\//i.test(v) || (/^[\w-]+(\.[\w-]+)+([/?#].*)?$/i.test(v) && !v.includes(' '));
+      if (looksLikeUrl) return /^https?:\/\//i.test(v) ? v : 'https://' + v;
+      return 'https://duckduckgo.com/?q=' + encodeURIComponent(v);
+    }
+
+    function showStart() {
+      startPage.style.display = 'flex';
+      blockedPage.classList.remove('show');
+      frame.style.display = 'none';
+      urlInput.value = '';
+    }
+
+    function showBlockedHint(url) {
+      blockedPage.classList.add('show');
+      blockedPage.querySelector('p').innerHTML =
+        `Muchos sitios bloquean ser incrustados en otras páginas (cabecera X-Frame-Options / CSP).<br><a href="${url}" target="_blank" rel="noopener">Abrir ${url} en una pestaña nueva ↗</a>`;
+    }
+
+    function navigate(url, pushHistory = true) {
+      startPage.style.display = 'none';
+      blockedPage.classList.remove('show');
+      frame.style.display = 'block';
+      urlWrap.classList.add('loading');
+      urlInput.value = url;
+
+      // Heurística: si tras un momento el iframe no reporta carga válida, no forzamos error
+      // (por seguridad cross-origin no podemos leer el contenido), solo dejamos accesible
+      // el botón de "abrir en pestaña nueva" y un aviso si el usuario ve pantalla en blanco.
+      frame.src = url;
+
+      if (pushHistory) {
+        stack = stack.slice(0, index + 1);
+        stack.push(url);
+        index = stack.length - 1;
+      }
+      updateNavButtons();
+      newTabBtn.onclick = () => window.open(url, '_blank', 'noopener');
+    }
+
+    frame.addEventListener('load', () => {
+      urlWrap.classList.remove('loading');
+    });
+    frame.addEventListener('error', () => {
+      urlWrap.classList.remove('loading');
+      showBlockedHint(frame.src);
+    });
+
+    function updateNavButtons() {
+      backBtn.disabled = index <= 0;
+      fwdBtn.disabled = index >= stack.length - 1;
+    }
+
+    urlInput.addEventListener('keydown', e => {
       if (e.key === 'Enter') {
-        body.querySelector('.br-page b').textContent = 'No se puede conectar';
-        body.querySelector('.br-page div:last-child').textContent = `No hay acceso real a internet en esta simulación (${input.value}).`;
+        const target = normalize(urlInput.value);
+        if (target) navigate(target);
       }
     });
+
+    backBtn.addEventListener('click', () => {
+      if (index > 0) { index -= 1; navigate(stack[index], false); }
+    });
+    fwdBtn.addEventListener('click', () => {
+      if (index < stack.length - 1) { index += 1; navigate(stack[index], false); }
+    });
+    reloadBtn.addEventListener('click', () => {
+      if (stack[index]) navigate(stack[index], false);
+    });
+    homeBtn.addEventListener('click', showStart);
+
+    showStart();
   }
 };
 
