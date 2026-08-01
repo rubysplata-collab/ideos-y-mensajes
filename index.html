@@ -153,6 +153,16 @@
     border-radius:8px;
     border:1px solid rgba(255,92,114,.3);
   }
+  #clearHistBtn{
+    background:transparent;
+    color:var(--muted);
+    font-size:14px;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #2a2f42;
+    margin-left:6px;
+  }
+  #clearHistBtn:hover{color:var(--danger);border-color:rgba(255,92,114,.3);}
   #messages{
     flex:1;
     overflow-y:auto;
@@ -318,7 +328,8 @@
         <div class="peer-status">● en línea</div>
       </div>
     </div>
-    <button id="disconnectBtn" onclick="disconnectChat()">Salir</button>
+    <button id="disconnectBtn" onclick="disconnectChat()" title="Salir del chat">Salir</button>
+    <button id="clearHistBtn" onclick="clearCurrentHistory()" title="Borrar historial guardado">🗑</button>
   </div>
 
   <div id="messages"></div>
@@ -463,12 +474,61 @@ function goToChat(){
   chatScreen.style.display = 'flex';
   peerLabel.textContent = 'Conectado con ' + conn.peer;
   peerAvatar.textContent = conn.peer.charAt(1).toUpperCase();
+  loadHistory(conn.peer);
   addSystemMsg('Conexión establecida 🎉');
+}
+
+/* ---------- AUTOGUARDADO DE MENSAJES (localStorage) ---------- */
+
+function historyKey(peerId){
+  return 'chat_history_' + peerId;
+}
+
+function loadHistory(peerId){
+  const raw = localStorage.getItem(historyKey(peerId));
+  if (!raw) return;
+  try{
+    const msgs = JSON.parse(raw);
+    msgs.forEach(m => addBubble(m.payload, m.isMe, m.type, false, m.time));
+    if (msgs.length){
+      addSystemMsg('Historial cargado (' + msgs.length + ' mensajes)');
+    }
+  } catch(e){
+    console.error('No se pudo leer el historial', e);
+  }
+}
+
+function saveMessage(peerId, msg){
+  const raw = localStorage.getItem(historyKey(peerId));
+  let msgs = [];
+  if (raw){
+    try{ msgs = JSON.parse(raw); } catch(e){ msgs = []; }
+  }
+  msgs.push(msg);
+  // límite de seguridad para no saturar localStorage
+  if (msgs.length > 500) msgs = msgs.slice(msgs.length - 500);
+  try{
+    localStorage.setItem(historyKey(peerId), JSON.stringify(msgs));
+  } catch(e){
+    console.warn('No se pudo guardar el mensaje (almacenamiento lleno)', e);
+  }
+}
+
+function clearHistory(peerId){
+  localStorage.removeItem(historyKey(peerId));
 }
 
 function disconnectChat(){
   if (conn) conn.close();
   location.reload();
+}
+
+function clearCurrentHistory(){
+  if (!conn || !conn.peer) return;
+  if (!confirm('¿Borrar el historial guardado de esta conversación en este dispositivo?')) return;
+  clearHistory(conn.peer);
+  messagesEl.innerHTML = '';
+  addSystemMsg('Historial borrado 🗑');
 }
 
 /* ---------- ENVÍO Y RECEPCIÓN ---------- */
@@ -481,7 +541,7 @@ function addSystemMsg(text){
   scrollDown();
 }
 
-function addBubble(content, isMe, type){
+function addBubble(content, isMe, type, shouldSave = true, savedTime = null){
   const row = document.createElement('div');
   row.className = 'msg-row ' + (isMe ? 'me' : 'other');
 
@@ -504,14 +564,19 @@ function addBubble(content, isMe, type){
     bubble.appendChild(audio);
   }
 
+  const timeStr = savedTime || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   const time = document.createElement('div');
   time.className = 'msg-time';
-  time.textContent = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  time.textContent = timeStr;
   bubble.appendChild(time);
 
   row.appendChild(bubble);
   messagesEl.appendChild(row);
   scrollDown();
+
+  if (shouldSave && conn && conn.peer){
+    saveMessage(conn.peer, { type, payload: content, isMe, time: timeStr });
+  }
 }
 
 function scrollDown(){
