@@ -398,11 +398,12 @@ function initPeer(useBackup){
     }
   };
   if (useBackup){
-    // servidor de señalización alternativo por si 0.peerjs.com está bloqueado/caído
-    opts.host = 'peerjs-server.herokuapp.com';
+    // servidor de señalización alternativo (peerjs.com oficial, distinto al 0.peerjs.com por defecto)
+    opts.host = 'peerjs.com';
     opts.secure = true;
     opts.port = 443;
     opts.path = '/';
+    opts.key = 'peerjs';
   }
   peer = new Peer(id, opts);
   bindPeerEvents(useBackup);
@@ -748,4 +749,5 @@ recordBtn.onclick = async () => {
 initPeer();
 </script>
 </body>
-</html>
+</html>y-content:center;
+
