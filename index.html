@@ -398,11 +398,10 @@ function initPeer(useBackup){
     }
   };
   if (useBackup){
-    // servidor de señalización alternativo (peerjs.com oficial, distinto al 0.peerjs.com por defecto)
     opts.host = 'peerjs.com';
     opts.secure = true;
     opts.port = 443;
-    opts.path = '/';
+    opts.path = '/peerjs';
     opts.key = 'peerjs';
   }
   peer = new Peer(id, opts);
