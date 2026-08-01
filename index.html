@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat P2P por Código</title>
+<title>tiktok con foto xd</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 <style>
   :root{
@@ -309,7 +309,7 @@
   <div class="code-box">
     <label>Tu código (compártelo)</label>
     <div class="my-code" id="myCode" onclick="copyMyCode()">generando…</div>
-    <div class="copy-hint">Toca para copiar</div>
+    <div class="copy-hint">Toca para copiar &nbsp;·&nbsp; <a href="#" onclick="regenerateCode();return false;" style="color:var(--muted);">regenerar código</a></div>
   </div>
 
   <input type="text" id="peerCodeInput" placeholder="Pega aquí el código de tu amigo">
@@ -375,20 +375,45 @@ const peerLabel = document.getElementById('peerLabel');
 const peerAvatar = document.getElementById('peerAvatar');
 
 function shortCode(){
-  // genera un código corto y fácil de compartir (6 caracteres)
-  return 'x' + Math.random().toString(36).substr(2,6);
+  // reutiliza el código guardado en este navegador si ya existe,
+  // así el código no cambia cada vez que se entra a la página
+  const saved = localStorage.getItem('my_peer_code');
+  if (saved) return saved;
+  const code = 'x' + Math.random().toString(36).substr(2,6) + Math.random().toString(36).substr(2,4);
+  localStorage.setItem('my_peer_code', code);
+  return code;
 }
 
 function initPeer(){
   const id = shortCode();
   peer = new Peer(id, {
-    debug: 1
+    debug: 1,
+    config: {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        {
+          urls: 'turn:openrelay.metered.ca:80',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        },
+        {
+          urls: 'turn:openrelay.metered.ca:443',
+          username: 'openrelayproject',
+          credential: 'openrelayproject'
+        }
+      ]
+    }
   });
+  bindPeerEvents();
+}
 
+function bindPeerEvents(){
   peer.on('open', (id) => {
     myId = id;
     myCodeEl.textContent = id;
     connectBtn.disabled = false;
+    connectBtn.innerHTML = 'Conectar';
     statusMsg.textContent = 'Listo. Comparte tu código o pega uno para conectar.';
     statusMsg.className = 'ok';
   });
@@ -405,13 +430,35 @@ function initPeer(){
   peer.on('error', (err) => {
     console.error(err);
     if (err.type === 'peer-unavailable') {
-      statusMsg.textContent = 'Ese código no existe o no está disponible.';
+      statusMsg.textContent = 'Ese código no existe, está mal escrito o el otro usuario no tiene la página abierta.';
       statusMsg.className = 'error';
       connectBtn.disabled = false;
       connectBtn.innerHTML = 'Conectar';
     } else if (err.type === 'unavailable-id') {
-      // reintentar con otro id
-      initPeer();
+      // el código ya está "ocupado" en el servidor (p.ej. quedó una sesión
+      // anterior colgada). Esperamos un poco y reintentamos con el MISMO id
+      // para que el código no cambie.
+      statusMsg.textContent = 'Reconectando con tu código…';
+      statusMsg.className = '';
+      setTimeout(() => {
+        peer.destroy();
+        peer = new Peer(localStorage.getItem('my_peer_code'), {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+              { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+            ]
+          }
+        });
+        bindPeerEvents();
+      }, 2000);
+    } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed'){
+      statusMsg.textContent = 'Problema de red con el servidor de conexión, reintentando…';
+      statusMsg.className = 'error';
+      setTimeout(() => { if (peer.disconnected) peer.reconnect(); }, 2000);
     } else {
       statusMsg.textContent = 'Error de conexión: ' + err.type;
       statusMsg.className = 'error';
@@ -421,7 +468,7 @@ function initPeer(){
   peer.on('disconnected', () => {
     statusMsg.textContent = 'Conexión al servidor perdida, reintentando…';
     statusMsg.className = 'error';
-    peer.reconnect();
+    setTimeout(() => { if (peer && peer.disconnected && !peer.destroyed) peer.reconnect(); }, 1000);
   });
 }
 
@@ -431,6 +478,18 @@ function copyMyCode(){
     statusMsg.textContent = '¡Código copiado!';
     statusMsg.className = 'ok';
   }).catch(() => {});
+}
+
+function regenerateCode(){
+  if (!confirm('¿Generar un código nuevo? El código actual dejará de funcionar.')) return;
+  localStorage.removeItem('my_peer_code');
+  if (peer) peer.destroy();
+  myCodeEl.textContent = 'generando…';
+  connectBtn.disabled = true;
+  connectBtn.innerHTML = 'Conectar';
+  statusMsg.textContent = 'Generando nuevo código…';
+  statusMsg.className = '';
+  initPeer();
 }
 
 function connectToPeer(){
@@ -448,6 +507,16 @@ function connectToPeer(){
 
   conn = peer.connect(code, { reliable: true });
   setupConnection();
+
+  // si en 12 segundos no abrió, avisamos (puede ser un problema de red/firewall)
+  setTimeout(() => {
+    if (conn && !conn.open){
+      statusMsg.textContent = 'Está tardando más de lo normal. Verifica que tu amiga tenga la página abierta y el código bien escrito, o intenten con otra red (algunos WiFi/datos bloquean la conexión directa).';
+      statusMsg.className = 'error';
+      connectBtn.disabled = false;
+      connectBtn.innerHTML = 'Conectar';
+    }
+  }, 12000);
 }
 
 function setupConnection(){
