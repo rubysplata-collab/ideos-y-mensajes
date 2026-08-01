@@ -221,6 +221,43 @@
     width:220px;
     height:36px;
   }
+  .bubble video{
+    max-width:240px;
+    max-height:280px;
+    border-radius:10px;
+    display:block;
+    margin-top:4px;
+  }
+  .file-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:rgba(255,255,255,.06);
+    border-radius:10px;
+    padding:10px 12px;
+    margin-top:4px;
+    text-decoration:none;
+    color:inherit;
+    min-width:180px;
+  }
+  .file-card .file-icon{
+    font-size:26px;
+    flex-shrink:0;
+  }
+  .file-card .file-info{
+    overflow:hidden;
+  }
+  .file-card .file-name{
+    font-size:13px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .file-card .file-size{
+    font-size:11px;
+    color:var(--muted);
+  }
   .msg-time{
     font-size:10px;
     color:var(--muted);
@@ -434,8 +471,8 @@
   <div id="messages"></div>
 
   <div id="inputBar">
-    <button class="icon-btn" id="attachBtn" title="Enviar foto">📷</button>
-    <input type="file" id="fileInput" accept="image/*">
+    <button class="icon-btn" id="attachBtn" title="Enviar foto, video, PDF o archivo">📎</button>
+    <input type="file" id="fileInput" accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip,.rar,*/*">
     <textarea id="textInput" rows="1" placeholder="Escribe un mensaje…"></textarea>
     <button class="icon-btn" id="recordBtn" title="Grabar audio">🎤</button>
     <button class="icon-btn" id="sendBtn" title="Enviar">➤</button>
@@ -660,6 +697,36 @@ function renderMessage(m){
     audio.src = m.payload;
     audio.controls = true;
     bubble.appendChild(audio);
+  } else if (m.type === 'video'){
+    const video = document.createElement('video');
+    video.src = m.payload;
+    video.controls = true;
+    bubble.appendChild(video);
+  } else if (m.type === 'file'){
+    const link = document.createElement('a');
+    link.className = 'file-card';
+    link.href = m.payload;
+    link.download = (m.meta && m.meta.name) || 'archivo';
+    link.target = '_blank';
+
+    const icon = document.createElement('div');
+    icon.className = 'file-icon';
+    icon.textContent = fileIconFor(m.meta && m.meta.mime, m.meta && m.meta.name);
+    link.appendChild(icon);
+
+    const info = document.createElement('div');
+    info.className = 'file-info';
+    const nameEl = document.createElement('div');
+    nameEl.className = 'file-name';
+    nameEl.textContent = (m.meta && m.meta.name) || 'archivo';
+    const sizeEl = document.createElement('div');
+    sizeEl.className = 'file-size';
+    sizeEl.textContent = (m.meta && m.meta.size) ? formatFileSize(m.meta.size) : '';
+    info.appendChild(nameEl);
+    info.appendChild(sizeEl);
+    link.appendChild(info);
+
+    bubble.appendChild(link);
   }
 
   const time = document.createElement('div');
@@ -677,15 +744,35 @@ function scrollDown(){
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function sendMessage(type, payload){
+function sendMessage(type, payload, meta){
   if (!messagesRef) return;
-  messagesRef.push({
+  const msg = {
     type: type,
     payload: payload,
     senderId: myClientId,
     senderName: myName,
     timestamp: firebase.database.ServerValue.TIMESTAMP
-  });
+  };
+  if (meta) msg.meta = meta;
+  messagesRef.push(msg);
+}
+
+function formatFileSize(bytes){
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+  return (bytes/(1024*1024)).toFixed(1) + ' MB';
+}
+
+function fileIconFor(mime, name){
+  mime = mime || '';
+  name = (name || '').toLowerCase();
+  if (mime.includes('pdf') || name.endsWith('.pdf')) return '📕';
+  if (mime.includes('word') || name.endsWith('.doc') || name.endsWith('.docx')) return '📄';
+  if (mime.includes('zip') || mime.includes('rar') || name.endsWith('.zip') || name.endsWith('.rar')) return '🗜️';
+  if (mime.includes('audio')) return '🎵';
+  if (mime.includes('text')) return '📃';
+  return '📁';
 }
 
 /* ---------- TEXTO ---------- */
@@ -709,16 +796,40 @@ textInput.addEventListener('input', () => {
   textInput.style.height = textInput.scrollHeight + 'px';
 });
 
-/* ---------- FOTOS ---------- */
+/* ---------- ARCHIVOS: FOTOS, VIDEOS, PDF Y CUALQUIER OTRO ---------- */
 attachBtn.onclick = () => fileInput.click();
 fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
   if (!file) return;
-  compressImage(file, (dataUrl) => {
-    sendMessage('image', dataUrl);
-  });
+
+  const MAX_SIZE = 15 * 1024 * 1024; // 15 MB — límite razonable para no saturar Firebase
+  if (file.size > MAX_SIZE){
+    alert('Ese archivo pesa ' + formatFileSize(file.size) + '. El límite es 15 MB para poder enviarlo por el chat.');
+    fileInput.value = '';
+    return;
+  }
+
+  if (file.type.startsWith('image/')){
+    compressImage(file, (dataUrl) => {
+      sendMessage('image', dataUrl);
+    });
+  } else if (file.type.startsWith('video/')){
+    readAsDataUrl(file, (dataUrl) => {
+      sendMessage('video', dataUrl, { name: file.name, size: file.size, mime: file.type });
+    });
+  } else {
+    readAsDataUrl(file, (dataUrl) => {
+      sendMessage('file', dataUrl, { name: file.name, size: file.size, mime: file.type });
+    });
+  }
   fileInput.value = '';
 });
+
+function readAsDataUrl(file, callback){
+  const reader = new FileReader();
+  reader.onload = () => callback(reader.result);
+  reader.readAsDataURL(file);
+}
 
 function compressImage(file, callback){
   const reader = new FileReader();
