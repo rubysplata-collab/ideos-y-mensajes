@@ -3,8 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat P2P por Código</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+<title>Chat por Código</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
   :root{
     --bg:#0f1117;
@@ -62,24 +63,28 @@
     margin-bottom:8px;
     text-align:left;
   }
-  .my-code{
-    font-size:26px;
-    font-weight:700;
-    letter-spacing:3px;
-    color:var(--accent2);
-    background:#11141c;
+  input#roomCodeInput{
+    width:100%;
+    padding:16px;
     border-radius:10px;
-    padding:12px;
-    cursor:pointer;
-    user-select:all;
-    word-break:break-all;
+    border:1px solid #2a2f42;
+    background:#11141c;
+    color:var(--accent2);
+    font-size:22px;
+    font-weight:700;
+    letter-spacing:2px;
+    text-align:center;
+    outline:none;
+    text-transform:lowercase;
   }
+  input#roomCodeInput:focus{border-color:var(--accent);}
   .copy-hint{
     font-size:11px;
     color:var(--muted);
-    margin-top:6px;
+    margin-top:8px;
   }
-  input#peerCodeInput{
+  .copy-hint a{color:var(--muted);}
+  input#nameInput{
     width:100%;
     padding:14px;
     border-radius:10px;
@@ -90,7 +95,7 @@
     margin-bottom:12px;
     outline:none;
   }
-  input#peerCodeInput:focus{border-color:var(--accent);}
+  input#nameInput:focus{border-color:var(--accent);}
   button{
     cursor:pointer;
     border:none;
@@ -192,6 +197,12 @@
   .msg-row.other .bubble{
     background:var(--bubble-other);
     border-bottom-left-radius:4px;
+  }
+  .sender-name{
+    font-size:11px;
+    color:var(--accent2);
+    margin-bottom:3px;
+    font-weight:600;
   }
   .bubble img{
     max-width:220px;
@@ -303,19 +314,20 @@
 
 <!-- PANTALLA DE CONEXIÓN -->
 <div id="connectScreen">
-  <h1>💬 Chat P2P</h1>
-  <p class="sub">Conéctate directamente con tu código, sin servidores intermedios</p>
+  <h1>💬 Chat por Código</h1>
+  <p class="sub">Escribe un código de sala — quien tenga el mismo código entra al mismo chat</p>
+
+  <input type="text" id="nameInput" placeholder="Tu nombre (como te van a ver)">
 
   <div class="code-box">
-    <label>Tu código (compártelo)</label>
-    <div class="my-code" id="myCode" onclick="copyMyCode()">generando…</div>
-    <div class="copy-hint">Toca para copiar &nbsp;·&nbsp; <a href="#" onclick="regenerateCode();return false;" style="color:var(--muted);">regenerar código</a></div>
+    <label>Código de la sala</label>
+    <input type="text" id="roomCodeInput" placeholder="ej: rubi-y-ana" maxlength="30">
+    <div class="copy-hint">Comparte este mismo código con tu amiga · <a href="#" onclick="randomRoomCode();return false;">generar uno aleatorio</a></div>
   </div>
 
-  <input type="text" id="peerCodeInput" placeholder="Pega aquí el código de tu amigo">
-  <button id="connectBtn" onclick="connectToPeer()" disabled>Conectar</button>
+  <button id="connectBtn" onclick="joinRoom()">Entrar al chat</button>
 
-  <div id="statusMsg">Iniciando conexión…</div>
+  <div id="statusMsg"></div>
 </div>
 
 <!-- PANTALLA DE CHAT -->
@@ -324,12 +336,14 @@
     <div class="info">
       <div class="avatar" id="peerAvatar">?</div>
       <div>
-        <div class="peer-label" id="peerLabel">Conectado</div>
-        <div class="peer-status">● en línea</div>
+        <div class="peer-label" id="peerLabel">Sala</div>
+        <div class="peer-status">● conectado</div>
       </div>
     </div>
-    <button id="disconnectBtn" onclick="disconnectChat()" title="Salir del chat">Salir</button>
-    <button id="clearHistBtn" onclick="clearCurrentHistory()" title="Borrar historial guardado">🗑</button>
+    <div>
+      <button id="disconnectBtn" onclick="disconnectChat()" title="Salir del chat">Salir</button>
+      <button id="clearHistBtn" onclick="clearCurrentHistory()" title="Borrar historial guardado">🗑</button>
+    </div>
   </div>
 
   <div id="messages"></div>
@@ -349,21 +363,35 @@
 
 <script>
 /* =========================================================
-   CHAT P2P — usa PeerJS (WebRTC) con el servidor público gratuito
-   de PeerJS solo para el "handshake" inicial (intercambio de
-   códigos). Los mensajes, fotos y audios viajan directo entre
-   los dos navegadores, sin pasar por ningún backend propio.
+   CHAT POR CÓDIGO DE SALA — usa Firebase Realtime Database.
+   Ambas personas entran con el MISMO código de sala y quedan
+   en el mismo chat. Los mensajes se guardan automáticamente
+   en la nube (autoguardado real, no solo en el navegador).
    ========================================================= */
 
-let peer = null;
-let conn = null;
-let myId = null;
+const firebaseConfig = {
+  apiKey: "AIzaSyCoRkv0UAsT5YCIJHhbFT_VB5KmEnIVZ98",
+  authDomain: "mi-chat-2bb2f.firebaseapp.com",
+  databaseURL: "https://mi-chat-2bb2f-default-rtdb.firebaseio.com",
+  projectId: "mi-chat-2bb2f",
+  storageBucket: "mi-chat-2bb2f.firebasestorage.app",
+  messagingSenderId: "381580220666",
+  appId: "1:381580220666:web:c7bacd0c29c702de051143"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let currentRoom = null;
+let myName = null;
+let myClientId = null;
+let messagesRef = null;
 
 const connectScreen = document.getElementById('connectScreen');
 const chatScreen = document.getElementById('chatScreen');
 const statusMsg = document.getElementById('statusMsg');
-const myCodeEl = document.getElementById('myCode');
-const peerCodeInput = document.getElementById('peerCodeInput');
+const roomCodeInput = document.getElementById('roomCodeInput');
+const nameInput = document.getElementById('nameInput');
 const connectBtn = document.getElementById('connectBtn');
 const messagesEl = document.getElementById('messages');
 const textInput = document.getElementById('textInput');
@@ -374,239 +402,115 @@ const recordBtn = document.getElementById('recordBtn');
 const peerLabel = document.getElementById('peerLabel');
 const peerAvatar = document.getElementById('peerAvatar');
 
-function shortCode(){
-  // reutiliza el código guardado en este navegador si ya existe,
-  // así el código no cambia cada vez que se entra a la página
-  const saved = localStorage.getItem('my_peer_code');
-  if (saved) return saved;
-  const code = 'x' + Math.random().toString(36).substr(2,6) + Math.random().toString(36).substr(2,4);
-  localStorage.setItem('my_peer_code', code);
-  return code;
-}
-
-function initPeer(useBackup){
-  const id = shortCode();
-  const opts = {
-    debug: 1,
-    config: {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
-      ]
-    }
-  };
-  if (useBackup){
-    opts.host = 'peerjs.com';
-    opts.secure = true;
-    opts.port = 443;
-    opts.path = '/peerjs';
-    opts.key = 'peerjs';
+/* id único de este navegador/dispositivo, para distinguir "mis" mensajes
+   de los del otro aunque los dos usen el mismo nombre */
+function getClientId(){
+  let id = localStorage.getItem('chat_client_id');
+  if (!id){
+    id = 'c' + Math.random().toString(36).substr(2,10);
+    localStorage.setItem('chat_client_id', id);
   }
-  peer = new Peer(id, opts);
-  bindPeerEvents(useBackup);
+  return id;
 }
 
-function bindPeerEvents(useBackup){
-  peer.on('open', (id) => {
-    myId = id;
-    myCodeEl.textContent = id;
-    connectBtn.disabled = false;
-    connectBtn.innerHTML = 'Conectar';
-    statusMsg.textContent = 'Listo. Comparte tu código o pega uno para conectar.';
-    statusMsg.className = 'ok';
-  });
-
-  peer.on('connection', (c) => {
-    if (conn && conn.open) {
-      c.close(); // ya hay una conexión activa
-      return;
-    }
-    conn = c;
-    setupConnection();
-  });
-
-  peer.on('error', (err) => {
-    console.error('PeerJS error:', err.type, err);
-    if (err.type === 'peer-unavailable') {
-      statusMsg.textContent = 'Ese código no existe, está mal escrito o el otro usuario no tiene la página abierta.';
-      statusMsg.className = 'error';
-      connectBtn.disabled = false;
-      connectBtn.innerHTML = 'Conectar';
-    } else if (err.type === 'unavailable-id') {
-      // el código ya está "ocupado" en el servidor (p.ej. quedó una sesión
-      // anterior colgada). Esperamos un poco y reintentamos con el MISMO id
-      // para que el código no cambie.
-      statusMsg.textContent = 'Reconectando con tu código…';
-      statusMsg.className = '';
-      setTimeout(() => {
-        peer.destroy();
-        initPeer(useBackup);
-      }, 2000);
-    } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed'){
-      statusMsg.textContent = 'Problema de red con el servidor de conexión, reintentando…';
-      statusMsg.className = 'error';
-      setTimeout(() => { if (peer.disconnected) peer.reconnect(); }, 2000);
-    } else {
-      statusMsg.textContent = 'Error de conexión: ' + err.type;
-      statusMsg.className = 'error';
-    }
-  });
-
-  peer.on('disconnected', () => {
-    statusMsg.textContent = 'Conexión al servidor perdida, reintentando…';
-    statusMsg.className = 'error';
-    setTimeout(() => { if (peer && peer.disconnected && !peer.destroyed) peer.reconnect(); }, 1000);
-  });
-
-  // si nunca llega a abrir en 8s, probablemente el servidor de señalización
-  // está bloqueado (extensión, firewall, red) o caído — probamos con el
-  // servidor de respaldo automáticamente
-  setTimeout(() => {
-    if (peer && !peer.open && !peer.destroyed){
-      if (!useBackup){
-        statusMsg.textContent = 'El servidor principal no responde, probando servidor alternativo…';
-        statusMsg.className = 'error';
-        peer.destroy();
-        initPeer(true);
-      } else {
-        statusMsg.textContent = 'No se pudo contactar ningún servidor de conexión. Prueba desactivar bloqueadores de anuncios/privacidad (uBlock, Brave Shields, etc.) para este sitio, o cambia de red (datos móviles).';
-        statusMsg.className = 'error';
-      }
-    }
-  }, 8000);
+function randomRoomCode(){
+  const palabras = ['sol','luna','rio','flor','cielo','estrella','mar','viento','luz','nube'];
+  const a = palabras[Math.floor(Math.random()*palabras.length)];
+  const b = Math.floor(1000 + Math.random()*9000);
+  roomCodeInput.value = a + '-' + b;
 }
 
-function copyMyCode(){
-  if (!myId) return;
-  navigator.clipboard.writeText(myId).then(() => {
-    statusMsg.textContent = '¡Código copiado!';
-    statusMsg.className = 'ok';
-  }).catch(() => {});
+/* precargar el último código y nombre usados */
+window.addEventListener('DOMContentLoaded', () => {
+  myClientId = getClientId();
+  const savedRoom = localStorage.getItem('chat_last_room');
+  const savedName = localStorage.getItem('chat_last_name');
+  if (savedRoom) roomCodeInput.value = savedRoom;
+  if (savedName) nameInput.value = savedName;
+});
+
+function sanitizeRoomCode(code){
+  return code.trim().toLowerCase().replace(/[^a-z0-9\-_]/g, '-').substr(0,40);
 }
 
-function regenerateCode(){
-  if (!confirm('¿Generar un código nuevo? El código actual dejará de funcionar.')) return;
-  localStorage.removeItem('my_peer_code');
-  if (peer) peer.destroy();
-  myCodeEl.textContent = 'generando…';
-  connectBtn.disabled = true;
-  connectBtn.innerHTML = 'Conectar';
-  statusMsg.textContent = 'Generando nuevo código…';
-  statusMsg.className = '';
-  initPeer();
-}
+function joinRoom(){
+  const rawName = nameInput.value.trim();
+  const rawCode = roomCodeInput.value.trim();
 
-function connectToPeer(){
-  const code = peerCodeInput.value.trim();
-  if (!code) return;
-  if (code === myId) {
-    statusMsg.textContent = 'No puedes conectarte a tu propio código 🙂';
+  if (!rawName){
+    statusMsg.textContent = 'Escribe tu nombre.';
     statusMsg.className = 'error';
     return;
   }
+  if (!rawCode){
+    statusMsg.textContent = 'Escribe o genera un código de sala.';
+    statusMsg.className = 'error';
+    return;
+  }
+
+  const code = sanitizeRoomCode(rawCode);
+  myName = rawName;
+  currentRoom = code;
+
+  localStorage.setItem('chat_last_room', rawCode);
+  localStorage.setItem('chat_last_name', rawName);
+
   connectBtn.disabled = true;
   connectBtn.innerHTML = '<span class="spinner"></span>Conectando…';
-  statusMsg.textContent = 'Buscando al otro usuario…';
+  statusMsg.textContent = 'Conectando a la sala…';
   statusMsg.className = '';
 
-  conn = peer.connect(code, { reliable: true });
-  setupConnection();
+  messagesRef = db.ref('rooms/' + code + '/messages');
 
-  // si en 12 segundos no abrió, avisamos (puede ser un problema de red/firewall)
+  // probar conexión real a Firebase
+  const connectedRef = db.ref('.info/connected');
+  connectedRef.on('value', (snap) => {
+    if (snap.val() === true){
+      goToChat();
+    }
+  });
+
+  // aviso si tarda demasiado (problema de red / config)
   setTimeout(() => {
-    if (conn && !conn.open){
-      statusMsg.textContent = 'Está tardando más de lo normal. Verifica que tu amiga tenga la página abierta y el código bien escrito, o intenten con otra red (algunos WiFi/datos bloquean la conexión directa).';
+    if (chatScreen.style.display !== 'flex'){
+      statusMsg.textContent = 'No se pudo conectar a la base de datos. Revisa tu internet.';
       statusMsg.className = 'error';
       connectBtn.disabled = false;
-      connectBtn.innerHTML = 'Conectar';
+      connectBtn.innerHTML = 'Entrar al chat';
     }
-  }, 12000);
-}
-
-function setupConnection(){
-  conn.on('open', () => {
-    goToChat();
-  });
-  conn.on('data', (data) => {
-    handleIncoming(data);
-  });
-  conn.on('close', () => {
-    addSystemMsg('El otro usuario se desconectó.');
-  });
-  conn.on('error', (err) => {
-    console.error(err);
-    statusMsg.textContent = 'Error al conectar. Verifica el código.';
-    statusMsg.className = 'error';
-    connectBtn.disabled = false;
-    connectBtn.innerHTML = 'Conectar';
-  });
+  }, 10000);
 }
 
 function goToChat(){
   connectScreen.style.display = 'none';
   chatScreen.style.display = 'flex';
-  peerLabel.textContent = 'Conectado con ' + conn.peer;
-  peerAvatar.textContent = conn.peer.charAt(1).toUpperCase();
-  loadHistory(conn.peer);
-  addSystemMsg('Conexión establecida 🎉');
-}
+  peerLabel.textContent = 'Sala: ' + currentRoom;
+  peerAvatar.textContent = myName.charAt(0).toUpperCase();
+  messagesEl.innerHTML = '';
 
-/* ---------- AUTOGUARDADO DE MENSAJES (localStorage) ---------- */
-
-function historyKey(peerId){
-  return 'chat_history_' + peerId;
-}
-
-function loadHistory(peerId){
-  const raw = localStorage.getItem(historyKey(peerId));
-  if (!raw) return;
-  try{
-    const msgs = JSON.parse(raw);
-    msgs.forEach(m => addBubble(m.payload, m.isMe, m.type, false, m.time));
-    if (msgs.length){
-      addSystemMsg('Historial cargado (' + msgs.length + ' mensajes)');
-    }
-  } catch(e){
-    console.error('No se pudo leer el historial', e);
-  }
-}
-
-function saveMessage(peerId, msg){
-  const raw = localStorage.getItem(historyKey(peerId));
-  let msgs = [];
-  if (raw){
-    try{ msgs = JSON.parse(raw); } catch(e){ msgs = []; }
-  }
-  msgs.push(msg);
-  // límite de seguridad para no saturar localStorage
-  if (msgs.length > 500) msgs = msgs.slice(msgs.length - 500);
-  try{
-    localStorage.setItem(historyKey(peerId), JSON.stringify(msgs));
-  } catch(e){
-    console.warn('No se pudo guardar el mensaje (almacenamiento lleno)', e);
-  }
-}
-
-function clearHistory(peerId){
-  localStorage.removeItem(historyKey(peerId));
+  // escuchar mensajes en tiempo real (esto también carga el historial ya guardado)
+  messagesRef.limitToLast(300).on('child_added', (snap) => {
+    const m = snap.val();
+    if (!m) return;
+    renderMessage(m);
+  });
 }
 
 function disconnectChat(){
-  if (conn) conn.close();
+  if (messagesRef) messagesRef.off();
   location.reload();
 }
 
 function clearCurrentHistory(){
-  if (!conn || !conn.peer) return;
-  if (!confirm('¿Borrar el historial guardado de esta conversación en este dispositivo?')) return;
-  clearHistory(conn.peer);
-  messagesEl.innerHTML = '';
-  addSystemMsg('Historial borrado 🗑');
+  if (!currentRoom) return;
+  if (!confirm('¿Borrar el historial de esta sala para TODOS los que la usan? Esta acción no se puede deshacer.')) return;
+  db.ref('rooms/' + currentRoom + '/messages').remove().then(() => {
+    messagesEl.innerHTML = '';
+    addSystemMsg('Historial borrado 🗑');
+  });
 }
 
-/* ---------- ENVÍO Y RECEPCIÓN ---------- */
+/* ---------- RENDER DE MENSAJES ---------- */
 
 function addSystemMsg(text){
   const div = document.createElement('div');
@@ -616,58 +520,68 @@ function addSystemMsg(text){
   scrollDown();
 }
 
-function addBubble(content, isMe, type, shouldSave = true, savedTime = null){
+function renderMessage(m){
+  const isMe = m.senderId === myClientId;
   const row = document.createElement('div');
   row.className = 'msg-row ' + (isMe ? 'me' : 'other');
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
 
-  if (type === 'text'){
+  if (!isMe){
+    const nameEl = document.createElement('div');
+    nameEl.className = 'sender-name';
+    nameEl.textContent = m.senderName || 'Anónimo';
+    bubble.appendChild(nameEl);
+  }
+
+  if (m.type === 'text'){
     const p = document.createElement('div');
-    p.textContent = content;
+    p.textContent = m.payload;
     bubble.appendChild(p);
-  } else if (type === 'image'){
+  } else if (m.type === 'image'){
     const img = document.createElement('img');
-    img.src = content;
-    img.onclick = () => openImgModal(content);
+    img.src = m.payload;
+    img.onclick = () => openImgModal(m.payload);
     bubble.appendChild(img);
-  } else if (type === 'audio'){
+  } else if (m.type === 'audio'){
     const audio = document.createElement('audio');
-    audio.src = content;
+    audio.src = m.payload;
     audio.controls = true;
     bubble.appendChild(audio);
   }
 
-  const timeStr = savedTime || new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   const time = document.createElement('div');
   time.className = 'msg-time';
-  time.textContent = timeStr;
+  const d = m.timestamp ? new Date(m.timestamp) : new Date();
+  time.textContent = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   bubble.appendChild(time);
 
   row.appendChild(bubble);
   messagesEl.appendChild(row);
   scrollDown();
-
-  if (shouldSave && conn && conn.peer){
-    saveMessage(conn.peer, { type, payload: content, isMe, time: timeStr });
-  }
 }
 
 function scrollDown(){
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function handleIncoming(data){
-  if (!data || !data.type) return;
-  addBubble(data.payload, false, data.type);
+function sendMessage(type, payload){
+  if (!messagesRef) return;
+  messagesRef.push({
+    type: type,
+    payload: payload,
+    senderId: myClientId,
+    senderName: myName,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  });
 }
 
+/* ---------- TEXTO ---------- */
 function sendText(){
   const text = textInput.value.trim();
-  if (!text || !conn || !conn.open) return;
-  conn.send({ type: 'text', payload: text });
-  addBubble(text, true, 'text');
+  if (!text) return;
+  sendMessage('text', text);
   textInput.value = '';
   textInput.style.height = 'auto';
 }
@@ -688,16 +602,34 @@ textInput.addEventListener('input', () => {
 attachBtn.onclick = () => fileInput.click();
 fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
-  if (!file || !conn || !conn.open) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    const dataUrl = reader.result;
-    conn.send({ type: 'image', payload: dataUrl });
-    addBubble(dataUrl, true, 'image');
-  };
-  reader.readAsDataURL(file);
+  if (!file) return;
+  compressImage(file, (dataUrl) => {
+    sendMessage('image', dataUrl);
+  });
   fileInput.value = '';
 });
+
+function compressImage(file, callback){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const maxW = 900;
+      let w = img.width, h = img.height;
+      if (w > maxW){
+        h = Math.round(h * (maxW / w));
+        w = maxW;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.7));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 
 function openImgModal(src){
   document.getElementById('imgModalSrc').src = src;
@@ -720,11 +652,7 @@ recordBtn.onclick = async () => {
         const blob = new Blob(audioChunks, { type: 'audio/webm' });
         const reader = new FileReader();
         reader.onload = () => {
-          const dataUrl = reader.result;
-          if (conn && conn.open){
-            conn.send({ type: 'audio', payload: dataUrl });
-            addBubble(dataUrl, true, 'audio');
-          }
+          sendMessage('audio', reader.result);
         };
         reader.readAsDataURL(blob);
         stream.getTracks().forEach(t => t.stop());
@@ -743,9 +671,6 @@ recordBtn.onclick = async () => {
     recordBtn.textContent = '🎤';
   }
 };
-
-/* ---------- INIT ---------- */
-initPeer();
 </script>
 </body>
 </html>
