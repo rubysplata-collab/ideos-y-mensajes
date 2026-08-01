@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>tiktok con foto xd</title>
+<title>Chat P2P por Código</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 <style>
   :root{
@@ -384,31 +384,31 @@ function shortCode(){
   return code;
 }
 
-function initPeer(){
+function initPeer(useBackup){
   const id = shortCode();
-  peer = new Peer(id, {
+  const opts = {
     debug: 1,
     config: {
       iceServers: [
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        {
-          urls: 'turn:openrelay.metered.ca:80',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        }
+        { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+        { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
       ]
     }
-  });
-  bindPeerEvents();
+  };
+  if (useBackup){
+    // servidor de señalización alternativo por si 0.peerjs.com está bloqueado/caído
+    opts.host = 'peerjs-server.herokuapp.com';
+    opts.secure = true;
+    opts.port = 443;
+    opts.path = '/';
+  }
+  peer = new Peer(id, opts);
+  bindPeerEvents(useBackup);
 }
 
-function bindPeerEvents(){
+function bindPeerEvents(useBackup){
   peer.on('open', (id) => {
     myId = id;
     myCodeEl.textContent = id;
@@ -428,7 +428,7 @@ function bindPeerEvents(){
   });
 
   peer.on('error', (err) => {
-    console.error(err);
+    console.error('PeerJS error:', err.type, err);
     if (err.type === 'peer-unavailable') {
       statusMsg.textContent = 'Ese código no existe, está mal escrito o el otro usuario no tiene la página abierta.';
       statusMsg.className = 'error';
@@ -442,18 +442,7 @@ function bindPeerEvents(){
       statusMsg.className = '';
       setTimeout(() => {
         peer.destroy();
-        peer = new Peer(localStorage.getItem('my_peer_code'), {
-          debug: 1,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' },
-              { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-              { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
-            ]
-          }
-        });
-        bindPeerEvents();
+        initPeer(useBackup);
       }, 2000);
     } else if (err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error' || err.type === 'socket-closed'){
       statusMsg.textContent = 'Problema de red con el servidor de conexión, reintentando…';
@@ -470,6 +459,23 @@ function bindPeerEvents(){
     statusMsg.className = 'error';
     setTimeout(() => { if (peer && peer.disconnected && !peer.destroyed) peer.reconnect(); }, 1000);
   });
+
+  // si nunca llega a abrir en 8s, probablemente el servidor de señalización
+  // está bloqueado (extensión, firewall, red) o caído — probamos con el
+  // servidor de respaldo automáticamente
+  setTimeout(() => {
+    if (peer && !peer.open && !peer.destroyed){
+      if (!useBackup){
+        statusMsg.textContent = 'El servidor principal no responde, probando servidor alternativo…';
+        statusMsg.className = 'error';
+        peer.destroy();
+        initPeer(true);
+      } else {
+        statusMsg.textContent = 'No se pudo contactar ningún servidor de conexión. Prueba desactivar bloqueadores de anuncios/privacidad (uBlock, Brave Shields, etc.) para este sitio, o cambia de red (datos móviles).';
+        statusMsg.className = 'error';
+      }
+    }
+  }, 8000);
 }
 
 function copyMyCode(){
