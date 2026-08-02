@@ -341,7 +341,90 @@
   }
   #imgModal img{max-width:92%;max-height:92%;border-radius:8px;}
 
-  /* ---------- MODAL DE LLAMADA ---------- */
+  /* ---------- TABS ---------- */
+  #tabBar{
+    display:flex;
+    background:var(--panel2);
+    border-bottom:1px solid #2a2f42;
+  }
+  .tab-btn{
+    flex:1;
+    padding:10px;
+    background:transparent;
+    color:var(--muted);
+    font-size:13px;
+    font-weight:600;
+    border-bottom:2px solid transparent;
+    transition:all .2s;
+  }
+  .tab-btn.active{
+    color:var(--text);
+    border-bottom-color:var(--accent);
+  }
+
+  /* ---------- FEED DE VIDEOS ---------- */
+  #videoFeed{
+    flex:1;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+  #videoFeed::-webkit-scrollbar{display:none;}
+  .video-card{
+    scroll-snap-align:start;
+    position:relative;
+    width:100%;
+    height:calc(100% - 0px);
+    min-height:300px;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .video-card video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+  .video-overlay{
+    position:absolute;
+    bottom:0;left:0;right:0;
+    padding:16px;
+    background:linear-gradient(transparent,rgba(0,0,0,.7));
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+  }
+  .video-info .video-author{
+    font-size:14px;font-weight:700;margin-bottom:4px;
+  }
+  .video-info .video-caption{
+    font-size:12px;color:rgba(255,255,255,.85);
+  }
+  .video-actions{
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+  }
+  .video-action-btn{
+    display:flex;flex-direction:column;align-items:center;
+    font-size:22px;cursor:pointer;
+    color:#fff;
+    gap:2px;
+  }
+  .video-action-btn span{font-size:11px;}
+  .video-empty{
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:center;height:100%;color:var(--muted);
+    text-align:center;padding:32px;gap:12px;font-size:14px;
+  }
+  #videoUploadBar{
+    padding:10px 14px;
+    background:var(--panel2);
+    display:flex;
+    align-items:center;
+    gap:10px;
+    border-top:1px solid #2a2f42;
+  }
   #callModal{
     display:none;
     position:fixed;inset:0;
@@ -494,18 +577,35 @@
     </div>
   </div>
 
-  <div id="messages"></div>
-  <div id="typingIndicator" style="display:none;padding:4px 16px;font-size:12px;color:var(--muted);font-style:italic;"></div>
-
-  <div id="inputBar">
-    <button class="icon-btn" id="cesarBtn" onclick="openCesarTool()" title="Traductor código César">🔐</button>
-    <button class="icon-btn" id="attachBtn" title="Enviar foto, video, PDF o archivo">📎</button>
-    <input type="file" id="fileInput" accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip,.rar,*/*">
-    <textarea id="textInput" rows="1" placeholder="Escribe un mensaje…"></textarea>
-    <button class="icon-btn" id="recordBtn" title="Grabar audio">🎤</button>
-    <button class="icon-btn" id="sendBtn" title="Enviar">➤</button>
+  <!-- TABS -->
+  <div id="tabBar">
+    <button class="tab-btn active" id="tabChat" onclick="switchTab('chat')">💬 Chat</button>
+    <button class="tab-btn" id="tabVideos" onclick="switchTab('videos')">🎵 Videos</button>
   </div>
-</div>
+
+  <!-- PANEL CHAT -->
+  <div id="panelChat" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="messages"></div>
+    <div id="typingIndicator" style="display:none;padding:4px 16px;font-size:12px;color:var(--muted);font-style:italic;"></div>
+    <div id="inputBar">
+      <button class="icon-btn" id="cesarBtn" onclick="openCesarTool()" title="Traductor código César">🔐</button>
+      <button class="icon-btn" id="attachBtn" title="Enviar foto, video, PDF o archivo">📎</button>
+      <input type="file" id="fileInput" accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip,.rar,*/*">
+      <textarea id="textInput" rows="1" placeholder="Escribe un mensaje…"></textarea>
+      <button class="icon-btn" id="recordBtn" title="Grabar audio">🎤</button>
+      <button class="icon-btn" id="sendBtn" title="Enviar">➤</button>
+    </div>
+  </div>
+
+  <!-- PANEL VIDEOS ESTILO TIKTOK -->
+  <div id="panelVideos" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="videoFeed"></div>
+    <div id="videoUploadBar">
+      <button class="icon-btn" onclick="document.getElementById('videoFileInput').click()" title="Subir video">➕</button>
+      <input type="file" id="videoFileInput" accept="video/*" style="display:none;">
+      <span style="color:var(--muted);font-size:12px;">Sube un video para compartir en la sala</span>
+    </div>
+  </div>
 
 <div id="imgModal" onclick="this.style.display='none'">
   <img id="imgModalSrc" src="">
@@ -1003,7 +1103,147 @@ function fileIconFor(mime, name){
   return '📁';
 }
 
-/* ---------- CÓDIGO CÉSAR ---------- */
+/* ---------- TABS ---------- */
+function switchTab(tab){
+  document.getElementById('panelChat').style.display = tab === 'chat' ? 'flex' : 'none';
+  document.getElementById('panelVideos').style.display = tab === 'videos' ? 'flex' : 'none';
+  document.getElementById('tabChat').classList.toggle('active', tab === 'chat');
+  document.getElementById('tabVideos').classList.toggle('active', tab === 'videos');
+  if (tab === 'videos') loadVideoFeed();
+}
+
+/* ---------- FEED DE VIDEOS ESTILO TIKTOK ---------- */
+const videoFeed = document.getElementById('videoFeed');
+const videoFileInput = document.getElementById('videoFileInput');
+let videosRef = null;
+let videoFeedLoaded = false;
+
+videoFileInput.addEventListener('change', () => {
+  const file = videoFileInput.files[0];
+  if (!file) return;
+  const MAX_VIDEO = 15 * 1024 * 1024;
+  if (file.size > MAX_VIDEO){
+    alert('El video pesa ' + formatFileSize(file.size) + '. Máximo 15 MB.');
+    videoFileInput.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    db.ref('rooms/' + currentRoom + '/videos').push({
+      url: reader.result,
+      author: myName,
+      authorId: myClientId,
+      country: myCountry || '',
+      pic: myProfilePic || null,
+      caption: '',
+      likes: 0,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+  };
+  reader.readAsDataURL(file);
+  videoFileInput.value = '';
+});
+
+function loadVideoFeed(){
+  if (videoFeedLoaded) return;
+  videoFeedLoaded = true;
+  videosRef = db.ref('rooms/' + currentRoom + '/videos');
+  videosRef.on('child_added', (snap) => {
+    const v = snap.val();
+    if (!v) return;
+    addVideoCard(snap.key, v);
+  });
+}
+
+function addVideoCard(key, v){
+  // quitar el estado vacío si existe
+  const empty = videoFeed.querySelector('.video-empty');
+  if (empty) empty.remove();
+
+  const card = document.createElement('div');
+  card.className = 'video-card';
+  card.id = 'vc-' + key;
+
+  const vid = document.createElement('video');
+  vid.src = v.url;
+  vid.loop = true;
+  vid.playsInline = true;
+  vid.preload = 'metadata';
+  // play/pause al hacer tap en el video
+  vid.addEventListener('click', () => vid.paused ? vid.play() : vid.pause());
+  card.appendChild(vid);
+
+  const overlay = document.createElement('div');
+  overlay.className = 'video-overlay';
+
+  const info = document.createElement('div');
+  info.className = 'video-info';
+  const authorLine = document.createElement('div');
+  authorLine.className = 'video-author';
+  authorLine.textContent = (v.pic ? '' : '') + (v.author || 'Anónimo') + (v.country ? ' ' + flagEmoji(v.country) : '');
+  const caption = document.createElement('div');
+  caption.className = 'video-caption';
+  caption.textContent = v.caption || '';
+  info.appendChild(authorLine);
+  info.appendChild(caption);
+
+  const actions = document.createElement('div');
+  actions.className = 'video-actions';
+
+  // botón de like
+  const likeBtn = document.createElement('div');
+  likeBtn.className = 'video-action-btn';
+  likeBtn.innerHTML = '❤️<span id="likes-' + key + '">' + (v.likes || 0) + '</span>';
+  likeBtn.onclick = () => {
+    db.ref('rooms/' + currentRoom + '/videos/' + key + '/likes').transaction(l => (l || 0) + 1);
+  };
+  db.ref('rooms/' + currentRoom + '/videos/' + key + '/likes').on('value', (s) => {
+    const el = document.getElementById('likes-' + key);
+    if (el) el.textContent = s.val() || 0;
+  });
+
+  // botón de eliminar (solo el autor)
+  if (v.authorId === myClientId){
+    const delBtn = document.createElement('div');
+    delBtn.className = 'video-action-btn';
+    delBtn.innerHTML = '🗑<span>borrar</span>';
+    delBtn.onclick = () => {
+      if (confirm('¿Eliminar este video?')){
+        db.ref('rooms/' + currentRoom + '/videos/' + key).remove();
+        card.remove();
+      }
+    };
+    actions.appendChild(likeBtn);
+    actions.appendChild(delBtn);
+  } else {
+    actions.appendChild(likeBtn);
+  }
+
+  overlay.appendChild(info);
+  overlay.appendChild(actions);
+  card.appendChild(overlay);
+  videoFeed.appendChild(card);
+
+  // autoplay cuando el video entra al viewport
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) vid.play().catch(() => {});
+      else { vid.pause(); vid.currentTime = 0; }
+    });
+  }, { threshold: 0.6 });
+  observer.observe(card);
+}
+
+// estado vacío inicial
+function showVideoEmpty(){
+  if (videoFeed.children.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'video-empty';
+    empty.innerHTML = '🎵<br>No hay videos aún<br><span style="color:var(--accent2);">¡Sube el primero!</span>';
+    videoFeed.appendChild(empty);
+  }
+}
+
 const cesarModal = document.getElementById('cesarModal');
 const cesarInput = document.getElementById('cesarInput');
 const cesarResults = document.getElementById('cesarResults');
