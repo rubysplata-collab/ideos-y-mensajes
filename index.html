@@ -425,6 +425,76 @@
     gap:10px;
     border-top:1px solid #2a2f42;
   }
+
+  /* ---------- JUEGOS ---------- */
+  .game-card{
+    width:100%;padding:16px;
+    background:var(--panel2);
+    border-radius:12px;
+    color:var(--text);
+    font-size:15px;font-weight:600;
+    text-align:left;
+    border:1px solid #2a2f42;
+    transition:background .15s;
+  }
+  .game-card:hover{background:#242838;}
+  #gameArea{padding:16px;overflow-y:auto;}
+  .game-title{
+    font-size:16px;font-weight:700;
+    margin-bottom:4px;display:flex;align-items:center;gap:8px;
+  }
+  .game-status{
+    font-size:12px;color:var(--muted);
+    margin-bottom:14px;min-height:18px;
+  }
+  .game-back{
+    background:transparent;color:var(--muted);
+    font-size:12px;padding:6px 0;
+    margin-bottom:12px;text-align:left;
+  }
+  /* Tres en raya */
+  #tttBoard{
+    display:grid;grid-template-columns:repeat(3,1fr);
+    gap:8px;max-width:240px;margin:0 auto 16px;
+  }
+  .ttt-cell{
+    aspect-ratio:1;background:var(--panel2);
+    border-radius:10px;border:1px solid #2a2f42;
+    font-size:32px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;transition:background .15s;
+  }
+  .ttt-cell:hover:not([data-val]){background:#242838;}
+  /* RPS */
+  .rps-options{display:flex;gap:12px;justify-content:center;margin:16px 0;}
+  .rps-btn{
+    font-size:36px;padding:12px;background:var(--panel2);
+    border-radius:14px;border:1px solid #2a2f42;
+    transition:transform .1s;
+  }
+  .rps-btn:hover{transform:scale(1.1);}
+  .rps-result{font-size:18px;font-weight:700;text-align:center;margin:12px 0;}
+  /* Trivia */
+  .trivia-q{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.4;}
+  .trivia-opts{display:flex;flex-direction:column;gap:8px;}
+  .trivia-opt{
+    padding:12px;background:var(--panel2);border-radius:10px;
+    border:1px solid #2a2f42;text-align:left;color:var(--text);font-size:14px;
+  }
+  .trivia-opt.correct{background:#0d3d2e;border-color:var(--accent2);color:var(--accent2);}
+  .trivia-opt.wrong{background:#3d0d17;border-color:var(--danger);color:var(--danger);}
+  /* Adivina la palabra */
+  #wordDisplay{
+    letter-spacing:6px;font-size:28px;font-weight:700;
+    text-align:center;margin:12px 0;color:var(--accent2);
+  }
+  .word-keyboard{
+    display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:12px;
+  }
+  .key-btn{
+    width:34px;height:34px;background:var(--panel2);border-radius:6px;
+    border:1px solid #2a2f42;color:var(--text);font-size:13px;font-weight:600;
+  }
+  .key-btn:disabled{background:#1a1d2a;color:#3a3f52;border-color:#1a1d2a;}
   #callModal{
     display:none;
     position:fixed;inset:0;
@@ -581,6 +651,7 @@
   <div id="tabBar">
     <button class="tab-btn active" id="tabChat" onclick="switchTab('chat')">💬 Chat</button>
     <button class="tab-btn" id="tabVideos" onclick="switchTab('videos')">🎵 Videos</button>
+    <button class="tab-btn" id="tabGames" onclick="switchTab('games')">🎮 Juegos</button>
   </div>
 
   <!-- PANEL CHAT -->
@@ -605,6 +676,18 @@
       <input type="file" id="videoFileInput" accept="video/*" style="display:none;">
       <span style="color:var(--muted);font-size:12px;">Sube un video para compartir en la sala</span>
     </div>
+  </div>
+
+  <!-- PANEL JUEGOS -->
+  <div id="panelGames" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="gameSelector" style="padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
+      <p style="color:var(--muted);font-size:12px;text-align:center;margin:0;">Elige un juego para jugar en la sala</p>
+      <button class="game-card" onclick="launchGame('ttt')">⭕ Tres en Raya</button>
+      <button class="game-card" onclick="launchGame('rps')">✂️ Piedra, Papel o Tijera</button>
+      <button class="game-card" onclick="launchGame('trivia')">🧠 Trivia Rápida</button>
+      <button class="game-card" onclick="launchGame('word')">💬 Adivina la Palabra</button>
+    </div>
+    <div id="gameArea" style="display:none;flex-direction:column;flex:1;overflow:hidden;"></div>
   </div>
 
 <div id="imgModal" onclick="this.style.display='none'">
@@ -1103,12 +1186,13 @@ function fileIconFor(mime, name){
   return '📁';
 }
 
-/* ---------- TABS ---------- */
 function switchTab(tab){
   document.getElementById('panelChat').style.display = tab === 'chat' ? 'flex' : 'none';
   document.getElementById('panelVideos').style.display = tab === 'videos' ? 'flex' : 'none';
+  document.getElementById('panelGames').style.display = tab === 'games' ? 'flex' : 'none';
   document.getElementById('tabChat').classList.toggle('active', tab === 'chat');
   document.getElementById('tabVideos').classList.toggle('active', tab === 'videos');
+  document.getElementById('tabGames').classList.toggle('active', tab === 'games');
   if (tab === 'videos') loadVideoFeed();
 }
 
@@ -1704,6 +1788,198 @@ recordBtn.onclick = async () => {
     recordBtn.textContent = '🎤';
   }
 };
+
+
+/* =========================================================
+   JUEGOS — sincronizados en tiempo real via Firebase
+   ========================================================= */
+const gameArea = document.getElementById('gameArea');
+const gameSelector = document.getElementById('gameSelector');
+let gameRef = null;
+let gameListener = null;
+
+function launchGame(type){
+  gameSelector.style.display = 'none';
+  gameArea.style.display = 'flex';
+  gameArea.innerHTML = '';
+  if (gameListener && gameRef) { gameRef.off('value', gameListener); gameListener = null; }
+  gameRef = db.ref('rooms/' + currentRoom + '/game/' + type);
+  if (type === 'ttt') initTTT();
+  if (type === 'rps') initRPS();
+  if (type === 'trivia') initTrivia();
+  if (type === 'word') initWord();
+}
+
+function backToGames(){
+  if (gameListener && gameRef) { gameRef.off('value', gameListener); gameListener = null; }
+  gameArea.style.display = 'none';
+  gameArea.innerHTML = '';
+  gameSelector.style.display = 'flex';
+}
+
+function gameHTML(icon, title, status, content){
+  return `<button class="game-back" onclick="backToGames()">← Volver</button>
+<div class="game-title">${icon} ${title}</div>
+<div class="game-status" id="gStatus">${status}</div>
+${content}`;
+}
+
+/* ---- 1. TRES EN RAYA ---- */
+function initTTT(){
+  gameArea.innerHTML = gameHTML('⭕','Tres en Raya','Cargando...',
+    `<div id="tttBoard">${Array(9).fill('<div class="ttt-cell"></div>').join('')}</div>
+     <button onclick="resetTTT()" style="background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 16px;font-size:13px;margin:8px auto;display:block;">Reiniciar</button>`);
+  gameRef.once('value', s => { if (!s.val()) gameRef.set({ board: Array(9).fill(''), turn: 'X', winner:'' }); });
+  gameListener = gameRef.on('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const cells = document.querySelectorAll('.ttt-cell');
+    cells.forEach((c, i) => {
+      c.textContent = g.board[i] || '';
+      c.style.color = g.board[i]==='X' ? 'var(--accent)' : 'var(--accent2)';
+      c.setAttribute('data-val', g.board[i] || '');
+      c.onclick = () => tttMove(i, g);
+    });
+    const st = document.getElementById('gStatus');
+    if (st) st.textContent = g.winner ? (g.winner==='draw' ? 'Empate! 🤝' : `Gano ${g.winner}! 🎉`) : `Turno: ${g.turn}`;
+  });
+}
+function tttMove(i, g){
+  if (g.board[i] || g.winner) return;
+  const sym = myClientId <= Object.keys({[myClientId]:1}).sort()[0] ? 'X' : 'O';
+  if (g.turn !== sym) return;
+  const board = [...g.board]; board[i] = sym;
+  const winner = checkTTT(board);
+  gameRef.set({ board, turn: sym==='X' ? 'O' : 'X', winner: winner || '' });
+}
+function checkTTT(b){
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (const [a,c,d] of lines) if (b[a] && b[a]===b[c] && b[a]===b[d]) return b[a];
+  return b.every(Boolean) ? 'draw' : null;
+}
+function resetTTT(){ gameRef.set({ board: Array(9).fill(''), turn: 'X', winner: '' }); }
+
+/* ---- 2. PIEDRA PAPEL TIJERA ---- */
+function initRPS(){
+  gameArea.innerHTML = gameHTML('✂️','Piedra, Papel o Tijera','Elige tu jugada:',
+    `<div class="rps-options">
+      <button class="rps-btn" onclick="rpsPlay('piedra')">🪨</button>
+      <button class="rps-btn" onclick="rpsPlay('papel')">📄</button>
+      <button class="rps-btn" onclick="rpsPlay('tijera')">✂️</button>
+    </div>
+    <div id="rpsResult" style="font-size:18px;font-weight:700;text-align:center;margin:12px 0;"></div>
+    <button onclick="resetRPS()" style="background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 16px;font-size:13px;margin:0 auto;display:block;">Nueva ronda</button>`);
+  gameRef.once('value', s => { if (!s.val()) gameRef.set({ moves: {} }); });
+  gameListener = gameRef.on('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const moves = g.moves || {};
+    const myMove = moves[myClientId];
+    const others = Object.entries(moves).filter(([id]) => id !== myClientId);
+    const st = document.getElementById('gStatus');
+    const res = document.getElementById('rpsResult');
+    if (!st || !res) return;
+    const icons = { piedra: '🪨', papel: '📄', tijera: '✂️' };
+    if (!myMove) { st.textContent = 'Elige tu jugada:'; res.textContent = ''; return; }
+    if (!others.length) { st.textContent = 'Esperando al otro... 🕐'; res.textContent = `Tu: ${icons[myMove]}`; return; }
+    const oppMove = others[0][1];
+    const w = rpsWinner(myMove, oppMove);
+    res.textContent = `Tu: ${icons[myMove]}  vs  Ellos: ${icons[oppMove]}`;
+    st.textContent = w===0 ? 'Empate! 🤝' : w===1 ? 'Ganaste! 🎉' : 'Perdiste! 😅';
+  });
+}
+function rpsPlay(c){ gameRef.child('moves/' + myClientId).set(c); }
+function rpsWinner(a, b){
+  if (a === b) return 0;
+  if ((a==='piedra'&&b==='tijera')||(a==='papel'&&b==='piedra')||(a==='tijera'&&b==='papel')) return 1;
+  return -1;
+}
+function resetRPS(){ gameRef.set({ moves: {} }); }
+
+/* ---- 3. TRIVIA ---- */
+const TRIVIA_QS = [
+  {q:'Cual es el pais mas grande del mundo?',opts:['Rusia','China','Canada','EE.UU.'],a:0},
+  {q:'Cuantos planetas tiene el sistema solar?',opts:['7','8','9','10'],a:1},
+  {q:'En que año llego el hombre a la luna?',opts:['1965','1969','1972','1958'],a:1},
+  {q:'Cual es el oceano mas grande?',opts:['Atlantico','Indico','Pacifico','Artico'],a:2},
+  {q:'Quien pinto la Mona Lisa?',opts:['Picasso','Van Gogh','Da Vinci','Miguel Angel'],a:2},
+  {q:'Cual es el elemento mas abundante en el universo?',opts:['Oxigeno','Carbono','Hidrogeno','Helio'],a:2},
+  {q:'Cuantos huesos tiene el cuerpo humano adulto?',opts:['206','212','198','220'],a:0},
+  {q:'Cual es la capital de Japon?',opts:['Osaka','Kioto','Tokio','Hiroshima'],a:2},
+  {q:'Que animal es el mas rapido?',opts:['Leon','Guepardo','Aguila','Halcon peregrino'],a:3},
+  {q:'Cuantos colores tiene el arcoiris?',opts:['5','6','7','8'],a:2},
+];
+function initTrivia(){
+  gameArea.innerHTML = gameHTML('🧠','Trivia Rapida','',
+    `<div id="triviaContent"></div>
+     <div id="triviaScore" style="text-align:center;font-size:13px;color:var(--muted);margin-top:10px;"></div>`);
+  gameRef.once('value', s => { if (!s.val()) gameRef.set({ q:0, scores:{}, answered:{} }); });
+  gameListener = gameRef.on('value', snap => { const g = snap.val(); if (g) renderTrivia(g); });
+}
+function renderTrivia(g){
+  const tc = document.getElementById('triviaContent');
+  const ts = document.getElementById('triviaScore');
+  if (!tc) return;
+  const qi = g.q || 0;
+  if (qi >= TRIVIA_QS.length){
+    const myS = (g.scores||{})[myClientId] || 0;
+    tc.innerHTML = `<div style="text-align:center;padding:20px;"><div style="font-size:40px;">🏆</div><div style="font-size:18px;font-weight:700;margin:10px 0;">Fin!</div><div style="color:var(--accent2);">Tu puntaje: ${myS}/${TRIVIA_QS.length}</div><button onclick="resetTrivia()" style="margin-top:14px;background:var(--accent);color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;">Jugar de nuevo</button></div>`;
+    return;
+  }
+  const question = TRIVIA_QS[qi];
+  const answered = (g.answered||{})[myClientId];
+  tc.innerHTML = `<div class="trivia-q">Pregunta ${qi+1}/${TRIVIA_QS.length}: ${question.q}</div>
+    <div class="trivia-opts">${question.opts.map((o,i) => `<button class="trivia-opt${answered!==undefined?(i===question.a?' correct':answered===i?' wrong':''):''}" onclick="triviaAnswer(${i})" ${answered!==undefined?'disabled':''}>${o}</button>`).join('')}</div>`;
+  if (ts) ts.textContent = `Tu puntaje: ${(g.scores||{})[myClientId]||0} pts`;
+  const st = document.getElementById('gStatus');
+  if (st) st.textContent = answered!==undefined ? (answered===question.a ? '✅ Correcto!' : '❌ Incorrecto') : 'Elige una respuesta';
+}
+function triviaAnswer(i){
+  gameRef.once('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const qi = g.q || 0;
+    const correct = TRIVIA_QS[qi].a === i;
+    const scores = Object.assign({}, g.scores||{}); scores[myClientId] = (scores[myClientId]||0) + (correct?1:0);
+    const answered = Object.assign({}, g.answered||{}); answered[myClientId] = i;
+    gameRef.update({ scores, answered });
+    setTimeout(() => { gameRef.once('value', s2 => { const g2 = s2.val(); if (g2) gameRef.update({ q:(g2.q||0)+1, answered:{} }); }); }, 1800);
+  });
+}
+function resetTrivia(){ gameRef.set({ q:0, scores:{}, answered:{} }); }
+
+/* ---- 4. ADIVINA LA PALABRA ---- */
+const WORDS = ['CHOCOLATE','COMPUTADORA','MARIPOSA','COLOMBIA','ESTRELLA','GUITARRA','AMANECER','INVISIBLE','FOTOGRAFIA','COHETE'];
+function initWord(){
+  gameArea.innerHTML = gameHTML('💬','Adivina la Palabra','',`<div id="wordArea"></div>`);
+  gameRef.once('value', s => {
+    if (!s.val()) { const w = WORDS[Math.floor(Math.random()*WORDS.length)]; gameRef.set({ word:w, guessed:[], errors:0 }); }
+  });
+  gameListener = gameRef.on('value', snap => { const g = snap.val(); if (g) renderWord(g); });
+}
+function renderWord(g){
+  const wa = document.getElementById('wordArea');
+  const st = document.getElementById('gStatus');
+  if (!wa) return;
+  const word = g.word || '';
+  const guessed = g.guessed || [];
+  const errors = g.errors || 0;
+  const MAX_ERR = 6;
+  const display = word.split('').map(l => guessed.includes(l) ? l : '_').join(' ');
+  const won = !display.includes('_');
+  const lost = errors >= MAX_ERR;
+  if (st) st.textContent = won ? '🎉 Adivinaron la palabra!' : lost ? `💀 Era: ${word}` : `❤️ Vidas: ${MAX_ERR-errors}/${MAX_ERR}`;
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  wa.innerHTML = `<div style="letter-spacing:6px;font-size:26px;font-weight:700;text-align:center;margin:12px 0;color:var(--accent2);">${display}</div>
+    <div class="word-keyboard">${alphabet.map(l => `<button class="key-btn" onclick="wordGuess('${l}')" ${guessed.includes(l)||won||lost?'disabled':''} style="${guessed.includes(l)?(word.includes(l)?'background:var(--accent2);color:#000;border-color:var(--accent2);':'background:#3d0d17;color:var(--danger);border-color:var(--danger);'):''}">${l}</button>`).join('')}</div>
+    <button onclick="resetWord()" style="background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 16px;font-size:13px;margin:14px auto;display:block;">Nueva palabra</button>`;
+}
+function wordGuess(letter){
+  gameRef.once('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const guessed = [...(g.guessed||[]), letter];
+    const errors = (g.errors||0) + (g.word.includes(letter) ? 0 : 1);
+    gameRef.update({ guessed, errors });
+  });
+}
+function resetWord(){ const w = WORDS[Math.floor(Math.random()*WORDS.length)]; gameRef.set({ word:w, guessed:[], errors:0 }); }
 
 </script>
 </body>
