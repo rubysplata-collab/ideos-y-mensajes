@@ -654,6 +654,32 @@ function joinRoom(){
   }
 
   const code = sanitizeRoomCode(rawCode);
+
+  connectBtn.disabled = true;
+  connectBtn.innerHTML = '<span class="spinner"></span>Verificando…';
+  statusMsg.textContent = 'Verificando nombre…';
+  statusMsg.className = '';
+
+  db.ref('rooms/' + code + '/profiles').once('value').then((snap) => {
+    const existing = snap.val() || {};
+    const taken = Object.entries(existing).some(([id, p]) =>
+      id !== myClientId && p && p.name && p.name.trim().toLowerCase() === rawName.toLowerCase()
+    );
+    if (taken){
+      statusMsg.textContent = 'Ese nombre ya lo está usando alguien en esta sala. Elige otro.';
+      statusMsg.className = 'error';
+      connectBtn.disabled = false;
+      connectBtn.innerHTML = 'Entrar al chat';
+      return;
+    }
+    finishJoinRoom(code, rawName, rawCode);
+  }).catch(() => {
+    // si falla la verificación por conexión, dejamos entrar igual
+    finishJoinRoom(code, rawName, rawCode);
+  });
+}
+
+function finishJoinRoom(code, rawName, rawCode){
   myName = rawName;
   currentRoom = code;
   myCountry = countrySelect.value || '';
