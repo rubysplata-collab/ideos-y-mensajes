@@ -439,6 +439,20 @@
 
   <input type="text" id="nameInput" placeholder="Tu nombre (como te van a ver)">
 
+  <div class="code-box" style="text-align:center;">
+    <label>Foto de perfil (opcional)</label>
+    <div id="profilePreview" onclick="document.getElementById('profilePicInput').click()" style="width:80px;height:80px;border-radius:50%;background:var(--panel2);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px dashed #2a2f42;overflow:hidden;">📷</div>
+    <input type="file" id="profilePicInput" accept="image/*" style="display:none;">
+    <div class="copy-hint">Toca el círculo para elegir una foto</div>
+  </div>
+
+  <div class="code-box" style="text-align:left;">
+    <label>Tu país</label>
+    <select id="countrySelect" style="width:100%;padding:12px;border-radius:10px;border:1px solid #2a2f42;background:#11141c;color:var(--text);font-size:15px;outline:none;">
+      <option value="">Selecciona tu país</option>
+    </select>
+  </div>
+
   <div class="code-box">
     <label>Código de la sala</label>
     <input type="text" id="roomCodeInput" placeholder="ej: rubi-y-ana" maxlength="30">
@@ -529,6 +543,7 @@ const db = firebase.database();
 let currentRoom = null;
 let myName = null;
 let myClientId = null;
+let myCountry = '';
 let messagesRef = null;
 
 const connectScreen = document.getElementById('connectScreen');
@@ -564,13 +579,59 @@ function randomRoomCode(){
   roomCodeInput.value = a + '-' + b;
 }
 
-/* precargar el último código y nombre usados */
+/* ---------- PAÍSES Y BANDERAS ---------- */
+const PAISES = [
+  ['AR','Argentina'],['BO','Bolivia'],['BR','Brasil'],['CA','Canadá'],['CL','Chile'],
+  ['CO','Colombia'],['CR','Costa Rica'],['CU','Cuba'],['DO','Rep. Dominicana'],['EC','Ecuador'],
+  ['ES','España'],['US','Estados Unidos'],['FR','Francia'],['GT','Guatemala'],['HN','Honduras'],
+  ['IT','Italia'],['JP','Japón'],['MX','México'],['NI','Nicaragua'],['PA','Panamá'],
+  ['PY','Paraguay'],['PE','Perú'],['PT','Portugal'],['PR','Puerto Rico'],['SV','El Salvador'],
+  ['UK','Reino Unido'],['UY','Uruguay'],['VE','Venezuela']
+];
+function flagEmoji(code){
+  if (!code || code === 'UK') code = code === 'UK' ? 'GB' : code;
+  return code.toUpperCase().replace(/./g, c => String.fromCodePoint(127397 + c.charCodeAt()));
+}
+const countrySelect = document.getElementById('countrySelect');
+PAISES.forEach(([code,name]) => {
+  const opt = document.createElement('option');
+  opt.value = code;
+  opt.textContent = flagEmoji(code) + ' ' + name;
+  countrySelect.appendChild(opt);
+});
+
+/* ---------- FOTO DE PERFIL ---------- */
+const profilePreview = document.getElementById('profilePreview');
+const profilePicInput = document.getElementById('profilePicInput');
+let myProfilePic = null;
+
+profilePicInput.addEventListener('change', () => {
+  const file = profilePicInput.files[0];
+  if (!file) return;
+  compressImage(file, (dataUrl) => {
+    myProfilePic = dataUrl;
+    profilePreview.style.backgroundImage = 'url(' + dataUrl + ')';
+    profilePreview.style.backgroundSize = 'cover';
+    profilePreview.style.backgroundPosition = 'center';
+    profilePreview.textContent = '';
+  });
+});
 window.addEventListener('DOMContentLoaded', () => {
   myClientId = getClientId();
   const savedRoom = localStorage.getItem('chat_last_room');
   const savedName = localStorage.getItem('chat_last_name');
+  const savedPic = localStorage.getItem('chat_profile_pic');
+  const savedCountry = localStorage.getItem('chat_country');
   if (savedRoom) roomCodeInput.value = savedRoom;
   if (savedName) nameInput.value = savedName;
+  if (savedCountry) countrySelect.value = savedCountry;
+  if (savedPic){
+    myProfilePic = savedPic;
+    profilePreview.style.backgroundImage = 'url(' + savedPic + ')';
+    profilePreview.style.backgroundSize = 'cover';
+    profilePreview.style.backgroundPosition = 'center';
+    profilePreview.textContent = '';
+  }
 });
 
 function sanitizeRoomCode(code){
@@ -595,9 +656,12 @@ function joinRoom(){
   const code = sanitizeRoomCode(rawCode);
   myName = rawName;
   currentRoom = code;
+  myCountry = countrySelect.value || '';
 
   localStorage.setItem('chat_last_room', rawCode);
   localStorage.setItem('chat_last_name', rawName);
+  localStorage.setItem('chat_country', myCountry);
+  if (myProfilePic) localStorage.setItem('chat_profile_pic', myProfilePic);
 
   connectBtn.disabled = true;
   connectBtn.innerHTML = '<span class="spinner"></span>Conectando…';
@@ -629,8 +693,22 @@ function goToChat(){
   connectScreen.style.display = 'none';
   chatScreen.style.display = 'flex';
   peerLabel.textContent = 'Sala: ' + currentRoom;
-  peerAvatar.textContent = myName.charAt(0).toUpperCase();
+  updateMyAvatar(peerAvatar);
   messagesEl.innerHTML = '';
+
+  // publicar mi perfil (nombre, país, foto) para que el otro lo vea
+  db.ref('rooms/' + currentRoom + '/profiles/' + myClientId).set({
+    name: myName,
+    country: myCountry,
+    pic: myProfilePic || null
+  });
+
+  // escuchar perfiles de todos (incluye el mío y el del otro)
+  db.ref('rooms/' + currentRoom + '/profiles').on('value', (snap) => {
+    profiles = snap.val() || {};
+    refreshRenderedProfiles();
+    updateHeaderWithOtherProfile();
+  });
 
   // escuchar mensajes en tiempo real (esto también carga el historial ya guardado)
   messagesRef.limitToLast(300).on('child_added', (snap) => {
@@ -640,6 +718,44 @@ function goToChat(){
   });
 
   listenForCalls();
+}
+
+function updateMyAvatar(el){
+  if (myProfilePic){
+    el.style.backgroundImage = 'url(' + myProfilePic + ')';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.textContent = '';
+  } else {
+    el.textContent = myName.charAt(0).toUpperCase();
+  }
+}
+
+let profiles = {};
+function updateHeaderWithOtherProfile(){
+  const otherId = Object.keys(profiles).find(id => id !== myClientId);
+  if (!otherId) return;
+  const p = profiles[otherId];
+  if (!p) return;
+  peerLabel.textContent = (p.name || 'Alguien') + (p.country ? ' ' + flagEmoji(p.country) : '') + ' — Sala: ' + currentRoom;
+  if (p.pic){
+    peerAvatar.style.backgroundImage = 'url(' + p.pic + ')';
+    peerAvatar.style.backgroundSize = 'cover';
+    peerAvatar.style.backgroundPosition = 'center';
+    peerAvatar.textContent = '';
+  } else {
+    peerAvatar.style.backgroundImage = 'none';
+    peerAvatar.textContent = (p.name || '?').charAt(0).toUpperCase();
+  }
+}
+function refreshRenderedProfiles(){
+  document.querySelectorAll('[data-sender-id]').forEach(el => {
+    const sid = el.getAttribute('data-sender-id');
+    const p = profiles[sid];
+    if (!p) return;
+    const nameEl = el.querySelector('.sender-name');
+    if (nameEl) nameEl.textContent = (p.name || 'Anónimo') + (p.country ? ' ' + flagEmoji(p.country) : '');
+  });
 }
 
 function disconnectChat(){
@@ -672,14 +788,17 @@ function renderMessage(m){
   const isMe = m.senderId === myClientId;
   const row = document.createElement('div');
   row.className = 'msg-row ' + (isMe ? 'me' : 'other');
+  row.setAttribute('data-sender-id', m.senderId || '');
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
 
   if (!isMe){
+    const p = profiles[m.senderId];
     const nameEl = document.createElement('div');
     nameEl.className = 'sender-name';
-    nameEl.textContent = m.senderName || 'Anónimo';
+    const country = (p && p.country) || '';
+    nameEl.textContent = (p && p.name ? p.name : (m.senderName || 'Anónimo')) + (country ? ' ' + flagEmoji(country) : '');
     bubble.appendChild(nameEl);
   }
 
