@@ -184,9 +184,21 @@
   #messages::-webkit-scrollbar{width:6px;}
   #messages::-webkit-scrollbar-thumb{background:#2a2f42;border-radius:10px;}
 
-  .msg-row{display:flex;max-width:80%;}
+  .msg-row{display:flex;max-width:80%;gap:8px;align-items:flex-end;}
   .msg-row.me{align-self:flex-end;justify-content:flex-end;}
   .msg-row.other{align-self:flex-start;}
+  .msg-avatar{
+    width:28px;height:28px;
+    border-radius:50%;
+    background:var(--panel2);
+    flex-shrink:0;
+    background-size:cover;
+    background-position:center;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;
+    color:var(--muted);
+  }
+  .msg-content{display:flex;flex-direction:column;min-width:0;}
   .bubble{
     padding:10px 14px;
     border-radius:16px;
@@ -781,6 +793,16 @@ function refreshRenderedProfiles(){
     if (!p) return;
     const nameEl = el.querySelector('.sender-name');
     if (nameEl) nameEl.textContent = (p.name || 'Anónimo') + (p.country ? ' ' + flagEmoji(p.country) : '');
+    const avatarEl = el.querySelector('.msg-avatar');
+    if (avatarEl){
+      if (p.pic){
+        avatarEl.style.backgroundImage = 'url(' + p.pic + ')';
+        avatarEl.textContent = '';
+      } else {
+        avatarEl.style.backgroundImage = 'none';
+        avatarEl.textContent = (p.name || '?').charAt(0).toUpperCase();
+      }
+    }
   });
 }
 
@@ -816,11 +838,22 @@ function renderMessage(m){
   row.className = 'msg-row ' + (isMe ? 'me' : 'other');
   row.setAttribute('data-sender-id', m.senderId || '');
 
+  const p = profiles[m.senderId];
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  if (p && p.pic){
+    avatar.style.backgroundImage = 'url(' + p.pic + ')';
+  } else {
+    avatar.textContent = ((p && p.name) || m.senderName || '?').charAt(0).toUpperCase();
+  }
+
+  const content = document.createElement('div');
+  content.className = 'msg-content';
+
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
 
   if (!isMe){
-    const p = profiles[m.senderId];
     const nameEl = document.createElement('div');
     nameEl.className = 'sender-name';
     const country = (p && p.country) || '';
@@ -829,9 +862,9 @@ function renderMessage(m){
   }
 
   if (m.type === 'text'){
-    const p = document.createElement('div');
-    p.textContent = m.payload;
-    bubble.appendChild(p);
+    const textEl = document.createElement('div');
+    textEl.textContent = m.payload;
+    bubble.appendChild(textEl);
   } else if (m.type === 'image'){
     const img = document.createElement('img');
     img.src = m.payload;
@@ -880,7 +913,15 @@ function renderMessage(m){
   time.textContent = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   bubble.appendChild(time);
 
-  row.appendChild(bubble);
+  content.appendChild(bubble);
+
+  if (isMe){
+    row.appendChild(content);
+    row.appendChild(avatar);
+  } else {
+    row.appendChild(avatar);
+    row.appendChild(content);
+  }
   messagesEl.appendChild(row);
   scrollDown();
 }
