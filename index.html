@@ -495,8 +495,10 @@
   </div>
 
   <div id="messages"></div>
+  <div id="typingIndicator" style="display:none;padding:4px 16px;font-size:12px;color:var(--muted);font-style:italic;"></div>
 
   <div id="inputBar">
+    <button class="icon-btn" id="cesarBtn" onclick="openCesarTool()" title="Traductor código César">🔐</button>
     <button class="icon-btn" id="attachBtn" title="Enviar foto, video, PDF o archivo">📎</button>
     <input type="file" id="fileInput" accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip,.rar,*/*">
     <textarea id="textInput" rows="1" placeholder="Escribe un mensaje…"></textarea>
@@ -528,6 +530,33 @@
   <div class="call-controls" id="incomingControls" style="display:none;">
     <button class="call-btn reject" onclick="rejectCall()" title="Rechazar">✖</button>
     <button class="call-btn accept" onclick="acceptCall()" title="Aceptar">📞</button>
+  </div>
+</div>
+
+<div id="cesarModal" style="display:none;position:fixed;inset:0;background:rgba(10,11,16,.9);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--panel);border-radius:16px;padding:22px;width:90%;max-width:420px;max-height:85vh;overflow-y:auto;">
+    <h3 style="margin:0 0 4px;font-size:17px;">🔐 Código César</h3>
+    <p style="color:var(--muted);font-size:12px;margin:0 0 16px;">Pega el texto cifrado y ve todas las posibles traducciones (desplazamientos del 1 al 25).</p>
+
+    <textarea id="cesarInput" rows="3" placeholder="Ej: Krod, frpr hvwdv?" style="width:100%;background:#11141c;border:1px solid #2a2f42;border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:none;outline:none;margin-bottom:10px;box-sizing:border-box;"></textarea>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <button onclick="decodeCesar()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--accent),#8a7ff0);color:#fff;border-radius:8px;font-size:13px;font-weight:600;">Descifrar (probar todos)</button>
+      <button onclick="closeCesarTool()" style="padding:10px 14px;background:#2a2f42;color:var(--text);border-radius:8px;font-size:13px;">Cerrar</button>
+    </div>
+
+    <div id="cesarResults" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+    <hr style="border-color:#2a2f42;margin:18px 0;">
+
+    <p style="color:var(--muted);font-size:12px;margin:0 0 8px;">O si sabes el desplazamiento exacto, cífralo o descífralo directo:</p>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+      <label style="font-size:12px;color:var(--muted);">Desplazamiento:</label>
+      <input type="number" id="cesarShift" value="3" min="0" max="25" style="width:60px;padding:6px;background:#11141c;border:1px solid #2a2f42;border-radius:6px;color:var(--text);text-align:center;">
+      <button onclick="applyCesarShift(1)" style="padding:6px 12px;background:#2a2f42;color:var(--text);border-radius:6px;font-size:12px;">Cifrar →</button>
+      <button onclick="applyCesarShift(-1)" style="padding:6px 12px;background:#2a2f42;color:var(--text);border-radius:6px;font-size:12px;">← Descifrar</button>
+    </div>
+    <textarea id="cesarShiftResult" rows="2" readonly placeholder="Resultado…" style="width:100%;background:#11141c;border:1px solid #2a2f42;border-radius:10px;padding:10px;color:var(--accent2);font-family:inherit;font-size:14px;resize:none;outline:none;box-sizing:border-box;"></textarea>
   </div>
 </div>
 
@@ -708,11 +737,19 @@ function finishJoinRoom(code, rawName, rawCode){
 
   messagesRef = db.ref('rooms/' + code + '/messages');
 
-  // probar conexión real a Firebase
+  // probar conexión real a Firebase (solo la primera vez que conecte)
   const connectedRef = db.ref('.info/connected');
-  connectedRef.on('value', (snap) => {
+  connectedRef.once('value', (snap) => {
     if (snap.val() === true){
       goToChat();
+    } else {
+      // aún no está listo; esperar el primer cambio a conectado
+      connectedRef.on('value', function onceConnected(snap2){
+        if (snap2.val() === true){
+          connectedRef.off('value', onceConnected);
+          goToChat();
+        }
+      });
     }
   });
 
@@ -727,7 +764,10 @@ function finishJoinRoom(code, rawName, rawCode){
   }, 10000);
 }
 
+let alreadyInChat = false;
 function goToChat(){
+  if (alreadyInChat) return;
+  alreadyInChat = true;
   connectScreen.style.display = 'none';
   chatScreen.style.display = 'flex';
   peerLabel.textContent = 'Sala: ' + currentRoom;
@@ -756,6 +796,7 @@ function goToChat(){
   });
 
   listenForCalls();
+  listenForTyping();
 }
 
 function updateMyAvatar(el){
@@ -808,6 +849,7 @@ function refreshRenderedProfiles(){
 
 function disconnectChat(){
   if (messagesRef) messagesRef.off();
+  if (typingRef){ typingRef.child(myClientId).remove(); typingRef.off(); }
   if (callValueListener && callRef) callRef.off('value', callValueListener);
   if (pc || localStream) endCallUI();
   location.reload();
@@ -961,13 +1003,124 @@ function fileIconFor(mime, name){
   return '📁';
 }
 
-/* ---------- TEXTO ---------- */
+/* ---------- CÓDIGO CÉSAR ---------- */
+const cesarModal = document.getElementById('cesarModal');
+const cesarInput = document.getElementById('cesarInput');
+const cesarResults = document.getElementById('cesarResults');
+const cesarShiftResult = document.getElementById('cesarShiftResult');
+
+function openCesarTool(){
+  cesarModal.style.display = 'flex';
+}
+function closeCesarTool(){
+  cesarModal.style.display = 'none';
+}
+
+function cesarShiftText(text, shift){
+  return text.replace(/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, (ch) => {
+    const isUpper = ch === ch.toUpperCase();
+    const base = 'abcdefghijklmnopqrstuvwxyzñ';
+    const baseAcc = 'áéíóú';
+    let lower = ch.toLowerCase();
+    let idx, alphabet;
+    if (baseAcc.includes(lower)){
+      alphabet = baseAcc;
+      idx = alphabet.indexOf(lower);
+    } else {
+      alphabet = base;
+      idx = alphabet.indexOf(lower);
+    }
+    if (idx === -1) return ch;
+    const newIdx = ((idx + shift) % alphabet.length + alphabet.length) % alphabet.length;
+    const result = alphabet[newIdx];
+    return isUpper ? result.toUpperCase() : result;
+  });
+}
+
+function decodeCesar(){
+  const text = cesarInput.value.trim();
+  cesarResults.innerHTML = '';
+  if (!text) return;
+
+  for (let shift = 1; shift <= 25; shift++){
+    const decoded = cesarShiftText(text, -shift);
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:#11141c;border-radius:8px;padding:8px 10px;font-size:13px;';
+
+    const label = document.createElement('span');
+    label.style.cssText = 'color:var(--muted);font-size:11px;flex-shrink:0;width:44px;';
+    label.textContent = 'des. ' + shift;
+
+    const text_ = document.createElement('span');
+    text_.style.cssText = 'flex:1;word-break:break-word;';
+    text_.textContent = decoded;
+
+    const useBtn = document.createElement('button');
+    useBtn.textContent = 'Usar';
+    useBtn.style.cssText = 'background:var(--accent);color:#fff;border-radius:6px;padding:4px 8px;font-size:11px;flex-shrink:0;';
+    useBtn.onclick = () => {
+      textInput.value = decoded;
+      closeCesarTool();
+      textInput.focus();
+    };
+
+    row.appendChild(label);
+    row.appendChild(text_);
+    row.appendChild(useBtn);
+    cesarResults.appendChild(row);
+  }
+}
+
+function applyCesarShift(direction){
+  const text = cesarInput.value.trim();
+  const shift = parseInt(document.getElementById('cesarShift').value, 10) || 0;
+  if (!text){
+    cesarShiftResult.value = '';
+    return;
+  }
+  cesarShiftResult.value = cesarShiftText(text, shift * direction);
+}
+const typingIndicator = document.getElementById('typingIndicator');
+let typingRef = null;
+let typingTimeout = null;
+let iAmTyping = false;
+
+function listenForTyping(){
+  typingRef = db.ref('rooms/' + currentRoom + '/typing');
+  typingRef.child(myClientId).onDisconnect().remove();
+  typingRef.on('value', (snap) => {
+    const typing = snap.val() || {};
+    const others = Object.entries(typing).filter(([id, isTyping]) => id !== myClientId && isTyping);
+    if (others.length > 0){
+      const names = others.map(([id]) => (profiles[id] && profiles[id].name) || 'Alguien');
+      typingIndicator.textContent = names.join(', ') + (others.length === 1 ? ' está escribiendo…' : ' están escribiendo…');
+      typingIndicator.style.display = 'block';
+      scrollDown();
+    } else {
+      typingIndicator.style.display = 'none';
+    }
+  });
+}
+
+function setTyping(isTyping){
+  if (!typingRef || iAmTyping === isTyping) return;
+  iAmTyping = isTyping;
+  typingRef.child(myClientId).set(isTyping);
+}
+
+textInput.addEventListener('input', () => {
+  setTyping(textInput.value.length > 0);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => setTyping(false), 2500);
+});
 function sendText(){
   const text = textInput.value.trim();
   if (!text) return;
   sendMessage('text', text);
   textInput.value = '';
   textInput.style.height = 'auto';
+  clearTimeout(typingTimeout);
+  setTyping(false);
 }
 
 sendBtn.onclick = sendText;
