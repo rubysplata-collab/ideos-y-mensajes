@@ -430,9 +430,8 @@
     border-top-color:#fff;border-radius:50%;display:inline-block;
     animation:spin .7s linear infinite;margin-right:6px;vertical-align:middle;
   }
-  @keyframes spin{to{transform:rotate(360deg);}}
+  @keyframes spin{to{transform:rotate(360deg);}
 
-  /* ---------- CÁMARA Y FILTROS ---------- */
   #cameraModal{
     display:none;position:fixed;inset:0;
     background:rgba(0,0,0,.95);z-index:1002;
@@ -553,7 +552,6 @@
     <div id="messages"></div>
     <div id="typingIndicator" style="display:none;padding:4px 16px;font-size:12px;color:var(--muted);font-style:italic;"></div>
     <div id="inputBar">
-      <button class="icon-btn" id="cesarBtn" onclick="openCesarTool()" title="Traductor código César">🔐</button>
       <button class="icon-btn" id="gifBtn" onclick="toggleGifPanel()" title="GIFs y Stickers">🎭</button>
       <button class="icon-btn" id="tempMsgBtn" onclick="toggleTempMode()" title="Mensaje que se borra solo">⏳</button>
       <button class="icon-btn" id="cameraBtn" onclick="openCamera()" title="Tomar foto con cámara">📷</button>
@@ -686,29 +684,6 @@
     </div>
   </div>
 
-  <!-- MODAL CÉSAR -->
-  <div id="cesarModal" style="display:none;position:fixed;inset:0;background:rgba(10,11,16,.9);z-index:1000;align-items:center;justify-content:center;">
-    <div style="background:var(--panel);border-radius:16px;padding:22px;width:90%;max-width:420px;max-height:85vh;overflow-y:auto;">
-      <h3 style="margin:0 0 4px;font-size:17px;">🔐 Código César</h3>
-      <p style="color:var(--muted);font-size:12px;margin:0 0 16px;">Pega el texto cifrado y ve todas las posibles traducciones.</p>
-      <textarea id="cesarInput" rows="3" placeholder="Ej: Krod, frpr hvwdv?" style="width:100%;background:#11141c;border:1px solid #2a2f42;border-radius:10px;padding:10px;color:var(--text);font-family:inherit;font-size:14px;resize:none;outline:none;margin-bottom:10px;box-sizing:border-box;"></textarea>
-      <div style="display:flex;gap:8px;margin-bottom:14px;">
-        <button onclick="decodeCesar()" style="flex:1;padding:10px;background:linear-gradient(135deg,var(--accent),#8a7ff0);color:#fff;border-radius:8px;font-size:13px;font-weight:600;">Descifrar (probar todos)</button>
-        <button onclick="closeCesarTool()" style="padding:10px 14px;background:#2a2f42;color:var(--text);border-radius:8px;font-size:13px;">Cerrar</button>
-      </div>
-      <div id="cesarResults" style="display:flex;flex-direction:column;gap:6px;"></div>
-      <hr style="border-color:#2a2f42;margin:18px 0;">
-      <p style="color:var(--muted);font-size:12px;margin:0 0 8px;">O si sabes el desplazamiento exacto:</p>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
-        <label style="font-size:12px;color:var(--muted);">Desplazamiento:</label>
-        <input type="number" id="cesarShift" value="3" min="0" max="25" style="width:60px;padding:6px;background:#11141c;border:1px solid #2a2f42;border-radius:6px;color:var(--text);text-align:center;">
-        <button onclick="applyCesarShift(1)" style="padding:6px 12px;background:#2a2f42;color:var(--text);border-radius:6px;font-size:12px;">Cifrar →</button>
-        <button onclick="applyCesarShift(-1)" style="padding:6px 12px;background:#2a2f42;color:var(--text);border-radius:6px;font-size:12px;">← Descifrar</button>
-      </div>
-      <textarea id="cesarShiftResult" rows="2" readonly placeholder="Resultado…" style="width:100%;background:#11141c;border:1px solid #2a2f42;border-radius:10px;padding:10px;color:var(--accent2);font-family:inherit;font-size:14px;resize:none;outline:none;box-sizing:border-box;"></textarea>
-    </div>
-  </div>
-
   <!-- PANTALLA COMPARTIDA -->
   <div id="screenModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:1000;flex-direction:column;align-items:center;justify-content:center;">
     <div style="color:var(--muted);font-size:13px;margin-bottom:10px;" id="screenLabel">Compartiendo tu pantalla</div>
@@ -771,7 +746,6 @@ function randomRoomCode(){
   roomCodeInput.value = a + '-' + b;
 }
 
-/* ---------- PAÍSES Y BANDERAS ---------- */
 const PAISES = [
   ['AR','Argentina'],['BO','Bolivia'],['BR','Brasil'],['CA','Canadá'],['CL','Chile'],
   ['CO','Colombia'],['CR','Costa Rica'],['CU','Cuba'],['DO','Rep. Dominicana'],['EC','Ecuador'],
@@ -792,7 +766,6 @@ PAISES.forEach(([code,name]) => {
   countrySelect.appendChild(opt);
 });
 
-/* ---------- FOTO DE PERFIL ---------- */
 const profilePreview = document.getElementById('profilePreview');
 const profilePicInput = document.getElementById('profilePicInput');
 let myProfilePic = null;
@@ -1146,6 +1119,7 @@ function renderMessage(m){
     menu.style.left = x + 'px'; menu.style.top = y + 'px';
     const rRow = document.createElement('div');
     rRow.style.cssText = 'display:flex;gap:6px;padding:4px;';
+    const QUICK_REACTIONS = ['❤️','😂','😮','😢','👍','🔥'];
     QUICK_REACTIONS.forEach(emoji => {
       const b = document.createElement('div');
       b.textContent = emoji; b.style.cssText = 'font-size:22px;cursor:pointer;padding:2px;border-radius:6px;';
@@ -1223,7 +1197,6 @@ function switchTab(tab){
   if (tab === 'videos') loadVideoFeed();
 }
 
-/* ---------- FEED DE VIDEOS ---------- */
 const videoFeed = document.getElementById('videoFeed');
 const videoFileInput = document.getElementById('videoFileInput');
 let videosRef = null;
@@ -1340,15 +1313,6 @@ function addVideoCard(key, v){
   observer.observe(card);
 }
 
-function showVideoEmpty(){
-  if (videoFeed.children.length === 0){
-    const empty = document.createElement('div');
-    empty.className = 'video-empty';
-    empty.innerHTML = '🎵<br>No hay videos aún<br><span style="color:var(--accent2);">¡Sube el primero!</span>';
-    videoFeed.appendChild(empty);
-  }
-}
-
 /* ---------- CÁMARA Y FILTROS ---------- */
 let cameraStream = null;
 let currentFilter = 'none';
@@ -1368,7 +1332,6 @@ function openCamera(){
       video.srcObject = stream;
       video.play();
       
-      // Setup canvas for filters
       filterCanvas = document.createElement('canvas');
       filterCtx = filterCanvas.getContext('2d');
       filterActive = true;
@@ -1399,8 +1362,6 @@ function applyFilterLoop(){
     filterCtx.putImageData(imageData, 0, 0);
   }
   
-  // Mostrar el canvas con el filtro aplicado
-  // Como el video está en scaleX(-1), necesitamos voltear el canvas también
   const tempCanvas = document.createElement('canvas');
   tempCanvas.width = filterCanvas.width;
   tempCanvas.height = filterCanvas.height;
@@ -1430,9 +1391,6 @@ function applyFilterToImageData(imageData, filter) {
         data[i+1] = avg + 128 * Math.sin(angle + 2.094);
         data[i+2] = avg + 128 * Math.sin(angle + 4.188);
       }
-      break;
-    case 'mirror':
-      // Ya se maneja con el canvas volteado
       break;
     case 'vintage':
       for (let i = 0; i < data.length; i += 4) {
@@ -1533,7 +1491,6 @@ function takePhoto() {
   canvas.height = video.videoHeight || 480;
   const ctx = canvas.getContext('2d');
   
-  // Aplicar filtro si existe
   if (currentFilter !== 'none') {
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -1581,12 +1538,10 @@ function applyVoiceEffect(audioBlob) {
         const source = audioContext.createBufferSource();
         source.buffer = audioBuffer;
         
-        // Efectos de voz
         let effectNode = audioContext.createGain();
         
         switch(effect) {
           case 'robot': {
-            // Distorsión + delay
             const dist = audioContext.createWaveShaper();
             dist.curve = new Float32Array(100).map((_, i) => {
               const x = (i - 50) / 50;
@@ -1605,22 +1560,16 @@ function applyVoiceEffect(audioBlob) {
             break;
           }
           case 'vader': {
-            // Pitch shift down
-            const pitch = audioContext.createBufferSource();
-            pitch.buffer = audioBuffer;
-            const rate = 0.7;
-            source.playbackRate.value = rate;
+            source.playbackRate.value = 0.7;
             source.connect(effectNode);
             break;
           }
           case 'chipmunk': {
-            // Pitch shift up
             source.playbackRate.value = 1.5;
             source.connect(effectNode);
             break;
           }
           case 'deep': {
-            // Pitch shift down + EQ
             source.playbackRate.value = 0.6;
             const filter = audioContext.createBiquadFilter();
             filter.type = 'lowpass';
@@ -1638,7 +1587,6 @@ function applyVoiceEffect(audioBlob) {
         effectNode.connect(dest);
         source.start(0);
         
-        // Convertir a blob
         const recorder = new MediaRecorder(dest.stream);
         const chunks = [];
         recorder.ondataavailable = (e) => chunks.push(e.data);
@@ -1675,7 +1623,6 @@ recordBtn.onclick = async () => {
       
       mediaRecorder.onstop = async () => {
         const blob = new Blob(audioChunks, { type: 'audio/webm' });
-        // Aplicar efecto de voz
         const effect = document.getElementById('voiceEffectSelect').value;
         if (effect !== 'none') {
           const processedBlob = await applyVoiceEffect(blob);
@@ -1709,9 +1656,6 @@ recordBtn.onclick = async () => {
   }
 };
 
-// ... (resto del código igual que antes: juegos, llamadas, reacciones, etc.)
-
-const QUICK_REACTIONS = ['❤️','😂','😮','😢','👍','🔥'];
 let typingRef = null;
 let typingTimeout = null;
 let iAmTyping = false;
@@ -1738,6 +1682,8 @@ function setTyping(isTyping){
   iAmTyping = isTyping;
   typingRef.child(myClientId).set(isTyping);
 }
+
+const typingIndicator = document.getElementById('typingIndicator');
 
 textInput.addEventListener('input', () => {
   setTyping(textInput.value.length > 0);
@@ -1767,7 +1713,6 @@ textInput.addEventListener('input', () => {
   textInput.style.height = textInput.scrollHeight + 'px';
 });
 
-/* ---------- ARCHIVOS ---------- */
 attachBtn.onclick = () => fileInput.click();
 fileInput.addEventListener('change', () => {
   const file = fileInput.files[0];
@@ -1829,10 +1774,7 @@ function openImgModal(src){
   document.getElementById('imgModal').style.display = 'flex';
 }
 
-// ... (resto de funciones: llamadas, juegos, GIFs, stickers, personalización, etc.)
-
 function toggleGifPanel(){
-  // Implementación simplificada
   const panel = document.getElementById('gifPanel');
   panel.style.display = panel.style.display === 'none' ? 'flex' : 'none';
 }
@@ -1957,77 +1899,6 @@ function searchMessages(query){
   });
 }
 
-/* ---------- CÉSAR ---------- */
-function cesarShiftText(text, shift){
-  return text.replace(/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, (ch) => {
-    const isUpper = ch === ch.toUpperCase();
-    const base = 'abcdefghijklmnopqrstuvwxyzñ';
-    const baseAcc = 'áéíóú';
-    let lower = ch.toLowerCase();
-    let idx, alphabet;
-    if (baseAcc.includes(lower)){
-      alphabet = baseAcc;
-      idx = alphabet.indexOf(lower);
-    } else {
-      alphabet = base;
-      idx = alphabet.indexOf(lower);
-    }
-    if (idx === -1) return ch;
-    const newIdx = ((idx + shift) % alphabet.length + alphabet.length) % alphabet.length;
-    const result = alphabet[newIdx];
-    return isUpper ? result.toUpperCase() : result;
-  });
-}
-
-function openCesarTool(){
-  document.getElementById('cesarModal').style.display = 'flex';
-}
-
-function closeCesarTool(){
-  document.getElementById('cesarModal').style.display = 'none';
-}
-
-function decodeCesar(){
-  const text = document.getElementById('cesarInput').value.trim();
-  const results = document.getElementById('cesarResults');
-  results.innerHTML = '';
-  if (!text) return;
-
-  for (let shift = 1; shift <= 25; shift++){
-    const decoded = cesarShiftText(text, -shift);
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;background:#11141c;border-radius:8px;padding:8px 10px;font-size:13px;';
-    const label = document.createElement('span');
-    label.style.cssText = 'color:var(--muted);font-size:11px;flex-shrink:0;width:44px;';
-    label.textContent = 'des. ' + shift;
-    const text_ = document.createElement('span');
-    text_.style.cssText = 'flex:1;word-break:break-word;';
-    text_.textContent = decoded;
-    const useBtn = document.createElement('button');
-    useBtn.textContent = 'Usar';
-    useBtn.style.cssText = 'background:var(--accent);color:#fff;border-radius:6px;padding:4px 8px;font-size:11px;flex-shrink:0;';
-    useBtn.onclick = () => {
-      textInput.value = decoded;
-      closeCesarTool();
-      textInput.focus();
-    };
-    row.appendChild(label);
-    row.appendChild(text_);
-    row.appendChild(useBtn);
-    results.appendChild(row);
-  }
-}
-
-function applyCesarShift(direction){
-  const text = document.getElementById('cesarInput').value.trim();
-  const shift = parseInt(document.getElementById('cesarShift').value, 10) || 0;
-  if (!text){
-    document.getElementById('cesarShiftResult').value = '';
-    return;
-  }
-  document.getElementById('cesarShiftResult').value = cesarShiftText(text, shift * direction);
-}
-
 /* ---------- PERSONALIZACIÓN ---------- */
 const BUBBLE_COLORS = [
   { label:'Morado', value:'#6c5ce7' },
@@ -2125,17 +1996,491 @@ function setFont(el){
   el.classList.add('selected');
 }
 
-// LLAMADAS (WebRTC)
-// ... (código de llamadas omitido por brevedad, pero funcional)
+// LLAMADAS (WebRTC) - funciones básicas
+let pc = null;
+let localStream = null;
+let callRef = null;
+let isCaller = false;
+let currentCallType = 'audio';
+let iAmMuted = false;
+let callValueListener = null;
+
+function listenForCalls(){
+  callRef = db.ref('rooms/' + currentRoom + '/call');
+  callValueListener = callRef.on('value', (snap) => {
+    const call = snap.val();
+    if (!call) return;
+    if (call.status === 'calling' && call.caller !== myClientId && !pc){
+      showIncomingCall(call);
+    } else if (call.status === 'accepted' && call.caller === myClientId && isCaller && pc && !pc.currentRemoteDescription){
+      pc.setRemoteDescription(new RTCSessionDescription(call.answer)).catch(console.error);
+      callStatusText.textContent = 'En llamada';
+    } else if (call.status === 'ended'){
+      endCallUI();
+    }
+  });
+}
+
+function showIncomingCall(call){
+  currentCallType = call.type;
+  callPeerName.textContent = call.callerName || 'Alguien';
+  callAvatarBig.textContent = (call.callerName || '?').charAt(0).toUpperCase();
+  incomingCallLabel.textContent = call.type === 'video' ? 'Videollamada entrante' : 'Llamada entrante';
+  callStatusText.textContent = '';
+  incomingControls.style.display = 'flex';
+  outgoingControls.style.display = 'none';
+  videoContainer.classList.remove('active');
+  callModal.classList.add('active');
+}
+
+const ICE_SERVERS = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' }
+  ]
+};
+
+async function startCall(type){
+  if (pc){ alert('Ya hay una llamada en curso.'); return; }
+  currentCallType = type;
+  isCaller = true;
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: type === 'video'
+    });
+  } catch(err){
+    alert('No se pudo acceder a ' + (type === 'video' ? 'la cámara/micrófono' : 'el micrófono') + ': ' + err.message);
+    return;
+  }
+
+  setupPeerConnection();
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  if (type === 'video'){
+    localVideo.srcObject = localStream;
+    videoContainer.classList.add('active');
+  }
+
+  callPeerName.textContent = 'Sala: ' + currentRoom;
+  callAvatarBig.textContent = '📞';
+  callStatusText.textContent = 'Llamando…';
+  incomingControls.style.display = 'none';
+  outgoingControls.style.display = 'flex';
+  callModal.classList.add('active');
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+
+  await callRef.set({
+    caller: myClientId,
+    callerName: myName,
+    type: type,
+    offer: { type: offer.type, sdp: offer.sdp },
+    status: 'calling',
+    startedAt: firebase.database.ServerValue.TIMESTAMP
+  });
+
+  listenCandidates('candidatesFromCallee');
+}
+
+async function acceptCall(){
+  const snap = await callRef.once('value');
+  const call = snap.val();
+  if (!call) return;
+
+  isCaller = false;
+  currentCallType = call.type;
+
+  try{
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: call.type === 'video'
+    });
+  } catch(err){
+    alert('No se pudo acceder a ' + (call.type === 'video' ? 'la cámara/micrófono' : 'el micrófono') + ': ' + err.message);
+    rejectCall();
+    return;
+  }
+
+  setupPeerConnection();
+  localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+  if (call.type === 'video'){
+    localVideo.srcObject = localStream;
+    videoContainer.classList.add('active');
+  }
+
+  await pc.setRemoteDescription(new RTCSessionDescription(call.offer));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+
+  await callRef.update({
+    answer: { type: answer.type, sdp: answer.sdp },
+    status: 'accepted'
+  });
+
+  incomingControls.style.display = 'none';
+  outgoingControls.style.display = 'flex';
+  callStatusText.textContent = 'En llamada';
+
+  listenCandidates('candidatesFromCaller');
+}
+
+function rejectCall(){
+  if (callRef) callRef.update({ status: 'ended' });
+  endCallUI();
+}
+
+function hangupCall(){
+  if (callRef) callRef.update({ status: 'ended' });
+  endCallUI();
+}
+
+function endCallUI(){
+  callModal.classList.remove('active');
+  videoContainer.classList.remove('active');
+  if (pc){
+    pc.close();
+    pc = null;
+  }
+  if (localStream){
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+  localVideo.srcObject = null;
+  remoteVideo.srcObject = null;
+  isCaller = false;
+  iAmMuted = false;
+  muteBtn.classList.remove('muted');
+  muteBtn.textContent = '🎤';
+  if (candidateListenerCaller){ db.ref('rooms/' + currentRoom + '/call/candidatesFromCaller').off('child_added', candidateListenerCaller); candidateListenerCaller = null; }
+  if (candidateListenerCallee){ db.ref('rooms/' + currentRoom + '/call/candidatesFromCallee').off('child_added', candidateListenerCallee); candidateListenerCallee = null; }
+  setTimeout(() => {
+    if (callRef) callRef.remove();
+  }, 1500);
+}
+
+function setupPeerConnection(){
+  pc = new RTCPeerConnection(ICE_SERVERS);
+
+  pc.ontrack = (event) => {
+    remoteVideo.srcObject = event.streams[0];
+  };
+
+  pc.onicecandidate = (event) => {
+    if (event.candidate){
+      const path = isCaller ? 'candidatesFromCaller' : 'candidatesFromCallee';
+      db.ref('rooms/' + currentRoom + '/call/' + path).push(event.candidate.toJSON());
+    }
+  };
+
+  pc.onconnectionstatechange = () => {
+    if (pc && (pc.connectionState === 'disconnected' || pc.connectionState === 'failed' || pc.connectionState === 'closed')){
+      if (callModal.classList.contains('active')){
+        endCallUI();
+      }
+    }
+  };
+}
+
+let candidateListenerCaller = null;
+let candidateListenerCallee = null;
+
+function listenCandidates(path){
+  const ref = db.ref('rooms/' + currentRoom + '/call/' + path);
+  const listener = ref.on('child_added', (snap) => {
+    const candidate = snap.val();
+    if (pc && candidate){
+      pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+    }
+  });
+  if (path === 'candidatesFromCaller') candidateListenerCaller = listener;
+  else candidateListenerCallee = listener;
+}
+
+function toggleMute(){
+  if (!localStream) return;
+  iAmMuted = !iAmMuted;
+  localStream.getAudioTracks().forEach(t => t.enabled = !iAmMuted);
+  muteBtn.classList.toggle('muted', iAmMuted);
+  muteBtn.textContent = iAmMuted ? '🔇' : '🎤';
+}
 
 // SCREEN SHARE
-// ... (código de screen share omitido por brevedad)
+let screenStream = null;
+let screenPc = null;
+
+async function startScreenShare(){
+  try{
+    screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+  } catch(err){
+    alert('No se pudo compartir la pantalla: ' + err.message);
+    return;
+  }
+
+  const screenVideo = document.getElementById('screenVideo');
+  const screenModal = document.getElementById('screenModal');
+  const screenLabel = document.getElementById('screenLabel');
+  screenVideo.srcObject = screenStream;
+  screenModal.style.display = 'flex';
+  screenLabel.textContent = 'Compartiendo tu pantalla — el otro usuario también la ve';
+  document.getElementById('screenBtn').classList.add('active');
+
+  const screenRef = db.ref('rooms/' + currentRoom + '/screen');
+  screenPc = new RTCPeerConnection(ICE_SERVERS);
+  screenStream.getTracks().forEach(t => screenPc.addTrack(t, screenStream));
+
+  screenPc.onicecandidate = e => {
+    if (e.candidate) screenRef.child('candidatesFromSharer').push(e.candidate.toJSON());
+  };
+
+  const offer = await screenPc.createOffer();
+  await screenPc.setLocalDescription(offer);
+  await screenRef.set({ offer: { type: offer.type, sdp: offer.sdp }, status: 'sharing', sharerId: myClientId });
+
+  screenRef.child('answer').on('value', async snap => {
+    if (snap.val() && screenPc && !screenPc.currentRemoteDescription){
+      await screenPc.setRemoteDescription(new RTCSessionDescription(snap.val()));
+    }
+  });
+  screenRef.child('candidatesFromViewer').on('child_added', snap => {
+    if (screenPc && snap.val()) screenPc.addIceCandidate(new RTCIceCandidate(snap.val())).catch(()=>{});
+  });
+
+  screenStream.getVideoTracks()[0].onended = () => stopScreenShare();
+}
+
+async function stopScreenShare(){
+  if (screenStream) screenStream.getTracks().forEach(t => t.stop());
+  if (screenPc) { screenPc.close(); screenPc = null; }
+  screenStream = null;
+  document.getElementById('screenModal').style.display = 'none';
+  document.getElementById('screenBtn').classList.remove('active');
+  db.ref('rooms/' + currentRoom + '/screen').remove();
+}
+
+function listenForScreenShare(){
+  db.ref('rooms/' + currentRoom + '/screen').on('value', async snap => {
+    const sc = snap.val();
+    if (!sc || sc.sharerId === myClientId) return;
+    if (sc.status === 'sharing' && sc.offer){
+      const screenVideo = document.getElementById('screenVideo');
+      const screenModal = document.getElementById('screenModal');
+      document.getElementById('screenLabel').textContent = 'Pantalla compartida por otro usuario';
+      document.getElementById('screenModal').querySelector('button').style.display = 'none';
+
+      const scRef = db.ref('rooms/' + currentRoom + '/screen');
+      const viewPc = new RTCPeerConnection(ICE_SERVERS);
+      viewPc.ontrack = e => { screenVideo.srcObject = e.streams[0]; screenModal.style.display = 'flex'; };
+      viewPc.onicecandidate = e => { if (e.candidate) scRef.child('candidatesFromViewer').push(e.candidate.toJSON()); };
+      await viewPc.setRemoteDescription(new RTCSessionDescription(sc.offer));
+      const answer = await viewPc.createAnswer();
+      await viewPc.setLocalDescription(answer);
+      scRef.child('answer').set({ type: answer.type, sdp: answer.sdp });
+      scRef.child('candidatesFromSharer').on('child_added', snap2 => {
+        if (snap2.val()) viewPc.addIceCandidate(new RTCIceCandidate(snap2.val())).catch(()=>{});
+      });
+    } else if (!sc.status){
+      document.getElementById('screenModal').style.display = 'none';
+      document.getElementById('screenModal').querySelector('button').style.display = 'block';
+    }
+  });
+}
 
 // JUEGOS
-// ... (código de juegos omitido por brevedad)
+const gameArea = document.getElementById('gameArea');
+const gameSelector = document.getElementById('gameSelector');
+let gameRef = null;
+let gameListener = null;
 
-// Inicializar
-console.log('Chat por Código cargado con cámara, filtros y cambiador de voz 🚀');
+function launchGame(type){
+  gameSelector.style.display = 'none';
+  gameArea.style.display = 'flex';
+  gameArea.innerHTML = '';
+  if (gameListener && gameRef) { gameRef.off('value', gameListener); gameListener = null; }
+  gameRef = db.ref('rooms/' + currentRoom + '/game/' + type);
+  if (type === 'ttt') initTTT();
+  if (type === 'rps') initRPS();
+  if (type === 'trivia') initTrivia();
+  if (type === 'word') initWord();
+}
+
+function backToGames(){
+  if (gameListener && gameRef) { gameRef.off('value', gameListener); gameListener = null; }
+  gameArea.style.display = 'none';
+  gameArea.innerHTML = '';
+  gameSelector.style.display = 'flex';
+}
+
+function gameHTML(icon, title, status, content){
+  return `<button class="game-back" onclick="backToGames()">← Volver</button>
+<div class="game-title">${icon} ${title}</div>
+<div class="game-status" id="gStatus">${status}</div>
+${content}`;
+}
+
+// TRES EN RAYA
+function initTTT(){
+  gameArea.innerHTML = gameHTML('⭕','Tres en Raya','Cargando...',
+    `<div id="tttBoard">${Array(9).fill('<div class="ttt-cell"></div>').join('')}</div>
+     <button onclick="resetTTT()" style="background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 16px;font-size:13px;margin:8px auto;display:block;">Reiniciar</button>`);
+  gameRef.once('value', s => { if (!s.val()) gameRef.set({ board: Array(9).fill(''), turn: 'X', winner:'' }); });
+  gameListener = gameRef.on('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const cells = document.querySelectorAll('.ttt-cell');
+    cells.forEach((c, i) => {
+      c.textContent = g.board[i] || '';
+      c.style.color = g.board[i]==='X' ? 'var(--accent)' : 'var(--accent2)';
+      c.setAttribute('data-val', g.board[i] || '');
+      c.onclick = () => tttMove(i, g);
+    });
+    const st = document.getElementById('gStatus');
+    if (st) st.textContent = g.winner ? (g.winner==='draw' ? 'Empate! 🤝' : `Gano ${g.winner}! 🎉`) : `Turno: ${g.turn}`;
+  });
+}
+function tttMove(i, g){
+  if (g.board[i] || g.winner) return;
+  const sym = myClientId <= Object.keys({[myClientId]:1}).sort()[0] ? 'X' : 'O';
+  if (g.turn !== sym) return;
+  const board = [...g.board]; board[i] = sym;
+  const winner = checkTTT(board);
+  gameRef.set({ board, turn: sym==='X' ? 'O' : 'X', winner: winner || '' });
+}
+function checkTTT(b){
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (const [a,c,d] of lines) if (b[a] && b[a]===b[c] && b[a]===b[d]) return b[a];
+  return b.every(Boolean) ? 'draw' : null;
+}
+function resetTTT(){ gameRef.set({ board: Array(9).fill(''), turn: 'X', winner: '' }); }
+
+// PIEDRA PAPEL TIJERA
+function initRPS(){
+  gameArea.innerHTML = gameHTML('✂️','Piedra, Papel o Tijera','Elige tu jugada:',
+    `<div class="rps-options">
+      <button class="rps-btn" onclick="rpsPlay('piedra')">🪨</button>
+      <button class="rps-btn" onclick="rpsPlay('papel')">📄</button>
+      <button class="rps-btn" onclick="rpsPlay('tijera')">✂️</button>
+    </div>
+    <div id="rpsResult" style="font-size:18px;font-weight:700;text-align:center;margin:12px 0;"></div>
+    <button onclick="resetRPS()" style="background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 16px;font-size:13px;margin:0 auto;display:block;">Nueva ronda</button>`);
+  gameRef.once('value', s => { if (!s.val()) gameRef.set({ moves: {} }); });
+  gameListener = gameRef.on('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const moves = g.moves || {};
+    const myMove = moves[myClientId];
+    const others = Object.entries(moves).filter(([id]) => id !== myClientId);
+    const st = document.getElementById('gStatus');
+    const res = document.getElementById('rpsResult');
+    if (!st || !res) return;
+    const icons = { piedra: '🪨', papel: '📄', tijera: '✂️' };
+    if (!myMove) { st.textContent = 'Elige tu jugada:'; res.textContent = ''; return; }
+    if (!others.length) { st.textContent = 'Esperando al otro... 🕐'; res.textContent = `Tu: ${icons[myMove]}`; return; }
+    const oppMove = others[0][1];
+    const w = rpsWinner(myMove, oppMove);
+    res.textContent = `Tu: ${icons[myMove]}  vs  Ellos: ${icons[oppMove]}`;
+    st.textContent = w===0 ? 'Empate! 🤝' : w===1 ? 'Ganaste! 🎉' : 'Perdiste! 😅';
+  });
+}
+function rpsPlay(c){ gameRef.child('moves/' + myClientId).set(c); }
+function rpsWinner(a, b){
+  if (a === b) return 0;
+  if ((a==='piedra'&&b==='tijera')||(a==='papel'&&b==='piedra')||(a==='tijera'&&b==='papel')) return 1;
+  return -1;
+}
+function resetRPS(){ gameRef.set({ moves: {} }); }
+
+// TRIVIA
+const TRIVIA_QS = [
+  {q:'Cual es el pais mas grande del mundo?',opts:['Rusia','China','Canada','EE.UU.'],a:0},
+  {q:'Cuantos planetas tiene el sistema solar?',opts:['7','8','9','10'],a:1},
+  {q:'En que año llego el hombre a la luna?',opts:['1965','1969','1972','1958'],a:1},
+  {q:'Cual es el oceano mas grande?',opts:['Atlantico','Indico','Pacifico','Artico'],a:2},
+  {q:'Quien pinto la Mona Lisa?',opts:['Picasso','Van Gogh','Da Vinci','Miguel Angel'],a:2},
+  {q:'Cual es el elemento mas abundante en el universo?',opts:['Oxigeno','Carbono','Hidrogeno','Helio'],a:2},
+  {q:'Cuantos huesos tiene el cuerpo humano adulto?',opts:['206','212','198','220'],a:0},
+  {q:'Cual es la capital de Japon?',opts:['Osaka','Kioto','Tokio','Hiroshima'],a:2},
+  {q:'Que animal es el mas rapido?',opts:['Leon','Guepardo','Aguila','Halcon peregrino'],a:3},
+  {q:'Cuantos colores tiene el arcoiris?',opts:['5','6','7','8'],a:2},
+];
+function initTrivia(){
+  gameArea.innerHTML = gameHTML('🧠','Trivia Rapida','',
+    `<div id="triviaContent"></div>
+     <div id="triviaScore" style="text-align:center;font-size:13px;color:var(--muted);margin-top:10px;"></div>`);
+  gameRef.once('value', s => { if (!s.val()) gameRef.set({ q:0, scores:{}, answered:{} }); });
+  gameListener = gameRef.on('value', snap => { const g = snap.val(); if (g) renderTrivia(g); });
+}
+function renderTrivia(g){
+  const tc = document.getElementById('triviaContent');
+  const ts = document.getElementById('triviaScore');
+  if (!tc) return;
+  const qi = g.q || 0;
+  if (qi >= TRIVIA_QS.length){
+    const myS = (g.scores||{})[myClientId] || 0;
+    tc.innerHTML = `<div style="text-align:center;padding:20px;"><div style="font-size:40px;">🏆</div><div style="font-size:18px;font-weight:700;margin:10px 0;">Fin!</div><div style="color:var(--accent2);">Tu puntaje: ${myS}/${TRIVIA_QS.length}</div><button onclick="resetTrivia()" style="margin-top:14px;background:var(--accent);color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;">Jugar de nuevo</button></div>`;
+    return;
+  }
+  const question = TRIVIA_QS[qi];
+  const answered = (g.answered||{})[myClientId];
+  tc.innerHTML = `<div class="trivia-q">Pregunta ${qi+1}/${TRIVIA_QS.length}: ${question.q}</div>
+    <div class="trivia-opts">${question.opts.map((o,i) => `<button class="trivia-opt${answered!==undefined?(i===question.a?' correct':answered===i?' wrong':''):''}" onclick="triviaAnswer(${i})" ${answered!==undefined?'disabled':''}>${o}</button>`).join('')}</div>`;
+  if (ts) ts.textContent = `Tu puntaje: ${(g.scores||{})[myClientId]||0} pts`;
+  const st = document.getElementById('gStatus');
+  if (st) st.textContent = answered!==undefined ? (answered===question.a ? '✅ Correcto!' : '❌ Incorrecto') : 'Elige una respuesta';
+}
+function triviaAnswer(i){
+  gameRef.once('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const qi = g.q || 0;
+    const correct = TRIVIA_QS[qi].a === i;
+    const scores = Object.assign({}, g.scores||{}); scores[myClientId] = (scores[myClientId]||0) + (correct?1:0);
+    const answered = Object.assign({}, g.answered||{}); answered[myClientId] = i;
+    gameRef.update({ scores, answered });
+    setTimeout(() => { gameRef.once('value', s2 => { const g2 = s2.val(); if (g2) gameRef.update({ q:(g2.q||0)+1, answered:{} }); }); }, 1800);
+  });
+}
+function resetTrivia(){ gameRef.set({ q:0, scores:{}, answered:{} }); }
+
+// ADIVINA LA PALABRA
+const WORDS = ['CHOCOLATE','COMPUTADORA','MARIPOSA','COLOMBIA','ESTRELLA','GUITARRA','AMANECER','INVISIBLE','FOTOGRAFIA','COHETE'];
+function initWord(){
+  gameArea.innerHTML = gameHTML('💬','Adivina la Palabra','',`<div id="wordArea"></div>`);
+  gameRef.once('value', s => {
+    if (!s.val()) { const w = WORDS[Math.floor(Math.random()*WORDS.length)]; gameRef.set({ word:w, guessed:[], errors:0 }); }
+  });
+  gameListener = gameRef.on('value', snap => { const g = snap.val(); if (g) renderWord(g); });
+}
+function renderWord(g){
+  const wa = document.getElementById('wordArea');
+  const st = document.getElementById('gStatus');
+  if (!wa) return;
+  const word = g.word || '';
+  const guessed = g.guessed || [];
+  const errors = g.errors || 0;
+  const MAX_ERR = 6;
+  const display = word.split('').map(l => guessed.includes(l) ? l : '_').join(' ');
+  const won = !display.includes('_');
+  const lost = errors >= MAX_ERR;
+  if (st) st.textContent = won ? '🎉 Adivinaron la palabra!' : lost ? `💀 Era: ${word}` : `❤️ Vidas: ${MAX_ERR-errors}/${MAX_ERR}`;
+  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  wa.innerHTML = `<div style="letter-spacing:6px;font-size:26px;font-weight:700;text-align:center;margin:12px 0;color:var(--accent2);">${display}</div>
+    <div class="word-keyboard">${alphabet.map(l => `<button class="key-btn" onclick="wordGuess('${l}')" ${guessed.includes(l)||won||lost?'disabled':''} style="${guessed.includes(l)?(word.includes(l)?'background:var(--accent2);color:#000;border-color:var(--accent2);':'background:#3d0d17;color:var(--danger);border-color:var(--danger);'):''}">${l}</button>`).join('')}</div>
+    <button onclick="resetWord()" style="background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 16px;font-size:13px;margin:14px auto;display:block;">Nueva palabra</button>`;
+}
+function wordGuess(letter){
+  gameRef.once('value', snap => {
+    const g = snap.val(); if (!g) return;
+    const guessed = [...(g.guessed||[]), letter];
+    const errors = (g.errors||0) + (g.word.includes(letter) ? 0 : 1);
+    gameRef.update({ guessed, errors });
+  });
+}
+function resetWord(){ const w = WORDS[Math.floor(Math.random()*WORDS.length)]; gameRef.set({ word:w, guessed:[], errors:0 }); }
+
+console.log('Chat por Código cargado con cámara, filtros faciales y cambiador de voz 🚀');
 </script>
 </body>
 </html>
