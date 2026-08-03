@@ -597,6 +597,7 @@
 </head>
 <body>
 
+<!-- PANTALLA DE CONEXIÓN -->
 <div id="connectScreen">
   <h1>💬 Chat por Código</h1>
   <p class="sub">Escribe un código de sala — quien tenga el mismo código entra al mismo chat</p>
@@ -628,6 +629,7 @@
   <div id="statusMsg"></div>
 </div>
 
+<!-- PANTALLA DE CHAT -->
 <div id="chatScreen">
   <div id="chatHeader">
     <div class="info">
@@ -646,12 +648,14 @@
     </div>
   </div>
 
+  <!-- TABS -->
   <div id="tabBar">
     <button class="tab-btn active" id="tabChat" onclick="switchTab('chat')">💬 Chat</button>
     <button class="tab-btn" id="tabVideos" onclick="switchTab('videos')">🎵 Videos</button>
     <button class="tab-btn" id="tabGames" onclick="switchTab('games')">🎮 Juegos</button>
   </div>
 
+  <!-- PANEL CHAT -->
   <div id="panelChat" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
     <div id="messages"></div>
     <div id="typingIndicator" style="display:none;padding:4px 16px;font-size:12px;color:var(--muted);font-style:italic;"></div>
@@ -665,6 +669,7 @@
     </div>
   </div>
 
+  <!-- PANEL VIDEOS ESTILO TIKTOK -->
   <div id="panelVideos" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
     <div id="videoFeed"></div>
     <div id="videoUploadBar">
@@ -674,6 +679,7 @@
     </div>
   </div>
 
+  <!-- PANEL JUEGOS -->
   <div id="panelGames" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
     <div id="gameSelector" style="padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;">
       <p style="color:var(--muted);font-size:12px;text-align:center;margin:0;">Elige un juego para jugar en la sala</p>
@@ -742,7 +748,7 @@
 
 <script>
 /* =========================================================
-   CHAT POR CÓDIGO DE SALA — usa Firebase Realtime Database.
+   CHAT POR CÓDIGO DE SALA — Firebase Realtime Database
    ========================================================= */
 
 const firebaseConfig = {
@@ -966,6 +972,11 @@ function goToChat(){
     if (!m) return;
     renderMessage(m);
   });
+
+  setupTyping();
+  listenCalls();
+  listenVideos();
+  listenGame();
 }
 
 function updateMyAvatar(el){
@@ -979,11 +990,634 @@ function updateMyAvatar(el){
   }
 }
 
-function refreshRenderedProfiles(){}
-function updateHeaderWithOtherProfile(){}
-function renderMessage(m){}
+function updateHeaderWithOtherProfile(){
+  const others = Object.entries(profiles).filter(([id]) => id !== myClientId);
+  if (others.length > 0){
+    const [otherId, p] = others[0];
+    const flag = p.country ? flagEmoji(p.country) + ' ' : '';
+    peerLabel.textContent = flag + (p.name || 'Amigo');
+    if (p.pic){
+      peerAvatar.style.backgroundImage = 'url(' + p.pic + ')';
+      peerAvatar.style.backgroundSize = 'cover';
+      peerAvatar.style.backgroundPosition = 'center';
+      peerAvatar.textContent = '';
+    } else {
+      peerAvatar.style.backgroundImage = 'none';
+      peerAvatar.textContent = p.name ? p.name.charAt(0).toUpperCase() : '?';
+    }
+  } else {
+    peerLabel.textContent = 'Sala: ' + currentRoom;
+    peerAvatar.style.backgroundImage = 'none';
+    peerAvatar.textContent = myName ? myName.charAt(0).toUpperCase() : '?';
+  }
+}
 
-/* ---------- FUNCIÓN DE COMPARTIR PANTALLA ---------- */
+function refreshRenderedProfiles(){
+  document.querySelectorAll('.msg-row').forEach(row => {
+    const senderId = row.dataset.senderId;
+    if (!senderId) return;
+    const p = profiles[senderId];
+    if (p){
+      const nameEl = row.querySelector('.sender-name');
+      const avEl = row.querySelector('.msg-avatar');
+      if (nameEl){
+        const flag = p.country ? flagEmoji(p.country) + ' ' : '';
+        nameEl.textContent = flag + p.name;
+      }
+      if (avEl && p.pic){
+        avEl.style.backgroundImage = 'url(' + p.pic + ')';
+        avEl.style.backgroundSize = 'cover';
+        avEl.style.backgroundPosition = 'center';
+        avEl.textContent = '';
+      }
+    }
+  });
+}
+
+function renderMessage(m){
+  if (document.getElementById('msg-' + m.id)) return;
+
+  if (m.type === 'system'){
+    const sysDiv = document.createElement('div');
+    sysDiv.id = 'msg-' + m.id;
+    sysDiv.className = 'system-msg';
+    sysDiv.textContent = m.text;
+    messagesEl.appendChild(sysDiv);
+    scrollToBottom();
+    return;
+  }
+
+  const isMe = m.senderId === myClientId;
+  const row = document.createElement('div');
+  row.id = 'msg-' + m.id;
+  row.className = 'msg-row ' + (isMe ? 'me' : 'other');
+  row.dataset.senderId = m.senderId;
+
+  const profile = profiles[m.senderId] || { name: m.senderName, country: m.country, pic: m.profilePic };
+
+  let avatarHTML = '';
+  if (!isMe){
+    if (profile.pic){
+      avatarHTML = `<div class="msg-avatar" style="background-image:url('${profile.pic}');"></div>`;
+    } else {
+      const initial = profile.name ? profile.name.charAt(0).toUpperCase() : '?';
+      avatarHTML = `<div class="msg-avatar">${initial}</div>`;
+    }
+  }
+
+  const flag = profile.country ? flagEmoji(profile.country) + ' ' : '';
+  const senderLabel = isMe ? '' : `<div class="sender-name">${flag}${profile.name || 'Alguien'}</div>`;
+
+  let contentHTML = '';
+
+  if (m.type === 'text'){
+    contentHTML = `<div>${escapeHtml(m.text).replace(/\n/g, '<br>')}</div>`;
+  } else if (m.type === 'image'){
+    contentHTML = `<img src="${m.fileUrl}" onclick="openImgModal('${m.fileUrl}')" alt="Imagen">`;
+    if (m.text) contentHTML += `<div style="margin-top:4px;">${escapeHtml(m.text)}</div>`;
+  } else if (m.type === 'audio'){
+    contentHTML = `<audio src="${m.fileUrl}" controls></audio>`;
+  } else if (m.type === 'video'){
+    contentHTML = `<video src="${m.fileUrl}" controls></video>`;
+    if (m.text) contentHTML += `<div style="margin-top:4px;">${escapeHtml(m.text)}</div>`;
+  } else if (m.type === 'file'){
+    const ext = (m.fileName || '').split('.').pop().toLowerCase();
+    let icon = '📄';
+    if (ext === 'pdf') icon = '📕';
+    else if (['doc','docx'].includes(ext)) icon = '📘';
+    else if (['zip','rar'].includes(ext)) icon = '📦';
+    else if (['txt'].includes(ext)) icon = '📝';
+
+    contentHTML = `
+      <a class="file-card" href="${m.fileUrl}" download="${m.fileName || 'archivo'}" target="_blank">
+        <div class="file-icon">${icon}</div>
+        <div class="file-info">
+          <div class="file-name">${escapeHtml(m.fileName || 'Archivo')}</div>
+          <div class="file-size">${formatBytes(m.fileSize)}</div>
+        </div>
+      </a>
+    `;
+  }
+
+  const timeStr = formatTime(m.timestamp);
+
+  row.innerHTML = `
+    ${avatarHTML}
+    <div class="msg-content">
+      ${senderLabel}
+      <div class="bubble">${contentHTML}</div>
+      <div class="msg-time">${timeStr}</div>
+    </div>
+  `;
+
+  messagesEl.appendChild(row);
+  scrollToBottom();
+}
+
+function escapeHtml(str){
+  return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function formatBytes(bytes){
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function formatTime(ts){
+  if (!ts) return '';
+  const d = new Date(ts);
+  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
+
+function scrollToBottom(){
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+function openImgModal(url){
+  document.getElementById('imgModalSrc').src = url;
+  document.getElementById('imgModal').style.display = 'flex';
+}
+
+function sendTextMessage(){
+  const text = textInput.value.trim();
+  if (!text) return;
+
+  const msgData = {
+    id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+    senderId: myClientId,
+    senderName: myName,
+    country: myCountry,
+    type: 'text',
+    text: text,
+    timestamp: firebase.database.ServerValue.TIMESTAMP
+  };
+
+  messagesRef.push(msgData);
+  textInput.value = '';
+  textInput.style.height = 'auto';
+  stopTyping();
+}
+
+sendBtn.addEventListener('click', sendTextMessage);
+textInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey){
+    e.preventDefault();
+    sendTextMessage();
+  }
+});
+
+textInput.addEventListener('input', () => {
+  textInput.style.height = 'auto';
+  textInput.style.height = Math.min(textInput.scrollHeight, 100) + 'px';
+  notifyTyping();
+});
+
+let typingTimeout = null;
+function notifyTyping(){
+  if (!currentRoom) return;
+  db.ref('rooms/' + currentRoom + '/typing/' + myClientId).set(myName);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(stopTyping, 3000);
+}
+
+function stopTyping(){
+  if (!currentRoom) return;
+  db.ref('rooms/' + currentRoom + '/typing/' + myClientId).remove();
+}
+
+function setupTyping(){
+  const typingEl = document.getElementById('typingIndicator');
+  db.ref('rooms/' + currentRoom + '/typing').on('value', (snap) => {
+    const data = snap.val() || {};
+    const typers = Object.entries(data).filter(([id]) => id !== myClientId).map(([,name]) => name);
+    if (typers.length > 0){
+      typingEl.style.display = 'block';
+      typingEl.textContent = typers.join(', ') + ' está escribiendo…';
+    } else {
+      typingEl.style.display = 'none';
+    }
+  });
+}
+
+attachBtn.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', () => {
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  if (file.size > 15 * 1024 * 1024){
+    alert('El archivo es muy grande. El límite es 15MB.');
+    fileInput.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    let type = 'file';
+    if (file.type.startsWith('image/')) type = 'image';
+    else if (file.type.startsWith('video/')) type = 'video';
+    else if (file.type.startsWith('audio/')) type = 'audio';
+
+    const msgData = {
+      id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+      senderId: myClientId,
+      senderName: myName,
+      country: myCountry,
+      type: type,
+      fileUrl: dataUrl,
+      fileName: file.name,
+      fileSize: file.size,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    messagesRef.push(msgData);
+    fileInput.value = '';
+  };
+  reader.readAsDataURL(file);
+});
+
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+recordBtn.addEventListener('click', async () => {
+  if (!isRecording){
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunks, { type: 'audio/webm' });
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target.result;
+          const msgData = {
+            id: 'm_' + Date.now() + '_' + Math.random().toString(36).substr(2,5),
+            senderId: myClientId,
+            senderName: myName,
+            country: myCountry,
+            type: 'audio',
+            fileUrl: dataUrl,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+          };
+          messagesRef.push(msgData);
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      recordBtn.classList.add('recording');
+    } catch (err){
+      alert('No se pudo acceder al micrófono.');
+    }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    recordBtn.classList.remove('recording');
+  }
+});
+
+function compressImage(file, callback){
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width;
+      let h = img.height;
+      const max = 300;
+      if (w > h){
+        if (w > max){ h = Math.round((h * max) / w); w = max; }
+      } else {
+        if (h > max){ w = Math.round((w * max) / h); h = max; }
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ---------- TRADUCTOR CÓDIGO CÉSAR ---------- */
+function openCesarTool(){
+  document.getElementById('cesarModal').style.display = 'flex';
+}
+function closeCesarTool(){
+  document.getElementById('cesarModal').style.display = 'none';
+}
+
+function cesarShiftText(text, shift){
+  return text.replace(/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/g, (c) => {
+    const code = c.charCodeAt(0);
+    if (code >= 65 && code <= 90){
+      return String.fromCharCode(((code - 65 + shift + 26) % 26) + 65);
+    }
+    if (code >= 97 && code <= 122){
+      return String.fromCharCode(((code - 97 + shift + 26) % 26) + 97);
+    }
+    return c;
+  });
+}
+
+function decodeCesar(){
+  const input = document.getElementById('cesarInput').value;
+  const resContainer = document.getElementById('cesarResults');
+  resContainer.innerHTML = '';
+
+  if (!input.trim()) return;
+
+  for (let s = 1; s <= 25; s++){
+    const decoded = cesarShiftText(input, -s);
+    const div = document.createElement('div');
+    div.style.cssText = 'background:#11141c;padding:8px 10px;border-radius:8px;font-size:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid #2a2f42;';
+    div.innerHTML = `
+      <span style="color:var(--accent2);font-weight:700;margin-right:8px;">-${s}:</span>
+      <span style="flex:1;word-break:break-all;">${escapeHtml(decoded)}</span>
+      <button onclick="copyText('${escapeHtml(decoded)}')" style="background:#2a2f42;color:#fff;border-radius:4px;padding:3px 8px;font-size:10px;margin-left:6px;">Copiar</button>
+    `;
+    resContainer.appendChild(div);
+  }
+}
+
+function applyCesarShift(direction){
+  const input = document.getElementById('cesarInput').value;
+  let shift = parseInt(document.getElementById('cesarShift').value) || 0;
+  shift = shift * direction;
+  const res = cesarShiftText(input, shift);
+  document.getElementById('cesarShiftResult').value = res;
+}
+
+function copyText(txt){
+  navigator.clipboard.writeText(txt);
+  alert('Copiado al portapapeles');
+}
+
+/* ---------- WEBRTC VOZ / VIDEO ---------- */
+let localStream = null;
+let peerConnection = null;
+let currentCallRef = null;
+let callType = 'audio';
+
+const iceServers = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' }
+  ]
+};
+
+const callModal = document.getElementById('callModal');
+const callStatusText = document.getElementById('callStatusText');
+const callPeerName = document.getElementById('callPeerName');
+const callAvatarBig = document.getElementById('callAvatarBig');
+const outgoingControls = document.getElementById('outgoingControls');
+const incomingControls = document.getElementById('incomingControls');
+const videoContainer = document.getElementById('videoContainer');
+const localVideo = document.getElementById('localVideo');
+const remoteVideo = document.getElementById('remoteVideo');
+
+async function startCall(type){
+  callType = type;
+  const others = Object.entries(profiles).filter(([id]) => id !== myClientId);
+  if (others.length === 0){
+    alert('No hay nadie más en la sala para llamar.');
+    return;
+  }
+
+  const [peerId, p] = others[0];
+
+  callModal.classList.add('active');
+  callPeerName.textContent = p.name || 'Amigo';
+  callStatusText.textContent = 'Llamando…';
+  document.getElementById('incomingCallLabel').textContent = '';
+  outgoingControls.style.display = 'flex';
+  incomingControls.style.display = 'none';
+
+  if (p.pic){
+    callAvatarBig.style.backgroundImage = 'url(' + p.pic + ')';
+    callAvatarBig.style.backgroundSize = 'cover';
+    callAvatarBig.textContent = '';
+  } else {
+    callAvatarBig.style.backgroundImage = 'none';
+    callAvatarBig.textContent = p.name ? p.name.charAt(0).toUpperCase() : '?';
+  }
+
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: type === 'video'
+    });
+
+    if (type === 'video'){
+      videoContainer.classList.add('active');
+      localVideo.srcObject = localStream;
+    } else {
+      videoContainer.classList.remove('active');
+    }
+
+    peerConnection = new RTCPeerConnection(iceServers);
+    window.peerConnection = peerConnection;
+    window.localStream = localStream;
+
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    peerConnection.ontrack = (e) => {
+      remoteVideo.srcObject = e.streams[0];
+    };
+
+    currentCallRef = db.ref('rooms/' + currentRoom + '/call');
+
+    peerConnection.onicecandidate = (e) => {
+      if (e.candidate){
+        currentCallRef.child('callerCandidates').push(e.candidate.toJSON());
+      }
+    };
+
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+
+    await currentCallRef.set({
+      callerId: myClientId,
+      callerName: myName,
+      targetId: peerId,
+      type: type,
+      offer: { type: offer.type, sdp: offer.sdp },
+      status: 'calling'
+    });
+
+    currentCallRef.on('value', async (snap) => {
+      const data = snap.val();
+      if (!data) return;
+
+      if (data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription){
+        callStatusText.textContent = 'En llamada';
+        const rdesc = new RTCSessionDescription(data.answer);
+        await peerConnection.setRemoteDescription(rdesc);
+
+        currentCallRef.child('calleeCandidates').on('child_added', (csnap) => {
+          const cand = csnap.val();
+          if (cand) peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+        });
+      }
+
+      if (data.status === 'rejected'){
+        callStatusText.textContent = 'Llamada rechazada';
+        setTimeout(endCallLocal, 1500);
+      }
+
+      if (data.status === 'ended'){
+        endCallLocal();
+      }
+    });
+
+  } catch (err){
+    alert('Error al acceder a cámara/micrófono.');
+    endCallLocal();
+  }
+}
+
+function listenCalls(){
+  db.ref('rooms/' + currentRoom + '/call').on('value', async (snap) => {
+    const data = snap.val();
+    if (!data) return;
+
+    if (data.targetId === myClientId && data.status === 'calling'){
+      callType = data.type;
+      callModal.classList.add('active');
+      callPeerName.textContent = data.callerName || 'Amigo';
+      callStatusText.textContent = 'Llamada entrante (' + (data.type === 'video' ? 'Video' : 'Voz') + ')';
+      document.getElementById('incomingCallLabel').textContent = 'Llamada Entrante';
+      outgoingControls.style.display = 'none';
+      incomingControls.style.display = 'flex';
+
+      const callerProfile = profiles[data.callerId];
+      if (callerProfile && callerProfile.pic){
+        callAvatarBig.style.backgroundImage = 'url(' + callerProfile.pic + ')';
+        callAvatarBig.style.backgroundSize = 'cover';
+        callAvatarBig.textContent = '';
+      } else {
+        callAvatarBig.style.backgroundImage = 'none';
+        callAvatarBig.textContent = data.callerName ? data.callerName.charAt(0).toUpperCase() : '?';
+      }
+    }
+
+    if (data.status === 'ended' && callModal.classList.contains('active')){
+      endCallLocal();
+    }
+  });
+}
+
+async function acceptCall(){
+  incomingControls.style.display = 'none';
+  outgoingControls.style.display = 'flex';
+  callStatusText.textContent = 'Conectando…';
+
+  currentCallRef = db.ref('rooms/' + currentRoom + '/call');
+
+  const snap = await currentCallRef.once('value');
+  const data = snap.val();
+
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: callType === 'video'
+    });
+
+    if (callType === 'video'){
+      videoContainer.classList.add('active');
+      localVideo.srcObject = localStream;
+    }
+
+    peerConnection = new RTCPeerConnection(iceServers);
+    window.peerConnection = peerConnection;
+    window.localStream = localStream;
+
+    localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+    peerConnection.ontrack = (e) => {
+      remoteVideo.srcObject = e.streams[0];
+    };
+
+    peerConnection.onicecandidate = (e) => {
+      if (e.candidate){
+        currentCallRef.child('calleeCandidates').push(e.candidate.toJSON());
+      }
+    };
+
+    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+    const answer = await peerConnection.createAnswer();
+    await peerConnection.setLocalDescription(answer);
+
+    await currentCallRef.update({
+      status: 'accepted',
+      answer: { type: answer.type, sdp: answer.sdp }
+    });
+
+    currentCallRef.child('callerCandidates').on('child_added', (csnap) => {
+      const cand = csnap.val();
+      if (cand) peerConnection.addIceCandidate(new RTCIceCandidate(cand));
+    });
+
+    callStatusText.textContent = 'En llamada';
+
+  } catch (err){
+    alert('Error al responder la llamada.');
+    rejectCall();
+  }
+}
+
+function rejectCall(){
+  db.ref('rooms/' + currentRoom + '/call').update({ status: 'rejected' });
+  endCallLocal();
+}
+
+function hangupCall(){
+  if (currentCallRef){
+    currentCallRef.update({ status: 'ended' });
+  }
+  endCallLocal();
+}
+
+function endCallLocal(){
+  stopScreenShare();
+  if (localStream){
+    localStream.getTracks().forEach(t => t.stop());
+    localStream = null;
+  }
+  if (peerConnection){
+    peerConnection.close();
+    peerConnection = null;
+  }
+  window.peerConnection = null;
+  window.localStream = null;
+  callModal.classList.remove('active');
+  videoContainer.classList.remove('active');
+  if (currentRoom) db.ref('rooms/' + currentRoom + '/call').off();
+}
+
+function toggleMute(){
+  if (!localStream) return;
+  const audioTrack = localStream.getAudioTracks()[0];
+  if (audioTrack){
+    audioTrack.enabled = !audioTrack.enabled;
+    const btn = document.getElementById('muteBtn');
+    btn.classList.toggle('muted', !audioTrack.enabled);
+  }
+}
+
+/* ---------- COMPARTIR PANTALLA ---------- */
 async function toggleScreenShare() {
   if (isScreenSharing) {
     stopScreenShare();
@@ -1011,9 +1645,9 @@ async function toggleScreenShare() {
       }
     }
 
-    const localVideo = document.getElementById('localVideo');
-    if (localVideo) {
-      localVideo.srcObject = screenStream;
+    const localVid = document.getElementById('localVideo');
+    if (localVid) {
+      localVid.srcObject = screenStream;
     }
 
     isScreenSharing = true;
@@ -1041,9 +1675,9 @@ function stopScreenShare() {
       videoSender.replaceTrack(videoTrack);
     }
 
-    const localVideo = document.getElementById('localVideo');
-    if (localVideo) {
-      localVideo.srcObject = window.localStream;
+    const localVid = document.getElementById('localVideo');
+    if (localVid) {
+      localVid.srcObject = window.localStream;
     }
   }
 
@@ -1059,20 +1693,379 @@ function updateScreenShareButtonUI(active) {
   if (headerBtn) headerBtn.style.background = bg;
 }
 
-function compressImage(file, callback){}
-function openCesarTool(){}
-function closeCesarTool(){}
-function decodeCesar(){}
-function applyCesarShift(){}
-function disconnectChat(){}
-function clearCurrentHistory(){}
-function switchTab(){}
-function launchGame(){}
-function startCall(){}
-function toggleMute(){}
-function hangupCall(){}
-function rejectCall(){}
-function acceptCall(){}
+/* ---------- TABS Y NAVEGACIÓN ---------- */
+function switchTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panelChat').style.display = 'none';
+  document.getElementById('panelVideos').style.display = 'none';
+  document.getElementById('panelGames').style.display = 'none';
+
+  if (tab === 'chat'){
+    document.getElementById('tabChat').classList.add('active');
+    document.getElementById('panelChat').style.display = 'flex';
+  } else if (tab === 'videos'){
+    document.getElementById('tabVideos').classList.add('active');
+    document.getElementById('panelVideos').style.display = 'flex';
+  } else if (tab === 'games'){
+    document.getElementById('tabGames').classList.add('active');
+    document.getElementById('panelGames').style.display = 'flex';
+  }
+}
+
+/* ---------- FEED DE VIDEOS TIKTOK ---------- */
+const videoFileInput = document.getElementById('videoFileInput');
+videoFileInput.addEventListener('change', () => {
+  const file = videoFileInput.files[0];
+  if (!file) return;
+
+  if (file.size > 25 * 1024 * 1024){
+    alert('El video supera el límite de 25MB.');
+    videoFileInput.value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const dataUrl = e.target.result;
+    const vData = {
+      id: 'v_' + Date.now(),
+      senderId: myClientId,
+      senderName: myName,
+      videoUrl: dataUrl,
+      likes: {},
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+    db.ref('rooms/' + currentRoom + '/videos/' + vData.id).set(vData);
+    videoFileInput.value = '';
+  };
+  reader.readAsDataURL(file);
+});
+
+function listenVideos(){
+  const feed = document.getElementById('videoFeed');
+  db.ref('rooms/' + currentRoom + '/videos').on('value', (snap) => {
+    const data = snap.val() || {};
+    feed.innerHTML = '';
+    const items = Object.values(data);
+
+    if (items.length === 0){
+      feed.innerHTML = `<div class="video-empty">🎵<br>No hay videos publicados todavía.<br>¡Sé el primero en subir uno!</div>`;
+      return;
+    }
+
+    items.sort((a,b) => b.timestamp - a.timestamp).forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      const likesCount = item.likes ? Object.keys(item.likes).length : 0;
+      const isLiked = item.likes && item.likes[myClientId];
+
+      card.innerHTML = `
+        <video src="${item.videoUrl}" loop playsinline onclick="this.paused?this.play():this.pause()"></video>
+        <div class="video-overlay">
+          <div class="video-info">
+            <div class="video-author">@${escapeHtml(item.senderName)}</div>
+          </div>
+          <div class="video-actions">
+            <div class="video-action-btn" onclick="toggleLikeVideo('${item.id}')">
+              ${isLiked ? '❤️' : '🤍'}
+              <span>${likesCount}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      feed.appendChild(card);
+    });
+  });
+}
+
+function toggleLikeVideo(vId){
+  const likeRef = db.ref('rooms/' + currentRoom + '/videos/' + vId + '/likes/' + myClientId);
+  likeRef.once('value', (snap) => {
+    if (snap.exists()){
+      likeRef.remove();
+    } else {
+      likeRef.set(true);
+    }
+  });
+}
+
+/* ---------- JUEGOS ---------- */
+let currentGame = null;
+
+function launchGame(type){
+  currentGame = type;
+  document.getElementById('gameSelector').style.display = 'none';
+  const area = document.getElementById('gameArea');
+  area.style.display = 'flex';
+  area.innerHTML = '';
+
+  db.ref('rooms/' + currentRoom + '/game').set({
+    type: type,
+    state: 'init',
+    updatedBy: myClientId
+  });
+}
+
+function backToGames(){
+  document.getElementById('gameSelector').style.display = 'flex';
+  const area = document.getElementById('gameArea');
+  area.style.display = 'none';
+  area.innerHTML = '';
+  db.ref('rooms/' + currentRoom + '/game').remove();
+  currentGame = null;
+}
+
+function listenGame(){
+  db.ref('rooms/' + currentRoom + '/game').on('value', (snap) => {
+    const g = snap.val();
+    if (!g){
+      if (currentGame){
+        document.getElementById('gameSelector').style.display = 'flex';
+        document.getElementById('gameArea').style.display = 'none';
+        currentGame = null;
+      }
+      return;
+    }
+    currentGame = g.type;
+    document.getElementById('gameSelector').style.display = 'none';
+    const area = document.getElementById('gameArea');
+    area.style.display = 'flex';
+
+    if (g.type === 'ttt') renderTTT(g, area);
+    else if (g.type === 'rps') renderRPS(g, area);
+    else if (g.type === 'trivia') renderTrivia(g, area);
+    else if (g.type === 'word') renderWord(g, area);
+  });
+}
+
+/* Tres en raya */
+function renderTTT(g, area){
+  const board = g.board || Array(9).fill('');
+  const turn = g.turn || 'X';
+  const winner = g.winner;
+
+  let statusText = 'Turno de: ' + turn;
+  if (winner === 'draw') statusText = '¡Empate!';
+  else if (winner) statusText = '¡Ganó ' + winner + '!';
+
+  let cellsHTML = '';
+  for(let i=0; i<9; i++){
+    const val = board[i] || '';
+    cellsHTML += `<div class="ttt-cell" ${val?'data-val="1"':''} onclick="playTTT(${i})">${val}</div>`;
+  }
+
+  area.innerHTML = `
+    <button class="game-back" onclick="backToGames()">← Volver a juegos</button>
+    <div class="game-title">⭕ Tres en Raya</div>
+    <div class="game-status">${statusText}</div>
+    <div id="tttBoard">${cellsHTML}</div>
+    <button onclick="resetTTT()" style="padding:10px;background:#2a2f42;color:#fff;border-radius:8px;">Reiniciar partida</button>
+  `;
+}
+
+function playTTT(idx){
+  db.ref('rooms/' + currentRoom + '/game').once('value', (snap) => {
+    const g = snap.val() || {};
+    if (g.winner) return;
+    let board = g.board || Array(9).fill('');
+    if (board[idx]) return;
+
+    let turn = g.turn || 'X';
+    board[idx] = turn;
+
+    const w = checkTTTWinner(board);
+    let nextTurn = turn === 'X' ? 'O' : 'X';
+
+    db.ref('rooms/' + currentRoom + '/game').update({
+      board: board,
+      turn: nextTurn,
+      winner: w || null
+    });
+  });
+}
+
+function checkTTTWinner(b){
+  const lines = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  for (let l of lines){
+    if (b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return b[l[0]];
+  }
+  if (b.every(c => c)) return 'draw';
+  return null;
+}
+
+function resetTTT(){
+  db.ref('rooms/' + currentRoom + '/game').set({
+    type: 'ttt',
+    board: Array(9).fill(''),
+    turn: 'X'
+  });
+}
+
+/* Piedra, Papel o Tijera */
+function renderRPS(g, area){
+  const moves = g.moves || {};
+  const myMove = moves[myClientId];
+  const count = Object.keys(moves).length;
+
+  let resText = 'Elige tu jugada';
+  if (myMove) resText = 'Esperando al otro jugador…';
+
+  if (count >= 2){
+    const entries = Object.entries(moves);
+    const [p1, m1] = entries[0];
+    const [p2, m2] = entries[1];
+
+    if (m1 === m2) resText = '¡Empate! Ambos eligieron ' + m1;
+    else if (
+      (m1 === '✊' && m2 === '✂️') ||
+      (m1 === '✋' && m2 === '✊') ||
+      (m1 === '✂️' && m2 === '✋')
+    ){
+      resText = (profiles[p1]?.name || 'Jugador 1') + ' ganó con ' + m1 + ' vs ' + m2;
+    } else {
+      resText = (profiles[p2]?.name || 'Jugador 2') + ' ganó con ' + m2 + ' vs ' + m1;
+    }
+  }
+
+  area.innerHTML = `
+    <button class="game-back" onclick="backToGames()">← Volver a juegos</button>
+    <div class="game-title">✂️ Piedra, Papel o Tijera</div>
+    <div class="rps-result">${resText}</div>
+    <div class="rps-options">
+      <button class="rps-btn" onclick="playRPS('✊')">✊</button>
+      <button class="rps-btn" onclick="playRPS('✋')">✋</button>
+      <button class="rps-btn" onclick="playRPS('✂️')">✂️</button>
+    </div>
+    <button onclick="resetRPS()" style="padding:10px;background:#2a2f42;color:#fff;border-radius:8px;margin-top:10px;">Nueva ronda</button>
+  `;
+}
+
+function playRPS(move){
+  db.ref('rooms/' + currentRoom + '/game/moves/' + myClientId).set(move);
+}
+
+function resetRPS(){
+  db.ref('rooms/' + currentRoom + '/game').set({ type: 'rps', moves: {} });
+}
+
+/* Trivia */
+const TRIVIAS = [
+  { q: '¿Cuál es el planeta más grande del sistema solar?', opts: ['Tierra', 'Júpiter', 'Saturno', 'Marte'], ans: 1 },
+  { q: '¿En qué año llegó el hombre a la Luna?', opts: ['1965', '1969', '1972', '1958'], ans: 1 },
+  { q: '¿Cuál es el océano más grande del mundo?', opts: ['Atlántico', 'Índico', 'Pacífico', 'Ártico'], ans: 2 }
+];
+
+function renderTrivia(g, area){
+  const idx = g.qIdx || 0;
+  const qData = TRIVIAS[idx];
+  const ansMap = g.ansMap || {};
+  const myAns = ansMap[myClientId];
+
+  let optsHTML = '';
+  qData.opts.forEach((opt, i) => {
+    let cls = 'trivia-opt';
+    if (myAns !== undefined){
+      if (i === qData.ans) cls += ' correct';
+      else if (i === myAns) cls += ' wrong';
+    }
+    optsHTML += `<button class="${cls}" onclick="ansTrivia(${i})">${opt}</button>`;
+  });
+
+  area.innerHTML = `
+    <button class="game-back" onclick="backToGames()">← Volver a juegos</button>
+    <div class="game-title">🧠 Trivia Rápida</div>
+    <div class="trivia-q">${qData.q}</div>
+    <div class="trivia-opts">${optsHTML}</div>
+    <button onclick="nextTrivia()" style="padding:10px;background:#2a2f42;color:#fff;border-radius:8px;margin-top:14px;">Siguiente pregunta</button>
+  `;
+}
+
+function ansTrivia(optIdx){
+  db.ref('rooms/' + currentRoom + '/game/ansMap/' + myClientId).set(optIdx);
+}
+
+function nextTrivia(){
+  db.ref('rooms/' + currentRoom + '/game').once('value', (snap) => {
+    const g = snap.val() || {};
+    const nextIdx = ((g.qIdx || 0) + 1) % TRIVIAS.length;
+    db.ref('rooms/' + currentRoom + '/game').set({
+      type: 'trivia',
+      qIdx: nextIdx,
+      ansMap: {}
+    });
+  });
+}
+
+/* Adivina la Palabra */
+const PALABRAS = ['CODIGO', 'CHAT', 'FIREBASE', 'AMIGOS', 'CELULAR', 'INTERNET'];
+
+function renderWord(g, area){
+  const target = g.target || PALABRAS[0];
+  const guessed = g.guessed || [];
+  const winner = g.winner;
+
+  let display = '';
+  for(let char of target){
+    if (guessed.includes(char)) display += char + ' ';
+    else display += '_ ';
+  }
+
+  const isWin = !display.includes('_');
+  if (isWin && !winner){
+    db.ref('rooms/' + currentRoom + '/game/winner').set(myName);
+  }
+
+  let keysHTML = '';
+  'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').forEach(letter => {
+    const dis = guessed.includes(letter);
+    keysHTML += `<button class="key-btn" ${dis?'disabled':''} onclick="guessLetter('${letter}')">${letter}</button>`;
+  });
+
+  let status = 'Adivina las letras de la palabra';
+  if (isWin) status = '¡Adivinaron la palabra! 🎉';
+
+  area.innerHTML = `
+    <button class="game-back" onclick="backToGames()">← Volver a juegos</button>
+    <div class="game-title">💬 Adivina la Palabra</div>
+    <div class="game-status">${status}</div>
+    <div id="wordDisplay">${display}</div>
+    <div class="word-keyboard">${keysHTML}</div>
+    <button onclick="resetWord()" style="padding:10px;background:#2a2f42;color:#fff;border-radius:8px;margin-top:14px;">Nueva palabra</button>
+  `;
+}
+
+function guessLetter(l){
+  db.ref('rooms/' + currentRoom + '/game').once('value', (snap) => {
+    const g = snap.val() || {};
+    let guessed = g.guessed || [];
+    if (!guessed.includes(l)){
+      guessed.push(l);
+      db.ref('rooms/' + currentRoom + '/game/guessed').set(guessed);
+    }
+  });
+}
+
+function resetWord(){
+  const rand = PALABRAS[Math.floor(Math.random() * PALABRAS.length)];
+  db.ref('rooms/' + currentRoom + '/game').set({
+    type: 'word',
+    target: rand,
+    guessed: []
+  });
+}
+
+function disconnectChat(){
+  if (currentRoom){
+    db.ref('rooms/' + currentRoom + '/profiles/' + myClientId).remove();
+  }
+  location.reload();
+}
+
+function clearCurrentHistory(){
+  if (confirm('¿Quieres borrar todos los mensajes de esta sala?')){
+    db.ref('rooms/' + currentRoom + '/messages').remove();
+  }
+}
 </script>
 </body>
 </html>
