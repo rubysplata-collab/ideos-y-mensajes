@@ -642,7 +642,7 @@
     <div>
       <button class="icon-btn" id="audioCallBtn" onclick="startCall('audio')" title="Llamada de voz" style="display:inline-flex;">📞</button>
       <button class="icon-btn" id="videoCallBtn" onclick="startCall('video')" title="Videollamada" style="display:inline-flex;">📹</button>
-      <button class="icon-btn" id="screenShareHeaderBtn" onclick="toggleScreenShare()" title="Compartir Pantalla" style="display:inline-flex;">🖥️</button>
+      <button class="icon-btn" id="screenShareHeaderBtn" onclick="startCall('screen')" title="Compartir Pantalla" style="display:inline-flex;">🖥️</button>
       <button id="disconnectBtn" onclick="disconnectChat()" title="Salir del chat">Salir</button>
       <button id="clearHistBtn" onclick="clearCurrentHistory()" title="Borrar historial guardado">🗑</button>
     </div>
@@ -774,6 +774,7 @@ let profiles = {};
 // Variables de compartir pantalla
 let screenStream = null;
 let isScreenSharing = false;
+let isScreenShareCall = false;
 
 const connectScreen = document.getElementById('connectScreen');
 const chatScreen = document.getElementById('chatScreen');
@@ -1365,7 +1366,7 @@ function copyText(txt){
   alert('Copiado al portapapeles');
 }
 
-/* ---------- WEBRTC VOZ / VIDEO ---------- */
+/* ---------- WEBRTC VOZ / VIDEO / PANTALLA COMPARTIDA ---------- */
 let localStream = null;
 let peerConnection = null;
 let currentCallRef = null;
@@ -1389,7 +1390,9 @@ const localVideo = document.getElementById('localVideo');
 const remoteVideo = document.getElementById('remoteVideo');
 
 async function startCall(type){
-  callType = type;
+  isScreenShareCall = (type === 'screen');
+  callType = (type === 'screen') ? 'video' : type;
+
   const others = Object.entries(profiles).filter(([id]) => id !== myClientId);
   if (others.length === 0){
     alert('No hay nadie más en la sala para llamar.');
@@ -1400,7 +1403,7 @@ async function startCall(type){
 
   callModal.classList.add('active');
   callPeerName.textContent = p.name || 'Amigo';
-  callStatusText.textContent = 'Llamando…';
+  callStatusText.textContent = isScreenShareCall ? 'Compartiendo pantalla…' : 'Llamando…';
   document.getElementById('incomingCallLabel').textContent = '';
   outgoingControls.style.display = 'flex';
   incomingControls.style.display = 'none';
@@ -1415,12 +1418,27 @@ async function startCall(type){
   }
 
   try {
-    localStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-      video: type === 'video'
-    });
+    if (isScreenShareCall) {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({
+        video: { cursor: "always" },
+        audio: true
+      });
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const audioTrack = audioStream.getAudioTracks()[0];
+        if (audioTrack) screenStream.addTrack(audioTrack);
+      } catch(e) { console.log("No mic added"); }
 
-    if (type === 'video'){
+      localStream = screenStream;
+      isScreenSharing = true;
+    } else {
+      localStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: type === 'video'
+      });
+    }
+
+    if (type === 'video' || isScreenShareCall){
       videoContainer.classList.add('active');
       localVideo.srcObject = localStream;
     } else {
@@ -1452,7 +1470,8 @@ async function startCall(type){
       callerId: myClientId,
       callerName: myName,
       targetId: peerId,
-      type: type,
+      type: callType,
+      isScreenShare: isScreenShareCall,
       offer: { type: offer.type, sdp: offer.sdp },
       status: 'calling'
     });
@@ -1483,7 +1502,7 @@ async function startCall(type){
     });
 
   } catch (err){
-    alert('Error al acceder a cámara/micrófono.');
+    alert('Error al acceder a los dispositivos de llamada.');
     endCallLocal();
   }
 }
@@ -1497,7 +1516,9 @@ function listenCalls(){
       callType = data.type;
       callModal.classList.add('active');
       callPeerName.textContent = data.callerName || 'Amigo';
-      callStatusText.textContent = 'Llamada entrante (' + (data.type === 'video' ? 'Video' : 'Voz') + ')';
+      
+      const labelType = data.isScreenShare ? 'Pantalla compartida' : (data.type === 'video' ? 'Video' : 'Voz');
+      callStatusText.textContent = 'Llamada entrante (' + labelType + ')';
       document.getElementById('incomingCallLabel').textContent = 'Llamada Entrante';
       outgoingControls.style.display = 'none';
       incomingControls.style.display = 'flex';
@@ -1617,7 +1638,6 @@ function toggleMute(){
   }
 }
 
-/* ---------- COMPARTIR PANTALLA ---------- */
 async function toggleScreenShare() {
   if (isScreenSharing) {
     stopScreenShare();
@@ -1654,7 +1674,7 @@ async function toggleScreenShare() {
     updateScreenShareButtonUI(true);
 
   } catch (err) {
-    console.error("Error al intentar compartir pantalla:", err);
+    console.error("Error al compartir pantalla:", err);
   }
 }
 
@@ -2069,3 +2089,4 @@ function clearCurrentHistory(){
 </script>
 </body>
 </html>
+
