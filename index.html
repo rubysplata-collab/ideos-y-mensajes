@@ -2513,12 +2513,10 @@ function listenForScreenShare(){
 
 
 /* =========================================================
-   GIFs DE TENOR
+   GIFs DE GIPHY
    ========================================================= */
-// Usamos la API pública de Tenor (key de demostración)
-const TENOR_KEY = 'AIzaSyAyimkuYQYF_FXVALexPjToSIFKFOwde38';
-// Nota: reemplaza por tu propia key gratis en tenor.com/developer
-const TENOR_LIMIT = 12;
+const GIPHY_KEY = 'HUS0nRvEMFpkj6Ny7WDqWoJvkoJx9Ufe';
+const GIPHY_LIMIT = 12;
 let gifPanelOpen = false;
 let currentGifTab = 'gif';
 let gifSearchTimeout = null;
@@ -2550,19 +2548,20 @@ async function loadTrendingGifs(q=''){
   document.getElementById('gifSearch').style.display = 'block';
   grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:16px;font-size:13px;">Cargando GIFs...</div>';
   const endpoint = q
-    ? `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=${TENOR_KEY}&limit=${TENOR_LIMIT}&media_filter=gif`
-    : `https://tenor.googleapis.com/v2/featured?key=${TENOR_KEY}&limit=${TENOR_LIMIT}&media_filter=gif`;
+    ? `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(q)}&limit=${GIPHY_LIMIT}&lang=es`
+    : `https://api.giphy.com/v1/gifs/trending?api_key=${GIPHY_KEY}&limit=${GIPHY_LIMIT}`;
   try{
     const res = await fetch(endpoint);
     const data = await res.json();
     grid.innerHTML = '';
-    (data.results || []).forEach(r => {
-      const url = r.media_formats && r.media_formats.gif ? r.media_formats.gif.url : (r.media_formats && r.media_formats.tinygif ? r.media_formats.tinygif.url : null);
+    (data.data || []).forEach(gif => {
+      const url = gif.images && gif.images.fixed_height_small && gif.images.fixed_height_small.url;
+      const fullUrl = gif.images && gif.images.original && gif.images.original.url;
       if (!url) return;
       const img = document.createElement('img');
       img.src = url;
       img.loading = 'lazy';
-      img.onclick = () => { sendMessage('gif', url); toggleGifPanel(); };
+      img.onclick = () => { sendMessage('gif', fullUrl || url); toggleGifPanel(); };
       grid.appendChild(img);
     });
     if (!grid.children.length) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--muted);padding:16px;font-size:13px;">No se encontraron GIFs</div>';
