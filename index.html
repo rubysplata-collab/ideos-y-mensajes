@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Chat + 25 Juegos</title>
+<title>Chat</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
-:root{--bubble-me-bg:#005c4b;}
 body{
   font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
   background:#111b21;color:#e9edef;
@@ -94,6 +93,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   padding:0 4px;
 }
 
+/* Botón nueva sala */
 #newRoomBtn{
   position:absolute;bottom:24px;right:24px;
   width:56px;height:56px;border-radius:50%;
@@ -104,13 +104,15 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 }
 #sidebar{position:relative;}
 
-/* ===== ÁREA PRINCIPAL ===== */
+/* ===== ÁREA PRINCIPAL (chat) ===== */
 #mainArea{
   flex:1;display:flex;flex-direction:column;
   background:#0b141a;
   background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23182229' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   position:relative;
 }
+
+/* Estado vacío */
 #welcomeScreen{
   flex:1;display:flex;flex-direction:column;
   align-items:center;justify-content:center;
@@ -124,9 +126,9 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 #chatHeader{
   background:#202c33;
   padding:10px 16px;
-  display:none;
-  align-items:center;justify-content:space-between;
+  display:flex;align-items:center;justify-content:space-between;
   height:60px;border-bottom:1px solid #2a3942;
+  display:none;
 }
 #chatHeaderLeft{display:flex;align-items:center;gap:12px;cursor:pointer;}
 #chatHeaderAvatar{
@@ -159,9 +161,10 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 }
 .chat-tab.active{color:#00a884;border-bottom-color:#00a884;}
 
-/* ===== PANEL CHAT ===== */
+/* ===== MENSAJES ===== */
 #panelChat{
-  flex:1;display:none;flex-direction:column;overflow:hidden;
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  display:none;
 }
 #searchBar{
   display:none;padding:6px 12px;
@@ -202,7 +205,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   position:relative;max-width:480px;
 }
 .msg-row.me .bubble{
-  background:var(--bubble-me-bg);color:#e9edef;
+  background:#005c4b;color:#e9edef;
   border-top-right-radius:0;
 }
 .msg-row.other .bubble{
@@ -244,7 +247,6 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   border-radius:8px;margin:6px 0;
 }
 .msg-temp-badge{font-size:10px;color:#f15c6d;margin-left:4px;}
-.msg-highlight{background:rgba(0,168,132,.2) !important;}
 
 /* ===== INPUT BAR ===== */
 #inputBar{
@@ -313,58 +315,28 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 
 /* ===== PANEL JUEGOS ===== */
 #panelGames{flex:1;flex-direction:column;overflow:hidden;display:none;}
-#gameSelector{
-  padding:16px;
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-  gap:10px;
-  overflow-y:auto;
-}
-.game-card{
-  padding:14px 10px;
-  background:#202c33;
-  border-radius:12px;
-  color:#e9edef;
-  font-size:13px;
-  font-weight:600;
-  text-align:center;
-  border:1px solid #2a3942;
-  transition:all .2s;
-}
-.game-card:hover{background:#2a3942;transform:scale(1.02);border-color:#00a884;}
-#gameArea{
-  padding:16px;
-  overflow-y:auto;
-  display:none;
-  flex-direction:column;
-}
-.game-back{
-  color:#8696a0;font-size:13px;padding:6px 0;margin-bottom:12px;text-align:left;
-}
+#gameSelector{padding:16px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;}
+.game-card{width:100%;padding:16px;background:#202c33;border-radius:12px;color:#e9edef;font-size:15px;font-weight:600;text-align:left;border:1px solid #2a3942;}
+.game-card:hover{background:#2a3942;}
+#gameArea{padding:16px;overflow-y:auto;display:none;flex-direction:column;}
+.game-back{color:#8696a0;font-size:13px;padding:6px 0;margin-bottom:12px;text-align:left;}
 .game-title{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
 .game-status{font-size:12px;color:#8696a0;margin-bottom:14px;min-height:18px;}
-
-/* ===== JUEGOS COMUNES ===== */
 #tttBoard{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto 16px;}
 .ttt-cell{aspect-ratio:1;background:#2a3942;border-radius:10px;border:1px solid #3d5260;font-size:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .ttt-cell:hover:not([data-val]){background:#3d5260;}
 .rps-options{display:flex;gap:12px;justify-content:center;margin:16px 0;}
-.rps-btn{font-size:36px;padding:12px;background:#2a3942;border-radius:14px;border:1px solid #3d5260;min-width:70px;}
+.rps-btn{font-size:36px;padding:12px;background:#2a3942;border-radius:14px;border:1px solid #3d5260;}
 .trivia-q{font-size:15px;font-weight:600;margin-bottom:14px;line-height:1.4;}
 .trivia-opts{display:flex;flex-direction:column;gap:8px;}
 .trivia-opt{padding:12px;background:#2a3942;border-radius:10px;border:1px solid #3d5260;text-align:left;color:#e9edef;font-size:14px;}
 .trivia-opt.correct{background:#0d3d2e;border-color:#00a884;color:#00a884;}
 .trivia-opt.wrong{background:#3d0d17;border-color:#f15c6d;color:#f15c6d;}
-.word-keyboard{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:12px;max-width:400px;margin-left:auto;margin-right:auto;}
+.word-keyboard{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:12px;}
 .key-btn{width:34px;height:34px;background:#2a3942;border-radius:6px;border:1px solid #3d5260;color:#e9edef;font-size:13px;font-weight:600;}
 .key-btn:disabled{background:#1a2730;color:#3d5260;border-color:#1a2730;}
-.memory-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:300px;margin:0 auto;}
-.memory-card{aspect-ratio:1;background:#2a3942;border-radius:10px;border:1px solid #3d5260;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s;}
-.memory-card.flipped{transform:rotateY(180deg);background:#1a2730;}
-.memory-card.matched{background:#0d3d2e;border-color:#00a884;}
-.memory-card:hover:not(.flipped):not(.matched){transform:scale(1.05);}
 
-/* ===== MODALES ===== */
+/* ===== MODAL PERSONALIZACIÓN ===== */
 #customModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1001;align-items:flex-end;justify-content:center;}
 #customModal.open{display:flex;}
 #customPanel{background:#202c33;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:22px;max-height:80vh;overflow-y:auto;}
@@ -381,9 +353,11 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 .font-opt{padding:8px 14px;background:#2a3942;border-radius:8px;border:2px solid #3d5260;font-size:14px;cursor:pointer;color:#e9edef;}
 .font-opt.selected{border-color:#00a884;}
 
+/* ===== MODAL PANTALLA COMPARTIDA ===== */
 #screenModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:1000;flex-direction:column;align-items:center;justify-content:center;}
 #screenModal video{max-width:95%;max-height:80vh;border-radius:12px;background:#000;}
 
+/* ===== MODAL LLAMADA ===== */
 #callModal{display:none;position:fixed;inset:0;background:rgba(10,17,21,.97);z-index:1000;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;}
 #callModal.active{display:flex;}
 #callAvatarBig{width:110px;height:110px;border-radius:50%;background:linear-gradient(135deg,#00a884,#005c4b);display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:700;margin-bottom:20px;}
@@ -401,6 +375,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 .call-btn.mute.muted{background:#f15c6d;}
 #incomingCallLabel{font-size:13px;color:#00a884;margin-bottom:6px;}
 
+/* ===== MODAL ENTRADA ===== */
 #loginModal{
   position:fixed;inset:0;background:#111b21;
   display:flex;align-items:center;justify-content:center;z-index:9999;
@@ -436,17 +411,21 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   color:#e9edef;font-size:15px;margin-bottom:12px;outline:none;
 }
 
+/* ===== MODAL NUEVA SALA ===== */
 #newRoomModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1001;align-items:center;justify-content:center;}
 #newRoomModal.open{display:flex;}
 #newRoomBox{background:#202c33;border-radius:14px;padding:24px;width:90%;max-width:360px;}
 #newRoomBox h3{margin-bottom:16px;}
 
+/* ===== IMAGEN MODAL ===== */
 #imgModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);align-items:center;justify-content:center;z-index:999;cursor:zoom-out;}
 #imgModal img{max-width:92%;max-height:92%;border-radius:8px;}
 
+/* ===== CÓDIGO CÉSAR ===== */
 #cesarModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;}
 #cesarBox{background:#202c33;border-radius:14px;padding:22px;width:90%;max-width:420px;max-height:85vh;overflow-y:auto;}
 
+/* ===== RESPONSIVE ===== */
 @media(max-width:768px){
   #sidebar{width:100%;position:absolute;z-index:100;height:100vh;}
   #sidebar.hidden{display:none;}
@@ -460,7 +439,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- MODAL LOGIN -->
 <div id="loginModal">
   <div id="loginBox">
     <div class="login-profile-pic" id="loginProfilePic" onclick="document.getElementById('profilePicInput').click()">📷</div>
@@ -473,7 +452,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   </div>
 </div>
 
-<!-- APP -->
+<!-- APP PRINCIPAL -->
 <div id="appMain" style="display:none;width:100%;display:none;">
 
 <!-- SIDEBAR -->
@@ -488,7 +467,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   </div>
   <div id="sideSearch">
     <div class="search-wrap">
-      <input id="sideSearchInput" placeholder="Buscar sala..." oninput="filterRooms(this.value)"
+      <input id="sideSearchInput" class="" placeholder="Buscar sala o crear nueva" oninput="filterRooms(this.value)"
         style="width:100%;background:#202c33;border:none;border-radius:8px;padding:9px 12px 9px 36px;color:#e9edef;font-size:14px;outline:none;">
     </div>
   </div>
@@ -496,14 +475,16 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
   <button id="newRoomBtn" onclick="openNewRoomModal()" title="Nueva sala">+</button>
 </div>
 
-<!-- MAIN -->
+<!-- ÁREA PRINCIPAL -->
 <div id="mainArea">
+  <!-- Welcome -->
   <div id="welcomeScreen">
     <div class="w-icon">💬</div>
-    <h2>Chat + 25 Juegos 🎮</h2>
-    <p>Abre o crea una sala desde la barra lateral.<br>Comparte el código con tus amigos y juega.</p>
+    <h2>Chat por Código</h2>
+    <p>Abre o crea una sala de chat desde la barra lateral.<br>Comparte el código con tus amigos para chatear.</p>
   </div>
 
+  <!-- Chat header (oculto hasta abrir sala) -->
   <div id="chatHeader">
     <div id="chatHeaderLeft">
       <div id="chatHeaderAvatar">?</div>
@@ -513,7 +494,6 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
       </div>
     </div>
     <div class="chat-header-icons">
-      <button class="chat-icon-btn" onclick="exitRoom()" title="Salir">✕</button>
       <button class="chat-icon-btn" id="audioCallBtn" onclick="startCall('audio')" title="Llamada">📞</button>
       <button class="chat-icon-btn" id="videoCallBtn" onclick="startCall('video')" title="Videollamada">📹</button>
       <button class="chat-icon-btn" id="screenBtn" onclick="startScreenShare()" title="Compartir pantalla">🖥️</button>
@@ -523,6 +503,7 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
     </div>
   </div>
 
+  <!-- Tabs -->
   <div id="chatTabs">
     <button class="chat-tab active" onclick="switchTab('chat')">💬 Chat</button>
     <button class="chat-tab" onclick="switchTab('videos')">🎵 Videos</button>
@@ -548,17 +529,17 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
         <button class="gif-tab" onclick="switchGifTab('sticker')">😄 Stickers</button>
       </div>
       <div id="gifSearch" style="padding:6px 8px;">
-        <input id="gifSearchInput" placeholder="Buscar GIFs..." style="width:100%;background:#2a3942;border:none;border-radius:6px;padding:7px 12px;color:#e9edef;font-size:13px;outline:none;">
+        <input id="gifSearchInput" placeholder="Buscar GIFs..." class="" style="width:100%;background:#2a3942;border:none;border-radius:6px;padding:7px 12px;color:#e9edef;font-size:13px;outline:none;">
       </div>
       <div id="gifGrid"></div>
       <div id="stickerGrid" style="display:none;"></div>
     </div>
     <div id="inputBar">
-      <button class="inp-btn" onclick="toggleGifPanel()" title="GIFs">😄</button>
+      <button class="inp-btn" onclick="toggleGifPanel()" title="GIFs y Stickers">😄</button>
       <button class="inp-btn" id="tempMsgBtn" onclick="toggleTempMode()" title="Mensaje temporal">⏳</button>
       <button class="inp-btn" onclick="document.getElementById('fileInput').click()" title="Adjuntar">📎</button>
-      <input type="file" id="fileInput" accept="image/*,video/*,*/*">
-      <textarea id="textInput" rows="1" placeholder="Escribe un mensaje…" maxlength="1000"></textarea>
+      <input type="file" id="fileInput" accept="image/*,video/*,application/pdf,.doc,.docx,.txt,.zip,.rar,*/*">
+      <textarea id="textInput" rows="1" placeholder="Escribe un mensaje…"></textarea>
       <button class="inp-btn" id="recordBtn" title="Grabar audio">🎤</button>
       <button class="inp-btn" id="sendBtn" onclick="sendText()">➤</button>
     </div>
@@ -576,7 +557,13 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 
   <!-- Panel Juegos -->
   <div id="panelGames">
-    <div id="gameSelector"></div>
+    <div id="gameSelector">
+      <p style="color:#8696a0;font-size:13px;text-align:center;">Elige un juego</p>
+      <button class="game-card" onclick="launchGame('ttt')">⭕ Tres en Raya</button>
+      <button class="game-card" onclick="launchGame('rps')">✂️ Piedra, Papel o Tijera</button>
+      <button class="game-card" onclick="launchGame('trivia')">🧠 Trivia Rápida</button>
+      <button class="game-card" onclick="launchGame('word')">💬 Adivina la Palabra</button>
+    </div>
     <div id="gameArea"></div>
   </div>
 </div>
@@ -588,8 +575,8 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 <div id="newRoomModal" onclick="if(event.target===this)closeNewRoomModal()">
   <div id="newRoomBox">
     <h3>💬 Nueva sala</h3>
-    <p style="color:#8696a0;font-size:13px;margin-bottom:14px;">Código de sala para compartir</p>
-    <input class="login-input" id="newRoomInput" placeholder="Código (ej: rubi-y-ana)" maxlength="40">
+    <p style="color:#8696a0;font-size:13px;margin-bottom:14px;">Escribe un código de sala. Quien tenga el mismo código entra al mismo chat.</p>
+    <input class="login-input" id="newRoomInput" placeholder="Código de sala (ej: rubi-y-ana)" maxlength="40">
     <div style="display:flex;gap:8px;margin-top:4px;">
       <button onclick="randomRoomCode()" style="flex:1;padding:11px;background:#2a3942;color:#e9edef;border-radius:8px;font-size:13px;">Aleatorio</button>
       <button onclick="joinRoom()" style="flex:2;padding:11px;background:#00a884;color:#fff;border-radius:8px;font-size:14px;font-weight:600;">Entrar</button>
@@ -669,9 +656,9 @@ button{cursor:pointer;border:none;font-family:inherit;background:transparent;}
 </div>
 
 <script>
-// ============================================================
-// FIREBASE CONFIG
-// ============================================================
+/* =========================================================
+   FIREBASE CONFIG
+   ========================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCoRkv0UAsT5YCIJHhbFT_VB5KmEnIVZ98",
   authDomain: "mi-chat-2bb2f.firebaseapp.com",
@@ -684,9 +671,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ============================================================
-// ESTADO GLOBAL
-// ============================================================
+/* =========================================================
+   ESTADO GLOBAL
+   ========================================================= */
 let myClientId = null, myName = '', myCountry = '', myProfilePic = null;
 let currentRoom = null, messagesRef = null, typingRef = null;
 let profiles = {}, alreadyInChat = false;
@@ -701,7 +688,6 @@ let typingTimeout = null, iAmTyping = false;
 let gifPanelOpen = false, currentGifTab = 'gif', gifSearchTimeout = null;
 let mediaRecorder = null, audioChunks = [], isRecording = false;
 let myRooms = [];
-let gameMode = null;
 
 const GIPHY_KEY = 'HUS0nRvEMFpkj6Ny7WDqWoJvkoJx9Ufe';
 const ICE_SERVERS = { iceServers: [
@@ -711,9 +697,9 @@ const ICE_SERVERS = { iceServers: [
   { urls:'turn:openrelay.metered.ca:443', username:'openrelayproject', credential:'openrelayproject' }
 ]};
 
-// ============================================================
-// PAÍSES
-// ============================================================
+/* =========================================================
+   PAÍSES
+   ========================================================= */
 const PAISES = [
   ['','Selecciona tu país'],['AR','Argentina'],['BO','Bolivia'],['BR','Brasil'],
   ['CA','Canadá'],['CL','Chile'],['CO','Colombia'],['CR','Costa Rica'],['CU','Cuba'],
@@ -722,80 +708,96 @@ const PAISES = [
   ['NI','Nicaragua'],['PA','Panamá'],['PY','Paraguay'],['PE','Perú'],
   ['SV','El Salvador'],['UY','Uruguay'],['VE','Venezuela']
 ];
-function flagEmoji(code){ if(!code)return ''; const c=code==='UK'?'GB':code.toUpperCase(); return c.replace(/./g,ch=>String.fromCodePoint(127397+ch.charCodeAt())); }
+function flagEmoji(code){
+  if (!code) return '';
+  const c = code === 'UK' ? 'GB' : code.toUpperCase();
+  return c.replace(/./g, ch => String.fromCodePoint(127397 + ch.charCodeAt()));
+}
 
-// ============================================================
-// LOGIN
-// ============================================================
+/* =========================================================
+   LOGIN
+   ========================================================= */
 const profilePicInput = document.getElementById('profilePicInput');
-profilePicInput.addEventListener('change', ()=>{
-  const file = profilePicInput.files[0]; if(!file)return;
-  compressImage(file, url=>{
+profilePicInput.addEventListener('change', () => {
+  const file = profilePicInput.files[0]; if (!file) return;
+  compressImage(file, url => {
     myProfilePic = url;
     const el = document.getElementById('loginProfilePic');
-    el.style.backgroundImage='url('+url+')';
-    el.style.backgroundSize='cover'; el.textContent='';
+    el.style.backgroundImage = 'url('+url+')';
+    el.style.backgroundSize = 'cover'; el.textContent = '';
   });
 });
 
-window.addEventListener('DOMContentLoaded', ()=>{
-  myClientId = (()=>{
+window.addEventListener('DOMContentLoaded', () => {
+  myClientId = (() => {
     let id = localStorage.getItem('chat_client_id');
-    if(!id){ id='c'+Math.random().toString(36).substr(2,10); localStorage.setItem('chat_client_id',id); }
+    if (!id){ id = 'c'+Math.random().toString(36).substr(2,10); localStorage.setItem('chat_client_id',id); }
     return id;
   })();
   const savedName = localStorage.getItem('chat_last_name');
   const savedCountry = localStorage.getItem('chat_country');
   const savedPic = localStorage.getItem('chat_profile_pic');
   const cs = document.getElementById('countrySelect');
-  PAISES.forEach(([code,name])=>{ const opt=document.createElement('option'); opt.value=code; opt.textContent=code?flagEmoji(code)+' '+name:name; cs.appendChild(opt); });
-  if(savedName) document.getElementById('nameInput').value = savedName;
-  if(savedCountry) cs.value = savedCountry;
-  if(savedPic){ myProfilePic=savedPic; const el=document.getElementById('loginProfilePic'); el.style.backgroundImage='url('+savedPic+')'; el.style.backgroundSize='cover'; el.textContent=''; }
-  if(savedName){ login(); return; }
+  PAISES.forEach(([code,name]) => {
+    const opt = document.createElement('option'); opt.value=code;
+    opt.textContent = code ? flagEmoji(code)+' '+name : name;
+    cs.appendChild(opt);
+  });
+  if (savedName){ document.getElementById('nameInput').value = savedName; }
+  if (savedCountry) cs.value = savedCountry;
+  if (savedPic){
+    myProfilePic = savedPic;
+    const el = document.getElementById('loginProfilePic');
+    el.style.backgroundImage = 'url('+savedPic+')';
+    el.style.backgroundSize = 'cover'; el.textContent = '';
+  }
+  if (savedName) { login(); return; }
   applyCustomization();
 });
 
 function login(){
   const name = document.getElementById('nameInput').value.trim();
-  if(!name){ alert('Escribe tu nombre.'); return; }
+  if (!name){ alert('Escribe tu nombre.'); return; }
   myName = name;
   myCountry = document.getElementById('countrySelect').value;
   localStorage.setItem('chat_last_name', myName);
   localStorage.setItem('chat_country', myCountry);
-  if(myProfilePic) localStorage.setItem('chat_profile_pic', myProfilePic);
+  if (myProfilePic) localStorage.setItem('chat_profile_pic', myProfilePic);
   document.getElementById('loginModal').style.display = 'none';
   document.getElementById('appMain').style.display = 'flex';
-  document.getElementById('myNameSide').textContent = myName + (myCountry?' '+flagEmoji(myCountry):'');
+  document.getElementById('myNameSide').textContent = myName + (myCountry ? ' '+flagEmoji(myCountry) : '');
   const av = document.getElementById('myProfilePicSide');
-  if(myProfilePic){ av.style.backgroundImage='url('+myProfilePic+')'; av.style.backgroundSize='cover'; av.textContent=''; }
+  if (myProfilePic){ av.style.backgroundImage='url('+myProfilePic+')'; av.style.backgroundSize='cover'; av.textContent=''; }
   else av.textContent = myName.charAt(0).toUpperCase();
   loadMyRooms();
   applyCustomization();
-  buildGameSelector();
 }
 
-// ============================================================
-// LISTA DE SALAS
-// ============================================================
+/* =========================================================
+   LISTA DE SALAS (sidebar)
+   ========================================================= */
 function loadMyRooms(){
   const saved = localStorage.getItem('chat_my_rooms');
   myRooms = saved ? JSON.parse(saved) : [];
   renderRoomList();
 }
-function saveMyRooms(){ localStorage.setItem('chat_my_rooms', JSON.stringify(myRooms)); }
+
+function saveMyRooms(){
+  localStorage.setItem('chat_my_rooms', JSON.stringify(myRooms));
+}
+
 function renderRoomList(filter=''){
   const list = document.getElementById('roomList');
   list.innerHTML = '';
-  const rooms = filter ? myRooms.filter(r=>r.code.includes(filter.toLowerCase())) : myRooms;
-  if(!rooms.length){
+  const rooms = filter ? myRooms.filter(r => r.code.includes(filter.toLowerCase())) : myRooms;
+  if (!rooms.length){
     list.innerHTML = '<div style="padding:24px;text-align:center;color:#8696a0;font-size:13px;">No hay salas aún.<br>Crea una con el botón +</div>';
     return;
   }
-  rooms.forEach(room=>{
+  rooms.forEach(room => {
     const item = document.createElement('div');
-    item.className = 'room-item' + (currentRoom===room.code?' active':'');
-    item.onclick = ()=>openRoom(room.code);
+    item.className = 'room-item' + (currentRoom === room.code ? ' active' : '');
+    item.onclick = () => openRoom(room.code);
     const av = document.createElement('div');
     av.className = 'room-avatar';
     av.textContent = room.code.charAt(0).toUpperCase();
@@ -807,9 +809,10 @@ function renderRoomList(filter=''){
     info.appendChild(name); info.appendChild(preview);
     item.appendChild(av); item.appendChild(info);
     list.appendChild(item);
-    db.ref('rooms/'+room.code+'/messages').limitToLast(1).on('value', snap=>{
+    // escuchar último mensaje
+    db.ref('rooms/'+room.code+'/messages').limitToLast(1).on('value', snap => {
       const msgs = snap.val();
-      if(!msgs) return;
+      if (!msgs) return;
       const last = Object.values(msgs)[0];
       preview.textContent = (last.senderName||'')+(last.type==='text'?': '+last.payload.substring(0,30)
         :last.type==='image'?': 📷 Foto'
@@ -823,35 +826,48 @@ function renderRoomList(filter=''){
 }
 
 function filterRooms(v){ renderRoomList(v); }
-function openNewRoomModal(){ document.getElementById('newRoomModal').classList.add('open'); document.getElementById('newRoomInput').focus(); }
-function closeNewRoomModal(){ document.getElementById('newRoomModal').classList.remove('open'); }
+
+function openNewRoomModal(){
+  document.getElementById('newRoomModal').classList.add('open');
+  document.getElementById('newRoomInput').focus();
+}
+function closeNewRoomModal(){
+  document.getElementById('newRoomModal').classList.remove('open');
+}
+
 function randomRoomCode(){
-  const w=['sol','luna','rio','flor','cielo','estrella','mar','viento','luz','nube','rubi','ana','amor','paz','juego'];
+  const w=['sol','luna','rio','flor','cielo','estrella','mar','viento','luz','nube'];
   document.getElementById('newRoomInput').value = w[Math.floor(Math.random()*w.length)]+'-'+Math.floor(1000+Math.random()*9000);
 }
+
 function joinRoom(){
   const rawCode = document.getElementById('newRoomInput').value.trim();
-  if(!rawCode){ alert('Escribe un código.'); return; }
+  if (!rawCode){ alert('Escribe un código de sala.'); return; }
   const code = rawCode.toLowerCase().replace(/[^a-z0-9\-_]/g,'-').substr(0,40);
   closeNewRoomModal();
-  if(!myRooms.find(r=>r.code===code)){ myRooms.unshift({code,lastMsg:''}); saveMyRooms(); }
+  if (!myRooms.find(r=>r.code===code)){
+    myRooms.unshift({ code, lastMsg:'' });
+    saveMyRooms();
+  }
   openRoom(code);
 }
 
-// ============================================================
-// ABRIR SALA
-// ============================================================
+/* =========================================================
+   ABRIR SALA / CHAT
+   ========================================================= */
 function openRoom(code){
-  if(currentRoom===code) return;
-  if(messagesRef) messagesRef.off();
-  if(typingRef){ typingRef.child(myClientId).remove(); typingRef.off(); }
-  if(callValueListener && callRef) callRef.off('value', callValueListener);
+  if (currentRoom === code) return;
+  // limpiar sala anterior
+  if (messagesRef) messagesRef.off();
+  if (typingRef){ typingRef.child(myClientId).remove(); typingRef.off(); }
+  if (callValueListener && callRef) callRef.off('value', callValueListener);
   document.getElementById('messages').innerHTML = '';
   alreadyInChat = false;
   currentRoom = code;
   profiles = {};
   videoFeedLoaded = false;
   renderRoomList();
+  // Mostrar UI del chat
   document.getElementById('welcomeScreen').style.display = 'none';
   document.getElementById('chatHeader').style.display = 'flex';
   document.getElementById('chatTabs').style.display = 'flex';
@@ -860,27 +876,26 @@ function openRoom(code){
   document.getElementById('chatHeaderName').textContent = code;
   document.getElementById('chatHeaderStatus').textContent = '● conectado';
   switchTab('chat');
-  
-  db.ref('rooms/'+code+'/profiles/'+myClientId).set({ name:myName, country:myCountry, pic:myProfilePic||null });
-  db.ref('rooms/'+code+'/profiles').on('value', snap=>{
+  // publicar mi perfil
+  db.ref('rooms/'+code+'/profiles/'+myClientId).set({
+    name:myName, country:myCountry, pic:myProfilePic||null
+  });
+  // escuchar perfiles
+  db.ref('rooms/'+code+'/profiles').on('value', snap => {
     profiles = snap.val() || {};
     updateHeaderWithOtherProfile();
     refreshRenderedProfiles();
   });
-  
+  // escuchar mensajes
   messagesRef = db.ref('rooms/'+code+'/messages');
-  messagesRef.limitToLast(300).on('child_added', snap=>{
-    const m = snap.val(); if(!m) return;
+  messagesRef.limitToLast(300).on('child_added', snap => {
+    const m = snap.val(); if (!m) return;
     m._key = snap.key;
-    if(m.meta && m.meta.temp && m.senderId !== myClientId) scheduleTempDelete(snap.key, m.meta.temp);
+    if (m.meta && m.meta.temp && m.senderId !== myClientId) scheduleTempDelete(snap.key, m.meta.temp);
     renderMessage(m);
-    if(m.senderId !== myClientId) markAsSeen();
+    if (m.senderId !== myClientId) markAsSeen();
   });
-  messagesRef.on('child_removed', snap=>{
-    const el = document.querySelector(`[data-msg-key="${snap.key}"]`);
-    if(el) el.remove();
-  });
-  
+  // typing, llamadas, reacciones, visto, pantalla
   listenForTyping();
   listenForCalls();
   listenReactions();
@@ -888,63 +903,54 @@ function openRoom(code){
   listenForScreenShare();
 }
 
-function exitRoom(){
-  if(!currentRoom) return;
-  if(messagesRef){ messagesRef.off(); messagesRef=null; }
-  if(typingRef){ typingRef.child(myClientId).remove(); typingRef.off(); typingRef=null; }
-  if(callValueListener && callRef){ callRef.off('value', callValueListener); callValueListener=null; }
-  if(callRef){ callRef.remove(); callRef=null; }
-  currentRoom = null;
-  document.getElementById('messages').innerHTML = '';
-  document.getElementById('chatHeader').style.display = 'none';
-  document.getElementById('chatTabs').style.display = 'none';
-  document.getElementById('panelChat').style.display = 'none';
-  document.getElementById('inputBar').style.display = 'none';
-  document.getElementById('panelVideos').style.display = 'none';
-  document.getElementById('panelGames').style.display = 'none';
-  document.getElementById('welcomeScreen').style.display = 'flex';
-  renderRoomList();
-}
-
+/* =========================================================
+   ACTUALIZAR HEADER CON EL OTRO PERFIL
+   ========================================================= */
 function updateHeaderWithOtherProfile(){
-  const otherId = Object.keys(profiles).find(id=>id!==myClientId);
-  if(!otherId) return;
+  const otherId = Object.keys(profiles).find(id => id !== myClientId);
+  if (!otherId) return;
   const p = profiles[otherId];
-  if(!p) return;
+  if (!p) return;
   document.getElementById('chatHeaderName').textContent = (p.name||'Sala') + (p.country?' '+flagEmoji(p.country):'');
   const av = document.getElementById('chatHeaderAvatar');
-  if(p.pic){ av.style.backgroundImage='url('+p.pic+')'; av.style.backgroundSize='cover'; av.textContent=''; }
+  if (p.pic){ av.style.backgroundImage='url('+p.pic+')'; av.style.backgroundSize='cover'; av.textContent=''; }
   else { av.style.backgroundImage='none'; av.textContent=(p.name||'?').charAt(0).toUpperCase(); }
 }
 
 function refreshRenderedProfiles(){
-  document.querySelectorAll('[data-sender-id]').forEach(el=>{
+  document.querySelectorAll('[data-sender-id]').forEach(el => {
     const sid = el.getAttribute('data-sender-id');
-    const p = profiles[sid]; if(!p) return;
+    const p = profiles[sid]; if (!p) return;
     const nameEl = el.querySelector('.sender-name');
-    if(nameEl) nameEl.textContent = (p.name||'Anónimo')+(p.country?' '+flagEmoji(p.country):'');
+    if (nameEl) nameEl.textContent = (p.name||'Anónimo')+(p.country?' '+flagEmoji(p.country):'');
+    const avEl = el.querySelector('.msg-avatar');
+    if (avEl){
+      if (p.pic){ avEl.style.backgroundImage='url('+p.pic+')'; avEl.textContent=''; }
+      else { avEl.style.backgroundImage='none'; avEl.textContent=(p.name||'?').charAt(0).toUpperCase(); }
+    }
   });
 }
 
-// ============================================================
-// TABS
-// ============================================================
+/* =========================================================
+   TABS
+   ========================================================= */
 function switchTab(tab){
-  document.querySelectorAll('.chat-tab').forEach((b,i)=>b.classList.toggle('active',['chat','videos','games'][i]===tab));
+  document.querySelectorAll('.chat-tab').forEach((b,i) => b.classList.toggle('active',['chat','videos','games'][i]===tab));
   document.getElementById('panelChat').style.display = tab==='chat'?'flex':'none';
   document.getElementById('panelVideos').style.display = tab==='videos'?'flex':'none';
   document.getElementById('panelGames').style.display = tab==='games'?'flex':'none';
   document.getElementById('inputBar').style.display = tab==='chat'?'flex':'none';
-  if(tab==='videos') loadVideoFeed();
+  if (tab==='videos') loadVideoFeed();
 }
 
-// ============================================================
-// RENDER MENSAJES
-// ============================================================
+/* =========================================================
+   RENDER MENSAJES
+   ========================================================= */
 function addSystemMsg(text){
   const div = document.createElement('div'); div.className='system-msg'; div.textContent=text;
   document.getElementById('messages').appendChild(div); scrollDown();
 }
+
 const QUICK_REACTIONS = ['❤️','😂','😮','😢','👍','🔥'];
 
 function renderMessage(m){
@@ -953,37 +959,37 @@ function renderMessage(m){
   const row = document.createElement('div');
   row.className = 'msg-row '+(isMe?'me':'other');
   row.setAttribute('data-sender-id', m.senderId||'');
-  if(m._key) row.setAttribute('data-msg-key', m._key);
+  if (m._key) row.setAttribute('data-msg-key', m._key);
 
   const content = document.createElement('div'); content.className='msg-content';
   const bubble = document.createElement('div'); bubble.className='bubble';
 
-  if(!isMe){
+  if (!isMe){
     const nameEl = document.createElement('div'); nameEl.className='sender-name';
     const country=(p&&p.country)||'';
     nameEl.textContent=(p&&p.name?p.name:(m.senderName||'Anónimo'))+(country?' '+flagEmoji(country):'');
     bubble.appendChild(nameEl);
   }
 
-  if(m.meta&&m.meta.replyTo){
+  if (m.meta&&m.meta.replyTo){
     const q=document.createElement('div'); q.className='reply-quote';
     q.textContent='↩ '+(m.meta.replyTo.preview||''); bubble.appendChild(q);
   }
 
-  if(m.type==='text'){
+  if (m.type==='text'){
     const t=document.createElement('div'); t.textContent=m.payload; bubble.appendChild(t);
-  } else if(m.type==='image'){
+  } else if (m.type==='image'){
     const img=document.createElement('img'); img.src=m.payload; img.className='bubble-img';
     img.onclick=()=>openImgModal(m.payload); bubble.appendChild(img);
-  } else if(m.type==='video'){
+  } else if (m.type==='video'){
     const v=document.createElement('video'); v.src=m.payload; v.controls=true; bubble.appendChild(v);
-  } else if(m.type==='audio'){
+  } else if (m.type==='audio'){
     const a=document.createElement('audio'); a.src=m.payload; a.controls=true; bubble.appendChild(a);
-  } else if(m.type==='sticker'){
+  } else if (m.type==='sticker'){
     const s=document.createElement('div'); s.className='sticker-big'; s.textContent=m.payload; bubble.appendChild(s);
-  } else if(m.type==='gif'){
+  } else if (m.type==='gif'){
     const img=document.createElement('img'); img.src=m.payload; img.className='gif-img'; bubble.appendChild(img);
-  } else if(m.type==='file'){
+  } else if (m.type==='file'){
     const link=document.createElement('a'); link.className='file-card';
     link.href=m.payload; link.download=(m.meta&&m.meta.name)||'archivo'; link.target='_blank';
     const icon=document.createElement('div'); icon.style.fontSize='26px';
@@ -1000,12 +1006,13 @@ function renderMessage(m){
   const timeRow = document.createElement('div'); timeRow.className='msg-time';
   const d=m.timestamp?new Date(m.timestamp):new Date();
   timeRow.textContent=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  if(m.meta&&m.meta.temp){ const badge=document.createElement('span'); badge.className='msg-temp-badge'; badge.textContent='⏳'; timeRow.appendChild(badge); }
+  if (m.meta&&m.meta.temp){ const badge=document.createElement('span'); badge.className='msg-temp-badge'; badge.textContent='⏳'; timeRow.appendChild(badge); }
   bubble.appendChild(timeRow);
 
+  // long-press / doble click → menú reacciones + responder
   let pressTimer;
   const showCtx=(e)=>{
-    e.preventDefault(); if(!m._key) return;
+    e.preventDefault(); if (!m._key) return;
     const menu=document.createElement('div');
     menu.style.cssText='position:fixed;background:#233138;border-radius:12px;padding:6px;box-shadow:0 4px 20px rgba(0,0,0,.5);z-index:999;display:flex;flex-direction:column;min-width:140px;';
     const cx=Math.min((e.clientX||e.touches?.[0]?.clientX||0),window.innerWidth-160);
@@ -1032,33 +1039,32 @@ function renderMessage(m){
   bubble.addEventListener('dblclick',showCtx);
 
   content.appendChild(bubble);
-  row.appendChild(content);
-  const msgs = document.getElementById('messages');
-  const atBottom = msgs.scrollTop + msgs.clientHeight >= msgs.scrollHeight - 20;
-  msgs.appendChild(row);
-  if(atBottom) msgs.scrollTop = msgs.scrollHeight;
+  if (isMe){ row.appendChild(content); }
+  else { row.appendChild(content); }
+  document.getElementById('messages').appendChild(row);
+  scrollDown();
 }
 
 function scrollDown(){ const m=document.getElementById('messages'); m.scrollTop=m.scrollHeight; }
 function openImgModal(src){ document.getElementById('imgModalSrc').src=src; document.getElementById('imgModal').style.display='flex'; }
 
-// ============================================================
-// ENVÍO DE MENSAJES
-// ============================================================
+/* =========================================================
+   ENVÍO DE MENSAJES
+   ========================================================= */
 function sendMessage(type, payload, meta){
-  if(!messagesRef) return;
+  if (!messagesRef) return;
   const msg={type,payload,senderId:myClientId,senderName:myName,timestamp:firebase.database.ServerValue.TIMESTAMP};
-  if(meta) msg.meta=meta;
+  if (meta) msg.meta=meta;
   return messagesRef.push(msg);
 }
 
 function sendText(){
-  const text=document.getElementById('textInput').value.trim(); if(!text) return;
+  const text=document.getElementById('textInput').value.trim(); if (!text) return;
   const meta={};
-  if(replyTo) meta.replyTo=replyTo;
-  if(tempMode) meta.temp=30;
-  const ref=sendMessage('text',text,Object.keys(meta).length?meta:undefined);
-  if(tempMode && ref) scheduleTempDelete(ref.key,30);
+  if (replyTo) meta.replyTo=replyTo;
+  if (tempMode) meta.temp=30;
+  const ref=messagesRef.push({type:'text',payload:text,senderId:myClientId,senderName:myName,timestamp:firebase.database.ServerValue.TIMESTAMP,...(Object.keys(meta).length?{meta}:{})});
+  if (tempMode) scheduleTempDelete(ref.key,30);
   cancelReply();
   document.getElementById('textInput').value='';
   document.getElementById('textInput').style.height='auto';
@@ -1073,31 +1079,31 @@ textInput.addEventListener('input',()=>{
   clearTimeout(typingTimeout); typingTimeout=setTimeout(()=>setTyping(false),2500);
 });
 
-// ============================================================
-// ARCHIVOS
-// ============================================================
+/* =========================================================
+   ARCHIVOS
+   ========================================================= */
 document.getElementById('fileInput').addEventListener('change',()=>{
-  const file=document.getElementById('fileInput').files[0]; if(!file) return;
+  const file=document.getElementById('fileInput').files[0]; if (!file) return;
   const MAX=15*1024*1024;
-  if(file.size>MAX){ alert('Máximo 15 MB. Este archivo pesa '+formatFileSize(file.size)); document.getElementById('fileInput').value=''; return; }
-  if(file.type.startsWith('image/')){ compressImage(file,url=>sendMessage('image',url)); }
-  else if(file.type.startsWith('video/')){ readAsDataUrl(file,url=>sendMessage('video',url,{name:file.name,size:file.size,mime:file.type})); }
+  if (file.size>MAX){ alert('Máximo 15 MB. Este archivo pesa '+formatFileSize(file.size)); document.getElementById('fileInput').value=''; return; }
+  if (file.type.startsWith('image/')){ compressImage(file,url=>sendMessage('image',url)); }
+  else if (file.type.startsWith('video/')){ readAsDataUrl(file,url=>sendMessage('video',url,{name:file.name,size:file.size,mime:file.type})); }
   else { readAsDataUrl(file,url=>sendMessage('file',url,{name:file.name,size:file.size,mime:file.type})); }
   document.getElementById('fileInput').value='';
 });
 
 function compressImage(file,cb){
-  const r=new FileReader(); r.onload=e=>{const img=new Image();img.onload=()=>{const maxW=900;let w=img.width,h=img.height;const ratio=w/h;if(w>maxW){w=maxW;h=Math.round(maxW/ratio);}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.7));};img.src=e.target.result;}; r.readAsDataURL(file);
+  const r=new FileReader(); r.onload=e=>{const img=new Image();img.onload=()=>{const maxW=900;let w=img.width,h=img.height;if(w>maxW){h=Math.round(h*(maxW/w));w=maxW;}const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);cb(c.toDataURL('image/jpeg',.7));};img.src=e.target.result;}; r.readAsDataURL(file);
 }
 function readAsDataUrl(file,cb){ const r=new FileReader(); r.onload=()=>cb(r.result); r.readAsDataURL(file); }
 function formatFileSize(b){ if(b<1024)return b+' B'; if(b<1048576)return(b/1024).toFixed(1)+' KB'; return(b/1048576).toFixed(1)+' MB'; }
 function fileIconFor(mime,name){ mime=mime||''; name=(name||'').toLowerCase(); if(mime.includes('pdf')||name.endsWith('.pdf'))return'📕'; if(mime.includes('word')||name.endsWith('.doc')||name.endsWith('.docx'))return'📄'; if(mime.includes('zip')||name.endsWith('.zip')||name.endsWith('.rar'))return'🗜️'; if(mime.includes('audio'))return'🎵'; return'📁'; }
 
-// ============================================================
-// AUDIO
-// ============================================================
+/* =========================================================
+   AUDIO (notas de voz)
+   ========================================================= */
 document.getElementById('recordBtn').onclick=async()=>{
-  if(!isRecording){
+  if (!isRecording){
     try{
       const stream=await navigator.mediaDevices.getUserMedia({audio:true});
       mediaRecorder=new MediaRecorder(stream); audioChunks=[];
@@ -1118,9 +1124,9 @@ document.getElementById('recordBtn').onclick=async()=>{
   }
 };
 
-// ============================================================
-// TYPING
-// ============================================================
+/* =========================================================
+   TYPING INDICATOR
+   ========================================================= */
 function listenForTyping(){
   typingRef=db.ref('rooms/'+currentRoom+'/typing');
   typingRef.child(myClientId).onDisconnect().remove();
@@ -1137,9 +1143,9 @@ function listenForTyping(){
 }
 function setTyping(v){ if(!typingRef||iAmTyping===v)return; iAmTyping=v; typingRef.child(myClientId).set(v); }
 
-// ============================================================
-// REACCIONES
-// ============================================================
+/* =========================================================
+   REACCIONES
+   ========================================================= */
 function addReaction(msgKey,emoji){
   const ref=db.ref('rooms/'+currentRoom+'/reactions/'+msgKey+'/'+myClientId);
   ref.once('value',snap=>{ if(snap.val()===emoji)ref.remove(); else ref.set(emoji); });
@@ -1161,9 +1167,9 @@ function updateReactionsUI(msgKey,obj){
   });
 }
 
-// ============================================================
-// RESPONDER
-// ============================================================
+/* =========================================================
+   RESPONDER
+   ========================================================= */
 function setReply(key,preview){
   replyTo={key,preview};
   document.getElementById('replyBar').style.display='flex';
@@ -1172,20 +1178,20 @@ function setReply(key,preview){
 }
 function cancelReply(){ replyTo=null; document.getElementById('replyBar').style.display='none'; }
 
-// ============================================================
-// TEMPORALES
-// ============================================================
+/* =========================================================
+   MENSAJES TEMPORALES
+   ========================================================= */
 function toggleTempMode(){
   tempMode=!tempMode;
   document.getElementById('tempMsgBtn').classList.toggle('active',tempMode);
 }
 function scheduleTempDelete(key,delay){
-  setTimeout(()=>{ if(currentRoom) db.ref('rooms/'+currentRoom+'/messages/'+key).remove(); }, delay*1000);
+  setTimeout(()=>db.ref('rooms/'+currentRoom+'/messages/'+key).remove(),delay*1000);
 }
 
-// ============================================================
-// VISTO
-// ============================================================
+/* =========================================================
+   VISTO
+   ========================================================= */
 function markAsSeen(){ if(!currentRoom||!myClientId)return; db.ref('rooms/'+currentRoom+'/seen/'+myClientId).set(firebase.database.ServerValue.TIMESTAMP); }
 function listenSeen(){
   db.ref('rooms/'+currentRoom+'/seen').on('value',snap=>{
@@ -1200,9 +1206,9 @@ function listenSeen(){
   });
 }
 
-// ============================================================
-// BUSCAR
-// ============================================================
+/* =========================================================
+   BUSCAR EN CHAT
+   ========================================================= */
 function toggleSearchBar(){
   const bar=document.getElementById('searchBar');
   const open=bar.style.display==='flex';
@@ -1216,18 +1222,18 @@ function searchMessages(q){
   document.querySelectorAll('.bubble').forEach(b=>{ if(b.textContent.toLowerCase().includes(q.toLowerCase())){b.classList.add('msg-highlight');b.scrollIntoView({behavior:'smooth',block:'nearest'});}});
 }
 
-// ============================================================
-// HISTORIAL
-// ============================================================
+/* =========================================================
+   HISTORIAL
+   ========================================================= */
 function clearCurrentHistory(){
-  if(!currentRoom) return;
-  if(!confirm('¿Borrar el historial de esta sala para todos?')) return;
+  if (!currentRoom) return;
+  if (!confirm('¿Borrar el historial de esta sala para todos?')) return;
   db.ref('rooms/'+currentRoom+'/messages').remove().then(()=>{ document.getElementById('messages').innerHTML=''; addSystemMsg('Historial borrado 🗑'); });
 }
 
-// ============================================================
-// GIFs
-// ============================================================
+/* =========================================================
+   GIFs DE GIPHY
+   ========================================================= */
 function toggleGifPanel(){
   gifPanelOpen=!gifPanelOpen;
   document.getElementById('gifPanel').style.display=gifPanelOpen?'flex':'none';
@@ -1272,9 +1278,9 @@ function buildStickerGrid(){
   });
 }
 
-// ============================================================
-// PERSONALIZACIÓN
-// ============================================================
+/* =========================================================
+   PERSONALIZACIÓN
+   ========================================================= */
 const BUBBLE_COLORS=[
   {label:'Verde',value:'#005c4b'},{label:'Morado',value:'#4a3aff'},
   {label:'Rosa',value:'#8b1a6b'},{label:'Rojo',value:'#7b1d1d'},
@@ -1289,9 +1295,6 @@ function applyCustomization(){
   document.documentElement.style.setProperty('--bubble-me-bg',currentBubbleColor);
   document.querySelectorAll('.msg-row.me .bubble').forEach(b=>b.style.background=currentBubbleColor);
   document.getElementById('messages').style.fontFamily=currentFont;
-  if(currentBubbleStyle==='round') document.querySelectorAll('.msg-row.me .bubble').forEach(b=>b.style.borderRadius='20px');
-  else if(currentBubbleStyle==='sharp') document.querySelectorAll('.msg-row.me .bubble').forEach(b=>b.style.borderRadius='0px');
-  else document.querySelectorAll('.msg-row.me .bubble').forEach(b=>b.style.borderRadius='7.5px 0 7.5px 7.5px');
 }
 
 function openCustomModal(){
@@ -1310,9 +1313,9 @@ function closeCustomModal(){ document.getElementById('customModal').classList.re
 function setBubbleStyle(style,el){ currentBubbleStyle=style; localStorage.setItem('chat_bubble_style',style); document.querySelectorAll('.bubble-preview').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); applyCustomization(); }
 function setFont(el){ currentFont=el.getAttribute('data-font'); localStorage.setItem('chat_font',currentFont); document.querySelectorAll('.font-opt').forEach(e=>e.classList.remove('selected')); el.classList.add('selected'); applyCustomization(); }
 
-// ============================================================
-// LLAMADAS
-// ============================================================
+/* =========================================================
+   LLAMADAS (WebRTC + Firebase)
+   ========================================================= */
 function listenForCalls(){
   callRef=db.ref('rooms/'+currentRoom+'/call');
   callValueListener=callRef.on('value',snap=>{
@@ -1402,9 +1405,9 @@ function toggleMute(){
   document.getElementById('muteBtn').textContent=iAmMuted?'🔇':'🎤';
 }
 
-// ============================================================
-// COMPARTIR PANTALLA
-// ============================================================
+/* =========================================================
+   COMPARTIR PANTALLA
+   ========================================================= */
 async function startScreenShare(){
   try{ screenStream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true}); }
   catch(err){alert('No se pudo compartir: '+err.message);return;}
@@ -1421,7 +1424,7 @@ async function startScreenShare(){
   scRef.child('candidatesFromViewer').on('child_added',snap=>{if(screenPc&&snap.val())screenPc.addIceCandidate(new RTCIceCandidate(snap.val())).catch(()=>{});});
   screenStream.getVideoTracks()[0].onended=()=>stopScreenShare();
 }
-function stopScreenShare(){
+async function stopScreenShare(){
   if(screenStream)screenStream.getTracks().forEach(t=>t.stop());
   if(screenPc){screenPc.close();screenPc=null;}
   screenStream=null;
@@ -1445,9 +1448,9 @@ function listenForScreenShare(){
   });
 }
 
-// ============================================================
-// VIDEOS
-// ============================================================
+/* =========================================================
+   VIDEOS ESTILO TIKTOK
+   ========================================================= */
 function loadVideoFeed(){
   if(videoFeedLoaded)return; videoFeedLoaded=true;
   videosRef=db.ref('rooms/'+currentRoom+'/videos');
@@ -1484,972 +1487,92 @@ document.getElementById('videoFileInput').addEventListener('change',()=>{
   r.readAsDataURL(file); document.getElementById('videoFileInput').value='';
 });
 
-// ============================================================
-// 25 JUEGOS COMPLETOS
-// ============================================================
-const GAME_LIST = [
-  {id:'ttt',icon:'⭕',name:'Tres en Raya'},
-  {id:'rps',icon:'✂️',name:'Piedra Papel Tijera'},
-  {id:'trivia',icon:'🧠',name:'Trivia Rápida'},
-  {id:'word',icon:'💬',name:'Adivina la Palabra'},
-  {id:'memory',icon:'🧩',name:'Memoria'},
-  {id:'hangman',icon:'🪢',name:'Ahorcado'},
-  {id:'connect4',icon:'🟡',name:'Conecta 4'},
-  {id:'snake',icon:'🐍',name:'Snake'},
-  {id:'tetris',icon:'🧱',name:'Tetris'},
-  {id:'pong',icon:'🏓',name:'Pong'},
-  {id:'space',icon:'🚀',name:'Space Invaders'},
-  {id:'dino',icon:'🦕',name:'Chrome Dino'},
-  {id:'sudoku',icon:'🧮',name:'Sudoku'},
-  {id:'chess',icon:'♟️',name:'Ajedrez'},
-  {id:'checkers',icon:'🔴',name:'Damas'},
-  {id:'blackjack',icon:'🃏',name:'Blackjack'},
-  {id:'poker',icon:'♠️',name:'Póker'},
-  {id:'bingo',icon:'🎱',name:'Bingo'},
-  {id:'mines',icon:'💣',name:'Buscaminas'},
-  {id:'snakes',icon:'🎲',name:'Serpientes y Escaleras'},
-  {id:'ludo',icon:'🏆',name:'Ludo'},
-  {id:'quiz',icon:'❓',name:'Quiz Musical'},
-  {id:'math',icon:'📐',name:'Matemáticas Rápidas'},
-  {id:'typing',icon:'⌨️',name:'Velocidad Mecanográfica'},
-  {id:'color',icon:'🎨',name:'Juego de Colores'}
-];
-
-function buildGameSelector(){
-  const container = document.getElementById('gameSelector');
-  container.innerHTML = '';
-  GAME_LIST.forEach(g=>{
-    const btn = document.createElement('button');
-    btn.className = 'game-card';
-    btn.innerHTML = `${g.icon}<br>${g.name}`;
-    btn.onclick = ()=>launchGame(g.id);
-    container.appendChild(btn);
-  });
-}
-
+/* =========================================================
+   JUEGOS
+   ========================================================= */
 function launchGame(type){
-  document.getElementById('gameSelector').style.display = 'none';
-  document.getElementById('gameArea').style.display = 'flex';
-  document.getElementById('gameArea').innerHTML = '';
-  if(gameListener&&gameRef){ gameRef.off('value',gameListener); gameListener=null; }
-  gameRef = db.ref('rooms/'+currentRoom+'/game/'+type);
-  gameMode = type;
-  
-  // Inicializar cada juego
-  switch(type){
-    case 'ttt': initTTT(); break;
-    case 'rps': initRPS(); break;
-    case 'trivia': initTrivia(); break;
-    case 'word': initWord(); break;
-    case 'memory': initMemory(); break;
-    case 'hangman': initHangman(); break;
-    case 'connect4': initConnect4(); break;
-    case 'snake': initSnake(); break;
-    case 'tetris': initTetris(); break;
-    case 'pong': initPong(); break;
-    case 'space': initSpace(); break;
-    case 'dino': initDino(); break;
-    case 'sudoku': initSudoku(); break;
-    case 'chess': initChess(); break;
-    case 'checkers': initCheckers(); break;
-    case 'blackjack': initBlackjack(); break;
-    case 'poker': initPoker(); break;
-    case 'bingo': initBingo(); break;
-    case 'mines': initMines(); break;
-    case 'snakes': initSnakes(); break;
-    case 'ludo': initLudo(); break;
-    case 'quiz': initQuiz(); break;
-    case 'math': initMath(); break;
-    case 'typing': initTyping(); break;
-    case 'color': initColor(); break;
-    default: backToGames();
-  }
+  document.getElementById('gameSelector').style.display='none';
+  document.getElementById('gameArea').style.display='flex'; document.getElementById('gameArea').innerHTML='';
+  if(gameListener&&gameRef){gameRef.off('value',gameListener);gameListener=null;}
+  gameRef=db.ref('rooms/'+currentRoom+'/game/'+type);
+  if(type==='ttt')initTTT(); if(type==='rps')initRPS(); if(type==='trivia')initTrivia(); if(type==='word')initWord();
 }
-
-function backToGames(){
-  if(gameListener&&gameRef){ gameRef.off('value',gameListener); gameListener=null; }
-  document.getElementById('gameArea').style.display = 'none';
-  document.getElementById('gameArea').innerHTML = '';
-  document.getElementById('gameSelector').style.display = 'grid';
-}
-
-function gameHTML(icon,title,status,content){
-  return `<button class="game-back" onclick="backToGames()">← Volver</button>
-          <div class="game-title">${icon} ${title}</div>
-          <div class="game-status" id="gStatus">${status}</div>
-          ${content}`;
-}
-
-// ---------- JUEGO 1: TRES EN RAYA ----------
+function backToGames(){ if(gameListener&&gameRef){gameRef.off('value',gameListener);gameListener=null;} document.getElementById('gameArea').style.display='none'; document.getElementById('gameArea').innerHTML=''; document.getElementById('gameSelector').style.display='flex'; }
+function gameHTML(icon,title,status,content){ return `<button class="game-back" onclick="backToGames()">← Volver</button><div class="game-title">${icon} ${title}</div><div class="game-status" id="gStatus">${status}</div>${content}`; }
 function initTTT(){
-  document.getElementById('gameArea').innerHTML = gameHTML('⭕','Tres en Raya','Cargando...',
-    `<div id="tttBoard">${Array(9).fill('<div class="ttt-cell"></div>').join('')}</div>
-     <button onclick="resetTTT()" style="background:#2a3942;color:#e9edef;border-radius:8px;padding:8px 16px;font-size:13px;margin:8px auto;display:block;">Reiniciar</button>`);
+  document.getElementById('gameArea').innerHTML=gameHTML('⭕','Tres en Raya','Cargando...',`<div id="tttBoard">${Array(9).fill('<div class="ttt-cell"></div>').join('')}</div><button onclick="resetTTT()" style="background:#2a3942;color:#e9edef;border-radius:8px;padding:8px 16px;font-size:13px;margin:8px auto;display:block;">Reiniciar</button>`);
   gameRef.once('value',s=>{if(!s.val())gameRef.set({board:Array(9).fill(''),turn:'X',winner:''});});
-  gameListener = gameRef.on('value', snap=>{
+  gameListener=gameRef.on('value',snap=>{
     const g=snap.val(); if(!g)return;
-    document.querySelectorAll('.ttt-cell').forEach((c,i)=>{
-      c.textContent = g.board[i]||'';
-      c.style.color = g.board[i]==='X'?'#00a884':'#f15c6d';
-      c.setAttribute('data-val',g.board[i]||'');
-      c.onclick = ()=>tttMove(i,g);
-    });
-    const st = document.getElementById('gStatus');
-    if(st) st.textContent = g.winner ? (g.winner==='draw'?'Empate! 🤝':`Ganó ${g.winner}! 🎉`) : `Turno: ${g.turn}`;
+    document.querySelectorAll('.ttt-cell').forEach((c,i)=>{c.textContent=g.board[i]||'';c.style.color=g.board[i]==='X'?'#00a884':'#f15c6d';c.setAttribute('data-val',g.board[i]||'');c.onclick=()=>tttMove(i,g);});
+    const st=document.getElementById('gStatus'); if(st)st.textContent=g.winner?(g.winner==='draw'?'Empate! 🤝':`Ganó ${g.winner}! 🎉`):`Turno: ${g.turn}`;
   });
 }
-function tttMove(i,g){
-  if(g.board[i]||g.winner)return;
-  const sym = myClientId <= Object.keys({[myClientId]:1}).sort()[0]?'X':'O';
-  if(g.turn!==sym)return;
-  const board=[...g.board]; board[i]=sym;
-  const w=checkTTT(board);
-  gameRef.set({board,turn:sym==='X'?'O':'X',winner:w||''});
-}
+function tttMove(i,g){ if(g.board[i]||g.winner)return; const sym=myClientId<=Object.keys({[myClientId]:1}).sort()[0]?'X':'O'; if(g.turn!==sym)return; const board=[...g.board];board[i]=sym; const w=checkTTT(board); gameRef.set({board,turn:sym==='X'?'O':'X',winner:w||''}); }
 function checkTTT(b){ const l=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; for(const[a,c,d]of l)if(b[a]&&b[a]===b[c]&&b[a]===b[d])return b[a]; return b.every(Boolean)?'draw':null; }
 function resetTTT(){ gameRef.set({board:Array(9).fill(''),turn:'X',winner:''}); }
-
-// ---------- JUEGO 2: PIEDRA PAPEL TIJERA ----------
 function initRPS(){
-  document.getElementById('gameArea').innerHTML = gameHTML('✂️','Piedra Papel Tijera','Elige:',
-    `<div class="rps-options">
-       <button class="rps-btn" onclick="rpsPlay('piedra')">🪨</button>
-       <button class="rps-btn" onclick="rpsPlay('papel')">📄</button>
-       <button class="rps-btn" onclick="rpsPlay('tijera')">✂️</button>
-     </div>
-     <div id="rpsResult" style="font-size:18px;font-weight:700;text-align:center;margin:12px 0;"></div>
-     <button onclick="resetRPS()" style="background:#2a3942;color:#e9edef;border-radius:8px;padding:8px 16px;font-size:13px;margin:0 auto;display:block;">Nueva ronda</button>`);
+  document.getElementById('gameArea').innerHTML=gameHTML('✂️','Piedra Papel Tijera','Elige:',`<div class="rps-options"><button class="rps-btn" onclick="rpsPlay('piedra')">🪨</button><button class="rps-btn" onclick="rpsPlay('papel')">📄</button><button class="rps-btn" onclick="rpsPlay('tijera')">✂️</button></div><div id="rpsResult" style="font-size:18px;font-weight:700;text-align:center;margin:12px 0;"></div><button onclick="resetRPS()" style="background:#2a3942;color:#e9edef;border-radius:8px;padding:8px 16px;font-size:13px;margin:0 auto;display:block;">Nueva ronda</button>`);
   gameRef.once('value',s=>{if(!s.val())gameRef.set({moves:{}}); });
-  gameListener = gameRef.on('value', snap=>{
+  gameListener=gameRef.on('value',snap=>{
     const g=snap.val(); if(!g)return;
-    const moves=g.moves||{}, my=moves[myClientId], others=Object.entries(moves).filter(([id])=>id!==myClientId);
-    const st=document.getElementById('gStatus'), res=document.getElementById('rpsResult');
-    if(!st||!res)return;
+    const moves=g.moves||{},my=moves[myClientId],others=Object.entries(moves).filter(([id])=>id!==myClientId);
+    const st=document.getElementById('gStatus'),res=document.getElementById('rpsResult'); if(!st||!res)return;
     const icons={piedra:'🪨',papel:'📄',tijera:'✂️'};
-    if(!my){ st.textContent='Elige tu jugada:'; res.textContent=''; return; }
-    if(!others.length){ st.textContent='Esperando al otro... 🕐'; res.textContent='Tu: '+icons[my]; return; }
-    const opp=others[0][1], w=rpsWinner(my,opp);
+    if(!my){st.textContent='Elige tu jugada:';res.textContent='';return;}
+    if(!others.length){st.textContent='Esperando al otro... 🕐';res.textContent='Tu: '+icons[my];return;}
+    const opp=others[0][1],w=rpsWinner(my,opp);
     res.textContent='Tu: '+icons[my]+'  vs  Ellos: '+icons[opp];
-    st.textContent = w===0?'Empate! 🤝':w===1?'Ganaste! 🎉':'Perdiste! 😅';
+    st.textContent=w===0?'Empate! 🤝':w===1?'Ganaste! 🎉':'Perdiste! 😅';
   });
 }
-function rpsPlay(c){ gameRef.child('moves/'+myClientId).set(c); }
-function rpsWinner(a,b){ if(a===b)return 0; if((a==='piedra'&&b==='tijera')||(a==='papel'&&b==='piedra')||(a==='tijera'&&b==='papel'))return 1; return -1; }
-function resetRPS(){ gameRef.set({moves:{}}); }
-
-// ---------- JUEGO 3: TRIVIA ----------
-const TRIVIA_QS = [
-  {q:'¿País más grande del mundo?',opts:['Rusia','China','Canadá','EE.UU.'],a:0},
-  {q:'¿Planetas en el sistema solar?',opts:['7','8','9','10'],a:1},
-  {q:'¿Año del hombre en la luna?',opts:['1965','1969','1972','1958'],a:1},
-  {q:'¿Océano más grande?',opts:['Atlántico','Índico','Pacífico','Ártico'],a:2},
-  {q:'¿Quién pintó la Mona Lisa?',opts:['Picasso','Van Gogh','Da Vinci','Miguel Ángel'],a:2},
-  {q:'¿Elemento más abundante en el universo?',opts:['Oxígeno','Carbono','Hidrógeno','Helio'],a:2},
-  {q:'¿Huesos en el cuerpo humano adulto?',opts:['206','212','198','220'],a:0},
-  {q:'¿Capital de Japón?',opts:['Osaka','Kioto','Tokio','Hiroshima'],a:2},
-  {q:'¿Animal más rápido?',opts:['León','Guepardo','Águila','Halcón peregrino'],a:3},
-  {q:'¿Colores del arcoíris?',opts:['5','6','7','8'],a:2}
-];
+function rpsPlay(c){gameRef.child('moves/'+myClientId).set(c);}
+function rpsWinner(a,b){if(a===b)return 0;if((a==='piedra'&&b==='tijera')||(a==='papel'&&b==='piedra')||(a==='tijera'&&b==='papel'))return 1;return -1;}
+function resetRPS(){gameRef.set({moves:{}});}
+const TRIVIA_QS=[{q:'¿País más grande del mundo?',opts:['Rusia','China','Canadá','EE.UU.'],a:0},{q:'¿Planetas en el sistema solar?',opts:['7','8','9','10'],a:1},{q:'¿Año del hombre en la luna?',opts:['1965','1969','1972','1958'],a:1},{q:'¿Océano más grande?',opts:['Atlántico','Índico','Pacífico','Ártico'],a:2},{q:'¿Quién pintó la Mona Lisa?',opts:['Picasso','Van Gogh','Da Vinci','Miguel Ángel'],a:2},{q:'¿Elemento más abundante en el universo?',opts:['Oxígeno','Carbono','Hidrógeno','Helio'],a:2},{q:'¿Huesos en el cuerpo humano adulto?',opts:['206','212','198','220'],a:0},{q:'¿Capital de Japón?',opts:['Osaka','Kioto','Tokio','Hiroshima'],a:2},{q:'¿Animal más rápido?',opts:['León','Guepardo','Águila','Halcón peregrino'],a:3},{q:'¿Colores del arcoíris?',opts:['5','6','7','8'],a:2}];
 function initTrivia(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🧠','Trivia Rápida','',
-    `<div id="triviaContent"></div><div id="triviaScore" style="text-align:center;font-size:13px;color:#8696a0;margin-top:10px;"></div>`);
+  document.getElementById('gameArea').innerHTML=gameHTML('🧠','Trivia Rápida','',`<div id="triviaContent"></div><div id="triviaScore" style="text-align:center;font-size:13px;color:#8696a0;margin-top:10px;"></div>`);
   gameRef.once('value',s=>{if(!s.val())gameRef.set({q:0,scores:{},answered:{}});});
-  gameListener = gameRef.on('value', snap=>{ const g=snap.val(); if(g)renderTrivia(g); });
+  gameListener=gameRef.on('value',snap=>{const g=snap.val();if(g)renderTrivia(g);});
 }
 function renderTrivia(g){
-  const tc=document.getElementById('triviaContent'), ts=document.getElementById('triviaScore'); if(!tc)return;
+  const tc=document.getElementById('triviaContent'),ts=document.getElementById('triviaScore'); if(!tc)return;
   const qi=g.q||0;
-  if(qi>=TRIVIA_QS.length){ const s=(g.scores||{})[myClientId]||0; tc.innerHTML=`<div style="text-align:center;padding:20px;"><div style="font-size:40px;">🏆</div><div style="font-size:18px;font-weight:700;margin:10px 0;">Fin!</div><div style="color:#00a884;">Tu puntaje: ${s}/${TRIVIA_QS.length}</div><button onclick="resetTrivia()" style="margin-top:14px;background:#00a884;color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;">Jugar de nuevo</button></div>`; return; }
-  const q=TRIVIA_QS[qi], answered=(g.answered||{})[myClientId];
-  tc.innerHTML = `<div class="trivia-q">Pregunta ${qi+1}/${TRIVIA_QS.length}: ${q.q}</div><div class="trivia-opts">${q.opts.map((o,i)=>`<button class="trivia-opt${answered!==undefined?(i===q.a?' correct':answered===i?' wrong':''):''}" onclick="triviaAnswer(${i})" ${answered!==undefined?'disabled':''}>${o}</button>`).join('')}</div>`;
-  if(ts) ts.textContent = `Tu puntaje: ${(g.scores||{})[myClientId]||0} pts`;
-  const st=document.getElementById('gStatus'); if(st) st.textContent = answered!==undefined?(answered===q.a?'✅ Correcto!':'❌ Incorrecto'):'Elige una respuesta';
+  if(qi>=TRIVIA_QS.length){const s=(g.scores||{})[myClientId]||0;tc.innerHTML=`<div style="text-align:center;padding:20px;"><div style="font-size:40px;">🏆</div><div style="font-size:18px;font-weight:700;margin:10px 0;">Fin!</div><div style="color:#00a884;">Tu puntaje: ${s}/${TRIVIA_QS.length}</div><button onclick="resetTrivia()" style="margin-top:14px;background:#00a884;color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;">Jugar de nuevo</button></div>`;return;}
+  const q=TRIVIA_QS[qi],answered=(g.answered||{})[myClientId];
+  tc.innerHTML=`<div class="trivia-q">Pregunta ${qi+1}/${TRIVIA_QS.length}: ${q.q}</div><div class="trivia-opts">${q.opts.map((o,i)=>`<button class="trivia-opt${answered!==undefined?(i===q.a?' correct':answered===i?' wrong':''):''}" onclick="triviaAnswer(${i})" ${answered!==undefined?'disabled':''}>${o}</button>`).join('')}</div>`;
+  if(ts)ts.textContent=`Tu puntaje: ${(g.scores||{})[myClientId]||0} pts`;
+  const st=document.getElementById('gStatus'); if(st)st.textContent=answered!==undefined?(answered===q.a?'✅ Correcto!':'❌ Incorrecto'):'Elige una respuesta';
 }
-function triviaAnswer(i){ gameRef.once('value', snap=>{ const g=snap.val(); if(!g)return; const qi=g.q||0, correct=TRIVIA_QS[qi].a===i, scores=Object.assign({},g.scores||{}); scores[myClientId]=(scores[myClientId]||0)+(correct?1:0); const answered=Object.assign({},g.answered||{}); answered[myClientId]=i; gameRef.update({scores,answered}); setTimeout(()=>{ gameRef.once('value', s2=>{ const g2=s2.val(); if(g2) gameRef.update({q:(g2.q||0)+1,answered:{}}); }); },1800); }); }
-function resetTrivia(){ gameRef.set({q:0,scores:{},answered:{}}); }
-
-// ---------- JUEGO 4: ADIVINA LA PALABRA ----------
-const WORDS = ['CHOCOLATE','COMPUTADORA','MARIPOSA','COLOMBIA','ESTRELLA','GUITARRA','AMANECER','INVISIBLE','FOTOGRAFIA','COHETE','TELEFONO','LIBERTAD','MUNDIAL','FELICIDAD','AVENTURA','SABIDURIA','CASCADA','PALACIO','MISTERIO','FANTASIA'];
+function triviaAnswer(i){ gameRef.once('value',snap=>{const g=snap.val();if(!g)return;const qi=g.q||0,correct=TRIVIA_QS[qi].a===i,scores=Object.assign({},g.scores||{});scores[myClientId]=(scores[myClientId]||0)+(correct?1:0);const answered=Object.assign({},g.answered||{});answered[myClientId]=i;gameRef.update({scores,answered});setTimeout(()=>{gameRef.once('value',s2=>{const g2=s2.val();if(g2)gameRef.update({q:(g2.q||0)+1,answered:{}});});},1800);}); }
+function resetTrivia(){gameRef.set({q:0,scores:{},answered:{}});}
+const WORDS=['CHOCOLATE','COMPUTADORA','MARIPOSA','COLOMBIA','ESTRELLA','GUITARRA','AMANECER','INVISIBLE','FOTOGRAFIA','COHETE'];
 function initWord(){
-  document.getElementById('gameArea').innerHTML = gameHTML('💬','Adivina la Palabra','',
-    `<div id="wordArea"></div>`);
-  gameRef.once('value',s=>{ if(!s.val()){ const w=WORDS[Math.floor(Math.random()*WORDS.length)]; gameRef.set({word:w,guessed:[],errors:0}); }});
-  gameListener = gameRef.on('value', snap=>{ const g=snap.val(); if(g)renderWord(g); });
+  document.getElementById('gameArea').innerHTML=gameHTML('💬','Adivina la Palabra','',`<div id="wordArea"></div>`);
+  gameRef.once('value',s=>{if(!s.val()){const w=WORDS[Math.floor(Math.random()*WORDS.length)];gameRef.set({word:w,guessed:[],errors:0});}});
+  gameListener=gameRef.on('value',snap=>{const g=snap.val();if(g)renderWord(g);});
 }
 function renderWord(g){
-  const wa=document.getElementById('wordArea'), st=document.getElementById('gStatus'); if(!wa)return;
-  const word=g.word||'', guessed=g.guessed||[], errors=g.errors||0, MAX=7;
+  const wa=document.getElementById('wordArea'),st=document.getElementById('gStatus'); if(!wa)return;
+  const word=g.word||'',guessed=g.guessed||[],errors=g.errors||0,MAX=6;
   const display=word.split('').map(l=>guessed.includes(l)?l:'_').join(' ');
-  const won=!display.includes('_'), lost=errors>=MAX;
-  if(st) st.textContent = won?'🎉 Adivinaron!':lost?`💀 Era: ${word}`:`❤️ Vidas: ${MAX-errors}/${MAX}`;
-  wa.innerHTML = `<div style="letter-spacing:6px;font-size:26px;font-weight:700;text-align:center;margin:12px 0;color:#00a884;">${display}</div>
-    <div class="word-keyboard">${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>`<button class="key-btn" onclick="wordGuess('${l}')" ${guessed.includes(l)||won||lost?'disabled':''} style="${guessed.includes(l)?(word.includes(l)?'background:#00a884;color:#111b21;border-color:#00a884;':'background:#3d0d17;color:#f15c6d;border-color:#f15c6d;'):''}">${l}</button>`).join('')}</div>
-    <button onclick="resetWord()" style="background:#2a3942;color:#e9edef;border-radius:8px;padding:8px 16px;font-size:13px;margin:14px auto;display:block;">Nueva palabra</button>`;
+  const won=!display.includes('_'),lost=errors>=MAX;
+  if(st)st.textContent=won?'🎉 Adivinaron!':lost?`💀 Era: ${word}`:`❤️ Vidas: ${MAX-errors}/${MAX}`;
+  wa.innerHTML=`<div style="letter-spacing:6px;font-size:26px;font-weight:700;text-align:center;margin:12px 0;color:#00a884;">${display}</div><div class="word-keyboard">${'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(l=>`<button class="key-btn" onclick="wordGuess('${l}')" ${guessed.includes(l)||won||lost?'disabled':''} style="${guessed.includes(l)?(word.includes(l)?'background:#00a884;color:#111b21;border-color:#00a884;':'background:#3d0d17;color:#f15c6d;border-color:#f15c6d;'):''}">${l}</button>`).join('')}</div><button onclick="resetWord()" style="background:#2a3942;color:#e9edef;border-radius:8px;padding:8px 16px;font-size:13px;margin:14px auto;display:block;">Nueva palabra</button>`;
 }
-function wordGuess(l){ gameRef.once('value', snap=>{ const g=snap.val(); if(!g)return; const guessed=[...(g.guessed||[]),l], errors=(g.errors||0)+(g.word.includes(l)?0:1); gameRef.update({guessed,errors}); }); }
-function resetWord(){ const w=WORDS[Math.floor(Math.random()*WORDS.length)]; gameRef.set({word:w,guessed:[],errors:0}); }
+function wordGuess(l){gameRef.once('value',snap=>{const g=snap.val();if(!g)return;const guessed=[...(g.guessed||[]),l],errors=(g.errors||0)+(g.word.includes(l)?0:1);gameRef.update({guessed,errors});});}
+function resetWord(){const w=WORDS[Math.floor(Math.random()*WORDS.length)];gameRef.set({word:w,guessed:[],errors:0});}
 
-// ---------- JUEGO 5: MEMORIA ----------
-function initMemory(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🧩','Memoria','Encuentra las parejas',
-    `<div class="memory-grid" id="memGrid"></div>
-     <div style="text-align:center;margin-top:12px;font-size:14px;color:#8696a0;" id="memStatus">Cliquea para voltear</div>`);
-  const emojis = ['🐱','🐶','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔'];
-  const selected = emojis.slice(0,8);
-  let deck = [...selected, ...selected];
-  for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-  let flipped=[], matched=[], lock=false;
-  const grid=document.getElementById('memGrid');
-  deck.forEach((em,i)=>{
-    const card=document.createElement('div'); card.className='memory-card'; card.dataset.id=i; card.dataset.em=em;
-    card.onclick=()=>{
-      if(lock||flipped.includes(i)||matched.includes(i)||flipped.length>=2)return;
-      card.textContent=em; card.classList.add('flipped');
-      flipped.push(i);
-      if(flipped.length===2){
-        lock=true;
-        const [a,b]=flipped;
-        if(deck[a]===deck[b]){
-          matched.push(a,b);
-          document.querySelectorAll('.memory-card').forEach(c=>{ if(matched.includes(parseInt(c.dataset.id))){ c.classList.add('matched'); c.textContent=deck[parseInt(c.dataset.id)]; } });
-          document.getElementById('memStatus').textContent = `✅ Pareja encontrada! (${matched.length/2}/${selected.length})`;
-          flipped=[];
-          lock=false;
-          if(matched.length===deck.length) document.getElementById('memStatus').textContent = '🎉 Ganaste! Juego completado!';
-        } else {
-          document.getElementById('memStatus').textContent = '❌ No coinciden, intenta de nuevo';
-          setTimeout(()=>{
-            document.querySelectorAll('.memory-card').forEach(c=>{
-              const id=parseInt(c.dataset.id);
-              if(!matched.includes(id)){ c.textContent=''; c.classList.remove('flipped'); }
-            });
-            flipped=[]; lock=false;
-            document.getElementById('memStatus').textContent = 'Cliquea para voltear';
-          },1000);
-        }
-      }
-    };
-    grid.appendChild(card);
-  });
-}
-
-// ---------- JUEGO 6: AHORCADO ----------
-function initHangman(){
-  const words = ['MANZANA','PERRO','GATO','ELEFANTE','TIGRE','LEON','JIRAFA','CABALLO','BALLENA','DELFIN','PINGUINO','CANGURO','KOALA','PANDA','CAMELLO'];
-  const word = words[Math.floor(Math.random()*words.length)];
-  document.getElementById('gameArea').innerHTML = gameHTML('🪢','Ahorcado','Adivina la palabra',
-    `<div id="hangmanWord" style="letter-spacing:8px;font-size:28px;text-align:center;color:#00a884;margin:12px 0;">${'_ '.repeat(word.length)}</div>
-     <div id="hangmanLives" style="text-align:center;font-size:16px;color:#f15c6d;">❤️ 6 vidas</div>
-     <div class="word-keyboard" id="hangmanKeyboard"></div>`);
-  let guessed=[], lives=6;
-  const kb=document.getElementById('hangmanKeyboard');
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l=>{
-    const btn=document.createElement('button'); btn.className='key-btn'; btn.textContent=l;
-    btn.onclick=()=>{
-      if(guessed.includes(l)||lives<=0)return;
-      guessed.push(l); btn.disabled=true;
-      if(!word.includes(l)){ lives--; document.getElementById('hangmanLives').textContent=`❤️ ${lives} vidas`; }
-      updateHangmanDisplay(word,guessed,lives);
-      if(lives===0) document.getElementById('gStatus').textContent='💀 Perdiste! La palabra era: '+word;
-      if(!word.split('').some(ch=>!guessed.includes(ch))) document.getElementById('gStatus').textContent='🎉 Ganaste!';
-    };
-    kb.appendChild(btn);
-  });
-}
-function updateHangmanDisplay(word,guessed,lives){
-  const display=word.split('').map(l=>guessed.includes(l)?l:'_').join(' ');
-  document.getElementById('hangmanWord').textContent=display;
-  document.getElementById('hangmanLives').textContent=`❤️ ${lives} vidas`;
-}
-
-// ---------- JUEGO 7: CONECTA 4 ----------
-function initConnect4(){
-  const cols=7,rows=6;
-  document.getElementById('gameArea').innerHTML = gameHTML('🟡','Conecta 4','Turno: 🔴 Rojo',
-    `<div id="c4Board" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:300px;margin:0 auto;"></div>
-     <div style="text-align:center;margin-top:10px;font-size:13px;color:#8696a0;">Haz clic en una columna</div>`);
-  let board=Array(rows).fill().map(()=>Array(cols).fill(null));
-  let turn='🔴', gameOver=false;
-  const grid=document.getElementById('c4Board');
-  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){ const cell=document.createElement('div'); cell.style.cssText='aspect-ratio:1;background:#2a3942;border-radius:6px;border:1px solid #3d5260;'; cell.dataset.r=r; cell.dataset.c=c; grid.appendChild(cell); }
-  grid.onclick=(e)=>{
-    if(gameOver)return;
-    const cell=e.target.closest('div[data-c]'); if(!cell)return;
-    const c=parseInt(cell.dataset.c);
-    for(let r=rows-1;r>=0;r--){
-      if(!board[r][c]){
-        board[r][c]=turn;
-        const idx=r*cols+c;
-        const el=grid.children[idx];
-        el.textContent=turn; el.style.fontSize='28px';
-        if(checkConnect4(board,r,c,turn)){
-          document.getElementById('gStatus').textContent=`🎉 ${turn} gana!`;
-          gameOver=true; return;
-        }
-        turn=turn==='🔴'?'🟡':'🔴';
-        document.getElementById('gStatus').textContent=`Turno: ${turn}`;
-        return;
-      }
-    }
-  };
-}
-function checkConnect4(board,r,c,player){
-  const dirs=[[1,0],[0,1],[1,1],[1,-1]];
-  for(const[dr,dc]of dirs){
-    let count=1;
-    for(let d=1;d<4;d++){ const nr=r+dr*d,nc=c+dc*d; if(nr<0||nr>=board.length||nc<0||nc>=board[0].length||board[nr][nc]!==player)break; count++; }
-    for(let d=1;d<4;d++){ const nr=r-dr*d,nc=c-dc*d; if(nr<0||nr>=board.length||nc<0||nc>=board[0].length||board[nr][nc]!==player)break; count++; }
-    if(count>=4)return true;
-  } return false;
-}
-
-// ---------- JUEGO 8: SNAKE ----------
-function initSnake(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🐍','Snake','Usa las flechas del teclado',
-    `<canvas id="snakeCanvas" style="background:#1a2730;border-radius:12px;display:block;margin:0 auto;width:100%;max-width:400px;aspect-ratio:1;"></canvas>
-     <div style="text-align:center;margin-top:8px;color:#8696a0;font-size:13px;" id="snakeScore">Puntuación: 0</div>`);
-  const canvas=document.getElementById('snakeCanvas'), ctx=canvas.getContext('2d');
-  const size=20, tile=canvas.width/size;
-  let snake=[[10,10]], dir=[1,0], food=[15,10], score=0, gameRunning=true, speed=150;
-  function gameLoop(){
-    if(!gameRunning)return;
-    const head=[snake[0][0]+dir[0],snake[0][1]+dir[1]];
-    if(head[0]<0||head[0]>=size||head[1]<0||head[1]>=size||snake.some(s=>s[0]===head[0]&&s[1]===head[1])){ gameRunning=false; document.getElementById('gStatus').textContent='💀 Perdiste! Puntuación: '+score; return; }
-    snake.unshift(head);
-    if(head[0]===food[0]&&head[1]===food[1]){ score++; document.getElementById('snakeScore').textContent='Puntuación: '+score; food=[Math.floor(Math.random()*size),Math.floor(Math.random()*size)]; }
-    else snake.pop();
-    ctx.fillStyle='#1a2730'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    snake.forEach(s=>{ ctx.fillStyle='#00a884'; ctx.fillRect(s[0]*tile+1,s[1]*tile+1,tile-2,tile-2); });
-    ctx.fillStyle='#f15c6d'; ctx.fillRect(food[0]*tile+1,food[1]*tile+1,tile-2,tile-2);
-    setTimeout(gameLoop,speed);
-  }
-  document.addEventListener('keydown',e=>{
-    if(!gameRunning)return;
-    const keys={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
-    const nd=keys[e.key]; if(nd&&(nd[0]!==-dir[0]||nd[1]!==-dir[1])) dir=nd;
-  });
-  gameLoop();
-}
-
-// ---------- JUEGO 9: TETRIS ----------
-function initTetris(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🧱','Tetris','Usa ← → ↓ y ↑ para rotar',
-    `<canvas id="tetrisCanvas" style="background:#1a2730;border-radius:12px;display:block;margin:0 auto;width:100%;max-width:300px;aspect-ratio:1/2;"></canvas>
-     <div style="text-align:center;margin-top:8px;color:#8696a0;font-size:13px;" id="tetrisScore">Puntuación: 0</div>`);
-  const canvas=document.getElementById('tetrisCanvas'), ctx=canvas.getContext('2d');
-  const cols=10, rows=20, block=canvas.width/cols;
-  let board=Array(rows).fill().map(()=>Array(cols).fill(0));
-  const pieces=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,0],[1,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]]];
-  let piece=pieces[Math.floor(Math.random()*pieces.length)], x=Math.floor((cols-piece[0].length)/2), y=0, score=0, gameRunning=true, speed=400;
-  function draw(){
-    ctx.fillStyle='#1a2730'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    board.forEach((row,r)=>row.forEach((v,c)=>{ if(v){ ctx.fillStyle='#00a884'; ctx.fillRect(c*block+1,r*block+1,block-2,block-2); } }));
-    piece.forEach((row,r)=>row.forEach((v,c)=>{ if(v){ ctx.fillStyle='#00a884'; ctx.fillRect((x+c)*block+1,(y+r)*block+1,block-2,block-2); } }));
-  }
-  function collides(px,py,p){ for(let r=0;r<p.length;r++)for(let c=0;c<p[r].length;c++)if(p[r][c]&&(py+r>=rows||px+c<0||px+c>=cols||board[py+r][px+c]))return true; return false; }
-  function merge(){ piece.forEach((row,r)=>row.forEach((v,c)=>{ if(v) board[y+r][x+c]=1; })); }
-  function clearRows(){ let cleared=0; for(let r=rows-1;r>=0;r--){ if(board[r].every(v=>v)){ board.splice(r,1); board.unshift(Array(cols).fill(0)); cleared++; r++; } } if(cleared){ score+=cleared*100; document.getElementById('tetrisScore').textContent='Puntuación: '+score; } }
-  function spawn(){ piece=pieces[Math.floor(Math.random()*pieces.length)]; x=Math.floor((cols-piece[0].length)/2); y=0; if(collides(x,y,piece)){ gameRunning=false; document.getElementById('gStatus').textContent='💀 Perdiste! Puntuación: '+score; } }
-  function drop(){ if(!gameRunning)return; if(!collides(x,y+1,piece)){ y++; draw(); setTimeout(drop,speed); } else { merge(); clearRows(); spawn(); draw(); setTimeout(drop,speed); } }
-  document.addEventListener('keydown',e=>{
-    if(!gameRunning)return;
-    if(e.key==='ArrowLeft'&&!collides(x-1,y,piece)){ x--; draw(); }
-    if(e.key==='ArrowRight'&&!collides(x+1,y,piece)){ x++; draw(); }
-    if(e.key==='ArrowDown'&&!collides(x,y+1,piece)){ y++; draw(); }
-    if(e.key==='ArrowUp'){ const p=piece[0].map((_,i)=>piece.map(row=>row[i]).reverse()); if(!collides(x,y,p)){ piece=p; draw(); } }
-  });
-  spawn(); draw(); drop();
-}
-
-// ---------- JUEGO 10: PONG ----------
-function initPong(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🏓','Pong','Usa W/S para mover',
-    `<canvas id="pongCanvas" style="background:#1a2730;border-radius:12px;display:block;margin:0 auto;width:100%;max-width:500px;aspect-ratio:2/1;"></canvas>
-     <div style="text-align:center;margin-top:8px;color:#8696a0;font-size:13px;" id="pongScore">Jugador: 0 | Computadora: 0</div>`);
-  const canvas=document.getElementById('pongCanvas'), ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height, paddleW=10,paddleH=80,ballSize=10;
-  let pY=H/2-paddleH/2, cY=H/2-paddleH/2, ballX=W/2, ballY=H/2, dx=3, dy=2, pScore=0,cScore=0, gameRunning=true;
-  function drawPong(){
-    ctx.fillStyle='#1a2730'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#00a884'; ctx.fillRect(10,pY,paddleW,paddleH); ctx.fillRect(W-20,cY,paddleW,paddleH);
-    ctx.fillStyle='#e9edef'; ctx.beginPath(); ctx.arc(ballX,ballY,ballSize,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle='#2a3942'; ctx.setLineDash([10,10]); ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke(); ctx.setLineDash([]);
-  }
-  function pongLoop(){
-    if(!gameRunning)return;
-    ballX+=dx; ballY+=dy;
-    if(ballY<0||ballY>H){ dy*=-1; }
-    if(ballX<20&&ballX>10&&ballY>pY&&ballY<pY+paddleH){ dx*=-1; dx*=1.05; dy*=1.05; }
-    if(ballX>W-20&&ballX<W-10&&ballY>cY&&ballY<cY+paddleH){ dx*=-1; dx*=1.05; dy*=1.05; }
-    if(ballX<0){ cScore++; document.getElementById('pongScore').textContent=`Jugador: ${pScore} | Computadora: ${cScore}`; resetBall(); }
-    if(ballX>W){ pScore++; document.getElementById('pongScore').textContent=`Jugador: ${pScore} | Computadora: ${cScore}`; resetBall(); }
-    const target=ballY-cY-paddleH/2; cY+=target*0.08;
-    cY=Math.max(0,Math.min(H-paddleH,cY));
-    drawPong();
-    requestAnimationFrame(pongLoop);
-  }
-  function resetBall(){ ballX=W/2; ballY=H/2; dx=3*(Math.random()>0.5?1:-1); dy=2*(Math.random()*2-1); }
-  document.addEventListener('keydown',e=>{ if(e.key==='w'||e.key==='W')pY=Math.max(0,pY-20); if(e.key==='s'||e.key==='S')pY=Math.min(H-paddleH,pY+20); });
-  pongLoop();
-}
-
-// ---------- JUEGO 11: SPACE INVADERS ----------
-function initSpace(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🚀','Space Invaders','Usa ← → y espacio para disparar',
-    `<canvas id="spaceCanvas" style="background:#1a2730;border-radius:12px;display:block;margin:0 auto;width:100%;max-width:400px;aspect-ratio:1;"></canvas>
-     <div style="text-align:center;margin-top:8px;color:#8696a0;font-size:13px;" id="spaceScore">Puntuación: 0</div>`);
-  const canvas=document.getElementById('spaceCanvas'), ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height, playerW=30,playerH=20;
-  let player={x:W/2-playerW/2,y:H-40}, bullets=[], enemies=[], score=0, gameRunning=true;
-  for(let r=0;r<3;r++)for(let c=0;c<7;c++) enemies.push({x:c*40+20,y:r*30+20,w:30,h:20,alive:true});
-  let dir=1,speed=1;
-  document.addEventListener('keydown',e=>{
-    if(e.key==='ArrowLeft'&&player.x>0) player.x-=15;
-    if(e.key==='ArrowRight'&&player.x<W-playerW) player.x+=15;
-    if(e.key===' '&&gameRunning){ bullets.push({x:player.x+playerW/2-3,y:player.y,h:10}); }
-  });
-  function spaceLoop(){
-    if(!gameRunning)return;
-    ctx.fillStyle='#1a2730'; ctx.fillRect(0,0,W,H);
-    let moveDown=false;
-    enemies.forEach(e=>{ if(e.alive){ e.x+=dir*speed; if(e.x<0||e.x>W-e.w){ moveDown=true; } } });
-    if(moveDown){ dir*=-1; enemies.forEach(e=>{ if(e.alive)e.y+=5; }); }
-    ctx.fillStyle='#00a884'; ctx.fillRect(player.x,player.y,playerW,playerH);
-    bullets.forEach(b=>{ b.y-=8; ctx.fillStyle='#f15c6d'; ctx.fillRect(b.x,b.y,6,b.h); });
-    bullets=bullets.filter(b=>b.y>0);
-    enemies.forEach(e=>{ if(e.alive){ ctx.fillStyle='#f15c6d'; ctx.fillRect(e.x,e.y,e.w,e.h); }});
-    bullets.forEach(b=>{ enemies.forEach(e=>{ if(e.alive&&b.x>e.x&&b.x<e.x+e.w&&b.y>e.y&&b.y<e.y+e.h){ e.alive=false; score++; document.getElementById('spaceScore').textContent='Puntuación: '+score; } }); });
-    bullets=bullets.filter(b=>{ let hit=false; enemies.forEach(e=>{ if(!e.alive)return; if(b.x>e.x&&b.x<e.x+e.w&&b.y>e.y&&b.y<e.y+e.h){ e.alive=false; score++; hit=true; document.getElementById('spaceScore').textContent='Puntuación: '+score; } }); return !hit; });
-    if(enemies.every(e=>!e.alive)){ document.getElementById('gStatus').textContent='🎉 Ganaste!'; gameRunning=false; }
-    requestAnimationFrame(spaceLoop);
-  }
-  spaceLoop();
-}
-
-// ---------- JUEGO 12: CHROME DINO ----------
-function initDino(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🦕','Chrome Dino','Presiona espacio para saltar',
-    `<canvas id="dinoCanvas" style="background:#1a2730;border-radius:12px;display:block;margin:0 auto;width:100%;max-width:400px;aspect-ratio:2/1;"></canvas>
-     <div style="text-align:center;margin-top:8px;color:#8696a0;font-size:13px;" id="dinoScore">Puntuación: 0</div>`);
-  const canvas=document.getElementById('dinoCanvas'), ctx=canvas.getContext('2d');
-  const W=canvas.width,H=canvas.height, ground=H-30;
-  let dino={x:50,y:ground-40,w:30,h:40,vy:0,ground:ground-40}, obstacles=[], score=0, jumping=false, gameRunning=true, frame=0;
-  document.addEventListener('keydown',e=>{ if(e.key===' '&&!jumping&&gameRunning){ dino.vy=-10; jumping=true; } });
-  function dinoLoop(){
-    if(!gameRunning)return;
-    ctx.fillStyle='#1a2730'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#2a3942'; ctx.fillRect(0,ground,W,2);
-    dino.vy+=0.5; dino.y+=dino.vy; if(dino.y>=dino.ground){ dino.y=dino.ground; dino.vy=0; jumping=false; }
-    ctx.fillStyle='#00a884'; ctx.fillRect(dino.x,dino.y,dino.w,dino.h);
-    frame++;
-    if(frame%60===0){ const h=20+Math.random()*30; obstacles.push({x:W,y:ground-h,w:20,h}); }
-    obstacles.forEach(o=>{ o.x-=5; ctx.fillStyle='#f15c6d'; ctx.fillRect(o.x,o.y,o.w,o.h); });
-    obstacles=obstacles.filter(o=>o.x>-20);
-    obstacles.forEach(o=>{ if(dino.x<o.x+o.w&&dino.x+dino.w>o.x&&dino.y<o.y+o.h&&dino.y+dino.h>o.y){ gameRunning=false; document.getElementById('gStatus').textContent='💀 Perdiste! Puntuación: '+score; } });
-    score++; document.getElementById('dinoScore').textContent='Puntuación: '+Math.floor(score/10);
-    requestAnimationFrame(dinoLoop);
-  }
-  dinoLoop();
-}
-
-// ---------- JUEGO 13: SUDOKU ----------
-function initSudoku(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🧮','Sudoku','Completa el tablero (haz clic en una celda y escribe un número)',
-    `<div style="display:grid;grid-template-columns:repeat(9,1fr);gap:2px;max-width:360px;margin:0 auto;aspect-ratio:1;" id="sudokuGrid"></div>
-     <div style="text-align:center;margin-top:10px;color:#8696a0;font-size:13px;" id="sudokuStatus">Resuelve el Sudoku</div>`);
-  const grid=document.getElementById('sudokuGrid');
-  let board=[], solution=[], selected=null;
-  function generateSudoku(){
-    const b=Array(9).fill().map(()=>Array(9).fill(0));
-    solveSudoku(b);
-    solution=b.map(row=>[...row]);
-    for(let i=0;i<40;i++){ const r=Math.floor(Math.random()*9), c=Math.floor(Math.random()*9); b[r][c]=0; }
-    return b;
-  }
-  function solveSudoku(b){
-    for(let r=0;r<9;r++)for(let c=0;c<9;c++){
-      if(!b[r][c]){
-        const nums=shuffle([1,2,3,4,5,6,7,8,9]);
-        for(const n of nums){ if(isValid(b,r,c,n)){ b[r][c]=n; if(solveSudoku(b))return true; b[r][c]=0; } }
-        return false;
-      }
-    } return true;
-  }
-  function isValid(b,r,c,n){ for(let i=0;i<9;i++){ if(b[r][i]===n||b[i][c]===n)return false; } const br=Math.floor(r/3)*3,bc=Math.floor(c/3)*3; for(let i=0;i<3;i++)for(let j=0;j<3;j++)if(b[br+i][bc+j]===n)return false; return true; }
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-  board=generateSudoku();
-  function renderSudoku(){
-    grid.innerHTML='';
-    board.forEach((row,r)=>row.forEach((v,c)=>{
-      const cell=document.createElement('div');
-      cell.style.cssText='aspect-ratio:1;background:#2a3942;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;cursor:pointer;color:#e9edef;';
-      if(v) cell.textContent=v;
-      if(v===0) cell.style.color='#8696a0';
-      cell.onclick=()=>{ selected={r,c}; document.querySelectorAll('#sudokuGrid div').forEach(el=>el.style.border='none'); cell.style.border='2px solid #00a884'; };
-      grid.appendChild(cell);
-    }));
-  }
-  document.addEventListener('keydown',e=>{
-    if(!selected||e.key<'1'||e.key>'9')return;
-    const n=parseInt(e.key);
-    if(solution[selected.r][selected.c]===n){ board[selected.r][selected.c]=n; renderSudoku(); document.getElementById('sudokuStatus').textContent='✅ Correcto! Sigue así.'; }
-    else document.getElementById('sudokuStatus').textContent='❌ Número incorrecto, intenta de nuevo.';
-    if(board.every(row=>row.every(v=>v!==0))) document.getElementById('sudokuStatus').textContent='🎉 Sudoku completado! Felicidades!';
-  });
-  renderSudoku();
-}
-
-// ---------- JUEGO 14: AJEDREZ ----------
-function initChess(){
-  document.getElementById('gameArea').innerHTML = gameHTML('♟️','Ajedrez','Turno: Blancas',
-    `<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:1px;max-width:400px;margin:0 auto;aspect-ratio:1;" id="chessBoard"></div>
-     <div style="text-align:center;margin-top:10px;color:#8696a0;font-size:13px;" id="chessStatus">Cliquea una pieza para seleccionar</div>`);
-  const board=[], pieces=['♜','♞','♝','♛','♚','♝','♞','♜'];
-  for(let r=0;r<8;r++){ board[r]=[]; for(let c=0;c<8;c++){ if(r===0) board[r][c]=pieces[c]; else if(r===1) board[r][c]='♟'; else if(r===6) board[r][c]='♙'; else if(r===7) board[r][c]=pieces[c].toUpperCase?pieces[c].toUpperCase():pieces[c]; else board[r][c]=''; } }
-  let selected=null, turn='white', gameOver=false;
-  function renderChess(){
-    const grid=document.getElementById('chessBoard');
-    grid.innerHTML='';
-    board.forEach((row,r)=>row.forEach((p,c)=>{
-      const cell=document.createElement('div');
-      cell.style.cssText=`aspect-ratio:1;background:${(r+c)%2===0?'#3d5260':'#1a2730'};display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;color:${p&&(p.charCodeAt(0)>5000)?'#e9edef':'#111b21'};`;
-      cell.textContent=p||'';
-      cell.onclick=()=>{ if(gameOver)return; if(selected){ const [sr,sc]=selected; if(chessMove(sr,sc,r,c)){ board[r][c]=board[sr][sc]; board[sr][sc]=''; selected=null; turn=turn==='white'?'black':'white'; renderChess(); document.getElementById('chessStatus').textContent=`Turno: ${turn.charAt(0).toUpperCase()+turn.slice(1)}`; if(checkChessMate()){ document.getElementById('chessStatus').textContent=`🎉 ${turn==='white'?'Negras':'Blancas'} ganan!`; gameOver=true; } } else { selected=[r,c]; renderChess(); } }
-      else { selected=[r,c]; document.querySelectorAll('#chessBoard div').forEach(el=>el.style.border='none'); cell.style.border='2px solid #00a884'; }
-      grid.appendChild(cell);
-    }));
-  }
-  function chessMove(sr,sc,tr,tc){
-    const p=board[sr][sc]; if(!p)return false;
-    const color=p.charCodeAt(0)>5000?'black':'white';
-    if(color!==turn)return false;
-    const target=board[tr][tc];
-    if(target&&(target.charCodeAt(0)>5000?'black':'white')===color)return false;
-    // Movimientos básicos (simplificado)
-    const dr=tr-sr, dc=tc-sc;
-    if(p==='♟'||p==='♙'){
-      const dir=p==='♟'?1:-1;
-      if(dc===0&&!target&&((dr===dir)||(dr===2*dir&&r===1&&!board[sr+dir][c])))return true;
-      if(Math.abs(dc)===1&&dr===dir&&target)return true;
-      return false;
-    }
-    if(p==='♜'||p==='♖'){ if(dr===0||dc===0)return true; return false; }
-    if(p==='♝'||p==='♗'){ if(Math.abs(dr)===Math.abs(dc))return true; return false; }
-    if(p==='♛'||p==='♕'){ if(dr===0||dc===0||Math.abs(dr)===Math.abs(dc))return true; return false; }
-    if(p==='♚'||p==='♔'){ if(Math.abs(dr)<=1&&Math.abs(dc)<=1)return true; return false; }
-    if(p==='♞'||p==='♘'){ if((Math.abs(dr)===2&&Math.abs(dc)===1)||(Math.abs(dr)===1&&Math.abs(dc)===2))return true; return false; }
-    return false;
-  }
-  function checkChessMate(){
-    let king='♚', kColor='black';
-    if(turn==='black'){ king='♔'; kColor='white'; }
-    for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(board[r][c]===king)return true;
-    return false;
-  }
-  renderChess();
-}
-
-// ---------- JUEGO 15: DAMAS ----------
-function initCheckers(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🔴','Damas','Turno: 🔴',
-    `<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:400px;margin:0 auto;aspect-ratio:1;" id="checkersBoard"></div>
-     <div style="text-align:center;margin-top:10px;color:#8696a0;font-size:13px;" id="checkersStatus">Cliquea una ficha para mover</div>`);
-  const board=[];
-  for(let r=0;r<8;r++){ board[r]=[]; for(let c=0;c<8;c++){ if((r+c)%2===1){ if(r<3) board[r][c]='🔴'; else if(r>4) board[r][c]='⚫'; else board[r][c]=''; } else board[r][c]=''; } }
-  let selected=null, turn='red', gameOver=false, mustTake=[];
-  function renderCheckers(){
-    const grid=document.getElementById('checkersBoard');
-    grid.innerHTML='';
-    board.forEach((row,r)=>row.forEach((p,c)=>{
-      const cell=document.createElement('div');
-      cell.style.cssText=`aspect-ratio:1;background:${(r+c)%2===0?'#3d5260':'#1a2730'};display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;`;
-      cell.textContent=p||'';
-      cell.onclick=()=>{ if(gameOver)return; if(selected){ const [sr,sc]=selected; if(checkersMove(sr,sc,r,c)){ board[r][c]=board[sr][sc]; board[sr][sc]=''; selected=null; turn=turn==='red'?'black':'red'; renderCheckers(); document.getElementById('checkersStatus').textContent=`Turno: ${turn==='red'?'🔴':'⚫'}`; } else { selected=[r,c]; renderCheckers(); } }
-      else if(p && ((p==='🔴'&&turn==='red')||(p==='⚫'&&turn==='black'))){ selected=[r,c]; renderCheckers(); }
-      grid.appendChild(cell);
-    }));
-  }
-  function checkersMove(sr,sc,tr,tc){
-    const p=board[sr][sc]; if(!p)return false;
-    const color=p==='🔴'?'red':'black';
-    if(color!==turn)return false;
-    const dr=tr-sr, dc=tc-sc;
-    if(Math.abs(dr)!==1||Math.abs(dc)!==1)return false;
-    const dir=color==='red'?1:-1;
-    if(dr!==dir)return false;
-    if(board[tr][tc])return false;
-    return true;
-  }
-  renderCheckers();
-}
-
-// ---------- JUEGO 16: BLACKJACK ----------
-function initBlackjack(){
-  const deck=[];
-  ['♠','♥','♦','♣'].forEach(s=>{ for(let i=1;i<=13;i++) deck.push({suit:s,value:i}); });
-  let player=[], dealer=[], gameOver=false;
-  function shuffleDeck(){ for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; } }
-  function cardValue(c){ return c.value>10?10:c.value===1?11:c.value; }
-  function handValue(hand){ let v=hand.reduce((s,c)=>s+cardValue(c),0), aces=hand.filter(c=>c.value===1).length; while(v>21&&aces>0){ v-=10; aces--; } return v; }
-  shuffleDeck();
-  player=[deck.pop(),deck.pop()]; dealer=[deck.pop(),deck.pop()];
-  document.getElementById('gameArea').innerHTML = gameHTML('🃏','Blackjack','',
-    `<div id="bjArea" style="text-align:center;">
-       <div style="margin-bottom:10px;"><span style="color:#8696a0;">Crupier:</span> <span id="dealerHand">${dealer[0].value}${dealer[0].suit} ?</span></div>
-       <div style="margin-bottom:20px;"><span style="color:#8696a0;">Tú:</span> <span id="playerHand">${player.map(c=>c.value+c.suit).join(' ')}</span> <span id="playerScore">(${handValue(player)})</span></div>
-       <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-         <button onclick="blackjackHit()" style="background:#00a884;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;">Pedir</button>
-         <button onclick="blackjackStand()" style="background:#2a3942;color:#e9edef;padding:10px 20px;border-radius:8px;font-size:14px;">Plantarse</button>
-         <button onclick="backToGames()" style="background:#3d5260;color:#e9edef;padding:10px 20px;border-radius:8px;font-size:14px;">Salir</button>
-       </div>
-       <div id="bjResult" style="margin-top:16px;font-size:18px;font-weight:700;"></div>
-     </div>`);
-  window.blackjackHit = ()=>{
-    if(gameOver)return;
-    player.push(deck.pop());
-    updateBJDisplay();
-    if(handValue(player)>21){ document.getElementById('bjResult').textContent='💀 Te pasaste! Pierdes.'; gameOver=true; }
-  };
-  window.blackjackStand = ()=>{
-    if(gameOver)return;
-    while(handValue(dealer)<17) dealer.push(deck.pop());
-    updateBJDisplay(true);
-    const pv=handValue(player), dv=handValue(dealer);
-    let result='';
-    if(dv>21) result='🎉 El crupier se pasó! Ganas!';
-    else if(pv>dv) result='🎉 Ganas!';
-    else if(pv<dv) result='💀 Pierdes.';
-    else result='🤝 Empate!';
-    document.getElementById('bjResult').textContent=result;
-    gameOver=true;
-  };
-  function updateBJDisplay(showDealer=false){
-    document.getElementById('playerHand').textContent=player.map(c=>c.value+c.suit).join(' ');
-    document.getElementById('playerScore').textContent=`(${handValue(player)})`;
-    if(showDealer){ document.getElementById('dealerHand').textContent=dealer.map(c=>c.value+c.suit).join(' '); }
-  }
-}
-
-// ---------- JUEGO 17: PÓKER ----------
-function initPoker(){
-  document.getElementById('gameArea').innerHTML = gameHTML('♠️','Póker','Mano de 5 cartas',
-    `<div id="pokerArea" style="text-align:center;">
-       <div style="font-size:32px;letter-spacing:8px;margin:20px 0;" id="pokerHand"></div>
-       <button onclick="dealPoker()" style="background:#00a884;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;">Repartir</button>
-       <div id="pokerResult" style="margin-top:12px;font-size:16px;color:#00a884;"></div>
-     </div>`);
-  window.dealPoker = ()=>{
-    const deck=[], ranks=['2','3','4','5','6','7','8','9','10','J','Q','K','A'], suits=['♠','♥','♦','♣'];
-    suits.forEach(s=>ranks.forEach(r=>deck.push(r+s)));
-    for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
-    const hand=deck.slice(0,5);
-    document.getElementById('pokerHand').textContent=hand.join(' ');
-    const rank=hand.map(c=>c.slice(0,-1)); const suit=hand.map(c=>c.slice(-1));
-    const counts={}; rank.forEach(r=>counts[r]=(counts[r]||0)+1);
-    const vals=Object.values(counts).sort((a,b)=>b-a);
-    const isFlush=suit.every(s=>s===suit[0]);
-    const isStraight=rank.map(r=>'23456789JQKA'.indexOf(r)).sort((a,b)=>a-b);
-    let result='';
-    if(vals[0]===4) result='✅ Póker!';
-    else if(vals[0]===3&&vals[1]===2) result='✅ Full House!';
-    else if(isFlush) result='✅ Color!';
-    else if(isStraight[4]-isStraight[0]===4) result='✅ Escalera!';
-    else if(vals[0]===3) result='✅ Trío!';
-    else if(vals[0]===2&&vals[1]===2) result='✅ Doble Pareja!';
-    else if(vals[0]===2) result='✅ Pareja!';
-    else result='❌ Carta alta';
-    document.getElementById('pokerResult').textContent=result;
-  };
-  dealPoker();
-}
-
-// ---------- JUEGO 18: BINGO ----------
-function initBingo(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🎱','Bingo','Genera tu cartón',
-    `<div id="bingoCard" style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;max-width:300px;margin:0 auto;"></div>
-     <div style="text-align:center;margin-top:12px;">
-       <button onclick="generateBingo()" style="background:#00a884;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;">Nuevo Cartón</button>
-       <button onclick="callBingo()" style="background:#2a3942;color:#e9edef;padding:8px 16px;border-radius:8px;font-size:13px;margin-left:8px;">Cantar Bingo!</button>
-     </div>
-     <div id="bingoStatus" style="text-align:center;margin-top:10px;font-size:14px;color:#8696a0;"></div>`);
-  let bingoNumbers=[], called=[];
-  window.generateBingo = ()=>{
-    const card=document.getElementById('bingoCard');
-    card.innerHTML='';
-    bingoNumbers=[]; called=[];
-    for(let i=0;i<25;i++){ let n; do{ n=Math.floor(Math.random()*75)+1; }while(bingoNumbers.includes(n)); bingoNumbers.push(n); }
-    bingoNumbers.forEach(n=>{
-      const cell=document.createElement('div');
-      cell.style.cssText='aspect-ratio:1;background:#2a3942;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#e9edef;';
-      cell.textContent=n;
-      cell.onclick=()=>{ if(called.includes(n)){ cell.style.background='#00a884'; } else { cell.style.background='#2a3942'; } };
-      card.appendChild(cell);
-    });
-    document.getElementById('bingoStatus').textContent='Haz clic en un número para marcarlo. ¡Suerte!';
-  };
-  window.callBingo = ()=>{
-    const marked=document.querySelectorAll('#bingoCard div');
-    const checked=[...marked].filter(el=>el.style.background==='rgb(0, 168, 132)');
-    if(checked.length>=5){
-      document.getElementById('bingoStatus').textContent='🎉 BINGO! Has ganado! (O al menos marcaste 5 números)';
-    } else {
-      document.getElementById('bingoStatus').textContent=`❌ Necesitas marcar al menos 5 números. Llevas ${checked.length}.`;
-    }
-  };
-  generateBingo();
-}
-
-// ---------- JUEGO 19: BUSCAMINAS ----------
-function initMines(){
-  document.getElementById('gameArea').innerHTML = gameHTML('💣','Buscaminas','Haz clic para descubrir, clic derecho para marcar',
-    `<div id="minesGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:2px;max-width:320px;margin:0 auto;"></div>
-     <div style="text-align:center;margin-top:10px;color:#8696a0;font-size:13px;" id="minesStatus">💣 10 minas</div>`);
-  const rows=8,cols=8,mines=10;
-  let board=[], revealed=[], flagged=[], gameOver=false;
-  function initMinesBoard(){
-    board=Array(rows).fill().map(()=>Array(cols).fill(0));
-    revealed=Array(rows).fill().map(()=>Array(cols).fill(false));
-    flagged=Array(rows).fill().map(()=>Array(cols).fill(false));
-    let placed=0;
-    while(placed<mines){ const r=Math.floor(Math.random()*rows), c=Math.floor(Math.random()*cols); if(board[r][c]!==-1){ board[r][c]=-1; placed++; } }
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){ if(board[r][c]===-1)continue; let count=0; for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){ const nr=r+dr,nc=c+dc; if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&board[nr][nc]===-1)count++; } board[r][c]=count; }
-    renderMines();
-  }
-  function renderMines(){
-    const grid=document.getElementById('minesGrid');
-    grid.innerHTML='';
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const cell=document.createElement('div');
-      cell.style.cssText='aspect-ratio:1;background:#2a3942;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;cursor:pointer;';
-      if(revealed[r][c]){ cell.style.background='#1a2730'; cell.textContent=board[r][c]===-1?'💣':board[r][c]||''; if(board[r][c]===-1)cell.style.color='#f15c6d'; }
-      else if(flagged[r][c]){ cell.textContent='🚩'; cell.style.color='#f15c6d'; }
-      cell.onclick=()=>{ if(gameOver||revealed[r][c]||flagged[r][c])return; revealMines(r,c); };
-      cell.oncontextmenu=(e)=>{ e.preventDefault(); if(gameOver||revealed[r][c])return; flagged[r][c]=!flagged[r][c]; renderMines(); };
-      grid.appendChild(cell);
-    }
-  }
-  function revealMines(r,c){
-    if(board[r][c]===-1){ gameOver=true; document.getElementById('minesStatus').textContent='💥 Perdiste! Has pisado una mina.'; renderMines(); return; }
-    revealed[r][c]=true;
-    if(board[r][c]===0){ for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){ const nr=r+dr,nc=c+dc; if(nr>=0&&nr<rows&&nc>=0&&nc<cols&&!revealed[nr][nc]&&!flagged[nr][nc])revealMines(nr,nc); } }
-    renderMines();
-    const total=rows*cols;
-    const revealedCount=revealed.flat().filter(v=>v).length;
-    if(revealedCount===total-mines){ document.getElementById('minesStatus').textContent='🎉 Ganaste! Encontraste todas las minas!'; gameOver=true; }
-  }
-  initMinesBoard();
-}
-
-// ---------- JUEGO 20: SERPIENTES Y ESCALERAS ----------
-function initSnakes(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🎲','Serpientes y Escaleras','Presiona "Tirar dado"',
-    `<div style="text-align:center;">
-       <div style="font-size:48px;margin:12px 0;">🎲</div>
-       <div style="font-size:24px;font-weight:700;color:#00a884;" id="snakesPos">Posición: 1</div>
-       <button onclick="rollSnakes()" style="background:#00a884;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;margin:10px 0;">Tirar dado</button>
-       <div id="snakesLog" style="margin-top:10px;font-size:14px;color:#8696a0;max-height:100px;overflow-y:auto;"></div>
-     </div>`);
-  let pos=1;
-  const snakes={16:6,47:26,49:11,56:53,62:19,64:60,87:24,93:73,95:75,98:78};
-  const ladders={1:38,4:14,9:31,21:42,28:84,36:44,51:67,71:91,80:100};
-  window.rollSnakes = ()=>{
-    const dice=Math.floor(Math.random()*6)+1;
-    let newPos=pos+dice;
-    if(newPos>100) newPos=100;
-    if(ladders[newPos]){ newPos=ladders[newPos]; log('¡Escalera! Sube a '+newPos); }
-    if(snakes[newPos]){ newPos=snakes[newPos]; log('🐍 Serpiente! Baja a '+newPos); }
-    pos=newPos;
-    document.getElementById('snakesPos').textContent=`Posición: ${pos}`;
-    log(`🎲 Tiraste ${dice} → Posición ${pos}`);
-    if(pos===100){ document.getElementById('gStatus').textContent='🎉 Ganaste! Llegaste al 100!'; }
-  };
-  function log(msg){ const log=document.getElementById('snakesLog'); log.innerHTML+=`<div>${msg}</div>`; log.scrollTop=log.scrollHeight; }
-}
-
-// ---------- JUEGO 21: LUDO ----------
-function initLudo(){
-  document.getElementById('gameArea').innerHTML = gameHTML('🏆','Ludo','Versión simplificada - Presiona "Tirar"',
-    `<div style="text-align:center;">
-       <div style="font-size:24px;margin:12px 0;">🎲</div>
-       <div style="font-size:18px;color:#00a884;" id="ludoPos">Tu ficha: 0</div>
-       <button onclick="rollLudo()" style="background:#00a884;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;margin:10px 0;">Tirar dado</button>
-       <div id="ludoLog" style="margin-top:10px;font-size:14px;color:#8696a0;max-height:80px;overflow-y:auto;"></div>
-     </div>`);
-  let steps=0, gameOver=false;
-  window.rollLudo = ()=>{
-    if(gameOver)return;
-    const dice=Math.floor(Math.random()*6)+1;
-    steps+=dice;
-    if(steps>=60){ gameOver=true; document.getElementById('gStatus').textContent='🎉 Ganaste! Completaste el recorrido!'; steps=60; }
-    document.getElementById('ludoPos').textContent=`Tu ficha: ${steps}/60`;
-    log(`🎲 Tiraste ${dice} → Avanzaste a ${steps}`);
-    if(steps>=60){ log('🏆 ¡Llegaste a la meta!'); }
-  };
-  function log(msg){ const log=document.getElementById('ludoLog'); log.innerHTML+=`<div>${msg}</div>`; log.scrollTop=log.scrollHeight; }
-}
-
-// ---------- JUEGO 22: QUIZ MUSICAL ----------
-function initQuiz(){
-  const preguntas = [
-    {q:'¿Qué banda canta "Bohemian Rhapsody"?',opts:['Queen','The Beatles','Led Zeppelin','Pink Floyd'],a:0},
-    {q:'¿Quién es el "Rey del Pop"?',opts:['Elvis Presley','Michael Jackson','Prince','Madonna'],a:1},
-    {q:'¿Canción más famosa de Shakira?',opts:['Hips Don\'t Lie','Waka Waka','Loca','Suerte'],a:1},
-    {q:'¿Género musical del reggae?',opts:['Ska','Reggae','Dub','Dancehall'],a:1},
-    {q:'¿Artista de "Blinding Lights"?',opts:['The Weeknd','Justin Bieber','Drake','Post Malone'],a:0},
-    {q:'¿Banda de "Smells Like Teen Spirit"?',opts:['Pearl Jam','Nirvana','Soundgarden','Alice in Chains'],a:1},
-    {q:'¿Instrumento principal del flamenco?',opts:['Guitarra','Piano','Violín','Saxofón'],a:0},
-    {q:'¿Canción de Los Beatles con "Yesterday"?',opts:['Hey Jude','Let It Be','Yesterday','Something'],a:2},
-    {q:'¿Género de la salsa?',opts:['Cubano','Puertorriqueño','Colombiano','Dominicano'],a:1},
-    {q:'¿Artista de "Despacito"?',opts:['Daddy Yankee','Luis Fonsi','J Balvin','Bad Bunny'],a:1}
-  ];
-  let qi=0, score=0, answered=false;
-  document.getElementById('gameArea').innerHTML = gameHTML('❓','Quiz Musical','Responde las preguntas',
-    `<div id="quizContent"></div><div id="quizScore" style="text-align:center;margin-top:10px;font-size:13px;color:#8696a0;">Puntaje: 0</div>`);
-  function renderQuiz(){
-    const tc=document.getElementById('quizContent');
-    if(qi>=preguntas.length){ tc.innerHTML=`<div style="text-align:center;padding:20px;"><div style="font-size:40px;">🏆</div><div style="font-size:18px;font-weight:700;margin:10px 0;">Fin del Quiz!</div><div style="color:#00a884;">Puntaje: ${score}/${preguntas.length}</div><button onclick="resetQuiz()" style="margin-top:14px;background:#00a884;color:#fff;border-radius:8px;padding:10px 20px;font-size:14px;">Jugar de nuevo</button></div>`; return; }
-    const q=preguntas[qi];
-    tc.innerHTML = `<div class="trivia-q">Pregunta ${qi+1}/${preguntas.length}: ${q.q}</div><div class="trivia-opts">${q.opts.map((o,i)=>`<button class="trivia-opt${answered?(i===q.a?' correct':''):''}" onclick="quizAnswer(${i})" ${answered?'disabled':''}>${o}</button>`).join('')}</div>`;
-    document.getElementById('quizScore').textContent=`Puntaje: ${score}`;
-    if(!answered){ const st=document.getElementById('gStatus'); if(st) st.textContent='Elige una respuesta'; }
-  }
-  window.quizAnswer = (i)=>{
-    if(answered)return;
-    answered=true;
-    const q=preguntas[qi];
-    if(i===q.a){ score++; }
-    document.getElementById('quizScore').textContent=`Puntaje: ${score}`;
-    const st=document.getElementById('gStatus');
-    if(st) st.textContent = i===q.a?'✅ Correcto!':'❌ Incorrecto. Era: '+q.opts[q.a];
-    setTimeout(()=>{ qi++; answered=false; renderQuiz(); },1800);
-  };
-  window.resetQuiz = ()=>{ qi=0; score=0; answered=false; renderQuiz(); };
-  renderQuiz();
-}
-
-// ---------- JUEGO 23: MATEMÁTICAS RÁPIDAS ----------
-function initMath(){
-  let a=0,b=0,op='+',correct=0,total=0,answered=false;
-  function newProblem(){
-    a=Math.floor(Math.random()*20)+1; b=Math.floor(Math.random()*20)+1; op=['+','-','*'][Math.floor(Math.random()*3)];
-    if(op==='-'){ if(a<b)[a,b]=[b,a]; }
-    if(op==='*'){ a=Math.floor(Math.random()*10)+1; b=Math.floor(Math.random()*10)+1; }
-    answered=false;
-    document.getElementById('mathProblem').textContent=`${a} ${op} ${b} = ?`;
-    document.getElementById('mathInput').value='';
-    document.getElementById('mathInput').focus();
-    document.getElementById('mathResult').textContent='';
-    const st=document.getElementById('gStatus'); if(st) st.textContent='Escribe tu respuesta';
-  }
-  document.getElementById('gameArea').innerHTML = gameHTML('📐','Matemáticas Rápidas','Resuelve',
-    `<div style="text-align:center;">
-       <div style="font-size:32px;font-weight:700;color:#00a884;margin:16px 0;" id="mathProblem">2 + 2 = ?</div>
-       <input id="mathInput" type="number" style="background:#2a3942;border:1px solid #3d5260;border-radius:8px;padding:10px;color:#e9edef;font-size:20px;width:120px;text-align:center;outline:none;" onkeydown="if(event.key==='Enter')checkMath()">
-       <button onclick="checkMath()" style="background:#00a884;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;margin-left:10px;">Comprobar</button>
-       <div id="mathResult" style="margin-top:12px;font-size:16px;font-weight:600;"></div>
-       <div style="margin-top:12px;color:#8696a0;font-size:13px;">✅ Correctas: <span id="mathCorrect">0</span> | ❌ Errores: <span id="mathErrors">0</span></div>
-     </div>`);
-  window.checkMath = ()=>{
-    if(answered)return;
-    const val=parseInt(document.getElementById('mathInput').value);
-    if(isNaN(val)){ document.getElementById('mathResult').textContent='❌ Escribe un número'; return; }
-    answered=true;
-    let result=0; if(op==='+') result=a+b; if(op==='-') result=a-b; if(op==='*') result=a*b;
-    if(val===result){ correct++; document.getElementById('mathResult').textContent='✅ Correcto! 🎉'; }
-    else { document.getElementById('mathResult').textContent=`❌ Incorrecto. Era ${result}`; }
-    total++;
-    document.getElementById('mathCorrect').textContent=correct;
-    document.getElementById('mathErrors').textContent=total-correct;
-    const st=document.getElementById('gStatus');
-    if(st) st.textContent = val===result?'✅ Correcto!':'❌ Incorrecto';
-    setTimeout(newProblem,1500);
-  };
-  newProblem();
-}
-
-// ---------- JUEGO 24: VELOCIDAD MECANOGRÁFICA ----------
-function initTyping(){
-  const palabras = ['hola','mundo','javascript','programacion','velocidad','teclado','dedos','escribir','rapido','practica','preciso','agil','constante','mejora','cada','dia'];
-  let palabra=palabras[Math.floor(Math.random()*palabras.length)], inicio, correctas=0,total=0;
-  document.getElementById('gameArea').innerHTML = gameHTML('⌨️','Velocidad Mecanográfica','Escribe la palabra lo más rápido posible',
-    `<div style="text-align:center;">
-       <div style="font-size:28px;font-weight:700;color:#00a884;margin:16px 0;letter-spacing:4px;" id="typingWord">${palabra}</div>
-       <input id="typingInput" style="background:#2a3942;border:1px solid #3d5260;border-radius:8px;padding:10px;color:#e9edef;font-size:18px;width:200px;text-align:center;outline:none;" onfocus="inicio=Date.now()" onkeydown="if(event.key==='Enter')checkTyping()">
-       <button onclick="checkTyping()" style="background:#00a884;color:#fff;padding:10px 20px;border-radius:8px;font-size:14px;margin-left:10px;">✓</button>
-       <div id="typingResult" style="margin-top:12px;font-size:16px;"></div>
-       <div style="margin-top:10px;color:#8696a0;font-size:13px;">✅ Correctas: <span id="typingCorrect">0</span> | ❌ Errores: <span id="typingErrors">0</span></div>
-     </div>`);
-  window.checkTyping = ()=>{
-    const input=document.getElementById('typingInput').value.trim();
-    const tiempo=(Date.now()-inicio)/1000;
-    if(input===palabra){ correctas++; document.getElementById('typingResult').textContent=`✅ Correcto! (${tiempo.toFixed(1)}s)`; }
-    else { document.getElementById('typingResult').textContent=`❌ Incorrecto. Era: ${palabra}`; }
-    total++;
-    document.getElementById('typingCorrect').textContent=correctas;
-    document.getElementById('typingErrors').textContent=total-correctas;
-    const st=document.getElementById('gStatus');
-    if(st) st.textContent=input===palabra?'✅ Correcto!':'❌ Incorrecto';
-    palabra=palabras[Math.floor(Math.random()*palabras.length)];
-    document.getElementById('typingWord').textContent=palabra;
-    document.getElementById('typingInput').value='';
-    document.getElementById('typingInput').focus();
-    inicio=Date.now();
-  };
-  inicio=Date.now();
-}
-
-// ---------- JUEGO 25: JUEGO DE COLORES ----------
-function initColor(){
-  const colores = ['rojo','azul','verde','amarillo','naranja','morado','rosa','café','gris','negro','blanco'];
-  const hex = {'rojo':'#f15c6d','azul':'#4a7bf5','verde':'#00a884','amarillo':'#f5d742','naranja':'#f5a742','morado':'#7b4af5','rosa':'#f54a8a','café':'#8b6b4a','gris':'#8696a0','negro':'#111b21','blanco':'#e9edef'};
-  let puntaje=0,total=0,colorActual,textoActual;
-  function nuevoColor(){
-    const nombres=Object.keys(colores);
-    colorActual=colores[Math.floor(Math.random()*colores.length)];
-    textoActual=colores[Math.floor(Math.random()*colores.length)];
-    document.getElementById('colorDisplay').textContent=textoActual;
-    document.getElementById('colorDisplay').style.color=hex[colorActual];
-    document.getElementById('colorResult').textContent='';
-    const st=document.getElementById('gStatus'); if(st) st.textContent='Elige el color (no la palabra)';
-  }
-  document.getElementById('gameArea').innerHTML = gameHTML('🎨','Juego de Colores','Elige el color correcto',
-    `<div style="text-align:center;">
-       <div style="font-size:48px;font-weight:700;margin:16px 0;text-transform:uppercase;" id="colorDisplay">rojo</div>
-       <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:360px;margin:0 auto;" id="colorButtons"></div>
-       <div id="colorResult" style="margin-top:12px;font-size:16px;font-weight:600;"></div>
-       <div style="margin-top:10px;color:#8696a0;font-size:13px;">✅ Correctas: <span id="colorCorrect">0</span> | ❌ Errores: <span id="colorErrors">0</span></div>
-     </div>`);
-  const container=document.getElementById('colorButtons');
-  colores.forEach(c=>{
-    const btn=document.createElement('button');
-    btn.textContent=c;
-    btn.style.cssText=`background:${hex[c]};padding:8px 16px;border-radius:8px;border:1px solid #3d5260;color:#111b21;font-weight:600;font-size:14px;min-width:60px;text-transform:uppercase;`;
-    btn.onclick=()=>{
-      const colorElegido=c;
-      total++;
-      if(colorElegido===colorActual){ puntaje++; document.getElementById('colorResult').textContent='✅ Correcto! 🎉'; }
-      else { document.getElementById('colorResult').textContent=`❌ Incorrecto. Era ${colorActual}`; }
-      document.getElementById('colorCorrect').textContent=puntaje;
-      document.getElementById('colorErrors').textContent=total-puntaje;
-      const st=document.getElementById('gStatus');
-      if(st) st.textContent=colorElegido===colorActual?'✅ Correcto!':'❌ Incorrecto';
-      setTimeout(nuevoColor,1000);
-    };
-    container.appendChild(btn);
-  });
-  nuevoColor();
-}
-
-// ============================================================
-// CÓDIGO CÉSAR
-// ============================================================
-function openCesarTool(){ document.getElementById('cesarModal').style.display='flex'; }
-function closeCesarTool(){ document.getElementById('cesarModal').style.display='none'; }
+/* =========================================================
+   CÓDIGO CÉSAR
+   ========================================================= */
+function openCesarTool(){document.getElementById('cesarModal').style.display='flex';}
+function closeCesarTool(){document.getElementById('cesarModal').style.display='none';}
 function cesarShiftText(text,shift){
   return text.replace(/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/g,ch=>{
     const isUpper=ch===ch.toUpperCase();
     const base='abcdefghijklmnopqrstuvwxyz';
-    let lower=ch.toLowerCase(), idx=base.indexOf(lower);
+    let lower=ch.toLowerCase(),idx=base.indexOf(lower);
     if(idx===-1)return ch;
     const newIdx=((idx+shift)%base.length+base.length)%base.length;
     return isUpper?base[newIdx].toUpperCase():base[newIdx];
@@ -2476,11 +1599,6 @@ function applyCesarShift(dir){
   const shift=parseInt(document.getElementById('cesarShift').value,10)||0;
   document.getElementById('cesarShiftResult').value=text?cesarShiftText(text,shift*dir):'';
 }
-
-// ============================================================
-// INICIALIZACIÓN FINAL
-// ============================================================
-console.log('🔥 Chat + 25 Juegos cargado!');
 </script>
 </body>
 </html>
