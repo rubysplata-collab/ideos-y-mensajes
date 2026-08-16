@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AnyDesk · IDs Cortos</title>
+    <title>Compartir Pantalla Fácil</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
         }
 
         body {
-            background: #0a0a1a;
+            background: #f0f2f5;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -24,131 +22,128 @@
             padding: 16px;
         }
 
-        .container {
-            max-width: 700px;
+        .app {
+            max-width: 500px;
             width: 100%;
-            background: #12122a;
-            border-radius: 24px;
-            padding: 20px;
-            border: 1px solid #2a3a5e;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            background: white;
+            border-radius: 30px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
         }
 
         /* Header */
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #2a3a5e;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            gap: 10px;
+            text-align: center;
+            margin-bottom: 24px;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: white;
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .logo i {
-            font-size: 28px;
-            color: #4a9eff;
-        }
-
-        .logo span {
-            color: #4a9eff;
-        }
-
-        .status-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-            background: #1a2a4a;
-            border-radius: 30px;
-            font-size: 13px;
-            color: #8ab4e6;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #ff4444;
-            display: inline-block;
-            transition: 0.3s;
-        }
-
-        .status-dot.connected {
-            background: #44ff88;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.3); }
-        }
-
-        /* Tarjeta de ID */
-        .id-card {
-            background: #0a1a3a;
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid #1a2a4a;
-            margin-bottom: 14px;
-        }
-
-        .id-card label {
-            color: #8ab4e6;
-            font-size: 13px;
-            font-weight: 600;
-            display: block;
+        .header .icon {
+            font-size: 48px;
             margin-bottom: 8px;
         }
 
-        .id-card label i {
-            margin-right: 8px;
-            color: #4a9eff;
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a2e;
         }
 
-        .id-input-group {
+        .header p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 8px;
+        }
+
+        .status-badge.online {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .status-badge.offline {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .status-dot.online {
+            background: #22c55e;
+        }
+
+        .status-dot.offline {
+            background: #ef4444;
+        }
+
+        /* Cards */
+        .card {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .card label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .card label .emoji {
+            margin-right: 6px;
+        }
+
+        .input-row {
             display: flex;
             gap: 10px;
         }
 
-        .id-input-group input {
+        .input-row input {
             flex: 1;
-            padding: 14px 16px;
-            background: #0a0a1a;
-            border: 2px solid #2a4a7a;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
-            color: white;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             text-align: center;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            background: white;
+            transition: 0.2s;
             outline: none;
-            transition: 0.3s;
+            color: #1a1a2e;
         }
 
-        .id-input-group input:focus {
-            border-color: #4a9eff;
-            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        .input-row input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
-        .id-input-group input::placeholder {
-            color: #4a6a8a;
+        .input-row input::placeholder {
+            color: #94a3b8;
             font-weight: 400;
             font-size: 14px;
         }
 
         .btn {
-            padding: 14px 24px;
+            padding: 12px 20px;
             border: none;
             border-radius: 12px;
             font-weight: 600;
@@ -157,55 +152,53 @@
             transition: 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             white-space: nowrap;
             touch-action: manipulation;
-            user-select: none;
         }
 
         .btn:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
 
-        .btn-primary {
-            background: #4a9eff;
+        .btn-blue {
+            background: #3b82f6;
             color: white;
         }
 
-        .btn-primary:hover {
-            background: #6ab4ff;
+        .btn-blue:hover {
+            background: #2563eb;
         }
 
-        .btn-success {
-            background: #44d47c;
+        .btn-green {
+            background: #22c55e;
             color: white;
         }
 
-        .btn-success:hover {
-            background: #66e89a;
+        .btn-green:hover {
+            background: #16a34a;
         }
 
-        .btn-danger {
-            background: #ff4444;
+        .btn-red {
+            background: #ef4444;
             color: white;
         }
 
-        .btn-danger:hover {
-            background: #ff6666;
+        .btn-red:hover {
+            background: #dc2626;
         }
 
-        .btn-secondary {
-            background: #1a2a4a;
-            color: #a0b4d6;
+        .btn-gray {
+            background: #e2e8f0;
+            color: #475569;
         }
 
-        .btn-secondary:hover {
-            background: #2a4a7a;
-            color: white;
+        .btn-gray:hover {
+            background: #cbd5e1;
         }
 
         .btn-sm {
-            padding: 10px 16px;
+            padding: 8px 14px;
             font-size: 13px;
         }
 
@@ -216,9 +209,8 @@
 
         .btn-group {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
         }
 
         .btn-group .btn {
@@ -227,311 +219,272 @@
         }
 
         /* Video */
-        .video-wrapper {
-            background: #0a0a1a;
+        .video-box {
+            background: #0f172a;
             border-radius: 16px;
             overflow: hidden;
-            border: 2px solid #1a2a4a;
-            margin: 14px 0;
-            position: relative;
+            margin: 16px 0;
             min-height: 200px;
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            border: 2px solid #e2e8f0;
         }
 
-        .video-wrapper video {
+        .video-box video {
             width: 100%;
             display: none;
-            background: #0a0a1a;
         }
 
         .placeholder {
-            color: #4a6a8a;
+            color: #64748b;
             text-align: center;
-            padding: 40px 20px;
+            padding: 32px 20px;
         }
 
-        .placeholder i {
-            font-size: 48px;
-            color: #2a4a7a;
-            margin-bottom: 12px;
+        .placeholder .big-icon {
+            font-size: 40px;
             display: block;
+            margin-bottom: 10px;
         }
 
         .placeholder h3 {
-            color: #8ab4e6;
+            color: #94a3b8;
             font-size: 16px;
-            margin-bottom: 6px;
+            font-weight: 500;
         }
 
         .placeholder p {
             font-size: 13px;
+            margin-top: 4px;
         }
 
-        /* Controles rápidos */
-        .quick-controls {
+        /* Quick buttons */
+        .quick-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             margin: 12px 0;
         }
 
-        .quick-controls .btn {
+        .quick-grid .btn {
             justify-content: center;
-            padding: 12px 8px;
-            font-size: 13px;
-            background: #1a2a4a;
-            color: #a0b4d6;
-            border: 1px solid #2a4a7a;
-            border-radius: 10px;
+            padding: 10px 8px;
+            font-size: 12px;
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
         }
 
-        .quick-controls .btn:active {
-            background: #2a4a7a;
+        .quick-grid .btn:active {
+            background: #e2e8f0;
         }
 
-        .quick-controls .btn i {
-            font-size: 18px;
+        .quick-grid .btn .icon {
             display: block;
-            margin-bottom: 4px;
-        }
-
-        .quick-controls .btn-primary {
-            background: #4a9eff;
-            color: white;
-            border-color: #4a9eff;
-        }
-
-        .quick-controls .btn-danger {
-            background: #ff4444;
-            color: white;
-            border-color: #ff4444;
+            font-size: 18px;
+            margin-bottom: 2px;
         }
 
         /* Chat */
         .chat-box {
-            background: #0a1a3a;
+            background: #f1f5f9;
             border-radius: 12px;
-            padding: 10px;
-            height: 100px;
+            padding: 10px 12px;
+            height: 80px;
             overflow-y: auto;
-            border: 1px solid #1a2a4a;
             margin: 10px 0;
+            border: 1px solid #e2e8f0;
         }
 
-        .chat-message {
-            color: #a0b4d6;
-            padding: 4px 0;
+        .chat-msg {
+            color: #475569;
+            padding: 3px 0;
             font-size: 13px;
-            border-bottom: 1px solid #0d1b3e;
+            border-bottom: 1px solid #e2e8f0;
         }
 
-        .chat-message:last-child {
+        .chat-msg:last-child {
             border-bottom: none;
         }
 
-        .chat-message .sender {
-            color: #4a9eff;
+        .chat-msg .who {
+            color: #3b82f6;
             font-weight: 600;
         }
 
-        .chat-input-group {
+        .chat-row {
             display: flex;
             gap: 10px;
         }
 
-        .chat-input-group input {
+        .chat-row input {
             flex: 1;
-            padding: 12px 16px;
-            background: #0a1a3a;
-            border: 1px solid #2a4a7a;
-            border-radius: 10px;
-            color: white;
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
             font-size: 14px;
             outline: none;
+            background: white;
         }
 
-        .chat-input-group input:focus {
-            border-color: #4a9eff;
+        .chat-row input:focus {
+            border-color: #3b82f6;
         }
 
-        .chat-input-group .btn {
-            padding: 12px 18px;
+        .chat-row .btn {
+            padding: 10px 16px;
         }
 
-        /* Info */
+        /* Footer info */
         .info-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 14px;
-            background: #0a1a3a;
+            padding: 10px 12px;
+            background: #f8fafc;
             border-radius: 12px;
-            border: 1px solid #1a2a4a;
+            border: 1px solid #e2e8f0;
             margin-top: 12px;
-            flex-wrap: wrap;
-            gap: 8px;
             font-size: 13px;
-            color: #6a8aaa;
+            color: #64748b;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
-        .info-bar .id-value {
-            color: #4a9eff;
+        .info-bar .id {
+            color: #3b82f6;
             font-weight: 600;
             cursor: pointer;
-            word-break: break-all;
         }
 
-        .info-bar .id-value:active {
+        .info-bar .id:active {
             opacity: 0.7;
         }
 
-        .info-bar .badge {
-            background: #1a2a5a;
-            padding: 4px 14px;
+        .info-bar .tag {
+            background: #e2e8f0;
+            padding: 2px 12px;
             border-radius: 20px;
-            color: #8ab4e6;
             font-size: 12px;
+            color: #475569;
         }
 
         .tip {
-            background: #1a2a4a;
+            background: #eff6ff;
             padding: 12px 16px;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 13px;
-            color: #8ab4e6;
-            border-left: 4px solid #4a9eff;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
             margin-top: 12px;
         }
 
-        .tip code {
-            background: #0a1a3a;
-            padding: 2px 8px;
-            border-radius: 4px;
-            color: #4a9eff;
+        .tip strong {
+            color: #1e3a8a;
         }
 
         /* Responsive */
-        @media (max-width: 600px) {
-            .container { padding: 14px; }
-            .id-input-group { flex-direction: column; }
-            .btn-group .btn { flex: 1 1 100%; }
-            .quick-controls { grid-template-columns: repeat(3, 1fr); }
-            .header { flex-direction: column; align-items: stretch; }
-            .status-badge { justify-content: center; }
-        }
-
-        @media (max-width: 400px) {
-            .quick-controls { grid-template-columns: repeat(2, 1fr); }
-            .logo { font-size: 17px; }
+        @media (max-width: 500px) {
+            .app { padding: 16px; }
+            .quick-grid { grid-template-columns: repeat(3, 1fr); }
+            .input-row { flex-direction: column; }
+            .btn-group { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <!-- ===== HEADER ===== -->
+<div class="app">
+    <!-- Header -->
     <div class="header">
-        <div class="logo">
-            <i class="fas fa-desktop"></i>
-            <span>Any<span>Desk</span></span>
-            <span style="font-size:12px;color:#4a6a8a;font-weight:400;">IDs cortos</span>
-        </div>
-        <div class="status-badge">
-            <span class="status-dot" id="statusDot"></span>
+        <div class="icon">🖥️</div>
+        <h1>Compartir Pantalla</h1>
+        <p>Conéctate con quien quieras</p>
+        <div class="status-badge offline" id="statusBadge">
+            <span class="status-dot offline" id="statusDot"></span>
             <span id="statusText">Desconectado</span>
         </div>
     </div>
 
-    <!-- ===== TU ID ===== -->
-    <div class="id-card">
-        <label><i class="fas fa-id-card"></i> TU ID (elige uno corto)</label>
-        <div class="id-input-group">
-            <input type="text" id="myIdInput" placeholder="ej: casa, ofi, pc01" value="casa-123">
-            <button class="btn btn-primary" onclick="startWithId()">
-                <i class="fas fa-play"></i> Iniciar
-            </button>
+    <!-- Mi ID -->
+    <div class="card">
+        <label><span class="emoji">👤</span> Tu código (elige uno fácil)</label>
+        <div class="input-row">
+            <input type="text" id="myId" placeholder="ej: casa, juan, pc" value="casa-123">
+            <button class="btn btn-blue" onclick="startWithId()">▶ Iniciar</button>
         </div>
         <div class="btn-group">
-            <button class="btn btn-secondary btn-sm" onclick="generateRandomId()">
-                <i class="fas fa-random"></i> Aleatorio
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="copyMyId()">
-                <i class="fas fa-copy"></i> Copiar ID
-            </button>
+            <button class="btn btn-gray btn-sm" onclick="randomId()">🎲 Aleatorio</button>
+            <button class="btn btn-gray btn-sm" onclick="copyMyId()">📋 Copiar</button>
         </div>
     </div>
 
-    <!-- ===== CONECTAR A OTRO ===== -->
-    <div class="id-card">
-        <label><i class="fas fa-plug"></i> CONECTAR A ID REMOTO</label>
-        <div class="id-input-group">
-            <input type="text" id="remoteIdInput" placeholder="ID de la otra persona" value="">
-            <button class="btn btn-success" onclick="connectToRemote()">
-                <i class="fas fa-arrow-right"></i> Conectar
-            </button>
+    <!-- Conectar -->
+    <div class="card">
+        <label><span class="emoji">🔗</span> Conectar al código de otra persona</label>
+        <div class="input-row">
+            <input type="text" id="remoteId" placeholder="ej: casa, juan, pc">
+            <button class="btn btn-green" onclick="connectTo()">Conectar</button>
         </div>
         <div class="btn-group">
-            <button class="btn btn-danger btn-sm" onclick="disconnectEverything()">
-                <i class="fas fa-power-off"></i> Desconectar
-            </button>
+            <button class="btn btn-red btn-sm" onclick="disconnectAll()">⛔ Desconectar</button>
         </div>
     </div>
 
-    <!-- ===== VIDEO ===== -->
-    <div class="video-wrapper" id="videoWrapper">
+    <!-- Video -->
+    <div class="video-box" id="videoBox">
         <div class="placeholder" id="placeholder">
-            <i class="fas fa-wifi"></i>
+            <span class="big-icon">📡</span>
             <h3>Esperando conexión...</h3>
-            <p>Comparte tu ID para recibir una conexión</p>
+            <p>Comparte tu código para que te vean</p>
         </div>
         <video id="remoteVideo" autoplay playsinline></video>
     </div>
 
-    <!-- ===== CONTROLES RÁPIDOS ===== -->
-    <div class="quick-controls">
+    <!-- Controles rápidos -->
+    <div class="quick-grid">
         <button class="btn" onclick="sendKey('ctrl')">
-            <i class="fas fa-keyboard"></i> Ctrl
+            <span class="icon">⌨️</span> Ctrl
         </button>
         <button class="btn" onclick="sendKey('alt')">
-            <i class="fas fa-keyboard"></i> Alt
+            <span class="icon">⌨️</span> Alt
         </button>
         <button class="btn" onclick="sendKey('shift')">
-            <i class="fas fa-keyboard"></i> Shift
+            <span class="icon">⌨️</span> Shift
         </button>
         <button class="btn" onclick="sendKey('esc')">
-            <i class="fas fa-times"></i> Esc
+            <span class="icon">✖</span> Esc
         </button>
-        <button class="btn btn-primary" onclick="toggleFullscreen()">
-            <i class="fas fa-expand"></i> Full
+        <button class="btn btn-blue" onclick="goFullscreen()">
+            <span class="icon">⛶</span> Full
         </button>
-        <button class="btn btn-danger" onclick="disconnectEverything()">
-            <i class="fas fa-power-off"></i> Salir
+        <button class="btn btn-red" onclick="disconnectAll()">
+            <span class="icon">⏻</span> Salir
         </button>
     </div>
 
-    <!-- ===== CHAT ===== -->
+    <!-- Chat -->
     <div class="chat-box" id="chatBox">
-        <div class="chat-message"><span class="sender">Sistema:</span> Conéctate para chatear</div>
+        <div class="chat-msg"><span class="who">💬</span> Conéctate para chatear</div>
     </div>
-    <div class="chat-input-group">
+    <div class="chat-row">
         <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendChat()">
-        <button class="btn btn-primary" onclick="sendChat()">
-            <i class="fas fa-paper-plane"></i>
-        </button>
+        <button class="btn btn-blue" onclick="sendChat()">📨</button>
     </div>
 
-    <!-- ===== INFO ===== -->
+    <!-- Info -->
     <div class="info-bar">
-        <span><i class="fas fa-id-card"></i> Mi ID: <span class="id-value" id="displayMyId" onclick="copyMyId()">---</span></span>
-        <span class="badge" id="connectionBadge">🔒 Desconectado</span>
+        <span>Mi código: <span class="id" id="displayMyId" onclick="copyMyId()">---</span></span>
+        <span class="tag" id="connectionTag">⚪ Desconectado</span>
     </div>
 
-    <!-- ===== TIP ===== -->
+    <!-- Tip -->
     <div class="tip">
-        💡 <strong>IDs cortos:</strong> Usa palabras fáciles como <code>casa</code>, <code>ofi</code>, <code>pc01</code>.
-        Quien da su ID, <strong>comparte su pantalla</strong>. Quien conecta, <strong>ve la pantalla</strong> del otro.
+        💡 <strong>Fácil:</strong> Elige un código corto, compártelo y listo.
+        Quien da su código <strong>comparte su pantalla</strong>.
+        Quien conecta <strong>ve la pantalla</strong> del otro.
     </div>
 </div>
 
@@ -546,22 +499,20 @@
     let myPeerId = null;
 
     // ============================================================
-    //  INICIAR CON ID PERSONALIZADO
+    //  INICIAR CON ID
     // ============================================================
     function startWithId() {
-        const id = document.getElementById('myIdInput').value.trim();
+        const id = document.getElementById('myId').value.trim();
         if (!id) {
-            alert('Elige un ID corto (ej: casa, oficina, pc01)');
+            alert('Elige un código fácil (ej: casa, juan, pc)');
             return;
         }
 
-        // Cerrar conexión anterior
         if (peer) {
             peer.destroy();
             peer = null;
         }
 
-        // Crear nuevo peer con ID personalizado
         peer = new Peer(id, {
             host: '0.peerjs.com',
             port: 443,
@@ -569,8 +520,7 @@
             secure: true,
             config: {
                 'iceServers': [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun.l.google.com:19302' }
                 ]
             }
         });
@@ -578,55 +528,40 @@
         peer.on('open', (peerId) => {
             myPeerId = peerId;
             document.getElementById('displayMyId').textContent = peerId;
-            updateStatus(true, `Conectado: ${peerId}`);
-            document.getElementById('connectionBadge').textContent = '🟢 En línea';
-            addChatMessage('Sistema', `✅ ID "${peerId}" activo. Compártelo para que te vean.`);
+            setStatus(true, 'Conectado: ' + peerId);
+            document.getElementById('connectionTag').textContent = '🟢 En línea';
+            addChat('Sistema', '✅ Código "' + peerId + '" activo. Compártelo.');
         });
 
         peer.on('error', (err) => {
-            console.error('Error:', err);
             if (err.type === 'unavailable-id') {
-                alert(`❌ El ID "${id}" ya está en uso. Elige otro.`);
-                updateStatus(false, 'ID en uso');
+                alert('❌ El código "' + id + '" ya está en uso. Elige otro.');
+                setStatus(false, 'Código en uso');
             } else {
-                alert('Error de conexión: ' + err.message);
-                updateStatus(false, 'Error');
+                alert('Error: ' + err.message);
+                setStatus(false, 'Error');
             }
         });
 
-        // Escuchar conexiones entrantes (data)
         peer.on('connection', (incomingConn) => {
-            if (conn) {
-                incomingConn.close();
-                return;
-            }
+            if (conn) { incomingConn.close(); return; }
             conn = incomingConn;
-            setupDataConnection(conn);
+            setupData(conn);
         });
 
-        // Escuchar llamadas entrantes (video)
         peer.on('call', (incomingCall) => {
-            if (call) {
-                incomingCall.answer();
-                incomingCall.close();
-                return;
-            }
+            if (call) { incomingCall.answer(); incomingCall.close(); return; }
 
-            // Compartir pantalla al recibir llamada
             navigator.mediaDevices.getDisplayMedia({
-                video: {
-                    cursor: 'always',
-                    frameRate: 30
-                },
+                video: { cursor: 'always', frameRate: 30 },
                 audio: true
             }).then((stream) => {
                 incomingCall.answer(stream);
                 setupCall(incomingCall);
-                addChatMessage('Sistema', '📺 Compartiendo pantalla...');
-            }).catch((err) => {
-                console.error('Error al compartir:', err);
-                addChatMessage('Sistema', '❌ Error al compartir pantalla');
-                incomingCall.answer(); // Responder sin video
+                addChat('Sistema', '📺 Compartiendo pantalla...');
+            }).catch(() => {
+                addChat('Sistema', '❌ Error al compartir pantalla');
+                incomingCall.answer();
                 incomingCall.close();
             });
         });
@@ -635,76 +570,69 @@
     // ============================================================
     //  CONECTAR A ID REMOTO
     // ============================================================
-    function connectToRemote() {
-        const remoteId = document.getElementById('remoteIdInput').value.trim();
+    function connectTo() {
+        const remoteId = document.getElementById('remoteId').value.trim();
         if (!remoteId) {
-            alert('Escribe el ID remoto (ej: casa, oficina)');
+            alert('Escribe el código de la otra persona');
             return;
         }
 
         if (!peer) {
-            alert('Primero inicia sesión con tu ID');
+            alert('Primero inicia tu código');
             return;
         }
 
         if (isConnected) {
-            disconnectEverything();
-            setTimeout(() => connectToRemote(), 300);
+            disconnectAll();
+            setTimeout(() => connectTo(), 300);
             return;
         }
 
-        addChatMessage('Sistema', `🔗 Conectando a "${remoteId}"...`);
+        addChat('Sistema', '🔗 Conectando a "' + remoteId + '"...');
 
-        // Conectar data channel
         conn = peer.connect(remoteId);
         conn.on('open', () => {
-            setupDataConnection(conn);
+            setupData(conn);
         });
 
-        conn.on('error', (err) => {
-            console.error('Error de conexión:', err);
-            addChatMessage('Sistema', `❌ Error al conectar con "${remoteId}"`);
-            updateStatus(false, 'Error de conexión');
+        conn.on('error', () => {
+            addChat('Sistema', '❌ No se pudo conectar a "' + remoteId + '"');
+            setStatus(false, 'Error de conexión');
         });
 
-        // Llamada de video
         navigator.mediaDevices.getDisplayMedia({
-            video: {
-                cursor: 'always',
-                frameRate: 30
-            },
+            video: { cursor: 'always', frameRate: 30 },
             audio: true
         }).then((stream) => {
             call = peer.call(remoteId, stream);
             setupCall(call);
-            addChatMessage('Sistema', '📺 Compartiendo pantalla...');
-        }).catch((err) => {
-            console.error('Error al compartir:', err);
-            addChatMessage('Sistema', '❌ Error al compartir pantalla');
+            addChat('Sistema', '📺 Compartiendo pantalla...');
+        }).catch(() => {
+            addChat('Sistema', '❌ Error al compartir pantalla');
         });
     }
 
     // ============================================================
-    //  SETUP CONEXIONES
+    //  SETUP
     // ============================================================
-    function setupDataConnection(connection) {
+    function setupData(connection) {
         conn = connection;
         isConnected = true;
-        updateStatus(true, `Conectado a ${conn.peer}`);
-        document.getElementById('connectionBadge').textContent = `🔗 Conectado a ${conn.peer}`;
-        addChatMessage('Sistema', `✅ Conectado a "${conn.peer}"`);
+        setStatus(true, 'Conectado a ' + conn.peer);
+        document.getElementById('connectionTag').textContent = '🔗 Conectado a ' + conn.peer;
+        addChat('Sistema', '✅ Conectado a "' + conn.peer + '"');
 
         conn.on('data', (data) => {
             if (data.type === 'chat') {
-                addChatMessage('Remoto', data.data);
+                addChat('Remoto', data.data);
             } else if (data.type === 'key') {
-                addChatMessage('Sistema', `⌨️ Tecla remota: ${data.data}`);
+                addChat('Sistema', '⌨️ Tecla: ' + data.data);
             }
         });
 
         conn.on('close', () => {
-            addChatMessage('Sistema', '⛔ El otro usuario se desconectó');
-            disconnectEverything();
+            addChat('Sistema', '⛔ La otra persona se desconectó');
+            disconnectAll();
         });
     }
 
@@ -716,160 +644,138 @@
             video.srcObject = stream;
             video.style.display = 'block';
             document.getElementById('placeholder').style.display = 'none';
-            addChatMessage('Sistema', '📺 Video recibido');
+            addChat('Sistema', '📺 Video recibido');
         });
 
         incomingCall.on('close', () => {
-            addChatMessage('Sistema', '⛔ Transmisión de video terminada');
             const video = document.getElementById('remoteVideo');
             video.style.display = 'none';
             video.srcObject = null;
             document.getElementById('placeholder').style.display = 'block';
-        });
-
-        incomingCall.on('error', (err) => {
-            console.error('Call error:', err);
-            disconnectEverything();
+            addChat('Sistema', '⛔ Transmisión terminada');
         });
     }
 
     // ============================================================
-    //  ENVIAR DATOS
+    //  ENVIAR
     // ============================================================
     function sendData(type, data) {
         if (!conn || !isConnected) {
-            addChatMessage('Sistema', '⚠️ No estás conectado');
+            addChat('Sistema', '⚠️ No estás conectado');
             return false;
         }
         try {
             conn.send({ type: type, data: data });
             return true;
         } catch (e) {
-            console.error('Error al enviar:', e);
             return false;
         }
     }
 
     function sendKey(key) {
-        if (!isConnected) {
-            addChatMessage('Sistema', '⚠️ Conéctate primero');
-            return;
-        }
+        if (!isConnected) { addChat('Sistema', '⚠️ Conéctate primero'); return; }
         sendData('key', key);
-        addChatMessage('Tú', `⌨️ Tecla: ${key}`);
+        addChat('Tú', '⌨️ Tecla: ' + key);
     }
 
     function sendChat() {
         const input = document.getElementById('chatInput');
         const msg = input.value.trim();
         if (!msg) return;
-        if (!isConnected) {
-            addChatMessage('Sistema', '⚠️ Conéctate primero');
-            input.value = '';
-            return;
-        }
+        if (!isConnected) { addChat('Sistema', '⚠️ Conéctate primero'); input.value = ''; return; }
         sendData('chat', msg);
-        addChatMessage('Tú', msg);
+        addChat('Tú', msg);
         input.value = '';
     }
 
     // ============================================================
     //  UTILIDADES
     // ============================================================
-    function updateStatus(connected, text) {
+    function setStatus(online, text) {
+        const badge = document.getElementById('statusBadge');
         const dot = document.getElementById('statusDot');
         const label = document.getElementById('statusText');
-        if (connected) {
-            dot.className = 'status-dot connected';
+
+        if (online) {
+            badge.className = 'status-badge online';
+            dot.className = 'status-dot online';
         } else {
-            dot.className = 'status-dot';
+            badge.className = 'status-badge offline';
+            dot.className = 'status-dot offline';
         }
         label.textContent = text;
     }
 
-    function disconnectEverything() {
-        if (call) {
-            call.close();
-            call = null;
-        }
-        if (conn) {
-            conn.close();
-            conn = null;
-        }
+    function disconnectAll() {
+        if (call) { call.close(); call = null; }
+        if (conn) { conn.close(); conn = null; }
         isConnected = false;
         const video = document.getElementById('remoteVideo');
         video.style.display = 'none';
         video.srcObject = null;
         document.getElementById('placeholder').style.display = 'block';
-        updateStatus(false, 'Desconectado');
-        document.getElementById('connectionBadge').textContent = '🔒 Desconectado';
-        addChatMessage('Sistema', '⛔ Desconectado');
+        setStatus(false, 'Desconectado');
+        document.getElementById('connectionTag').textContent = '⚪ Desconectado';
+        addChat('Sistema', '⛔ Desconectado');
     }
 
-    function generateRandomId() {
-        const palabras = ['casa', 'ofi', 'pc', 'lab', 'home', 'work', 'server', 'laptop', 'escritorio', 'movil'];
+    function randomId() {
+        const palabras = ['casa', 'juan', 'pc', 'lab', 'home', 'work', 'server', 'laptop'];
         const num = Math.floor(Math.random() * 1000);
-        const id = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
-        document.getElementById('myIdInput').value = id;
-        addChatMessage('Sistema', `🎲 ID sugerido: ${id}`);
+        document.getElementById('myId').value = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
+        addChat('Sistema', '🎲 Código sugerido: ' + document.getElementById('myId').value);
     }
 
     function copyMyId() {
         const id = document.getElementById('displayMyId').textContent;
         if (id && id !== '---') {
             navigator.clipboard.writeText(id).then(() => {
-                addChatMessage('Sistema', `📋 ID "${id}" copiado al portapapeles`);
+                addChat('Sistema', '📋 Código "' + id + '" copiado');
             }).catch(() => {
-                // Fallback
                 const input = document.createElement('input');
                 input.value = id;
                 document.body.appendChild(input);
                 input.select();
                 document.execCommand('copy');
                 document.body.removeChild(input);
-                addChatMessage('Sistema', `📋 ID "${id}" copiado`);
+                addChat('Sistema', '📋 Código "' + id + '" copiado');
             });
         }
     }
 
-    function toggleFullscreen() {
-        const container = document.querySelector('.container');
+    function goFullscreen() {
+        const app = document.querySelector('.app');
         if (!document.fullscreenElement) {
-            container.requestFullscreen().catch(err => {
-                console.log('Error al entrar en fullscreen:', err);
-            });
+            app.requestFullscreen().catch(() => {});
         } else {
             document.exitFullscreen();
         }
     }
 
-    function addChatMessage(sender, message) {
-        const chatBox = document.getElementById('chatBox');
+    function addChat(sender, message) {
+        const box = document.getElementById('chatBox');
         const div = document.createElement('div');
-        div.className = 'chat-message';
-        div.innerHTML = `<span class="sender">${sender}:</span> ${message}`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        div.className = 'chat-msg';
+        div.innerHTML = '<span class="who">' + sender + ':</span> ' + message;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
+        if (box.children.length > 50) {
+            box.removeChild(box.children[0]);
+        }
     }
 
     // ============================================================
-    //  AUTO INICIO AL CARGAR
+    //  AUTO INICIO
     // ============================================================
     window.onload = function() {
-        // Generar ID aleatorio por defecto
-        const palabras = ['casa', 'ofi', 'pc', 'lab', 'home'];
+        const palabras = ['casa', 'juan', 'pc', 'lab', 'home'];
         const num = Math.floor(Math.random() * 1000);
-        document.getElementById('myIdInput').value = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
-        
-        // Iniciar automáticamente
+        document.getElementById('myId').value = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
         setTimeout(startWithId, 500);
     };
 
-    // Prevenir cierre accidental
     window.addEventListener('beforeunload', () => {
-        if (isConnected) {
-            disconnectEverything();
-        }
+        if (isConnected) disconnectAll();
     });
 </script>
 
