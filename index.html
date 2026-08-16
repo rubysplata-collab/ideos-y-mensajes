@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escritorio Remoto - AnyDesk Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AnyDesk · IDs Cortos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -12,25 +12,26 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            background: #1a1a2e;
+            background: #0a0a1a;
             min-height: 100vh;
             display: flex;
-            align-items: center;
             justify-content: center;
-            padding: 20px;
+            align-items: center;
+            padding: 16px;
         }
 
         .container {
+            max-width: 700px;
             width: 100%;
-            max-width: 1400px;
-            background: #16213e;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+            background: #12122a;
+            border-radius: 24px;
+            padding: 20px;
             border: 1px solid #2a3a5e;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
 
         /* Header */
@@ -38,48 +39,40 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 20px;
+            padding-bottom: 16px;
             border-bottom: 2px solid #2a3a5e;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
-            gap: 15px;
+            gap: 10px;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             color: white;
+            font-size: 20px;
+            font-weight: 700;
         }
 
         .logo i {
-            font-size: 32px;
+            font-size: 28px;
             color: #4a9eff;
-        }
-
-        .logo h1 {
-            font-size: 24px;
-            font-weight: 700;
         }
 
         .logo span {
             color: #4a9eff;
         }
 
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            color: #a0b4d6;
-        }
-
-        .status-indicator {
+        .status-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: #1a2a4a;
             border-radius: 30px;
+            font-size: 13px;
+            color: #8ab4e6;
         }
 
         .status-dot {
@@ -88,6 +81,7 @@
             border-radius: 50%;
             background: #ff4444;
             display: inline-block;
+            transition: 0.3s;
         }
 
         .status-dot.connected {
@@ -96,186 +90,81 @@
         }
 
         @keyframes pulse {
-            0% { opacity: 1; transform: scale(1); }
+            0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.3); }
-            100% { opacity: 1; transform: scale(1); }
         }
 
-        .peer-id-box {
-            background: #0d1b3e;
-            padding: 8px 18px;
-            border-radius: 30px;
-            font-size: 14px;
-            color: #4a9eff;
-            border: 1px solid #2a4a7a;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .peer-id-box:hover {
-            background: #1a2a5a;
-        }
-
-        /* Main Grid */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Remote Screen */
-        .remote-screen {
-            background: #0d1b3e;
+        /* Tarjeta de ID */
+        .id-card {
+            background: #0a1a3a;
             border-radius: 16px;
             padding: 16px;
-            border: 2px solid #2a3a5e;
-            min-height: 500px;
-            position: relative;
+            border: 1px solid #1a2a4a;
+            margin-bottom: 14px;
         }
 
-        .screen-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #a0b4d6;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #1a2a4a;
-            margin-bottom: 16px;
-        }
-
-        .screen-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
-        }
-
-        .screen-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .screen-controls button {
-            background: #1a2a4a;
-            border: none;
-            color: #a0b4d6;
-            padding: 6px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.3s;
+        .id-card label {
+            color: #8ab4e6;
             font-size: 13px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
         }
 
-        .screen-controls button:hover {
-            background: #2a4a7a;
-            color: white;
+        .id-card label i {
+            margin-right: 8px;
+            color: #4a9eff;
         }
 
-        .screen-controls button.danger:hover {
-            background: #ff4444;
-        }
-
-        .screen-display {
-            background: #0a0a1a;
-            border-radius: 12px;
-            min-height: 400px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #remoteVideo {
-            width: 100%;
-            height: 100%;
-            min-height: 400px;
-            object-fit: contain;
-            background: #0a0a1a;
-            display: none;
-        }
-
-        .screen-placeholder {
-            color: #4a6a8a;
-            text-align: center;
-            padding: 40px;
-        }
-
-        .screen-placeholder i {
-            font-size: 64px;
-            margin-bottom: 20px;
-            color: #2a4a7a;
-        }
-
-        .screen-placeholder h3 {
-            color: #8ab4e6;
-            margin-bottom: 10px;
-        }
-
-        /* Controls Panel */
-        .controls-panel {
-            background: #0d1b3e;
-            border-radius: 16px;
-            padding: 20px;
-            border: 2px solid #2a3a5e;
-        }
-
-        .panel-section {
-            margin-bottom: 24px;
-        }
-
-        .panel-section:last-child {
-            margin-bottom: 0;
-        }
-
-        .panel-section h3 {
-            color: #8ab4e6;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-        }
-
-        .peer-input-group {
+        .id-input-group {
             display: flex;
             gap: 10px;
-            margin-bottom: 12px;
         }
 
-        .peer-input-group input {
+        .id-input-group input {
             flex: 1;
-            padding: 12px 16px;
-            background: #0a1a3a;
-            border: 1px solid #2a4a7a;
-            border-radius: 10px;
+            padding: 14px 16px;
+            background: #0a0a1a;
+            border: 2px solid #2a4a7a;
+            border-radius: 12px;
             color: white;
-            font-size: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 1px;
             outline: none;
             transition: 0.3s;
         }
 
-        .peer-input-group input:focus {
+        .id-input-group input:focus {
             border-color: #4a9eff;
             box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
         }
 
+        .id-input-group input::placeholder {
+            color: #4a6a8a;
+            font-weight: 400;
+            font-size: 14px;
+        }
+
         .btn {
-            padding: 12px 24px;
+            padding: 14px 24px;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-weight: 600;
+            font-size: 15px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 14px;
+            white-space: nowrap;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
         }
 
         .btn-primary {
@@ -285,8 +174,6 @@
 
         .btn-primary:hover {
             background: #6ab4ff;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(74, 158, 255, 0.3);
         }
 
         .btn-success {
@@ -296,7 +183,6 @@
 
         .btn-success:hover {
             background: #66e89a;
-            transform: translateY(-2px);
         }
 
         .btn-danger {
@@ -306,7 +192,6 @@
 
         .btn-danger:hover {
             background: #ff6666;
-            transform: translateY(-2px);
         }
 
         .btn-secondary {
@@ -319,62 +204,120 @@
             color: white;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
+        .btn-sm {
+            padding: 10px 16px;
+            font-size: 13px;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
         }
 
         .btn-group {
             display: flex;
             gap: 10px;
+            margin-top: 10px;
             flex-wrap: wrap;
         }
 
-        .control-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+        .btn-group .btn {
+            flex: 1;
+            justify-content: center;
         }
 
-        .control-btn {
-            padding: 12px;
-            background: #0a1a3a;
-            border: 1px solid #2a4a7a;
-            border-radius: 8px;
-            color: #a0b4d6;
-            cursor: pointer;
-            transition: 0.3s;
+        /* Video */
+        .video-wrapper {
+            background: #0a0a1a;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #1a2a4a;
+            margin: 14px 0;
+            position: relative;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            display: none;
+            background: #0a0a1a;
+        }
+
+        .placeholder {
+            color: #4a6a8a;
             text-align: center;
+            padding: 40px 20px;
+        }
+
+        .placeholder i {
+            font-size: 48px;
+            color: #2a4a7a;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .placeholder h3 {
+            color: #8ab4e6;
+            font-size: 16px;
+            margin-bottom: 6px;
+        }
+
+        .placeholder p {
             font-size: 13px;
         }
 
-        .control-btn i {
+        /* Controles rápidos */
+        .quick-controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .quick-controls .btn {
+            justify-content: center;
+            padding: 12px 8px;
+            font-size: 13px;
+            background: #1a2a4a;
+            color: #a0b4d6;
+            border: 1px solid #2a4a7a;
+            border-radius: 10px;
+        }
+
+        .quick-controls .btn:active {
+            background: #2a4a7a;
+        }
+
+        .quick-controls .btn i {
+            font-size: 18px;
             display: block;
-            font-size: 20px;
             margin-bottom: 4px;
         }
 
-        .control-btn:hover {
-            background: #1a2a5a;
-            border-color: #4a9eff;
+        .quick-controls .btn-primary {
+            background: #4a9eff;
             color: white;
-        }
-
-        .control-btn.active {
-            background: #2a4a7a;
             border-color: #4a9eff;
-            color: #4a9eff;
         }
 
+        .quick-controls .btn-danger {
+            background: #ff4444;
+            color: white;
+            border-color: #ff4444;
+        }
+
+        /* Chat */
         .chat-box {
             background: #0a1a3a;
-            border-radius: 10px;
-            padding: 12px;
-            height: 120px;
+            border-radius: 12px;
+            padding: 10px;
+            height: 100px;
             overflow-y: auto;
-            margin-bottom: 10px;
             border: 1px solid #1a2a4a;
+            margin: 10px 0;
         }
 
         .chat-message {
@@ -382,6 +325,10 @@
             padding: 4px 0;
             font-size: 13px;
             border-bottom: 1px solid #0d1b3e;
+        }
+
+        .chat-message:last-child {
+            border-bottom: none;
         }
 
         .chat-message .sender {
@@ -396,11 +343,12 @@
 
         .chat-input-group input {
             flex: 1;
-            padding: 10px 14px;
+            padding: 12px 16px;
             background: #0a1a3a;
             border: 1px solid #2a4a7a;
-            border-radius: 8px;
+            border-radius: 10px;
             color: white;
+            font-size: 14px;
             outline: none;
         }
 
@@ -408,285 +356,318 @@
             border-color: #4a9eff;
         }
 
-        /* Mouse position indicator */
-        .mouse-indicator {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            border: 2px solid #4a9eff;
-            border-radius: 50%;
-            pointer-events: none;
-            display: none;
-            z-index: 10;
+        .chat-input-group .btn {
+            padding: 12px 18px;
+        }
+
+        /* Info */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: #0a1a3a;
+            border-radius: 12px;
+            border: 1px solid #1a2a4a;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 13px;
+            color: #6a8aaa;
+        }
+
+        .info-bar .id-value {
+            color: #4a9eff;
+            font-weight: 600;
+            cursor: pointer;
+            word-break: break-all;
+        }
+
+        .info-bar .id-value:active {
+            opacity: 0.7;
+        }
+
+        .info-bar .badge {
+            background: #1a2a5a;
+            padding: 4px 14px;
+            border-radius: 20px;
+            color: #8ab4e6;
+            font-size: 12px;
+        }
+
+        .tip {
+            background: #1a2a4a;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            color: #8ab4e6;
+            border-left: 4px solid #4a9eff;
+            margin-top: 12px;
+        }
+
+        .tip code {
+            background: #0a1a3a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #4a9eff;
         }
 
         /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 12px;
-            }
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .connection-status {
-                flex-wrap: wrap;
-            }
-            .peer-input-group {
-                flex-direction: column;
-            }
-            .control-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        @media (max-width: 600px) {
+            .container { padding: 14px; }
+            .id-input-group { flex-direction: column; }
+            .btn-group .btn { flex: 1 1 100%; }
+            .quick-controls { grid-template-columns: repeat(3, 1fr); }
+            .header { flex-direction: column; align-items: stretch; }
+            .status-badge { justify-content: center; }
+        }
+
+        @media (max-width: 400px) {
+            .quick-controls { grid-template-columns: repeat(2, 1fr); }
+            .logo { font-size: 17px; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Header -->
+    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="logo">
             <i class="fas fa-desktop"></i>
-            <h1>Any<span>Desk</span> <span style="font-size: 14px; color: #4a6a8a;">· Escritorio Remoto</span></h1>
+            <span>Any<span>Desk</span></span>
+            <span style="font-size:12px;color:#4a6a8a;font-weight:400;">IDs cortos</span>
         </div>
-        <div class="connection-status">
-            <div class="status-indicator">
-                <span class="status-dot" id="statusDot"></span>
-                <span id="statusText">Desconectado</span>
-            </div>
-            <div class="peer-id-box" onclick="copyPeerId()">
-                <i class="fas fa-id-card"></i> <span id="myPeerId">Cargando...</span>
-            </div>
+        <div class="status-badge">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Desconectado</span>
         </div>
     </div>
 
-    <!-- Main Grid -->
-    <div class="main-grid">
-        <!-- Remote Screen -->
-        <div class="remote-screen">
-            <div class="screen-header">
-                <div class="screen-title">
-                    <i class="fas fa-monitor"></i>
-                    <span id="remoteName">Pantalla remota</span>
-                </div>
-                <div class="screen-controls">
-                    <button onclick="toggleFullscreen()"><i class="fas fa-expand"></i> Pantalla completa</button>
-                    <button class="danger" onclick="disconnect()"><i class="fas fa-power-off"></i> Desconectar</button>
-                </div>
-            </div>
-            <div class="screen-display" id="screenDisplay">
-                <div class="screen-placeholder" id="placeholder">
-                    <i class="fas fa-wifi"></i>
-                    <h3>Esperando conexión...</h3>
-                    <p style="color: #4a6a8a; font-size: 14px;">Comparte tu ID para recibir una conexión</p>
-                </div>
-                <video id="remoteVideo" autoplay playsinline></video>
-                <div class="mouse-indicator" id="mouseIndicator"></div>
-            </div>
+    <!-- ===== TU ID ===== -->
+    <div class="id-card">
+        <label><i class="fas fa-id-card"></i> TU ID (elige uno corto)</label>
+        <div class="id-input-group">
+            <input type="text" id="myIdInput" placeholder="ej: casa, ofi, pc01" value="casa-123">
+            <button class="btn btn-primary" onclick="startWithId()">
+                <i class="fas fa-play"></i> Iniciar
+            </button>
         </div>
-
-        <!-- Controls Panel -->
-        <div class="controls-panel">
-            <!-- Conexión -->
-            <div class="panel-section">
-                <h3><i class="fas fa-plug"></i> Conexión</h3>
-                <div class="peer-input-group">
-                    <input type="text" id="remotePeerId" placeholder="ID remoto" value="">
-                    <button class="btn btn-primary" onclick="connectToPeer()">
-                        <i class="fas fa-arrow-right"></i> Conectar
-                    </button>
-                </div>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn btn-secondary" onclick="copyPeerId()" style="flex:1;">
-                        <i class="fas fa-copy"></i> Copiar mi ID
-                    </button>
-                    <button class="btn btn-secondary" onclick="generateNewId()" style="flex:1;">
-                        <i class="fas fa-sync"></i> Nuevo ID
-                    </button>
-                </div>
-            </div>
-
-            <!-- Controles remotos -->
-            <div class="panel-section">
-                <h3><i class="fas fa-mouse-pointer"></i> Controles remotos</h3>
-                <div class="control-grid">
-                    <div class="control-btn" onclick="sendKey('ctrl')">
-                        <i class="fas fa-keyboard"></i> Ctrl
-                    </div>
-                    <div class="control-btn" onclick="sendKey('alt')">
-                        <i class="fas fa-keyboard"></i> Alt
-                    </div>
-                    <div class="control-btn" onclick="sendKey('shift')">
-                        <i class="fas fa-keyboard"></i> Shift
-                    </div>
-                    <div class="control-btn" onclick="sendKey('esc')">
-                        <i class="fas fa-times"></i> Esc
-                    </div>
-                    <div class="control-btn" onclick="sendKey('tab')">
-                        <i class="fas fa-arrow-right"></i> Tab
-                    </div>
-                    <div class="control-btn" onclick="sendKey('win')">
-                        <i class="fab fa-windows"></i> Win
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat -->
-            <div class="panel-section">
-                <h3><i class="fas fa-comment"></i> Chat</h3>
-                <div class="chat-box" id="chatBox">
-                    <div class="chat-message"><span class="sender">Sistema:</span> Conéctate para chatear</div>
-                </div>
-                <div class="chat-input-group">
-                    <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendMessage()">
-                    <button class="btn btn-primary" onclick="sendMessage()">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Estado -->
-            <div class="panel-section" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #1a2a4a;">
-                <div style="display: flex; justify-content: space-between; color: #6a8aaa; font-size: 12px;">
-                    <span><i class="fas fa-shield-alt"></i> Conexión cifrada</span>
-                    <span id="connectionInfo">Esperando conexión...</span>
-                </div>
-            </div>
+        <div class="btn-group">
+            <button class="btn btn-secondary btn-sm" onclick="generateRandomId()">
+                <i class="fas fa-random"></i> Aleatorio
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="copyMyId()">
+                <i class="fas fa-copy"></i> Copiar ID
+            </button>
         </div>
+    </div>
+
+    <!-- ===== CONECTAR A OTRO ===== -->
+    <div class="id-card">
+        <label><i class="fas fa-plug"></i> CONECTAR A ID REMOTO</label>
+        <div class="id-input-group">
+            <input type="text" id="remoteIdInput" placeholder="ID de la otra persona" value="">
+            <button class="btn btn-success" onclick="connectToRemote()">
+                <i class="fas fa-arrow-right"></i> Conectar
+            </button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-danger btn-sm" onclick="disconnectEverything()">
+                <i class="fas fa-power-off"></i> Desconectar
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== VIDEO ===== -->
+    <div class="video-wrapper" id="videoWrapper">
+        <div class="placeholder" id="placeholder">
+            <i class="fas fa-wifi"></i>
+            <h3>Esperando conexión...</h3>
+            <p>Comparte tu ID para recibir una conexión</p>
+        </div>
+        <video id="remoteVideo" autoplay playsinline></video>
+    </div>
+
+    <!-- ===== CONTROLES RÁPIDOS ===== -->
+    <div class="quick-controls">
+        <button class="btn" onclick="sendKey('ctrl')">
+            <i class="fas fa-keyboard"></i> Ctrl
+        </button>
+        <button class="btn" onclick="sendKey('alt')">
+            <i class="fas fa-keyboard"></i> Alt
+        </button>
+        <button class="btn" onclick="sendKey('shift')">
+            <i class="fas fa-keyboard"></i> Shift
+        </button>
+        <button class="btn" onclick="sendKey('esc')">
+            <i class="fas fa-times"></i> Esc
+        </button>
+        <button class="btn btn-primary" onclick="toggleFullscreen()">
+            <i class="fas fa-expand"></i> Full
+        </button>
+        <button class="btn btn-danger" onclick="disconnectEverything()">
+            <i class="fas fa-power-off"></i> Salir
+        </button>
+    </div>
+
+    <!-- ===== CHAT ===== -->
+    <div class="chat-box" id="chatBox">
+        <div class="chat-message"><span class="sender">Sistema:</span> Conéctate para chatear</div>
+    </div>
+    <div class="chat-input-group">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <!-- ===== INFO ===== -->
+    <div class="info-bar">
+        <span><i class="fas fa-id-card"></i> Mi ID: <span class="id-value" id="displayMyId" onclick="copyMyId()">---</span></span>
+        <span class="badge" id="connectionBadge">🔒 Desconectado</span>
+    </div>
+
+    <!-- ===== TIP ===== -->
+    <div class="tip">
+        💡 <strong>IDs cortos:</strong> Usa palabras fáciles como <code>casa</code>, <code>ofi</code>, <code>pc01</code>.
+        Quien da su ID, <strong>comparte su pantalla</strong>. Quien conecta, <strong>ve la pantalla</strong> del otro.
     </div>
 </div>
 
 <script>
-    // =============================================
-    // PEERJS CONFIGURACIÓN (Servidor gratuito)
-    // =============================================
-    const peer = new Peer(undefined, {
-        host: '0.peerjs.com',
-        port: 443,
-        path: '/',
-        secure: true,
-        config: {
-            'iceServers': [
-                { urls: 'stun:stun.l.google.com:19302' }
-            ]
-        }
-    });
-
-    let remotePeerId = null;
+    // ============================================================
+    //  CONFIGURACIÓN
+    // ============================================================
+    let peer = null;
     let conn = null;
     let call = null;
     let isConnected = false;
-    let localStream = null;
-    let remoteStream = null;
+    let myPeerId = null;
 
-    // Elementos DOM
-    const statusDot = document.getElementById('statusDot');
-    const statusText = document.getElementById('statusText');
-    const myPeerIdEl = document.getElementById('myPeerId');
-    const remotePeerIdInput = document.getElementById('remotePeerId');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const placeholder = document.getElementById('placeholder');
-    const screenDisplay = document.getElementById('screenDisplay');
-    const remoteName = document.getElementById('remoteName');
-    const mouseIndicator = document.getElementById('mouseIndicator');
-    const chatBox = document.getElementById('chatBox');
-    const chatInput = document.getElementById('chatInput');
-    const connectionInfo = document.getElementById('connectionInfo');
-
-    // =============================================
-    // EVENTOS PEER
-    // =============================================
-    peer.on('open', (id) => {
-        myPeerIdEl.textContent = id;
-        updateStatus('disconnected', 'Esperando conexión');
-        connectionInfo.textContent = 'ID: ' + id;
-        console.log('Mi ID:', id);
-        
-        // Si hay URL con parámetro ?connect=ID, conectar automáticamente
-        const params = new URLSearchParams(window.location.search);
-        const autoConnect = params.get('connect');
-        if (autoConnect) {
-            remotePeerIdInput.value = autoConnect;
-            setTimeout(connectToPeer, 500);
-        }
-    });
-
-    peer.on('error', (err) => {
-        console.error('Peer error:', err);
-        if (err.type === 'peer-unavailable') {
-            addChatMessage('Sistema', 'ID remoto no disponible');
-            updateStatus('disconnected', 'Error de conexión');
-        }
-    });
-
-    // =============================================
-    // CONEXIÓN ENTRANTE (data + video)
-    // =============================================
-    peer.on('connection', (incomingConn) => {
-        if (conn) {
-            incomingConn.close();
-            return;
-        }
-        conn = incomingConn;
-        remotePeerId = conn.peer;
-        setupConnection(conn);
-    });
-
-    peer.on('call', (incomingCall) => {
-        if (call) {
-            incomingCall.answer();
-            incomingCall.close();
-            return;
-        }
-        
-        // Pedir permisos de cámara/screen
-        navigator.mediaDevices.getDisplayMedia({
-            video: {
-                cursor: 'always',
-                frameRate: 30
-            },
-            audio: true
-        }).then((stream) => {
-            localStream = stream;
-            incomingCall.answer(stream);
-            setupCall(incomingCall);
-        }).catch((err) => {
-            console.error('Error al compartir pantalla:', err);
-            addChatMessage('Sistema', 'No se pudo compartir pantalla');
-        });
-    });
-
-    // =============================================
-    // CONEXIÓN SALIENTE
-    // =============================================
-    function connectToPeer() {
-        const id = remotePeerIdInput.value.trim();
+    // ============================================================
+    //  INICIAR CON ID PERSONALIZADO
+    // ============================================================
+    function startWithId() {
+        const id = document.getElementById('myIdInput').value.trim();
         if (!id) {
-            addChatMessage('Sistema', 'Introduce un ID válido');
+            alert('Elige un ID corto (ej: casa, oficina, pc01)');
+            return;
+        }
+
+        // Cerrar conexión anterior
+        if (peer) {
+            peer.destroy();
+            peer = null;
+        }
+
+        // Crear nuevo peer con ID personalizado
+        peer = new Peer(id, {
+            host: '0.peerjs.com',
+            port: 443,
+            path: '/',
+            secure: true,
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
+                ]
+            }
+        });
+
+        peer.on('open', (peerId) => {
+            myPeerId = peerId;
+            document.getElementById('displayMyId').textContent = peerId;
+            updateStatus(true, `Conectado: ${peerId}`);
+            document.getElementById('connectionBadge').textContent = '🟢 En línea';
+            addChatMessage('Sistema', `✅ ID "${peerId}" activo. Compártelo para que te vean.`);
+        });
+
+        peer.on('error', (err) => {
+            console.error('Error:', err);
+            if (err.type === 'unavailable-id') {
+                alert(`❌ El ID "${id}" ya está en uso. Elige otro.`);
+                updateStatus(false, 'ID en uso');
+            } else {
+                alert('Error de conexión: ' + err.message);
+                updateStatus(false, 'Error');
+            }
+        });
+
+        // Escuchar conexiones entrantes (data)
+        peer.on('connection', (incomingConn) => {
+            if (conn) {
+                incomingConn.close();
+                return;
+            }
+            conn = incomingConn;
+            setupDataConnection(conn);
+        });
+
+        // Escuchar llamadas entrantes (video)
+        peer.on('call', (incomingCall) => {
+            if (call) {
+                incomingCall.answer();
+                incomingCall.close();
+                return;
+            }
+
+            // Compartir pantalla al recibir llamada
+            navigator.mediaDevices.getDisplayMedia({
+                video: {
+                    cursor: 'always',
+                    frameRate: 30
+                },
+                audio: true
+            }).then((stream) => {
+                incomingCall.answer(stream);
+                setupCall(incomingCall);
+                addChatMessage('Sistema', '📺 Compartiendo pantalla...');
+            }).catch((err) => {
+                console.error('Error al compartir:', err);
+                addChatMessage('Sistema', '❌ Error al compartir pantalla');
+                incomingCall.answer(); // Responder sin video
+                incomingCall.close();
+            });
+        });
+    }
+
+    // ============================================================
+    //  CONECTAR A ID REMOTO
+    // ============================================================
+    function connectToRemote() {
+        const remoteId = document.getElementById('remoteIdInput').value.trim();
+        if (!remoteId) {
+            alert('Escribe el ID remoto (ej: casa, oficina)');
+            return;
+        }
+
+        if (!peer) {
+            alert('Primero inicia sesión con tu ID');
             return;
         }
 
         if (isConnected) {
-            disconnect();
-            setTimeout(() => connectToPeer(), 300);
+            disconnectEverything();
+            setTimeout(() => connectToRemote(), 300);
             return;
         }
 
+        addChatMessage('Sistema', `🔗 Conectando a "${remoteId}"...`);
+
         // Conectar data channel
-        const newConn = peer.connect(id);
-        newConn.on('open', () => {
-            conn = newConn;
-            remotePeerId = id;
-            setupConnection(conn);
+        conn = peer.connect(remoteId);
+        conn.on('open', () => {
+            setupDataConnection(conn);
         });
 
-        newConn.on('error', (err) => {
+        conn.on('error', (err) => {
             console.error('Error de conexión:', err);
-            addChatMessage('Sistema', 'Error al conectar con ' + id);
+            addChatMessage('Sistema', `❌ Error al conectar con "${remoteId}"`);
+            updateStatus(false, 'Error de conexión');
         });
 
-        // También llamada de video
+        // Llamada de video
         navigator.mediaDevices.getDisplayMedia({
             video: {
                 cursor: 'always',
@@ -694,85 +675,74 @@
             },
             audio: true
         }).then((stream) => {
-            localStream = stream;
-            const newCall = peer.call(id, stream);
-            setupCall(newCall);
+            call = peer.call(remoteId, stream);
+            setupCall(call);
+            addChatMessage('Sistema', '📺 Compartiendo pantalla...');
         }).catch((err) => {
-            console.error('Error al compartir pantalla:', err);
-            addChatMessage('Sistema', 'No se pudo compartir pantalla');
+            console.error('Error al compartir:', err);
+            addChatMessage('Sistema', '❌ Error al compartir pantalla');
         });
-
-        remoteName.textContent = 'Conectando a ' + id + '...';
     }
 
-    // =============================================
-    // SETUP CONEXIÓN
-    // =============================================
-    function setupConnection(connection) {
+    // ============================================================
+    //  SETUP CONEXIONES
+    // ============================================================
+    function setupDataConnection(connection) {
         conn = connection;
-        remotePeerId = connection.peer;
         isConnected = true;
+        updateStatus(true, `Conectado a ${conn.peer}`);
+        document.getElementById('connectionBadge').textContent = `🔗 Conectado a ${conn.peer}`;
+        addChatMessage('Sistema', `✅ Conectado a "${conn.peer}"`);
 
-        updateStatus('connected', 'Conectado a ' + remotePeerId);
-        connectionInfo.textContent = 'Conectado a: ' + remotePeerId;
-        remoteName.textContent = 'Escritorio: ' + remotePeerId;
-        placeholder.style.display = 'none';
-
-        // Escuchar mensajes
         conn.on('data', (data) => {
-            handleData(data);
+            if (data.type === 'chat') {
+                addChatMessage('Remoto', data.data);
+            } else if (data.type === 'key') {
+                addChatMessage('Sistema', `⌨️ Tecla remota: ${data.data}`);
+            }
         });
 
         conn.on('close', () => {
-            disconnect();
+            addChatMessage('Sistema', '⛔ El otro usuario se desconectó');
+            disconnectEverything();
         });
-
-        addChatMessage('Sistema', 'Conectado a ' + remotePeerId);
-        
-        // Si estamos recibiendo, también mostramos su ID
-        if (remotePeerIdInput.value !== remotePeerId) {
-            remotePeerIdInput.value = remotePeerId;
-        }
     }
 
     function setupCall(incomingCall) {
         call = incomingCall;
-        
+
         incomingCall.on('stream', (stream) => {
-            remoteStream = stream;
-            remoteVideo.srcObject = stream;
-            remoteVideo.style.display = 'block';
-            placeholder.style.display = 'none';
-            addChatMessage('Sistema', 'Stream de video recibido');
-            
-            // Mostrar indicador de mouse si es posible
-            setupMouseTracking();
+            const video = document.getElementById('remoteVideo');
+            video.srcObject = stream;
+            video.style.display = 'block';
+            document.getElementById('placeholder').style.display = 'none';
+            addChatMessage('Sistema', '📺 Video recibido');
         });
 
         incomingCall.on('close', () => {
-            disconnect();
+            addChatMessage('Sistema', '⛔ Transmisión de video terminada');
+            const video = document.getElementById('remoteVideo');
+            video.style.display = 'none';
+            video.srcObject = null;
+            document.getElementById('placeholder').style.display = 'block';
         });
 
         incomingCall.on('error', (err) => {
             console.error('Call error:', err);
-            disconnect();
+            disconnectEverything();
         });
     }
 
-    // =============================================
-    // ENVÍO DE DATOS (control remoto)
-    // =============================================
+    // ============================================================
+    //  ENVIAR DATOS
+    // ============================================================
     function sendData(type, data) {
         if (!conn || !isConnected) {
-            console.warn('No conectado');
+            addChatMessage('Sistema', '⚠️ No estás conectado');
             return false;
         }
         try {
-            conn.send({
-                type: type,
-                data: data,
-                timestamp: Date.now()
-            });
+            conn.send({ type: type, data: data });
             return true;
         } catch (e) {
             console.error('Error al enviar:', e);
@@ -780,85 +750,44 @@
         }
     }
 
-    function handleData(data) {
-        console.log('Datos recibidos:', data);
-        
-        if (data.type === 'chat') {
-            addChatMessage('Remoto', data.data);
-        } else if (data.type === 'mouse') {
-            // Simular movimiento de mouse en pantalla remota
-            if (data.data.x !== undefined && data.data.y !== undefined) {
-                const rect = screenDisplay.getBoundingClientRect();
-                const x = rect.left + (data.data.x * rect.width / 100);
-                const y = rect.top + (data.data.y * rect.height / 100);
-                mouseIndicator.style.left = (x - 10) + 'px';
-                mouseIndicator.style.top = (y - 10) + 'px';
-                mouseIndicator.style.display = 'block';
-                setTimeout(() => {
-                    mouseIndicator.style.display = 'none';
-                }, 300);
-            }
-        } else if (data.type === 'key') {
-            addChatMessage('Sistema', 'Tecla: ' + data.data);
-        }
-    }
-
-    // =============================================
-    // CONTROLES REMOTOS
-    // =============================================
     function sendKey(key) {
         if (!isConnected) {
-            addChatMessage('Sistema', 'No estás conectado');
+            addChatMessage('Sistema', '⚠️ Conéctate primero');
             return;
         }
         sendData('key', key);
-        addChatMessage('Tú', 'Tecla: ' + key);
+        addChatMessage('Tú', `⌨️ Tecla: ${key}`);
     }
 
-    // Seguimiento de mouse (para enviar posición)
-    function setupMouseTracking() {
-        screenDisplay.addEventListener('mousemove', (e) => {
-            if (!isConnected || !conn) return;
-            const rect = screenDisplay.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-            sendData('mouse', { x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
-        });
-    }
-
-    // =============================================
-    // CHAT
-    // =============================================
-    function sendMessage() {
-        const msg = chatInput.value.trim();
+    function sendChat() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
         if (!msg) return;
         if (!isConnected) {
-            addChatMessage('Sistema', 'No estás conectado');
-            chatInput.value = '';
+            addChatMessage('Sistema', '⚠️ Conéctate primero');
+            input.value = '';
             return;
         }
         sendData('chat', msg);
         addChatMessage('Tú', msg);
-        chatInput.value = '';
+        input.value = '';
     }
 
-    function addChatMessage(sender, message) {
-        const div = document.createElement('div');
-        div.className = 'chat-message';
-        div.innerHTML = `<span class="sender">${sender}:</span> ${message}`;
-        chatBox.appendChild(div);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    // ============================================================
+    //  UTILIDADES
+    // ============================================================
+    function updateStatus(connected, text) {
+        const dot = document.getElementById('statusDot');
+        const label = document.getElementById('statusText');
+        if (connected) {
+            dot.className = 'status-dot connected';
+        } else {
+            dot.className = 'status-dot';
+        }
+        label.textContent = text;
     }
 
-    // =============================================
-    // UTILIDADES
-    // =============================================
-    function updateStatus(state, text) {
-        statusDot.className = 'status-dot' + (state === 'connected' ? ' connected' : '');
-        statusText.textContent = text;
-    }
-
-    function disconnect() {
+    function disconnectEverything() {
         if (call) {
             call.close();
             call = null;
@@ -867,31 +796,29 @@
             conn.close();
             conn = null;
         }
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-        if (remoteStream) {
-            remoteStream.getTracks().forEach(track => track.stop());
-            remoteStream = null;
-        }
-        
-        remoteVideo.style.display = 'none';
-        remoteVideo.srcObject = null;
-        placeholder.style.display = 'flex';
         isConnected = false;
-        updateStatus('disconnected', 'Desconectado');
-        connectionInfo.textContent = 'Esperando conexión...';
-        remoteName.textContent = 'Pantalla remota';
-        mouseIndicator.style.display = 'none';
-        addChatMessage('Sistema', 'Desconectado');
+        const video = document.getElementById('remoteVideo');
+        video.style.display = 'none';
+        video.srcObject = null;
+        document.getElementById('placeholder').style.display = 'block';
+        updateStatus(false, 'Desconectado');
+        document.getElementById('connectionBadge').textContent = '🔒 Desconectado';
+        addChatMessage('Sistema', '⛔ Desconectado');
     }
 
-    function copyPeerId() {
-        const id = myPeerIdEl.textContent;
-        if (id && id !== 'Cargando...') {
+    function generateRandomId() {
+        const palabras = ['casa', 'ofi', 'pc', 'lab', 'home', 'work', 'server', 'laptop', 'escritorio', 'movil'];
+        const num = Math.floor(Math.random() * 1000);
+        const id = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
+        document.getElementById('myIdInput').value = id;
+        addChatMessage('Sistema', `🎲 ID sugerido: ${id}`);
+    }
+
+    function copyMyId() {
+        const id = document.getElementById('displayMyId').textContent;
+        if (id && id !== '---') {
             navigator.clipboard.writeText(id).then(() => {
-                addChatMessage('Sistema', 'ID copiado: ' + id);
+                addChatMessage('Sistema', `📋 ID "${id}" copiado al portapapeles`);
             }).catch(() => {
                 // Fallback
                 const input = document.createElement('input');
@@ -900,54 +827,48 @@
                 input.select();
                 document.execCommand('copy');
                 document.body.removeChild(input);
-                addChatMessage('Sistema', 'ID copiado: ' + id);
+                addChatMessage('Sistema', `📋 ID "${id}" copiado`);
             });
         }
     }
 
-    function generateNewId() {
-        if (isConnected) {
-            disconnect();
-        }
-        // Reiniciar Peer
-        peer.destroy();
-        location.reload();
-    }
-
     function toggleFullscreen() {
-        const el = document.querySelector('.container');
+        const container = document.querySelector('.container');
         if (!document.fullscreenElement) {
-            el.requestFullscreen().catch(err => {
-                console.log('Error al entrar en pantalla completa:', err);
+            container.requestFullscreen().catch(err => {
+                console.log('Error al entrar en fullscreen:', err);
             });
         } else {
             document.exitFullscreen();
         }
     }
 
-    // =============================================
-    // INICIALIZACIÓN
-    // =============================================
-    console.log('AnyDesk Clone iniciado');
-    
-    // Si hay un ID en la URL, auto-conectar
-    const params = new URLSearchParams(window.location.search);
-    const autoConnect = params.get('connect');
-    if (autoConnect) {
-        remotePeerIdInput.value = autoConnect;
+    function addChatMessage(sender, message) {
+        const chatBox = document.getElementById('chatBox');
+        const div = document.createElement('div');
+        div.className = 'chat-message';
+        div.innerHTML = `<span class="sender">${sender}:</span> ${message}`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // Atajo de teclado para enviar mensaje
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && document.fullscreenElement) {
-            document.exitFullscreen();
-        }
-    });
+    // ============================================================
+    //  AUTO INICIO AL CARGAR
+    // ============================================================
+    window.onload = function() {
+        // Generar ID aleatorio por defecto
+        const palabras = ['casa', 'ofi', 'pc', 'lab', 'home'];
+        const num = Math.floor(Math.random() * 1000);
+        document.getElementById('myIdInput').value = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
+        
+        // Iniciar automáticamente
+        setTimeout(startWithId, 500);
+    };
 
     // Prevenir cierre accidental
     window.addEventListener('beforeunload', () => {
         if (isConnected) {
-            disconnect();
+            disconnectEverything();
         }
     });
 </script>
