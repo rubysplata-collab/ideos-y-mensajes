@@ -3,32 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Compartir Pantalla Fácil</title>
+    <title>EasyDesk · Compartir Pantalla Fácil</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
         body {
-            background: #f0f2f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 20px;
         }
 
         .app {
-            max-width: 500px;
+            max-width: 480px;
             width: 100%;
             background: white;
             border-radius: 30px;
             padding: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
 
         /* Header */
@@ -37,15 +37,17 @@
             margin-bottom: 24px;
         }
 
-        .header .icon {
-            font-size: 48px;
-            margin-bottom: 8px;
+        .header .logo {
+            font-size: 56px;
+            margin-bottom: 4px;
         }
 
         .header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a1a2e;
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .header p {
@@ -54,106 +56,101 @@
             margin-top: 4px;
         }
 
-        .status-badge {
-            display: inline-flex;
+        /* Status */
+        .status-bar {
+            display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 8px;
-            padding: 6px 16px;
+            gap: 12px;
+            padding: 8px 16px;
+            background: #f3f4f6;
             border-radius: 30px;
-            font-size: 13px;
+            margin: 12px 0 20px;
+            font-size: 14px;
             font-weight: 500;
-            margin-top: 8px;
-        }
-
-        .status-badge.online {
-            background: #dcfce7;
-            color: #16a34a;
-        }
-
-        .status-badge.offline {
-            background: #fee2e2;
-            color: #dc2626;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             display: inline-block;
+            animation: pulse 2s infinite;
         }
 
-        .status-dot.online {
-            background: #22c55e;
-        }
+        .status-dot.online { background: #10b981; }
+        .status-dot.offline { background: #ef4444; animation: none; }
 
-        .status-dot.offline {
-            background: #ef4444;
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
         }
 
         /* Cards */
         .card {
-            background: #f8fafc;
+            background: #f9fafb;
             border-radius: 16px;
             padding: 16px;
-            margin-bottom: 16px;
-            border: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+            border: 2px solid #e5e7eb;
+            transition: 0.3s;
+        }
+
+        .card:focus-within {
+            border-color: #667eea;
         }
 
         .card label {
             display: block;
             font-size: 13px;
             font-weight: 600;
-            color: #475569;
+            color: #374151;
             margin-bottom: 8px;
         }
 
-        .card label .emoji {
-            margin-right: 6px;
-        }
-
-        .input-row {
+        .input-group {
             display: flex;
             gap: 10px;
         }
 
-        .input-row input {
+        .input-group input {
             flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
             border-radius: 12px;
             font-size: 16px;
             font-weight: 600;
             text-align: center;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
             background: white;
             transition: 0.2s;
             outline: none;
-            color: #1a1a2e;
+            color: #1f2937;
         }
 
-        .input-row input:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        .input-group input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
         }
 
-        .input-row input::placeholder {
-            color: #94a3b8;
+        .input-group input::placeholder {
+            color: #9ca3af;
             font-weight: 400;
             font-size: 14px;
         }
 
         .btn {
-            padding: 12px 20px;
+            padding: 14px 24px;
             border: none;
             border-radius: 12px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 15px;
             cursor: pointer;
             transition: 0.2s;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            white-space: nowrap;
+            gap: 8px;
+            justify-content: center;
             touch-action: manipulation;
         }
 
@@ -161,40 +158,42 @@
             transform: scale(0.96);
         }
 
-        .btn-blue {
-            background: #3b82f6;
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
 
-        .btn-blue:hover {
-            background: #2563eb;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
-        .btn-green {
-            background: #22c55e;
+        .btn-success {
+            background: #10b981;
             color: white;
         }
 
-        .btn-green:hover {
-            background: #16a34a;
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
         }
 
-        .btn-red {
+        .btn-danger {
             background: #ef4444;
             color: white;
         }
 
-        .btn-red:hover {
+        .btn-danger:hover {
             background: #dc2626;
         }
 
         .btn-gray {
-            background: #e2e8f0;
-            color: #475569;
+            background: #e5e7eb;
+            color: #4b5563;
         }
 
         .btn-gray:hover {
-            background: #cbd5e1;
+            background: #d1d5db;
         }
 
         .btn-sm {
@@ -204,7 +203,6 @@
 
         .btn-block {
             width: 100%;
-            justify-content: center;
         }
 
         .btn-group {
@@ -215,42 +213,41 @@
 
         .btn-group .btn {
             flex: 1;
-            justify-content: center;
         }
 
         /* Video */
-        .video-box {
-            background: #0f172a;
+        .video-container {
+            background: #111827;
             border-radius: 16px;
             overflow: hidden;
             margin: 16px 0;
-            min-height: 200px;
+            min-height: 220px;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
         }
 
-        .video-box video {
+        .video-container video {
             width: 100%;
             display: none;
         }
 
         .placeholder {
-            color: #64748b;
+            color: #9ca3af;
             text-align: center;
-            padding: 32px 20px;
+            padding: 30px 20px;
         }
 
-        .placeholder .big-icon {
-            font-size: 40px;
+        .placeholder .icon {
+            font-size: 48px;
             display: block;
             margin-bottom: 10px;
         }
 
         .placeholder h3 {
-            color: #94a3b8;
+            color: #e5e7eb;
             font-size: 16px;
             font-weight: 500;
         }
@@ -260,7 +257,7 @@
             margin-top: 4px;
         }
 
-        /* Quick buttons */
+        /* Quick controls */
         .quick-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -269,40 +266,39 @@
         }
 
         .quick-grid .btn {
-            justify-content: center;
             padding: 10px 8px;
             font-size: 12px;
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            background: #f3f4f6;
+            color: #4b5563;
+            border: 1px solid #e5e7eb;
         }
 
         .quick-grid .btn:active {
-            background: #e2e8f0;
+            background: #e5e7eb;
         }
 
         .quick-grid .btn .icon {
             display: block;
-            font-size: 18px;
+            font-size: 20px;
             margin-bottom: 2px;
         }
 
         /* Chat */
         .chat-box {
-            background: #f1f5f9;
+            background: #f9fafb;
             border-radius: 12px;
             padding: 10px 12px;
             height: 80px;
             overflow-y: auto;
             margin: 10px 0;
-            border: 1px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
         }
 
         .chat-msg {
-            color: #475569;
+            color: #4b5563;
             padding: 3px 0;
             font-size: 13px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e5e7eb;
         }
 
         .chat-msg:last-child {
@@ -310,7 +306,7 @@
         }
 
         .chat-msg .who {
-            color: #3b82f6;
+            color: #667eea;
             font-weight: 600;
         }
 
@@ -322,7 +318,7 @@
         .chat-row input {
             flex: 1;
             padding: 10px 14px;
-            border: 2px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
             border-radius: 12px;
             font-size: 14px;
             outline: none;
@@ -330,32 +326,28 @@
         }
 
         .chat-row input:focus {
-            border-color: #3b82f6;
+            border-color: #667eea;
         }
 
-        .chat-row .btn {
-            padding: 10px 16px;
-        }
-
-        /* Footer info */
+        /* Info */
         .info-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 12px;
-            background: #f8fafc;
+            background: #f9fafb;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
+            border: 2px solid #e5e7eb;
             margin-top: 12px;
             font-size: 13px;
-            color: #64748b;
+            color: #6b7280;
             flex-wrap: wrap;
             gap: 6px;
         }
 
         .info-bar .id {
-            color: #3b82f6;
-            font-weight: 600;
+            color: #667eea;
+            font-weight: 700;
             cursor: pointer;
         }
 
@@ -364,32 +356,49 @@
         }
 
         .info-bar .tag {
-            background: #e2e8f0;
-            padding: 2px 12px;
+            background: #e5e7eb;
+            padding: 2px 14px;
             border-radius: 20px;
             font-size: 12px;
-            color: #475569;
+            font-weight: 600;
+            color: #4b5563;
         }
 
+        /* Tip */
         .tip {
-            background: #eff6ff;
+            background: linear-gradient(135deg, #eef2ff 0%, #ede9fe 100%);
             padding: 12px 16px;
             border-radius: 12px;
             font-size: 13px;
-            color: #1e40af;
-            border-left: 4px solid #3b82f6;
+            color: #4c1d95;
+            border-left: 4px solid #667eea;
             margin-top: 12px;
         }
 
         .tip strong {
-            color: #1e3a8a;
+            color: #1e1b4b;
+        }
+
+        /* Animación de carga */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #e5e7eb;
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* Responsive */
-        @media (max-width: 500px) {
+        @media (max-width: 480px) {
             .app { padding: 16px; }
             .quick-grid { grid-template-columns: repeat(3, 1fr); }
-            .input-row { flex-direction: column; }
+            .input-group { flex-direction: column; }
             .btn-group { flex-direction: column; }
         }
     </style>
@@ -397,53 +406,66 @@
 <body>
 
 <div class="app">
-    <!-- Header -->
+    <!-- ===== HEADER ===== -->
     <div class="header">
-        <div class="icon">🖥️</div>
-        <h1>Compartir Pantalla</h1>
-        <p>Conéctate con quien quieras</p>
-        <div class="status-badge offline" id="statusBadge">
-            <span class="status-dot offline" id="statusDot"></span>
-            <span id="statusText">Desconectado</span>
-        </div>
+        <div class="logo">🚀</div>
+        <h1>EasyDesk</h1>
+        <p>Comparte tu pantalla al instante</p>
     </div>
 
-    <!-- Mi ID -->
+    <!-- ===== STATUS ===== -->
+    <div class="status-bar" id="statusBar">
+        <span class="status-dot offline" id="statusDot"></span>
+        <span id="statusText">Desconectado</span>
+        <span id="statusExtra" style="color:#9ca3af;font-weight:400;"></span>
+    </div>
+
+    <!-- ===== TU CÓDIGO ===== -->
     <div class="card">
-        <label><span class="emoji">👤</span> Tu código (elige uno fácil)</label>
-        <div class="input-row">
-            <input type="text" id="myId" placeholder="ej: casa, juan, pc" value="casa-123">
-            <button class="btn btn-blue" onclick="startWithId()">▶ Iniciar</button>
+        <label>🔑 Tu código (elige uno fácil)</label>
+        <div class="input-group">
+            <input type="text" id="myId" placeholder="ej: casa-123, juan-pc" value="">
+            <button class="btn btn-primary" onclick="startWithId()">
+                ▶ Iniciar
+            </button>
         </div>
         <div class="btn-group">
-            <button class="btn btn-gray btn-sm" onclick="randomId()">🎲 Aleatorio</button>
-            <button class="btn btn-gray btn-sm" onclick="copyMyId()">📋 Copiar</button>
+            <button class="btn btn-gray btn-sm" onclick="generateRandomId()">
+                🎲 Aleatorio
+            </button>
+            <button class="btn btn-gray btn-sm" onclick="copyMyId()">
+                📋 Copiar
+            </button>
         </div>
     </div>
 
-    <!-- Conectar -->
+    <!-- ===== CONECTAR ===== -->
     <div class="card">
-        <label><span class="emoji">🔗</span> Conectar al código de otra persona</label>
-        <div class="input-row">
-            <input type="text" id="remoteId" placeholder="ej: casa, juan, pc">
-            <button class="btn btn-green" onclick="connectTo()">Conectar</button>
+        <label>🔗 Conectar al código de otra persona</label>
+        <div class="input-group">
+            <input type="text" id="remoteId" placeholder="Código de la otra persona">
+            <button class="btn btn-success" onclick="connectToPeer()">
+                Conectar
+            </button>
         </div>
         <div class="btn-group">
-            <button class="btn btn-red btn-sm" onclick="disconnectAll()">⛔ Desconectar</button>
+            <button class="btn btn-danger btn-sm" onclick="disconnectAll()">
+                ⛔ Desconectar
+            </button>
         </div>
     </div>
 
-    <!-- Video -->
-    <div class="video-box" id="videoBox">
+    <!-- ===== VIDEO ===== -->
+    <div class="video-container" id="videoContainer">
         <div class="placeholder" id="placeholder">
-            <span class="big-icon">📡</span>
+            <span class="icon">📡</span>
             <h3>Esperando conexión...</h3>
             <p>Comparte tu código para que te vean</p>
         </div>
         <video id="remoteVideo" autoplay playsinline></video>
     </div>
 
-    <!-- Controles rápidos -->
+    <!-- ===== CONTROLES ===== -->
     <div class="quick-grid">
         <button class="btn" onclick="sendKey('ctrl')">
             <span class="icon">⌨️</span> Ctrl
@@ -457,56 +479,69 @@
         <button class="btn" onclick="sendKey('esc')">
             <span class="icon">✖</span> Esc
         </button>
-        <button class="btn btn-blue" onclick="goFullscreen()">
+        <button class="btn btn-primary" onclick="goFullscreen()">
             <span class="icon">⛶</span> Full
         </button>
-        <button class="btn btn-red" onclick="disconnectAll()">
+        <button class="btn btn-danger" onclick="disconnectAll()">
             <span class="icon">⏻</span> Salir
         </button>
     </div>
 
-    <!-- Chat -->
+    <!-- ===== CHAT ===== -->
     <div class="chat-box" id="chatBox">
         <div class="chat-msg"><span class="who">💬</span> Conéctate para chatear</div>
     </div>
     <div class="chat-row">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendChat()">
-        <button class="btn btn-blue" onclick="sendChat()">📨</button>
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+        <button class="btn btn-primary" onclick="sendChatMessage()">📨</button>
     </div>
 
-    <!-- Info -->
+    <!-- ===== INFO ===== -->
     <div class="info-bar">
-        <span>Mi código: <span class="id" id="displayMyId" onclick="copyMyId()">---</span></span>
+        <span>🆔 Mi código: <span class="id" id="displayMyId" onclick="copyMyId()">---</span></span>
         <span class="tag" id="connectionTag">⚪ Desconectado</span>
     </div>
 
-    <!-- Tip -->
+    <!-- ===== TIP ===== -->
     <div class="tip">
-        💡 <strong>Fácil:</strong> Elige un código corto, compártelo y listo.
-        Quien da su código <strong>comparte su pantalla</strong>.
-        Quien conecta <strong>ve la pantalla</strong> del otro.
+        💡 <strong>¿Cómo funciona?</strong><br>
+        • Quien da su <strong>código</strong> → <strong>comparte</strong> su pantalla<br>
+        • Quien conecta al <strong>código</strong> → <strong>ve</strong> la pantalla del otro<br>
+        • Ambos deben hacer clic en <strong>"Iniciar"</strong> primero
     </div>
 </div>
 
 <script>
     // ============================================================
-    //  CONFIGURACIÓN
+    // CONFIGURACIÓN
     // ============================================================
     let peer = null;
     let conn = null;
     let call = null;
     let isConnected = false;
     let myPeerId = null;
+    let reconnectAttempts = 0;
+    let isStarting = false;
 
     // ============================================================
-    //  INICIAR CON ID
+    // INICIAR CON ID
     // ============================================================
     function startWithId() {
+        if (isStarting) return;
+        
         const id = document.getElementById('myId').value.trim();
         if (!id) {
-            alert('Elige un código fácil (ej: casa, juan, pc)');
+            showAlert('⚠️ Elige un código fácil (ej: casa-123, juan-pc)');
             return;
         }
+
+        if (!id.match(/^[a-zA-Z0-9\-_]+$/)) {
+            showAlert('⚠️ Usa solo letras, números, guiones y guiones bajos');
+            return;
+        }
+
+        isStarting = true;
+        document.getElementById('statusExtra').textContent = '🔄 Conectando...';
 
         if (peer) {
             peer.destroy();
@@ -518,9 +553,11 @@
             port: 443,
             path: '/',
             secure: true,
+            debug: 0,
             config: {
                 'iceServers': [
-                    { urls: 'stun:stun.l.google.com:19302' }
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' }
                 ]
             }
         });
@@ -528,110 +565,177 @@
         peer.on('open', (peerId) => {
             myPeerId = peerId;
             document.getElementById('displayMyId').textContent = peerId;
-            setStatus(true, 'Conectado: ' + peerId);
+            setStatus(true, '✅ Conectado', '🟢 Activo');
             document.getElementById('connectionTag').textContent = '🟢 En línea';
-            addChat('Sistema', '✅ Código "' + peerId + '" activo. Compártelo.');
+            addChatMessage('Sistema', '✅ Código "' + peerId + '" activo. ¡Compártelo!');
+            isStarting = false;
+            document.getElementById('statusExtra').textContent = '';
+            
+            // Mostrar notificación visual
+            document.getElementById('myId').style.borderColor = '#10b981';
         });
 
         peer.on('error', (err) => {
+            isStarting = false;
+            document.getElementById('statusExtra').textContent = '';
+            
             if (err.type === 'unavailable-id') {
-                alert('❌ El código "' + id + '" ya está en uso. Elige otro.');
-                setStatus(false, 'Código en uso');
+                showAlert('❌ El código "' + id + '" ya está en uso. Elige otro.');
+                document.getElementById('myId').style.borderColor = '#ef4444';
+                setStatus(false, '❌ Código en uso', '');
+            } else if (err.type === 'network') {
+                showAlert('⚠️ Error de red. Revisa tu conexión a internet.');
+                setStatus(false, '⚠️ Error de red', '');
             } else {
-                alert('Error: ' + err.message);
-                setStatus(false, 'Error');
+                console.error('Error:', err);
+                showAlert('❌ Error: ' + (err.message || 'Error desconocido'));
+                setStatus(false, '❌ Error', '');
             }
         });
 
+        // Escuchar conexiones entrantes
         peer.on('connection', (incomingConn) => {
-            if (conn) { incomingConn.close(); return; }
+            if (conn) {
+                incomingConn.close();
+                return;
+            }
             conn = incomingConn;
-            setupData(conn);
+            setupDataConnection(conn);
+            addChatMessage('Sistema', '🔗 Alguien se está conectando...');
         });
 
         peer.on('call', (incomingCall) => {
-            if (call) { incomingCall.answer(); incomingCall.close(); return; }
+            if (call) {
+                incomingCall.answer();
+                incomingCall.close();
+                return;
+            }
 
+            addChatMessage('Sistema', '📞 Solicitud de pantalla recibida...');
+
+            // Compartir pantalla
             navigator.mediaDevices.getDisplayMedia({
-                video: { cursor: 'always', frameRate: 30 },
+                video: { 
+                    cursor: 'always', 
+                    frameRate: 30,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                },
                 audio: true
             }).then((stream) => {
                 incomingCall.answer(stream);
                 setupCall(incomingCall);
-                addChat('Sistema', '📺 Compartiendo pantalla...');
-            }).catch(() => {
-                addChat('Sistema', '❌ Error al compartir pantalla');
+                addChatMessage('Sistema', '📺 Compartiendo pantalla...');
+                setStatus(true, '✅ Compartiendo', '📺 En vivo');
+            }).catch((err) => {
+                console.error('Error al compartir:', err);
+                addChatMessage('Sistema', '❌ No se pudo compartir pantalla');
                 incomingCall.answer();
                 incomingCall.close();
+                
+                if (err.name === 'NotAllowedError') {
+                    showAlert('⚠️ Debes permitir compartir pantalla en el navegador');
+                } else {
+                    showAlert('❌ Error al compartir pantalla: ' + err.message);
+                }
             });
         });
+
+        // Timeout por si no responde
+        setTimeout(() => {
+            if (isStarting) {
+                isStarting = false;
+                document.getElementById('statusExtra').textContent = '';
+                setStatus(false, '⏱️ Tiempo de espera agotado', '');
+                showAlert('⏱️ El servidor tardó mucho en responder. Intenta de nuevo.');
+            }
+        }, 10000);
     }
 
     // ============================================================
-    //  CONECTAR A ID REMOTO
+    // CONECTAR A ID REMOTO
     // ============================================================
-    function connectTo() {
+    function connectToPeer() {
         const remoteId = document.getElementById('remoteId').value.trim();
         if (!remoteId) {
-            alert('Escribe el código de la otra persona');
+            showAlert('⚠️ Escribe el código de la otra persona');
             return;
         }
 
         if (!peer) {
-            alert('Primero inicia tu código');
+            showAlert('⚠️ Primero inicia tu código (click en "Iniciar")');
             return;
         }
 
         if (isConnected) {
             disconnectAll();
-            setTimeout(() => connectTo(), 300);
+            setTimeout(() => connectToPeer(), 500);
             return;
         }
 
-        addChat('Sistema', '🔗 Conectando a "' + remoteId + '"...');
+        addChatMessage('Sistema', '🔗 Conectando a "' + remoteId + '"...');
 
+        // Conectar data channel
         conn = peer.connect(remoteId);
+        
         conn.on('open', () => {
-            setupData(conn);
+            setupDataConnection(conn);
+            addChatMessage('Sistema', '✅ Conectado a "' + remoteId + '"');
+            document.getElementById('connectionTag').textContent = '🔗 Conectado a ' + remoteId;
         });
 
-        conn.on('error', () => {
-            addChat('Sistema', '❌ No se pudo conectar a "' + remoteId + '"');
-            setStatus(false, 'Error de conexión');
+        conn.on('error', (err) => {
+            console.error('Error de conexión:', err);
+            addChatMessage('Sistema', '❌ No se pudo conectar a "' + remoteId + '"');
+            setStatus(false, '❌ Error de conexión', '');
+            showAlert('❌ No se pudo conectar. ¿La otra persona inició sesión?');
         });
 
+        // Llamada de video
         navigator.mediaDevices.getDisplayMedia({
-            video: { cursor: 'always', frameRate: 30 },
+            video: { 
+                cursor: 'always', 
+                frameRate: 30,
+                width: { ideal: 1920 },
+                height: { ideal: 1080 }
+            },
             audio: true
         }).then((stream) => {
             call = peer.call(remoteId, stream);
             setupCall(call);
-            addChat('Sistema', '📺 Compartiendo pantalla...');
-        }).catch(() => {
-            addChat('Sistema', '❌ Error al compartir pantalla');
+            addChatMessage('Sistema', '📺 Compartiendo pantalla...');
+            setStatus(true, '✅ Compartiendo', '📺 En vivo');
+        }).catch((err) => {
+            console.error('Error al compartir:', err);
+            addChatMessage('Sistema', '❌ Error al compartir pantalla');
+            
+            if (err.name === 'NotAllowedError') {
+                showAlert('⚠️ Debes permitir compartir pantalla en el navegador');
+            } else {
+                showAlert('❌ Error al compartir pantalla: ' + err.message);
+            }
         });
     }
 
     // ============================================================
-    //  SETUP
+    // SETUP CONEXIONES
     // ============================================================
-    function setupData(connection) {
+    function setupDataConnection(connection) {
         conn = connection;
         isConnected = true;
-        setStatus(true, 'Conectado a ' + conn.peer);
+        setStatus(true, '✅ Conectado a ' + conn.peer, '🔗 En vivo');
         document.getElementById('connectionTag').textContent = '🔗 Conectado a ' + conn.peer;
-        addChat('Sistema', '✅ Conectado a "' + conn.peer + '"');
 
         conn.on('data', (data) => {
             if (data.type === 'chat') {
-                addChat('Remoto', data.data);
+                addChatMessage('Remoto', data.data);
             } else if (data.type === 'key') {
-                addChat('Sistema', '⌨️ Tecla: ' + data.data);
+                addChatMessage('Sistema', '⌨️ Tecla remota: ' + data.data);
             }
         });
 
         conn.on('close', () => {
-            addChat('Sistema', '⛔ La otra persona se desconectó');
+            addChatMessage('Sistema', '⛔ La otra persona se desconectó');
             disconnectAll();
         });
     }
@@ -644,7 +748,8 @@
             video.srcObject = stream;
             video.style.display = 'block';
             document.getElementById('placeholder').style.display = 'none';
-            addChat('Sistema', '📺 Video recibido');
+            addChatMessage('Sistema', '📺 Video recibido');
+            setStatus(true, '✅ Viendo pantalla', '👀 En vivo');
         });
 
         incomingCall.on('close', () => {
@@ -652,93 +757,119 @@
             video.style.display = 'none';
             video.srcObject = null;
             document.getElementById('placeholder').style.display = 'block';
-            addChat('Sistema', '⛔ Transmisión terminada');
+            addChatMessage('Sistema', '⛔ Transmisión terminada');
+            setStatus(false, '⛔ Transmisión terminada', '');
+        });
+
+        incomingCall.on('error', (err) => {
+            console.error('Call error:', err);
+            disconnectAll();
         });
     }
 
     // ============================================================
-    //  ENVIAR
+    // ENVIAR DATOS
     // ============================================================
     function sendData(type, data) {
         if (!conn || !isConnected) {
-            addChat('Sistema', '⚠️ No estás conectado');
+            addChatMessage('Sistema', '⚠️ No estás conectado');
             return false;
         }
         try {
             conn.send({ type: type, data: data });
             return true;
         } catch (e) {
+            console.error('Error al enviar:', e);
             return false;
         }
     }
 
     function sendKey(key) {
-        if (!isConnected) { addChat('Sistema', '⚠️ Conéctate primero'); return; }
+        if (!isConnected) {
+            addChatMessage('Sistema', '⚠️ Conéctate primero');
+            return;
+        }
         sendData('key', key);
-        addChat('Tú', '⌨️ Tecla: ' + key);
+        addChatMessage('Tú', '⌨️ Tecla: ' + key);
     }
 
-    function sendChat() {
+    function sendChatMessage() {
         const input = document.getElementById('chatInput');
         const msg = input.value.trim();
         if (!msg) return;
-        if (!isConnected) { addChat('Sistema', '⚠️ Conéctate primero'); input.value = ''; return; }
+        if (!isConnected) {
+            addChatMessage('Sistema', '⚠️ Conéctate primero');
+            input.value = '';
+            return;
+        }
         sendData('chat', msg);
-        addChat('Tú', msg);
+        addChatMessage('Tú', msg);
         input.value = '';
     }
 
     // ============================================================
-    //  UTILIDADES
+    // UTILIDADES
     // ============================================================
-    function setStatus(online, text) {
-        const badge = document.getElementById('statusBadge');
+    function setStatus(online, text, extra) {
         const dot = document.getElementById('statusDot');
         const label = document.getElementById('statusText');
+        const extraEl = document.getElementById('statusExtra');
 
         if (online) {
-            badge.className = 'status-badge online';
             dot.className = 'status-dot online';
+            label.style.color = '#10b981';
         } else {
-            badge.className = 'status-badge offline';
             dot.className = 'status-dot offline';
+            label.style.color = '#ef4444';
         }
         label.textContent = text;
+        if (extra) {
+            extraEl.textContent = extra;
+        }
     }
 
     function disconnectAll() {
         if (call) { call.close(); call = null; }
         if (conn) { conn.close(); conn = null; }
         isConnected = false;
+        
         const video = document.getElementById('remoteVideo');
         video.style.display = 'none';
         video.srcObject = null;
         document.getElementById('placeholder').style.display = 'block';
-        setStatus(false, 'Desconectado');
         document.getElementById('connectionTag').textContent = '⚪ Desconectado';
-        addChat('Sistema', '⛔ Desconectado');
+        setStatus(false, 'Desconectado', '');
+        addChatMessage('Sistema', '⛔ Desconectado');
     }
 
-    function randomId() {
-        const palabras = ['casa', 'juan', 'pc', 'lab', 'home', 'work', 'server', 'laptop'];
-        const num = Math.floor(Math.random() * 1000);
-        document.getElementById('myId').value = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
-        addChat('Sistema', '🎲 Código sugerido: ' + document.getElementById('myId').value);
+    function generateRandomId() {
+        const words = ['casa', 'juan', 'pc', 'lab', 'home', 'work', 'laptop', 'server'];
+        const num = Math.floor(Math.random() * 10000);
+        const id = words[Math.floor(Math.random() * words.length)] + '-' + num;
+        document.getElementById('myId').value = id;
+        document.getElementById('myId').style.borderColor = '#667eea';
+        addChatMessage('Sistema', '🎲 Código sugerido: ' + id);
+        
+        // Auto iniciar después de generar
+        setTimeout(startWithId, 300);
     }
 
     function copyMyId() {
         const id = document.getElementById('displayMyId').textContent;
         if (id && id !== '---') {
             navigator.clipboard.writeText(id).then(() => {
-                addChat('Sistema', '📋 Código "' + id + '" copiado');
+                addChatMessage('Sistema', '📋 Código "' + id + '" copiado');
+                showToast('✅ Código copiado');
             }).catch(() => {
+                // Fallback
                 const input = document.createElement('input');
                 input.value = id;
                 document.body.appendChild(input);
                 input.select();
                 document.execCommand('copy');
                 document.body.removeChild(input);
-                addChat('Sistema', '📋 Código "' + id + '" copiado');
+                addChatMessage('Sistema', '📋 Código "' + id + '" copiado');
+                showToast('✅ Código copiado');
             });
         }
     }
@@ -752,30 +883,94 @@
         }
     }
 
-    function addChat(sender, message) {
+    function addChatMessage(sender, message) {
         const box = document.getElementById('chatBox');
         const div = document.createElement('div');
         div.className = 'chat-msg';
         div.innerHTML = '<span class="who">' + sender + ':</span> ' + message;
         box.appendChild(div);
         box.scrollTop = box.scrollHeight;
-        if (box.children.length > 50) {
+        
+        // Limitar mensajes
+        if (box.children.length > 100) {
             box.removeChild(box.children[0]);
         }
     }
 
+    // Alertas bonitas
+    function showAlert(message) {
+        const statusBar = document.getElementById('statusBar');
+        const originalText = statusBar.innerHTML;
+        
+        statusBar.style.background = '#fef2f2';
+        statusBar.style.border = '2px solid #ef4444';
+        statusBar.innerHTML = '⚠️ ' + message;
+        
+        setTimeout(() => {
+            statusBar.style.background = '#f3f4f6';
+            statusBar.style.border = 'none';
+            statusBar.innerHTML = originalText;
+        }, 5000);
+    }
+
+    function showToast(message) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 999;
+            animation: slideUp 0.3s ease;
+        `;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transition = '0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
     // ============================================================
-    //  AUTO INICIO
+    // AUTO INICIO
     // ============================================================
     window.onload = function() {
-        const palabras = ['casa', 'juan', 'pc', 'lab', 'home'];
-        const num = Math.floor(Math.random() * 1000);
-        document.getElementById('myId').value = palabras[Math.floor(Math.random() * palabras.length)] + '-' + num;
-        setTimeout(startWithId, 500);
+        const words = ['casa', 'juan', 'pc', 'lab', 'home', 'work'];
+        const num = Math.floor(Math.random() * 10000);
+        document.getElementById('myId').value = words[Math.floor(Math.random() * words.length)] + '-' + num;
+        
+        // Auto iniciar después de 1 segundo
+        setTimeout(startWithId, 1000);
+        
+        // Agregar estilos para animación
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                to { opacity: 1; transform: translateX(-50%) translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
     };
 
     window.addEventListener('beforeunload', () => {
         if (isConnected) disconnectAll();
+    });
+
+    // Atajo de teclado para enviar mensaje
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.fullscreenElement) {
+            document.exitFullscreen();
+        }
     });
 </script>
 
