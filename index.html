@@ -31,7 +31,6 @@ img{display:block;max-width:100%;}
   --text:#ffffff;
   --text-secondary:#aaaaaa;
   --accent:#ff304f;
-  --accent-dark:#c9223c;
   --border:#303030;
   --header-h:56px;
   --sidebar-w:240px;
@@ -88,22 +87,16 @@ img{display:block;max-width:100%;}
 .header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .create-btn{
   display:flex;align-items:center;gap:6px;
-  padding:8px 14px;border-radius:20px;background:var(--panel2);
-  font-size:14px;font-weight:500;white-space:nowrap;
+  padding:8px 14px;border-radius:20px;background:var(--accent);
+  font-size:14px;font-weight:600;white-space:nowrap;color:#fff;
 }
-.create-btn:hover{background:#3a3a3a;}
+.create-btn:hover{filter:brightness(0.9);}
 .avatar-circle{
   width:34px;height:34px;border-radius:50%;
   background:var(--accent);display:flex;align-items:center;justify-content:center;
   font-weight:700;font-size:14px;color:#fff;overflow:hidden;flex-shrink:0;
 }
 .avatar-circle img{width:100%;height:100%;object-fit:cover;}
-.auth-btn{
-  display:flex;align-items:center;gap:6px;
-  padding:6px 14px;border:1px solid var(--border);border-radius:20px;
-  color:#3ea6ff;font-size:14px;font-weight:500;white-space:nowrap;
-}
-.auth-btn:hover{background:rgba(62,166,255,0.1);}
 
 #sidebar{
   position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);
@@ -130,12 +123,6 @@ img{display:block;max-width:100%;}
 .sb-item .sb-ico{font-size:20px;width:24px;text-align:center;flex-shrink:0;}
 #sidebar.mini .sb-item .sb-ico{width:auto;font-size:20px;}
 .sb-item:hover{background:#3a3a3a;}
-.sb-item.active{background:var(--panel2);font-weight:600;}
-.sb-item.active .sb-ico{color:var(--accent);}
-
-#sidebarOverlay{
-  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:140;
-}
 
 #appBody{padding-top:var(--header-h);display:flex;min-height:100vh;}
 #mainContent{
@@ -161,10 +148,6 @@ img{display:block;max-width:100%;}
 .video-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px 12px;
 }
-@media (min-width:1600px){.video-grid{grid-template-columns:repeat(5,1fr);}}
-@media (max-width:900px){.video-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}}
-@media (max-width:520px){.video-grid{grid-template-columns:1fr;}}
-
 .video-card{cursor:pointer;}
 .thumb-wrap{
   position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
@@ -188,131 +171,72 @@ img{display:block;max-width:100%;}
   margin-bottom:4px;
 }
 .card-channel{font-size:13px;color:var(--text-secondary);}
-.card-channel:hover{color:var(--text);}
 .card-stats{font-size:13px;color:var(--text-secondary);}
 
 .state-box{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   padding:80px 20px;text-align:center;color:var(--text-secondary);gap:12px;
 }
-.state-box .state-ico{font-size:52px;opacity:.6;}
 .state-box h3{color:var(--text);font-size:18px;font-weight:600;}
-.state-box p{font-size:14px;max-width:360px;}
-.retry-btn{
-  margin-top:8px;padding:9px 20px;border-radius:20px;background:var(--panel2);
-  font-size:14px;font-weight:500;
-}
-.retry-btn:hover{background:#3a3a3a;}
 
 #toastContainer{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  z-index:900;display:flex;flex-direction:column;gap:8px;align-items:center;
-  width:100%;pointer-events:none;
+  z-index:1100;display:flex;flex-direction:column;gap:8px;align-items:center;
 }
 .toast{
   background:#2a2a2a;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.4);animation:toastIn .2s ease;
-  max-width:90vw;text-align:center;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);
 }
 .toast.error{background:#3a1418;border:1px solid var(--accent);}
 .toast.success{background:#123a20;border:1px solid #2ecc71;}
-@keyframes toastIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
-
-.dropdown{position:relative;}
-.dropdown-menu{
-  position:absolute;top:calc(100% + 8px);right:0;background:var(--panel2);
-  border-radius:8px;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.5);
-  z-index:300;overflow:hidden;padding:6px 0;
-}
-.dropdown-item{
-  display:flex;align-items:center;gap:14px;padding:10px 16px;font-size:14px;
-  white-space:nowrap;
-}
-.dropdown-item:hover{background:#3a3a3a;}
-.dropdown-sep{height:1px;background:var(--border);margin:6px 0;}
-.dropdown-user-head{padding:12px 16px;display:flex;gap:12px;align-items:center;}
-.dropdown-user-head .name{font-weight:600;font-size:14px;}
-.dropdown-user-head .handle{font-size:12px;color:var(--text-secondary);}
 
 .watch-layout{display:flex;gap:24px;align-items:flex-start;max-width:1600px;margin:0 auto;}
 .watch-main{flex:1;min-width:0;}
-.watch-side{width:400px;flex-shrink:0;}
+.watch-side{width:360px;flex-shrink:0;}
 @media (max-width:1100px){.watch-layout{flex-direction:column;}.watch-side{width:100%;}}
 
-.player-wrap{width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:16px;position:relative;}
-.player-wrap video{width:100%;display:block;max-height:80vh;background:#000;}
-.watch-title{font-size:20px;font-weight:600;margin-bottom:8px;line-height:1.3;}
-.watch-meta-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px;}
+.player-wrap{width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.player-wrap video{width:100%;display:block;max-height:75vh;background:#000;}
+.watch-title{font-size:20px;font-weight:600;margin-bottom:8px;}
+.watch-meta-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
 .watch-stats{font-size:14px;color:var(--text-secondary);}
-.watch-actions{display:flex;gap:8px;flex-wrap:wrap;}
-.pill-btn{
-  display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:20px;
-  background:var(--panel2);font-size:14px;font-weight:500;
-}
-.pill-btn:hover{background:#3a3a3a;}
-.pill-group{display:flex;border-radius:20px;overflow:hidden;background:var(--panel2);}
-.pill-group .pill-btn{border-radius:0;}
-.pill-group .pill-btn:first-child{padding-right:12px;}
-.pill-group .pill-divider{width:1px;background:var(--border);}
 
 .channel-row{
   display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;
+  border-bottom:1px solid var(--border);margin-bottom:16px;
 }
-.channel-row .avatar-circle{width:48px;height:48px;font-size:17px;}
-.channel-row-info{flex:1;min-width:150px;}
+.channel-row-info{flex:1;}
 .channel-row-info .cname{font-weight:600;font-size:15px;}
-.channel-row-info .csubs{font-size:13px;color:var(--text-secondary);}
-.subscribe-btn{padding:10px 20px;border-radius:20px;background:var(--text);color:#0f0f0f;font-weight:600;font-size:14px;}
-.subscribe-btn:hover{filter:brightness(.9);}
 
-.watch-desc{background:var(--panel2);border-radius:12px;padding:12px 16px;font-size:14px;line-height:1.5;margin-bottom:20px;white-space:pre-wrap;word-break:break-word;}
+.watch-desc{background:var(--panel2);border-radius:12px;padding:12px 16px;font-size:14px;line-height:1.5;margin-bottom:20px;}
 
 .side-video-item{display:flex;gap:8px;margin-bottom:10px;cursor:pointer;}
-.side-video-item .thumb-wrap{width:168px;flex-shrink:0;margin-bottom:0;}
-.side-video-item .card-title{font-size:13px;-webkit-line-clamp:2;}
-.side-video-item .card-channel,.side-video-item .card-stats{font-size:12px;}
+.side-video-item .thumb-wrap{width:140px;flex-shrink:0;margin-bottom:0;}
+.side-video-item .card-title{font-size:13px;}
 
-.shorts-feed{
-  height:calc(100vh - var(--header-h));
-  overflow-y:scroll;scroll-snap-type:y mandatory;
-  display:flex;flex-direction:column;align-items:center;
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;
+  display:flex;align-items:center;justify-content:center;padding:16px;
 }
-.short-item{
-  height:calc(100vh - var(--header-h));width:100%;
-  scroll-snap-align:start;display:flex;align-items:center;justify-content:center;
-  position:relative;flex-shrink:0;
+.modal-card{
+  background:var(--panel);border-radius:12px;padding:24px;width:100%;max-width:500px;
+  display:flex;flex-direction:column;gap:14px;border:1px solid var(--border);
 }
-.short-frame{
-  height:92%;aspect-ratio:9/16;background:#000;border-radius:14px;overflow:hidden;
-  position:relative;max-width:100%;
+.modal-card input, .modal-card textarea{
+  width:100%;padding:10px 14px;background:var(--panel2);border:1px solid var(--border);
+  border-radius:8px;outline:none;font-size:14px;
 }
-.short-frame video{width:100%;height:100%;object-fit:cover;}
-.short-side-actions{
-  position:absolute;right:-56px;bottom:16px;display:flex;flex-direction:column;gap:20px;align-items:center;
-}
-@media (max-width:700px){.short-side-actions{right:8px;}}
-.short-action-btn{display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;font-size:11px;}
-.short-action-btn .circle{
-  width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);
-  display:flex;align-items:center;justify-content:center;font-size:20px;
-}
-.short-info-overlay{
-  position:absolute;left:12px;bottom:16px;right:80px;color:#fff;
-}
-.short-info-overlay .schannel{font-weight:600;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
-.short-info-overlay .stitle{font-size:13px;opacity:.9;}
+.modal-card textarea{height:80px;resize:none;}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:8px;}
+.btn-sec{padding:8px 16px;background:var(--panel2);border-radius:8px;font-weight:500;}
+.btn-pri{padding:8px 16px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;}
 
 .spinner{
-  width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.25);border-top-color:#fff;
-  border-radius:50%;animation:spin .7s linear infinite;display:inline-block;
+  width:24px;height:24px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite;
 }
 @keyframes spin{to{transform:rotate(360deg);}}
 .page-loading{display:flex;align-items:center;justify-content:center;padding:100px 0;}
-.tag-pill{display:inline-flex;padding:7px 14px;border-radius:8px;background:var(--panel2);font-size:14px;font-weight:500;white-space:nowrap;}
-.tag-pill.active{background:var(--text);color:#0f0f0f;}
-.chip-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:16px;margin-bottom:8px;}
-.chip-row::-webkit-scrollbar{display:none;}
 </style>
 </head>
 <body>
@@ -320,9 +244,7 @@ img{display:block;max-width:100%;}
 <header id="appHeader">
   <div class="header-left">
     <button class="icon-btn" id="btnToggleSidebar">☰</button>
-    <a href="#/home" class="brand">
-      <span class="play-ico">▶</span> JHEILER
-    </a>
+    <a href="#/home" class="brand"><span class="play-ico">▶</span> JHEILER</a>
   </div>
 
   <div class="header-center">
@@ -333,46 +255,20 @@ img{display:block;max-width:100%;}
   </div>
 
   <div class="header-right">
-    <button class="create-btn" id="btnCreate">
-      <span>➕</span><span>Crear</span>
-    </button>
-
-    <div id="authAreaLoggedOut" class="hidden">
-      <button class="auth-btn" id="btnOpenLogin">
-        <span style="font-size:18px;">👤</span> Iniciar sesión
-      </button>
-    </div>
-
-    <div id="authAreaLoggedIn" class="dropdown hidden">
-      <button class="icon-btn" id="btnUserMenu" style="width:auto;height:auto;border-radius:50%;padding:0;">
-        <span class="avatar-circle" id="headerAvatar">U</span>
-      </button>
-      <div class="dropdown-menu hidden" id="userMenu">
-        <div class="dropdown-user-head">
-          <span class="avatar-circle" id="userMenuAvatar">U</span>
-          <div>
-            <div class="name" id="userMenuName">Usuario</div>
-            <div class="handle" id="userMenuHandle">@usuario</div>
-          </div>
-        </div>
-        <div class="dropdown-sep"></div>
-        <button class="dropdown-item" id="btnLogout" style="width:100%;text-align:left;"><span>🚪</span> Cerrar sesión</button>
-      </div>
-    </div>
+    <button class="create-btn" id="btnCreate">➕ <span>Crear</span></button>
   </div>
 </header>
 
-<div id="sidebarOverlay" class="hidden"></div>
 <nav id="sidebar">
   <div class="sb-section">
-    <a class="sb-item" data-route="home" href="#/home"><span class="sb-ico">🏠</span><span class="sb-label">Inicio</span></a>
-    <a class="sb-item" data-route="shorts" href="#/shorts"><span class="sb-ico">⚡</span><span class="sb-label">Shorts</span></a>
-    <a class="sb-item" data-route="subscriptions" href="#/subscriptions"><span class="sb-ico">📺</span><span class="sb-label">Suscripciones</span></a>
+    <a class="sb-item" href="#/home"><span class="sb-ico">🏠</span><span>Inicio</span></a>
+    <a class="sb-item" href="#/shorts"><span class="sb-ico">⚡</span><span>Shorts</span></a>
+    <a class="sb-item" href="#/subscriptions"><span class="sb-ico">📺</span><span>Suscripciones</span></a>
   </div>
   <div class="sb-section">
     <div class="sb-title">Biblioteca</div>
-    <a class="sb-item" data-route="history" href="#/history"><span class="sb-ico">🕒</span><span class="sb-label">Historial</span></a>
-    <a class="sb-item" data-route="your-videos" href="#/your-videos"><span class="sb-ico">🎬</span><span class="sb-label">Tus videos</span></a>
+    <a class="sb-item" href="#/history"><span class="sb-ico">🕒</span><span>Historial</span></a>
+    <a class="sb-item" href="#/your-videos"><span class="sb-ico">🎬</span><span>Tus videos</span></a>
   </div>
 </nav>
 
@@ -389,50 +285,9 @@ const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-const STATE = {
-  session: null,
-  user: null,
-  profile: null,
-  sidebarMini: false,
-};
-
 function qs(sel, root){ return (root||document).querySelector(sel); }
-function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
-function escapeHTML(str){
-  if(!str) return '';
-  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function initials(name){
-  if(!name) return 'U';
-  return String(name).trim().slice(0,2).toUpperCase();
-}
-function timeAgo(dateStr){
-  if(!dateStr) return '';
-  const diff = (Date.now() - new Date(dateStr).getTime())/1000;
-  if(diff < 3600) return 'hace un momento';
-  if(diff < 86400) return `hace ${Math.floor(diff/3600)} h`;
-  return `hace ${Math.floor(diff/86400)} d`;
-}
-function formatCount(n){
-  n = Number(n)||0;
-  if(n>=1000000) return (n/1000000).toFixed(1)+'M';
-  if(n>=1000) return (n/1000).toFixed(1)+'K';
-  return String(n);
-}
-function formatDuration(sec){
-  sec = Math.floor(Number(sec)||0);
-  const m = Math.floor(sec/60);
-  const s = String(sec%60).padStart(2,'0');
-  return `${m}:${s}`;
-}
-function avatarHTML(profile, size){
-  const sz = size ? `style="width:${size}px;height:${size}px;"` : '';
-  if (profile && profile.avatar_url) {
-    return `<div class="avatar-circle" ${sz}><img src="${escapeHTML(profile.avatar_url)}"></div>`;
-  }
-  const name = profile ? (profile.display_name || profile.username) : 'U';
-  return `<div class="avatar-circle" ${sz}>${escapeHTML(initials(name))}</div>`;
-}
+function escapeHTML(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function formatDuration(sec){ sec=Math.floor(Number(sec)||0); return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
 
 function toast(msg, type = 'info') {
   const container = qs('#toastContainer');
@@ -450,9 +305,7 @@ function getRoute() {
   return { path: parts[0], query: new URLSearchParams(parts[1] || '') };
 }
 
-function navigate(path) {
-  window.location.hash = path;
-}
+function navigate(path) { window.location.hash = path; }
 
 async function renderPage() {
   const { path, query } = getRoute();
@@ -469,6 +322,12 @@ async function renderPage() {
     await renderShorts(main);
   } else if (path === '/search') {
     await renderSearchResults(main, query.get('q') || '');
+  } else if (['/subscriptions', '/history', '/your-videos'].includes(path)) {
+    main.innerHTML = `
+      <div class="state-box">
+        <h3>Sección vacía</h3>
+        <p>Aún no hay elementos guardados en esta lista.</p>
+      </div>`;
   } else {
     main.innerHTML = `<div class="state-box"><h3>Página no encontrada</h3></div>`;
   }
@@ -481,15 +340,15 @@ async function renderHome(container) {
     .order('created_at', { ascending: false });
 
   if (error || !videos || videos.length === 0) {
-    container.innerHTML = `<div class="state-box"><h3>No hay videos cargados</h3><p>Sube tu primer video a Supabase para verlo aquí.</p></div>`;
+    container.innerHTML = `
+      <div class="state-box">
+        <h3>No hay videos cargados</h3>
+        <p>Haz clic en el botón <strong>Crear</strong> arriba para publicar tu primer video.</p>
+      </div>`;
     return;
   }
 
-  container.innerHTML = `
-    <div class="video-grid">
-      ${videos.map(v => renderVideoCard(v)).join('')}
-    </div>
-  `;
+  container.innerHTML = `<div class="video-grid">${videos.map(v => renderVideoCard(v)).join('')}</div>`;
 }
 
 async function renderWatch(container, videoId) {
@@ -507,7 +366,7 @@ async function renderWatch(container, videoId) {
     .from('videos')
     .select('*, profiles(*)')
     .neq('id', videoId)
-    .limit(10);
+    .limit(6);
 
   container.innerHTML = `
     <div class="watch-layout">
@@ -517,23 +376,18 @@ async function renderWatch(container, videoId) {
         </div>
         <h1 class="watch-title">${escapeHTML(video.title)}</h1>
         <div class="watch-meta-row">
-          <div class="watch-stats">${formatCount(video.views)} vistas • ${timeAgo(video.created_at)}</div>
-          <div class="watch-actions">
-            <button class="pill-btn">👍 ${formatCount(video.likes_count)}</button>
-          </div>
+          <div class="watch-stats">${video.views || 0} vistas</div>
         </div>
         <div class="channel-row">
-          ${avatarHTML(video.profiles)}
+          <div class="avatar-circle">U</div>
           <div class="channel-row-info">
             <div class="cname">${escapeHTML(video.profiles?.display_name || 'Canal')}</div>
-            <div class="csubs">${formatCount(video.profiles?.subscribers_count || 0)} suscriptores</div>
           </div>
-          <button class="subscribe-btn">Suscribirse</button>
         </div>
-        <div class="watch-desc"><p>${escapeHTML(video.description)}</p></div>
+        <div class="watch-desc">${escapeHTML(video.description || 'Sin descripción')}</div>
       </div>
       <div class="watch-side">
-        <h3 class="section-heading">Sugerencias</h3>
+        <h3 class="section-heading">Más videos</h3>
         ${(related || []).map(r => `
           <div class="side-video-item" onclick="navigate('/watch?v=${r.id}')">
             <div class="thumb-wrap">
@@ -541,8 +395,7 @@ async function renderWatch(container, videoId) {
             </div>
             <div>
               <div class="card-title">${escapeHTML(r.title)}</div>
-              <div class="card-channel">${escapeHTML(r.profiles?.display_name || '')}</div>
-              <div class="card-stats">${formatCount(r.views)} vistas</div>
+              <div class="card-channel">${escapeHTML(r.profiles?.display_name || 'Canal')}</div>
             </div>
           </div>
         `).join('')}
@@ -554,7 +407,7 @@ async function renderWatch(container, videoId) {
 async function renderShorts(container) {
   const { data: shorts } = await supabase
     .from('videos')
-    .select('*, profiles(*)')
+    .select('*')
     .eq('is_short', true);
 
   if (!shorts || shorts.length === 0) {
@@ -563,20 +416,9 @@ async function renderShorts(container) {
   }
 
   container.innerHTML = `
-    <div class="shorts-feed">
-      ${shorts.map(s => `
-        <div class="short-item">
-          <div class="short-frame">
-            <video src="${escapeHTML(s.video_url)}" controls loop></video>
-            <div class="short-info-overlay">
-              <div class="schannel">@${escapeHTML(s.profiles?.username || 'usuario')}</div>
-              <div class="stitle">${escapeHTML(s.title)}</div>
-            </div>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `;
+    <div style="display:flex;justify-content:center;align-items:center;">
+      <video src="${escapeHTML(shorts[0].video_url)}" controls loop style="max-height:80vh;border-radius:12px;"></video>
+    </div>`;
 }
 
 async function renderSearchResults(container, query) {
@@ -599,22 +441,67 @@ function renderVideoCard(video) {
         <span class="duration-badge">${formatDuration(video.duration)}</span>
       </div>
       <div class="card-meta">
-        ${avatarHTML(video.profiles)}
+        <div class="avatar-circle">U</div>
         <div class="card-info">
           <div class="card-title">${escapeHTML(video.title)}</div>
           <div class="card-channel">${escapeHTML(video.profiles?.display_name || 'Canal')}</div>
-          <div class="card-stats">${formatCount(video.views)} vistas • ${timeAgo(video.created_at)}</div>
+          <div class="card-stats">${video.views || 0} vistas</div>
         </div>
       </div>
     </div>
   `;
 }
 
-function setupGlobalEvents() {
+function openUploadModal() {
+  const modalHTML = `
+    <div id="uploadModal" class="modal-backdrop">
+      <div class="modal-card">
+        <h2>Subir nuevo video</h2>
+        <input type="text" id="upTitle" placeholder="Título del video">
+        <input type="text" id="upUrl" placeholder="URL directa del archivo (.mp4)">
+        <input type="text" id="upThumb" placeholder="URL de la miniatura (opcional)">
+        <textarea id="upDesc" placeholder="Descripción"></textarea>
+        <div class="modal-actions">
+          <button class="btn-sec" onclick="document.getElementById('uploadModal').remove()">Cancelar</button>
+          <button class="btn-pri" id="btnSaveVideo">Publicar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+  qs('#btnSaveVideo').addEventListener('click', async () => {
+    const title = qs('#upTitle').value.trim();
+    const video_url = qs('#upUrl').value.trim();
+    const thumbnail_url = qs('#upThumb').value.trim();
+    const description = qs('#upDesc').value.trim();
+
+    if (!title || !video_url) {
+      toast('Título y URL del video son obligatorios', 'error');
+      return;
+    }
+
+    const { error } = await supabase.from('videos').insert([
+      { title, video_url, thumbnail_url, description }
+    ]);
+
+    if (error) {
+      toast('Error al guardar: ' + error.message, 'error');
+    } else {
+      toast('¡Video subido con éxito!', 'success');
+      qs('#uploadModal').remove();
+      renderPage();
+    }
+  });
+}
+
+function setupEvents() {
   qs('#btnToggleSidebar')?.addEventListener('click', () => {
     qs('#sidebar')?.classList.toggle('mini');
     qs('#mainContent')?.classList.toggle('mini-margin');
   });
+
+  qs('#btnCreate')?.addEventListener('click', openUploadModal);
 
   qs('#searchForm')?.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -626,7 +513,7 @@ function setupGlobalEvents() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  setupGlobalEvents();
+  setupEvents();
   renderPage();
 });
 </script>
