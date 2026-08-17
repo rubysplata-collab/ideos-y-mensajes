@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JHEILER</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ff304f%22/><polygon points=%2238,28 78,50 38,72%22 fill=%22white%22/></svg>">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -10,60 +10,39 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html,body{height:100%;}
 body{
-  font-family:"Roboto","Segoe UI",Arial,sans-serif;
+  font-family:"Segoe UI",Roboto,sans-serif;
   background:#0f0f0f;
   color:#ffffff;
   overflow-x:hidden;
 }
 a{color:inherit;text-decoration:none;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
-input,textarea,select{font-family:inherit;color:#fff;}
-img{display:block;max-width:100%;}
+input,textarea{font-family:inherit;color:#fff;}
 ::-webkit-scrollbar{width:8px;height:8px;}
 ::-webkit-scrollbar-track{background:#0f0f0f;}
 ::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px;}
-::-webkit-scrollbar-thumb:hover{background:#ff304f;}
 
 :root{
   --bg:#0f0f0f;
   --panel:#181818;
   --panel2:#212121;
-  --text:#ffffff;
-  --text-secondary:#aaaaaa;
   --accent:#ff304f;
   --border:#303030;
   --header-h:56px;
   --sidebar-w:240px;
-  --sidebar-w-mini:72px;
 }
 
 #appHeader{
   position:fixed;top:0;left:0;right:0;height:var(--header-h);
   background:var(--bg);
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;
-  z-index:200;
-  border-bottom:1px solid var(--border);
+  padding:0 16px;z-index:200;border-bottom:1px solid var(--border);
 }
 .header-left{display:flex;align-items:center;gap:16px;}
-.icon-btn{
-  width:40px;height:40px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--text);font-size:20px;
-  transition:background .15s;
-}
-.icon-btn:hover{background:#3a3a3a;}
-.brand{
-  display:flex;align-items:center;gap:6px;
-  font-size:20px;font-weight:700;letter-spacing:-0.5px;
-  color:var(--text);
-}
+.brand{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:700;}
 .brand .play-ico{color:var(--accent);font-size:22px;}
 
-.header-center{
-  flex:1;display:flex;justify-content:center;align-items:center;
-  max-width:600px;margin:0 16px;
-}
+.header-center{flex:1;display:flex;justify-content:center;max-width:600px;margin:0 16px;}
 .search-form{
   display:flex;width:100%;align-items:center;
   border:1px solid var(--border);border-radius:20px 0 0 20px;
@@ -71,63 +50,34 @@ img{display:block;max-width:100%;}
 }
 .search-form input{
   flex:1;background:transparent;border:none;outline:none;
-  padding:0 16px;font-size:15px;color:var(--text);
+  padding:0 16px;font-size:15px;color:#fff;
 }
 .search-btn{
   width:60px;height:40px;background:var(--panel2);
   border:1px solid var(--border);border-left:none;border-radius:0 20px 20px 0;
-  display:flex;align-items:center;justify-content:center;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
 }
-.search-btn:hover{background:#3a3a3a;}
 
-.header-right{display:flex;align-items:center;gap:12px;}
 .create-btn{
   display:flex;align-items:center;gap:8px;
   padding:8px 16px;border-radius:20px;background:var(--accent);
   font-size:14px;font-weight:600;color:#fff;
-  transition:transform 0.1s, filter 0.1s;
 }
-.create-btn:hover{filter:brightness(1.1);}
-.create-btn:active{transform:scale(0.96);}
 
 #sidebar{
   position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);
-  background:var(--bg);overflow-y:auto;z-index:150;
-  transition:width .2s ease;
-  padding-top:12px;
+  background:var(--bg);padding-top:12px;border-right:1px solid var(--border);
 }
-#sidebar.mini{width:var(--sidebar-w-mini);}
 .sb-section{padding:8px 0;border-bottom:1px solid var(--border);}
-.sb-title{
-  padding:8px 24px;font-size:12px;font-weight:600;color:var(--text-secondary);
-  text-transform:uppercase;letter-spacing:0.5px;
-}
+.sb-title{padding:8px 24px;font-size:12px;font-weight:600;color:#aaa;text-transform:uppercase;}
 .sb-item{
   display:flex;align-items:center;gap:20px;
-  padding:12px 24px;font-size:14px;
-  white-space:nowrap;overflow:hidden;color:var(--text);
+  padding:12px 24px;font-size:14px;color:#fff;
 }
-#sidebar.mini .sb-item{
-  flex-direction:column;gap:4px;padding:12px 0;font-size:10px;
-  text-align:center;
-}
-#sidebar.mini .sb-title{display:none;}
-.sb-item .sb-ico{font-size:20px;width:24px;text-align:center;}
 .sb-item:hover{background:#272727;}
 
 #appBody{padding-top:var(--header-h);display:flex;min-height:100vh;}
-#mainContent{
-  flex:1;margin-left:var(--sidebar-w);padding:24px;min-width:0;
-  transition:margin-left .2s ease;
-}
-#mainContent.mini-margin{margin-left:var(--sidebar-w-mini);}
-
-@media (max-width:768px){
-  #sidebar{width:var(--sidebar-w-mini);}
-  #sidebar .sb-title{display:none;}
-  #sidebar .sb-item{flex-direction:column;gap:4px;padding:12px 0;font-size:10px;text-align:center;}
-  #mainContent{margin-left:var(--sidebar-w-mini) !important;padding:16px;}
-}
+#mainContent{flex:1;margin-left:var(--sidebar-w);padding:24px;min-width:0;}
 
 .video-grid{
   display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px 16px;
@@ -140,39 +90,22 @@ img{display:block;max-width:100%;}
 .thumb-wrap img{width:100%;height:100%;object-fit:cover;}
 .thumb-wrap .no-thumb{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  font-size:36px;color:var(--text-secondary);background:linear-gradient(135deg,#252525,#121212);
+  font-size:36px;color:#aaa;background:linear-gradient(135deg,#252525,#121212);
 }
 .card-meta{display:flex;gap:12px;}
 .avatar-circle{
   width:36px;height:36px;border-radius:50%;background:var(--accent);
   display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
-  flex-shrink:0;
 }
-.card-info{flex:1;min-width:0;}
-.card-title{
-  font-size:14px;font-weight:600;line-height:1.3;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-  margin-bottom:4px;
-}
-.card-channel,.card-stats{font-size:13px;color:var(--text-secondary);}
+.card-title{font-size:14px;font-weight:600;line-height:1.3;margin-bottom:4px;}
+.card-channel{font-size:13px;color:#aaa;}
 
 .state-box{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:50vh;text-align:center;color:var(--text-secondary);gap:16px;padding:20px;
+  min-height:50vh;text-align:center;color:#aaa;gap:16px;
 }
-.state-box .icon{font-size:64px;opacity:0.8;}
-.state-box h3{color:var(--text);font-size:22px;font-weight:600;}
-.state-box p{font-size:15px;max-width:400px;line-height:1.4;}
-
-.watch-layout{display:flex;gap:24px;max-width:1400px;margin:0 auto;}
-.watch-main{flex:1;min-width:0;}
-.watch-side{width:350px;flex-shrink:0;}
-@media (max-width:1000px){.watch-layout{flex-direction:column;}.watch-side{width:100%;}}
-
-.player-wrap{width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:16px;}
-.player-wrap video{width:100%;display:block;max-height:70vh;}
-.watch-title{font-size:20px;font-weight:600;margin-bottom:8px;}
-.watch-desc{background:var(--panel2);border-radius:12px;padding:16px;font-size:14px;margin-top:16px;}
+.state-box .icon{font-size:64px;}
+.state-box h3{color:#fff;font-size:22px;}
 
 .modal-backdrop{
   position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;
@@ -181,50 +114,37 @@ img{display:block;max-width:100%;}
 .modal-card{
   background:var(--panel);border-radius:16px;padding:24px;width:100%;max-width:480px;
   display:flex;flex-direction:column;gap:14px;border:1px solid var(--border);
-  box-shadow:0 10px 30px rgba(0,0,0,0.5);
 }
-.modal-card h2{font-size:18px;margin-bottom:4px;}
 .modal-card input, .modal-card textarea{
-  width:100%;padding:12px 14px;background:var(--panel2);border:1px solid var(--border);
-  border-radius:8px;outline:none;font-size:14px;color:#fff;
+  width:100%;padding:12px;background:var(--panel2);border:1px solid var(--border);
+  border-radius:8px;outline:none;font-size:14px;
 }
-.modal-card textarea{height:90px;resize:none;}
+.modal-card textarea{height:80px;resize:none;}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;}
-.btn-sec{padding:10px 18px;background:var(--panel2);border-radius:8px;font-weight:500;}
-.btn-pri{padding:10px 18px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;}
+.btn-sec{padding:10px 18px;background:var(--panel2);border-radius:8px;}
+.btn-pri{padding:10px 18px;background:var(--accent);color:#fff;border-radius:8px;}
 
 #toastContainer{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  z-index:1100;display:flex;flex-direction:column;gap:8px;align-items:center;
+  z-index:1100;display:flex;flex-direction:column;gap:8px;
 }
-.toast{
-  background:#2a2a2a;color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;
-  box-shadow:0 4px 14px rgba(0,0,0,0.5);
-}
+.toast{background:#2a2a2a;color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;}
 .toast.error{background:#a31c1c;}
 .toast.success{background:#1e7e34;}
-
-.spinner{
-  width:28px;height:28px;border:3px solid rgba(255,255,255,0.2);border-top-color:#fff;
-  border-radius:50%;animation:spin .7s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg);}}
-.page-loading{display:flex;align-items:center;justify-content:center;padding:120px 0;}
 </style>
 </head>
 <body>
 
 <header id="appHeader">
   <div class="header-left">
-    <button class="icon-btn" id="btnToggleSidebar">☰</button>
     <a href="#/home" class="brand"><span class="play-ico">▶</span> JHEILER</a>
   </div>
 
   <div class="header-center">
-    <form class="search-form" id="searchForm">
-      <input type="text" id="searchInput" placeholder="Buscar" autocomplete="off">
+    <form class="search-form" onsubmit="event.preventDefault();">
+      <input type="text" id="searchInput" placeholder="Buscar">
     </form>
-    <button class="search-btn" id="searchSubmitBtn">🔍</button>
+    <button class="search-btn">🔍</button>
   </div>
 
   <div class="header-right">
@@ -234,14 +154,14 @@ img{display:block;max-width:100%;}
 
 <nav id="sidebar">
   <div class="sb-section">
-    <a class="sb-item" href="#/home"><span class="sb-ico">🏠</span><span>Inicio</span></a>
-    <a class="sb-item" href="#/shorts"><span class="sb-ico">⚡</span><span>Shorts</span></a>
-    <a class="sb-item" href="#/subscriptions"><span class="sb-ico">📺</span><span>Suscripciones</span></a>
+    <a class="sb-item" href="#/home"><span>🏠</span><span>Inicio</span></a>
+    <a class="sb-item" href="#/shorts"><span>⚡</span><span>Shorts</span></a>
+    <a class="sb-item" href="#/subscriptions"><span>📺</span><span>Suscripciones</span></a>
   </div>
   <div class="sb-section">
     <div class="sb-title">Biblioteca</div>
-    <a class="sb-item" href="#/history"><span class="sb-ico">🕒</span><span>Historial</span></a>
-    <a class="sb-item" href="#/your-videos"><span class="sb-ico">🎬</span><span>Tus videos</span></a>
+    <a class="sb-item" href="#/history"><span>🕒</span><span>Historial</span></a>
+    <a class="sb-item" href="#/your-videos"><span>🎬</span><span>Tus videos</span></a>
   </div>
 </nav>
 
@@ -252,17 +172,13 @@ img{display:block;max-width:100%;}
 <div id="toastContainer"></div>
 
 <script>
-"use strict";
-
+// Usamos 'sb' para no chocar con la variable global 'supabase'
 const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-function qs(sel, root){ return (root||document).querySelector(sel); }
-function escapeHTML(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function toast(msg, type = 'info') {
-  const container = qs('#toastContainer');
+function showToast(msg, type = 'info') {
+  const container = document.getElementById('toastContainer');
   if (!container) return;
   const el = document.createElement('div');
   el.className = `toast ${type}`;
@@ -271,161 +187,53 @@ function toast(msg, type = 'info') {
   setTimeout(() => el.remove(), 3000);
 }
 
-function getRoute() {
-  const hash = window.location.hash.slice(1) || '/home';
-  const parts = hash.split('?');
-  return { path: parts[0], query: new URLSearchParams(parts[1] || '') };
-}
-
-function navigate(path) { window.location.hash = path; }
-
 async function renderPage() {
-  const { path, query } = getRoute();
-  const main = qs('#mainContent');
+  const main = document.getElementById('mainContent');
   if (!main) return;
 
-  main.innerHTML = '<div class="page-loading"><div class="spinner"></div></div>';
-
   try {
-    if (path === '/home' || path === '/') {
-      await renderHome(main);
-    } else if (path === '/watch') {
-      await renderWatch(main, query.get('v'));
-    } else if (path === '/shorts') {
-      await renderShorts(main);
-    } else if (path === '/search') {
-      await renderSearchResults(main, query.get('q') || '');
-    } else {
-      renderEmptyState(main, "🔍", "Busca algo para comenzar", "Explora contenido o usa la barra de búsqueda superior para encontrar videos.");
+    const { data: videos, error } = await sb.from('videos').select('*').order('created_at', { ascending: false });
+
+    if (error || !videos || videos.length === 0) {
+      main.innerHTML = `
+        <div class="state-box">
+          <div class="icon">🎬</div>
+          <h3>Busca algo para comenzar</h3>
+          <p>No hay videos publicados aún. Haz clic en <b>➕ Crear</b> para subir uno.</p>
+        </div>`;
+      return;
     }
-  } catch(err) {
-    console.error("Error al cargar la página:", err);
-    renderEmptyState(main, "🎬", "Busca algo para comenzar", "Haz clic en el botón Crear arriba para subir tu primer video.");
-  }
-}
 
-function renderEmptyState(container, icon, title, desc) {
-  container.innerHTML = `
-    <div class="state-box">
-      <div class="icon">${icon}</div>
-      <h3>${escapeHTML(title)}</h3>
-      <p>${escapeHTML(desc)}</p>
-    </div>`;
-}
-
-async function renderHome(container) {
-  const { data: videos, error } = await supabase
-    .from('videos')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error || !videos || videos.length === 0) {
-    renderEmptyState(container, "🎬", "Busca algo para comenzar", "No hay videos disponibles aún. ¡Haz clic en Crear arriba y sube el primero!");
-    return;
-  }
-
-  container.innerHTML = `<div class="video-grid">${videos.map(v => renderVideoCard(v)).join('')}</div>`;
-}
-
-async function renderWatch(container, videoId) {
-  if (!videoId) { navigate('/home'); return; }
-
-  const { data: video } = await supabase
-    .from('videos')
-    .select('*')
-    .eq('id', videoId)
-    .single();
-
-  if (!video) {
-    renderEmptyState(container, "❌", "Video no encontrado", "El video solicitado no existe o fue eliminado.");
-    return;
-  }
-
-  const { data: related } = await supabase
-    .from('videos')
-    .select('*')
-    .neq('id', videoId)
-    .limit(6);
-
-  container.innerHTML = `
-    <div class="watch-layout">
-      <div class="watch-main">
-        <div class="player-wrap">
-          <video src="${escapeHTML(video.video_url)}" controls autoplay></video>
-        </div>
-        <h1 class="watch-title">${escapeHTML(video.title)}</h1>
-        <div class="watch-desc">${escapeHTML(video.description || 'Sin descripción disponible.')}</div>
-      </div>
-      <div class="watch-side">
-        <h3 style="margin-bottom:12px;font-size:16px;">Más videos</h3>
-        ${(related || []).map(r => `
-          <div class="side-video-item" onclick="navigate('/watch?v=${r.id}')" style="display:flex;gap:10px;margin-bottom:12px;cursor:pointer;">
-            <div style="width:120px;aspect-ratio:16/9;background:#222;border-radius:8px;overflow:hidden;flex-shrink:0;">
-              ${r.thumbnail_url ? `<img src="${escapeHTML(r.thumbnail_url)}" style="width:100%;height:100%;object-fit:cover;">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;">▶</div>'}
+    main.innerHTML = `
+      <div class="video-grid">
+        ${videos.map(v => `
+          <div class="video-card" onclick="window.location.hash='#/watch?v=${v.id}'">
+            <div class="thumb-wrap">
+              ${v.thumbnail_url ? `<img src="${v.thumbnail_url}">` : '<div class="no-thumb">▶</div>'}
             </div>
-            <div>
-              <div style="font-size:13px;font-weight:600;line-height:1.2;">${escapeHTML(r.title)}</div>
+            <div class="card-meta">
+              <div class="avatar-circle">J</div>
+              <div>
+                <div class="card-title">${v.title}</div>
+                <div class="card-channel">JHEILER</div>
+              </div>
             </div>
           </div>
         `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-async function renderShorts(container) {
-  const { data: shorts } = await supabase
-    .from('videos')
-    .select('*')
-    .eq('is_short', true);
-
-  if (!shorts || shorts.length === 0) {
-    renderEmptyState(container, "⚡", "No hay Shorts disponibles", "Prueba a subir un video marcando la casilla de Short.");
-    return;
+      </div>`;
+  } catch (err) {
+    console.error(err);
+    main.innerHTML = `
+      <div class="state-box">
+        <div class="icon">🎬</div>
+        <h3>Busca algo para comenzar</h3>
+        <p>Haz clic en el botón <b>➕ Crear</b> arriba para añadir tu primer video.</p>
+      </div>`;
   }
-
-  container.innerHTML = `
-    <div style="display:flex;justify-content:center;align-items:center;padding:20px 0;">
-      <video src="${escapeHTML(shorts[0].video_url)}" controls loop style="max-height:75vh;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.6);"></video>
-    </div>`;
 }
 
-async function renderSearchResults(container, query) {
-  const { data: videos } = await supabase
-    .from('videos')
-    .select('*')
-    .ilike('title', `%${query}%`);
-
-  if (!videos || videos.length === 0) {
-    renderEmptyState(container, "🔍", "Sin resultados", `No se encontraron videos para "${escapeHTML(query)}".`);
-    return;
-  }
-
-  container.innerHTML = `
-    <h2 style="font-size:18px;margin-bottom:16px;">Resultados para "${escapeHTML(query)}"</h2>
-    <div class="video-grid">${videos.map(v => renderVideoCard(v)).join('')}</div>
-  `;
-}
-
-function renderVideoCard(video) {
-  return `
-    <div class="video-card" onclick="navigate('/watch?v=${video.id}')">
-      <div class="thumb-wrap">
-        ${video.thumbnail_url ? `<img src="${escapeHTML(video.thumbnail_url)}">` : '<div class="no-thumb">▶</div>'}
-      </div>
-      <div class="card-meta">
-        <div class="avatar-circle">J</div>
-        <div class="card-info">
-          <div class="card-title">${escapeHTML(video.title)}</div>
-          <div class="card-channel">JHEILER</div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function openUploadModal() {
-  const existingModal = qs('#uploadModal');
+document.getElementById('btnCreate')?.addEventListener('click', () => {
+  const existingModal = document.getElementById('uploadModal');
   if (existingModal) existingModal.remove();
 
   const modalHTML = `
@@ -435,9 +243,9 @@ function openUploadModal() {
         <input type="text" id="upTitle" placeholder="Título del video (Obligatorio)">
         <input type="text" id="upUrl" placeholder="URL del video MP4 (Obligatorio)">
         <input type="text" id="upThumb" placeholder="URL de la miniatura (Opcional)">
-        <textarea id="upDesc" placeholder="Descripción del video"></textarea>
+        <textarea id="upDesc" placeholder="Descripción"></textarea>
         <div class="modal-actions">
-          <button class="btn-sec" id="btnCancelModal">Cancelar</button>
+          <button class="btn-sec" onclick="document.getElementById('uploadModal').remove()">Cancelar</button>
           <button class="btn-pri" id="btnSaveVideo">Publicar</button>
         </div>
       </div>
@@ -445,56 +253,31 @@ function openUploadModal() {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
-  qs('#btnCancelModal')?.addEventListener('click', () => {
-    qs('#uploadModal')?.remove();
-  });
-
-  qs('#btnSaveVideo')?.addEventListener('click', async () => {
-    const title = qs('#upTitle').value.trim();
-    const video_url = qs('#upUrl').value.trim();
-    const thumbnail_url = qs('#upThumb').value.trim();
-    const description = qs('#upDesc').value.trim();
+  document.getElementById('btnSaveVideo')?.addEventListener('click', async () => {
+    const title = document.getElementById('upTitle').value.trim();
+    const video_url = document.getElementById('upUrl').value.trim();
+    const thumbnail_url = document.getElementById('upThumb').value.trim();
+    const description = document.getElementById('upDesc').value.trim();
 
     if (!title || !video_url) {
-      toast('El título y la URL del video son obligatorios', 'error');
+      showToast('Por favor completa el título y la URL del video', 'error');
       return;
     }
 
-    const { error } = await supabase.from('videos').insert([
-      { title, video_url, thumbnail_url, description }
-    ]);
+    const { error } = await sb.from('videos').insert([{ title, video_url, thumbnail_url, description }]);
 
     if (error) {
-      toast('Error al guardar: ' + error.message, 'error');
+      showToast('Error al guardar: ' + error.message, 'error');
     } else {
-      toast('¡Video publicado con éxito!', 'success');
-      qs('#uploadModal')?.remove();
+      showToast('¡Video publicado correctamente!', 'success');
+      document.getElementById('uploadModal').remove();
       renderPage();
     }
   });
-}
-
-function setupEvents() {
-  qs('#btnToggleSidebar')?.addEventListener('click', () => {
-    qs('#sidebar')?.classList.toggle('mini');
-    qs('#mainContent')?.classList.toggle('mini-margin');
-  });
-
-  qs('#btnCreate')?.addEventListener('click', openUploadModal);
-
-  qs('#searchForm')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const val = qs('#searchInput').value.trim();
-    if (val) navigate(`/search?q=${encodeURIComponent(val)}`);
-  });
-
-  window.addEventListener('hashchange', renderPage);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  setupEvents();
-  renderPage();
 });
+
+window.addEventListener('hashchange', renderPage);
+document.addEventListener('DOMContentLoaded', renderPage);
 </script>
 </body>
 </html>
