@@ -80,14 +80,14 @@ input,textarea{font-family:inherit;color:#fff;}
 #mainContent{flex:1;margin-left:var(--sidebar-w);padding:24px;min-width:0;}
 
 .video-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:20px 16px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px 16px;
 }
 .video-card{cursor:pointer;}
 .thumb-wrap{
   position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
   background:var(--panel2);margin-bottom:10px;
 }
-.thumb-wrap img{width:100%;height:100%;object-fit:cover;}
+.thumb-wrap img, .thumb-wrap video{width:100%;height:100%;object-fit:cover;}
 .thumb-wrap .no-thumb{
   width:100%;height:100%;display:flex;align-items:center;justify-content:center;
   font-size:36px;color:#aaa;background:linear-gradient(135deg,#252525,#121212);
@@ -112,17 +112,24 @@ input,textarea{font-family:inherit;color:#fff;}
   display:flex;align-items:center;justify-content:center;padding:16px;
 }
 .modal-card{
-  background:var(--panel);border-radius:16px;padding:24px;width:100%;max-width:480px;
+  background:var(--panel);border-radius:16px;padding:24px;width:100%;max-width:500px;
   display:flex;flex-direction:column;gap:14px;border:1px solid var(--border);
 }
-.modal-card input, .modal-card textarea{
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group label{font-size:13px;color:#aaa;}
+.modal-card input[type="text"], .modal-card textarea{
   width:100%;padding:12px;background:var(--panel2);border:1px solid var(--border);
   border-radius:8px;outline:none;font-size:14px;
 }
-.modal-card textarea{height:80px;resize:none;}
+.modal-card input[type="file"]{
+  background:var(--panel2);padding:10px;border-radius:8px;border:1px dashed var(--border);
+  font-size:13px;color:#ccc;cursor:pointer;
+}
+.modal-card textarea{height:70px;resize:none;}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;}
 .btn-sec{padding:10px 18px;background:var(--panel2);border-radius:8px;}
-.btn-pri{padding:10px 18px;background:var(--accent);color:#fff;border-radius:8px;}
+.btn-pri{padding:10px 18px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;}
+.btn-pri:disabled{opacity:0.5;cursor:not-allowed;}
 
 #toastContainer{
   position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -172,7 +179,6 @@ input,textarea{font-family:inherit;color:#fff;}
 <div id="toastContainer"></div>
 
 <script>
-// Usamos 'sb' para no chocar con la variable global 'supabase'
 const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
@@ -184,7 +190,7 @@ function showToast(msg, type = 'info') {
   el.className = `toast ${type}`;
   el.textContent = msg;
   container.appendChild(el);
-  setTimeout(() => el.remove(), 3000);
+  setTimeout(() => el.remove(), 4000);
 }
 
 async function renderPage() {
@@ -199,7 +205,7 @@ async function renderPage() {
         <div class="state-box">
           <div class="icon">🎬</div>
           <h3>Busca algo para comenzar</h3>
-          <p>No hay videos publicados aún. Haz clic en <b>➕ Crear</b> para subir uno.</p>
+          <p>No hay videos publicados aún. Haz clic en <b>➕ Crear</b> para subir uno desde tu PC o celular.</p>
         </div>`;
       return;
     }
@@ -240,12 +246,29 @@ document.getElementById('btnCreate')?.addEventListener('click', () => {
     <div id="uploadModal" class="modal-backdrop">
       <div class="modal-card">
         <h2>Subir nuevo video</h2>
-        <input type="text" id="upTitle" placeholder="Título del video (Obligatorio)">
-        <input type="text" id="upUrl" placeholder="URL del video MP4 (Obligatorio)">
-        <input type="text" id="upThumb" placeholder="URL de la miniatura (Opcional)">
-        <textarea id="upDesc" placeholder="Descripción"></textarea>
+        
+        <div class="form-group">
+          <label>Título del video *</label>
+          <input type="text" id="upTitle" placeholder="Ej: Mi primer video">
+        </div>
+
+        <div class="form-group">
+          <label>Archivo de Video (MP4, WEBM, MOV) *</label>
+          <input type="file" id="upVideoFile" accept="video/*">
+        </div>
+
+        <div class="form-group">
+          <label>Miniatura / Imagen (Opcional)</label>
+          <input type="file" id="upThumbFile" accept="image/*">
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="upDesc" placeholder="Escribe algo sobre tu video..."></textarea>
+        </div>
+
         <div class="modal-actions">
-          <button class="btn-sec" onclick="document.getElementById('uploadModal').remove()">Cancelar</button>
+          <button class="btn-sec" id="btnCancel">Cancelar</button>
           <button class="btn-pri" id="btnSaveVideo">Publicar</button>
         </div>
       </div>
@@ -253,25 +276,72 @@ document.getElementById('btnCreate')?.addEventListener('click', () => {
   `;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 
+  document.getElementById('btnCancel')?.addEventListener('click', () => {
+    document.getElementById('uploadModal').remove();
+  });
+
   document.getElementById('btnSaveVideo')?.addEventListener('click', async () => {
     const title = document.getElementById('upTitle').value.trim();
-    const video_url = document.getElementById('upUrl').value.trim();
-    const thumbnail_url = document.getElementById('upThumb').value.trim();
+    const videoFileInput = document.getElementById('upVideoFile');
+    const thumbFileInput = document.getElementById('upThumbFile');
     const description = document.getElementById('upDesc').value.trim();
 
-    if (!title || !video_url) {
-      showToast('Por favor completa el título y la URL del video', 'error');
+    const videoFile = videoFileInput.files[0];
+    const thumbFile = thumbFileInput.files[0];
+
+    if (!title || !videoFile) {
+      showToast('Por favor escribe un título y selecciona un archivo de video.', 'error');
       return;
     }
 
-    const { error } = await sb.from('videos').insert([{ title, video_url, thumbnail_url, description }]);
+    const btnSave = document.getElementById('btnSaveVideo');
+    btnSave.disabled = true;
+    btnSave.textContent = 'Subiendo...';
 
-    if (error) {
-      showToast('Error al guardar: ' + error.message, 'error');
-    } else {
-      showToast('¡Video publicado correctamente!', 'success');
+    try {
+      // 1. Subir Video a bucket 'videos'
+      showToast('Subiendo archivo de video...', 'info');
+      const videoFileName = `${Date.now()}_${videoFile.name.replace(/\s+/g, '_')}`;
+      const { data: vData, error: vErr } = await sb.storage
+        .from('videos')
+        .upload(videoFileName, videoFile);
+
+      if (vErr) throw new Error('Error al subir video: ' + vErr.message);
+
+      const videoUrlData = sb.storage.from('videos').getPublicUrl(videoFileName);
+      const video_url = videoUrlData.data.publicUrl;
+
+      // 2. Subir Miniatura si se eligió una
+      let thumbnail_url = null;
+      if (thumbFile) {
+        showToast('Subiendo miniatura...', 'info');
+        const thumbFileName = `${Date.now()}_${thumbFile.name.replace(/\s+/g, '_')}`;
+        const { error: tErr } = await sb.storage
+          .from('thumbnails')
+          .upload(thumbFileName, thumbFile);
+
+        if (!tErr) {
+          const thumbUrlData = sb.storage.from('thumbnails').getPublicUrl(thumbFileName);
+          thumbnail_url = thumbUrlData.data.publicUrl;
+        }
+      }
+
+      // 3. Guardar en la tabla 'videos'
+      const { error: dbErr } = await sb.from('videos').insert([
+        { title, video_url, thumbnail_url, description }
+      ]);
+
+      if (dbErr) throw new Error('Error en BD: ' + dbErr.message);
+
+      showToast('¡Video publicado con éxito!', 'success');
       document.getElementById('uploadModal').remove();
       renderPage();
+
+    } catch (err) {
+      console.error(err);
+      showToast(err.message, 'error');
+      btnSave.disabled = false;
+      btnSave.textContent = 'Publicar';
     }
   });
 });
