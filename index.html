@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JHEILER</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ff304f%22/><polygon points=%2238,28 78,50 38,72%22 fill=%22white%22/></svg>">
+
+<link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff304f'/><polygon points='38,28 78,50 38,72' fill='white'/></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}"/>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -58,10 +61,16 @@ input,textarea{font-family:inherit;color:#fff;}
   display:flex;align-items:center;justify-content:center;
 }
 
+.header-right{display:flex;align-items:center;gap:10px;}
 .create-btn{
   display:flex;align-items:center;gap:8px;
   padding:8px 16px;border-radius:20px;background:var(--accent);
   font-size:14px;font-weight:600;color:#fff;
+}
+.install-btn{
+  display:none;align-items:center;gap:8px;
+  padding:8px 16px;border-radius:20px;background:var(--panel2);
+  border:1px solid var(--border);font-size:14px;font-weight:600;color:#fff;
 }
 
 #sidebar{
@@ -107,6 +116,7 @@ input,textarea{font-family:inherit;color:#fff;}
 .action-bar{
   display:flex;align-items:center;justify-content:space-between;
   margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);
+  flex-wrap:wrap;gap:12px;
 }
 .channel-info{display:flex;align-items:center;gap:12px;}
 .sub-btn{
@@ -193,6 +203,7 @@ input,textarea{font-family:inherit;color:#fff;}
   </div>
 
   <div class="header-right">
+    <button class="install-btn" id="btnInstallApp">📥 Instalar App</button>
     <button class="create-btn" id="btnCreate">➕ <span>Crear</span></button>
   </div>
 </header>
@@ -224,6 +235,27 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 let localLikes = JSON.parse(localStorage.getItem('jheiler_likes') || '{}');
 let isSubscribed = localStorage.getItem('jheiler_sub') === 'true';
 let localComments = JSON.parse(localStorage.getItem('jheiler_comments') || '{}');
+let deferredPrompt;
+
+// PWA Instalación
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btnInstall = document.getElementById('btnInstallApp');
+  if (btnInstall) btnInstall.style.display = 'flex';
+});
+
+document.getElementById('btnInstallApp')?.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      showToast('¡Gracias por instalar la App!', 'success');
+    }
+    deferredPrompt = null;
+    document.getElementById('btnInstallApp').style.display = 'none';
+  }
+});
 
 function showToast(msg, type = 'info') {
   const container = document.getElementById('toastContainer');
@@ -248,7 +280,6 @@ async function renderPage() {
 
   const hash = window.location.hash || '#/home';
 
-  // Vista de Shorts, Suscripciones, Historial o Tus Videos
   if (['#/shorts', '#/subscriptions', '#/history', '#/your-videos'].includes(hash)) {
     const titles = {
       '#/shorts': '⚡ Shorts',
@@ -265,7 +296,6 @@ async function renderPage() {
     return;
   }
 
-  // Vista Reproductor de Video
   if (hash.startsWith('#/watch')) {
     const urlParams = new URLSearchParams(hash.split('?')[1]);
     const videoId = urlParams.get('v');
@@ -323,7 +353,6 @@ async function renderPage() {
       </div>
     `;
 
-    // Eventos de interactividad
     document.getElementById('btnSub')?.addEventListener('click', () => {
       isSubscribed = !isSubscribed;
       localStorage.setItem('jheiler_sub', isSubscribed);
@@ -352,7 +381,6 @@ async function renderPage() {
     return;
   }
 
-  // Vista Inicio / Búsqueda
   try {
     const searchQuery = new URLSearchParams(hash.split('?')[1]).get('q') || '';
     
@@ -389,7 +417,9 @@ async function renderPage() {
         ${videos.map(v => `
           <div class="video-card" onclick="window.location.hash='#/watch?v=${v.id}'">
             <div class="thumb-wrap">
-              ${v.thumbnail_url ? `<img src="${v.thumbnail_url}">` : '<div class="no-thumb">▶</div>'}
+              ${v.thumbnail_url 
+                ? `<img src="${v.thumbnail_url}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="no-thumb" style="display:none;">▶</div>` 
+                : '<div class="no-thumb">▶</div>'}
             </div>
             <div class="card-meta">
               <div class="avatar-circle">J</div>
