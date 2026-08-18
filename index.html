@@ -1,569 +1,707 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JHEILER</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ff304f%22/><polygon points=%2238,28 78,50 38,72%22 fill=%22white%22/></svg>">
-<link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff304f'/><polygon points='38,28 78,50 38,72' fill='white'/></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
-body{
-  font-family:"Segoe UI",Roboto,sans-serif;
-  background:#0f0f0f;
-  color:#ffffff;
-  overflow-x:hidden;
-}
-a{color:inherit;text-decoration:none;}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
-input,textarea{font-family:inherit;color:#fff;}
-::-webkit-scrollbar{width:8px;height:8px;}
-::-webkit-scrollbar-track{background:#0f0f0f;}
-::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>JHEILER - Tu plataforma de videos</title>
+    
+    <!-- ===== FONT AWESOME (Iconos profesionales) ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/3670/3670147.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        /* ===== RESET Y VARIABLES ===== */
+        :root {
+            --bg: #0f0f0f;
+            --panel: #181818;
+            --panel2: #212121;
+            --accent: #ff304f;
+            --border: #303030;
+            --text-secondary: #aaa;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
 
-:root{
-  --bg:#0f0f0f;
-  --panel:#181818;
-  --panel2:#212121;
-  --accent:#ff304f;
-  --border:#303030;
-  --header-h:56px;
-  --sidebar-w:240px;
-}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-#appHeader{
-  position:fixed;top:0;left:0;right:0;height:var(--header-h);
-  background:var(--bg);
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 16px;z-index:200;border-bottom:1px solid var(--border);
-}
-.header-left{display:flex;align-items:center;gap:16px;}
-.brand{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:700;}
-.brand .play-ico{color:var(--accent);font-size:22px;}
+        body {
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: #fff;
+            min-height: 100vh;
+        }
 
-.header-center{flex:1;display:flex;justify-content:center;max-width:600px;margin:0 16px;}
-.search-form{
-  display:flex;width:100%;align-items:center;
-  border:1px solid var(--border);border-radius:20px 0 0 20px;
-  background:var(--bg);height:40px;overflow:hidden;
-}
-.search-form input{
-  flex:1;background:transparent;border:none;outline:none;
-  padding:0 16px;font-size:15px;color:#fff;
-}
-.search-btn{
-  width:60px;height:40px;background:var(--panel2);
-  border:1px solid var(--border);border-left:none;border-radius:0 20px 20px 0;
-  display:flex;align-items:center;justify-content:center;
-}
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-.header-right{display:flex;align-items:center;gap:10px;}
-.create-btn{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 16px;border-radius:20px;background:var(--accent);
-  font-size:14px;font-weight:600;color:#fff;
-}
-.install-btn{
-  display:none;align-items:center;gap:8px;
-  padding:8px 16px;border-radius:20px;background:var(--panel2);
-  border:1px solid var(--border);font-size:14px;font-weight:600;color:#fff;
-}
+        /* ===== HEADER ===== */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border);
+            z-index: 200;
+            backdrop-filter: blur(12px);
+            background: rgba(15,15,15,0.92);
+        }
 
-#sidebar{
-  position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);
-  background:var(--bg);padding-top:12px;border-right:1px solid var(--border);
-}
-.sb-section{padding:8px 0;border-bottom:1px solid var(--border);}
-.sb-title{padding:8px 24px;font-size:12px;font-weight:600;color:#aaa;text-transform:uppercase;}
-.sb-item{
-  display:flex;align-items:center;gap:20px;
-  padding:12px 24px;font-size:14px;color:#fff;cursor:pointer;
-}
-.sb-item:hover{background:#272727;}
+        .brand {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
 
-#appBody{padding-top:var(--header-h);display:flex;min-height:100vh;}
-#mainContent{flex:1;margin-left:var(--sidebar-w);padding:24px;min-width:0;}
+        .brand i {
+            font-size: 26px;
+            color: var(--accent);
+        }
 
-.video-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px 16px;
-}
-.video-card{cursor:pointer;}
-.thumb-wrap{
-  position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
-  background:var(--panel2);margin-bottom:10px;
-}
-.thumb-wrap img, .thumb-wrap video{width:100%;height:100%;object-fit:cover;}
-.thumb-wrap .no-thumb{
-  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
-  font-size:36px;color:#aaa;background:linear-gradient(135deg,#252525,#121212);
-}
-.card-meta{display:flex;gap:12px;}
-.avatar-circle{
-  width:36px;height:36px;border-radius:50%;background:var(--accent);
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
-}
-.card-title{font-size:14px;font-weight:600;line-height:1.3;margin-bottom:4px;}
-.card-channel{font-size:13px;color:#aaa;}
+        .create-btn {
+            padding: 10px 20px;
+            background: var(--accent);
+            border-radius: 24px;
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-.player-container{max-width:900px;margin:0 auto;}
-.video-player{width:100%;max-height:70vh;background:#000;border-radius:12px;margin-bottom:16px;}
-.video-info-title{font-size:20px;font-weight:700;margin-bottom:12px;}
+        .create-btn i {
+            font-size: 16px;
+        }
 
-.action-bar{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);
-  flex-wrap:wrap;gap:12px;
-}
-.channel-info{display:flex;align-items:center;gap:12px;}
-.sub-btn{
-  background:#fff;color:#000;padding:8px 16px;border-radius:20px;
-  font-weight:600;font-size:14px;
-}
-.sub-btn.subscribed{background:var(--panel2);color:#fff;border:1px solid var(--border);}
+        .create-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 24px rgba(255,48,79,0.35);
+        }
 
-.interaction-btns{display:flex;gap:10px;}
-.like-btn{
-  background:var(--panel2);padding:8px 16px;border-radius:20px;
-  display:flex;align-items:center;gap:6px;font-size:14px;
-}
-.like-btn.liked{color:var(--accent);}
+        /* ===== SIDEBAR ===== */
+        aside {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            bottom: 0;
+            width: 220px;
+            background: var(--bg);
+            border-right: 1px solid var(--border);
+            padding-top: 12px;
+            overflow-y: auto;
+            z-index: 100;
+        }
 
-.video-info-desc{background:var(--panel2);padding:12px;border-radius:8px;font-size:14px;color:#ddd;margin-bottom:24px;}
+        .sb-section {
+            padding: 6px 0 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
 
-.comments-section{margin-top:20px;}
-.comments-section h3{margin-bottom:16px;font-size:18px;}
-.comment-form{display:flex;gap:10px;margin-bottom:20px;}
-.comment-form input{
-  flex:1;background:var(--panel2);border:1px solid var(--border);
-  border-radius:20px;padding:10px 16px;outline:none;
-}
-.comment-form button{
-  background:var(--accent);color:#fff;padding:8px 18px;
-  border-radius:20px;font-weight:600;
-}
-.comment-list{display:flex;flex-direction:column;gap:12px;}
-.comment-item{background:var(--panel);padding:10px 14px;border-radius:10px;font-size:14px;}
+        .sb-title {
+            padding: 6px 24px 8px 24px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
 
-.state-box{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:50vh;text-align:center;color:#aaa;gap:16px;
-}
-.state-box .icon{font-size:64px;}
-.state-box h3{color:#fff;font-size:22px;}
+        .sb-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 24px;
+            font-size: 14px;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 0 8px;
+            transition: background 0.15s ease;
+            cursor: pointer;
+        }
 
-.modal-backdrop{
-  position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;
-  display:flex;align-items:center;justify-content:center;padding:16px;
-}
-.modal-card{
-  background:var(--panel);border-radius:16px;padding:24px;width:100%;max-width:500px;
-  display:flex;flex-direction:column;gap:14px;border:1px solid var(--border);
-}
-.form-group{display:flex;flex-direction:column;gap:6px;}
-.form-group label{font-size:13px;color:#aaa;}
-.modal-card input[type="text"], .modal-card textarea{
-  width:100%;padding:12px;background:var(--panel2);border:1px solid var(--border);
-  border-radius:8px;outline:none;font-size:14px;
-}
-.modal-card input[type="file"]{
-  background:var(--panel2);padding:10px;border-radius:8px;border:1px dashed var(--border);
-  font-size:13px;color:#ccc;cursor:pointer;
-}
-.modal-card textarea{height:70px;resize:none;}
-.modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px;}
-.btn-sec{padding:10px 18px;background:var(--panel2);border-radius:8px;}
-.btn-pri{padding:10px 18px;background:var(--accent);color:#fff;border-radius:8px;font-weight:600;}
-.btn-pri:disabled{opacity:0.5;cursor:not-allowed;}
+        .sb-item:hover {
+            background: var(--panel2);
+        }
 
-#toastContainer{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  z-index:1100;display:flex;flex-direction:column;gap:8px;
-}
-.toast{background:#2a2a2a;color:#fff;padding:12px 24px;border-radius:30px;font-size:14px;}
-.toast.error{background:#a31c1c;}
-.toast.success{background:#1e7e34;}
-</style>
+        .sb-item i {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .sb-item:hover i {
+            color: #fff;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        main {
+            margin-left: 220px;
+            padding: 80px 24px 40px 24px;
+            min-height: 100vh;
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 28px 20px;
+        }
+
+        .video-card {
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .video-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: var(--panel2);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .video-card:hover .thumb img {
+            transform: scale(1.02);
+        }
+
+        .play-overlay {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.85);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .play-overlay i {
+            font-size: 14px;
+            color: var(--accent);
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .card-meta i {
+            margin-right: 4px;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            display: block;
+            margin-bottom: 16px;
+            color: var(--border);
+        }
+
+        .empty-state h3 {
+            font-size: 22px;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        /* ===== MODAL ===== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(6px);
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.96); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-content {
+            background: var(--panel);
+            padding: 28px 32px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .modal-content h3 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-content h3 i {
+            color: var(--accent);
+        }
+
+        .modal-content input,
+        .modal-content textarea {
+            padding: 12px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: #fff;
+            font-size: 14px;
+            transition: border 0.2s ease;
+            width: 100%;
+        }
+
+        .modal-content input:focus,
+        .modal-content textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .modal-content textarea {
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 0 24px rgba(255,48,79,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--panel2);
+            color: #aaa;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+            color: #fff;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            padding: 10px;
+            background: var(--panel2);
+            border-radius: 10px;
+            border: 1px dashed var(--border);
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"]::file-selector-button {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-right: 12px;
+        }
+
+        .file-input-wrapper i {
+            margin-right: 6px;
+        }
+
+        /* ===== TOAST ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--panel2);
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            z-index: 2000;
+            font-weight: 500;
+            animation: slideUp 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast i {
+            font-size: 20px;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            aside {
+                display: none;
+            }
+            main {
+                margin-left: 0;
+                padding: 76px 16px 24px 16px;
+            }
+            .video-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 16px;
+            }
+            .brand {
+                font-size: 18px;
+            }
+            .brand i {
+                font-size: 20px;
+            }
+            .create-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .video-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+            .card-title {
+                font-size: 13px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<header id="appHeader">
-  <div class="header-left">
-    <a href="#/home" class="brand"><span class="play-ico">▶</span> JHEILER</a>
-  </div>
-
-  <div class="header-center">
-    <form class="search-form" id="searchForm">
-      <input type="text" id="searchInput" placeholder="Buscar">
-    </form>
-    <button class="search-btn" id="searchBtn">🔍</button>
-  </div>
-
-  <div class="header-right">
-    <button class="install-btn" id="btnInstallApp">📥 Instalar App</button>
-    <button class="create-btn" id="btnCreate">➕ <span>Crear</span></button>
-  </div>
-</header>
-
-<nav id="sidebar">
-  <div class="sb-section">
-    <a class="sb-item" href="#/home"><span>🏠</span><span>Inicio</span></a>
-    <a class="sb-item" href="#/shorts"><span>⚡</span><span>Shorts</span></a>
-    <a class="sb-item" href="#/subscriptions"><span>📺</span><span>Suscripciones</span></a>
-  </div>
-  <div class="sb-section">
-    <div class="sb-title">Biblioteca</div>
-    <a class="sb-item" href="#/history"><span>🕒</span><span>Historial</span></a>
-    <a class="sb-item" href="#/your-videos"><span>🎬</span><span>Tus videos</span></a>
-  </div>
-</nav>
-
-<div id="appBody">
-  <div id="mainContent"></div>
-</div>
-
-<div id="toastContainer"></div>
-
-<script>
-const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
-let localLikes = JSON.parse(localStorage.getItem('jheiler_likes') || '{}');
-let isSubscribed = localStorage.getItem('jheiler_sub') === 'true';
-let localComments = JSON.parse(localStorage.getItem('jheiler_comments') || '{}');
-let deferredPrompt;
-
-// Registrar Service Worker para permitir la instalación PWA
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js').catch(() => {});
-  });
-}
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const btnInstall = document.getElementById('btnInstallApp');
-  if (btnInstall) btnInstall.style.display = 'flex';
-});
-
-document.getElementById('btnInstallApp')?.addEventListener('click', async () => {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      showToast('¡Gracias por instalar la App!', 'success');
-    }
-    deferredPrompt = null;
-    document.getElementById('btnInstallApp').style.display = 'none';
-  }
-});
-
-function showToast(msg, type = 'info') {
-  const container = document.getElementById('toastContainer');
-  if (!container) return;
-  const el = document.createElement('div');
-  el.className = `toast ${type}`;
-  el.textContent = msg;
-  container.appendChild(el);
-  setTimeout(() => el.remove(), 4000);
-}
-
-function cleanFileName(fileName) {
-  return fileName
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9.-]/g, "_");
-}
-
-async function renderPage() {
-  const main = document.getElementById('mainContent');
-  if (!main) return;
-
-  const hash = window.location.hash || '#/home';
-
-  if (['#/shorts', '#/subscriptions', '#/history', '#/your-videos'].includes(hash)) {
-    const titles = {
-      '#/shorts': '⚡ Shorts',
-      '#/subscriptions': '📺 Suscripciones',
-      '#/history': '🕒 Historial',
-      '#/your-videos': '🎬 Tus videos'
-    };
-    main.innerHTML = `
-      <div class="state-box">
-        <div class="icon">🚧</div>
-        <h3>Sección de ${titles[hash]}</h3>
-        <p>Esta pestaña estará disponible próximamente.</p>
-      </div>`;
-    return;
-  }
-
-  if (hash.startsWith('#/watch')) {
-    const urlParams = new URLSearchParams(hash.split('?')[1]);
-    const videoId = urlParams.get('v');
-
-    if (!videoId) {
-      main.innerHTML = `<div class="state-box"><h3>Video no encontrado</h3></div>`;
-      return;
-    }
-
-    const { data: v, error } = await sb.from('videos').select('*').eq('id', videoId).single();
-
-    if (error || !v) {
-      main.innerHTML = `<div class="state-box"><h3>Error al cargar el video</h3></div>`;
-      return;
-    }
-
-    const likesCount = localLikes[videoId] ? 1 : 0;
-    const comments = localComments[videoId] || [];
-
-    main.innerHTML = `
-      <div class="player-container">
-        <video class="video-player" controls autoplay src="${v.video_url}"></video>
-        <div class="video-info-title">${v.title}</div>
-        
-        <div class="action-bar">
-          <div class="channel-info">
-            <div class="avatar-circle">J</div>
-            <div>
-              <strong style="display:block;">JHEILER</strong>
-            </div>
-            <button class="sub-btn ${isSubscribed ? 'subscribed' : ''}" id="btnSub">
-              ${isSubscribed ? 'Suscrito' : 'Suscribirse'}
-            </button>
-          </div>
-
-          <div class="interaction-btns">
-            <button class="like-btn ${localLikes[videoId] ? 'liked' : ''}" id="btnLike">
-              👍 <span id="likeCount">${likesCount}</span>
-            </button>
-          </div>
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div class="brand">
+            <i class="fas fa-play"></i> JHEILER
         </div>
+        <button class="create-btn" id="btnOpenModal">
+            <i class="fas fa-plus"></i> Crear
+        </button>
+    </header>
 
-        <div class="video-info-desc">${v.description || 'Sin descripción.'}</div>
-
-        <div class="comments-section">
-          <h3>Comentarios (${comments.length})</h3>
-          <div class="comment-form">
-            <input type="text" id="commentInput" placeholder="Añade un comentario...">
-            <button id="btnComment">Comentar</button>
-          </div>
-          <div class="comment-list" id="commentList">
-            ${comments.map(c => `<div class="comment-item">${c}</div>`).join('')}
-          </div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside>
+        <div class="sb-section">
+            <a class="sb-item" href="#">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <a class="sb-item" href="#">
+                <i class="fas fa-bolt"></i> Shorts
+            </a>
+            <a class="sb-item" href="#">
+                <i class="fas fa-tv"></i> Suscripciones
+            </a>
         </div>
-      </div>
-    `;
-
-    document.getElementById('btnSub')?.addEventListener('click', () => {
-      isSubscribed = !isSubscribed;
-      localStorage.setItem('jheiler_sub', isSubscribed);
-      renderPage();
-      showToast(isSubscribed ? '¡Te has suscrito!' : 'Suscripción cancelada');
-    });
-
-    document.getElementById('btnLike')?.addEventListener('click', () => {
-      localLikes[videoId] = !localLikes[videoId];
-      localStorage.setItem('jheiler_likes', JSON.stringify(localLikes));
-      renderPage();
-    });
-
-    document.getElementById('btnComment')?.addEventListener('click', () => {
-      const input = document.getElementById('commentInput');
-      const text = input.value.trim();
-      if (text) {
-        if (!localComments[videoId]) localComments[videoId] = [];
-        localComments[videoId].push(text);
-        localStorage.setItem('jheiler_comments', JSON.stringify(localComments));
-        input.value = '';
-        renderPage();
-      }
-    });
-
-    return;
-  }
-
-  try {
-    const searchQuery = new URLSearchParams(hash.split('?')[1]).get('q') || '';
-    
-    let query = sb.from('videos').select('*').order('created_at', { ascending: false });
-    
-    if (searchQuery) {
-      query = query.ilike('title', `%${searchQuery}%`);
-    }
-
-    const { data: videos, error } = await query;
-
-    if (error) {
-      main.innerHTML = `
-        <div class="state-box">
-          <div class="icon">⚠️</div>
-          <h3>Error al conectar con la base de datos</h3>
-          <p>${error.message}</p>
-        </div>`;
-      return;
-    }
-
-    if (!videos || videos.length === 0) {
-      main.innerHTML = `
-        <div class="state-box">
-          <div class="icon">🎬</div>
-          <h3>${searchQuery ? 'No se encontraron resultados' : 'No hay videos aún'}</h3>
-          <p>${searchQuery ? `No hay videos que coincidan con "${searchQuery}"` : 'Haz clic en el botón <b>➕ Crear</b> arriba para publicar tu primer video.'}</p>
-        </div>`;
-      return;
-    }
-
-    main.innerHTML = `
-      <div class="video-grid">
-        ${videos.map(v => `
-          <div class="video-card" onclick="window.location.hash='#/watch?v=${v.id}'">
-            <div class="thumb-wrap">
-              ${v.thumbnail_url 
-                ? `<img src="${v.thumbnail_url}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"><div class="no-thumb" style="display:none;">▶</div>` 
-                : '<div class="no-thumb">▶</div>'}
-            </div>
-            <div class="card-meta">
-              <div class="avatar-circle">J</div>
-              <div>
-                <div class="card-title">${v.title}</div>
-                <div class="card-channel">JHEILER</div>
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>`;
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-function executeSearch() {
-  const term = document.getElementById('searchInput').value.trim();
-  if (term) {
-    window.location.hash = `#/search?q=${encodeURIComponent(term)}`;
-  } else {
-    window.location.hash = '#/home';
-  }
-}
-
-document.getElementById('searchForm')?.addEventListener('submit', (e) => {
-  e.preventDefault();
-  executeSearch();
-});
-document.getElementById('searchBtn')?.addEventListener('click', executeSearch);
-
-document.getElementById('btnCreate')?.addEventListener('click', () => {
-  const existingModal = document.getElementById('uploadModal');
-  if (existingModal) existingModal.remove();
-
-  const modalHTML = `
-    <div id="uploadModal" class="modal-backdrop">
-      <div class="modal-card">
-        <h2>Subir nuevo video</h2>
-        
-        <div class="form-group">
-          <label>Título del video *</label>
-          <input type="text" id="upTitle" placeholder="Ej: Mi video de Roblox">
+        <div class="sb-section">
+            <div class="sb-title">Biblioteca</div>
+            <a class="sb-item" href="#">
+                <i class="fas fa-clock"></i> Historial
+            </a>
+            <a class="sb-item" href="#">
+                <i class="fas fa-video"></i> Tus videos
+            </a>
+            <a class="sb-item" href="#">
+                <i class="fas fa-heart"></i> Favoritos
+            </a>
+            <a class="sb-item" href="#">
+                <i class="fas fa-clock"></i> Ver después
+            </a>
         </div>
+    </aside>
 
-        <div class="form-group">
-          <label>Archivo de Video (MP4, WEBM, MOV) *</label>
-          <input type="file" id="upVideoFile" accept="video/*">
-        </div>
+    <!-- ===== MAIN ===== -->
+    <main>
+        <div class="video-grid" id="videoGrid"></div>
+    </main>
 
-        <div class="form-group">
-          <label>Miniatura / Imagen (Opcional)</label>
-          <input type="file" id="upThumbFile" accept="image/*">
-        </div>
+    <script>
+        // ===== CONFIG =====
+        const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        <div class="form-group">
-          <label>Descripción</label>
-          <textarea id="upDesc" placeholder="Escribe algo sobre tu video..."></textarea>
-        </div>
+        const grid = document.getElementById('videoGrid');
 
-        <div class="modal-actions">
-          <button class="btn-sec" id="btnCancel">Cancelar</button>
-          <button class="btn-pri" id="btnSaveVideo">Publicar</button>
-        </div>
-      </div>
-    </div>
-  `;
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
+        // ===== TOAST NOTIFICATION =====
+        function showToast(message, type = 'info', duration = 2500) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
 
-  document.getElementById('btnCancel')?.addEventListener('click', () => {
-    document.getElementById('uploadModal').remove();
-  });
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            const iconMap = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            toast.innerHTML = `<i class="${iconMap[type] || iconMap.info}"></i> ${message}`;
+            document.body.appendChild(toast);
 
-  document.getElementById('btnSaveVideo')?.addEventListener('click', async () => {
-    const title = document.getElementById('upTitle').value.trim();
-    const videoFileInput = document.getElementById('upVideoFile');
-    const thumbFileInput = document.getElementById('upThumbFile');
-    const description = document.getElementById('upDesc').value.trim();
-
-    const videoFile = videoFileInput.files[0];
-    const thumbFile = thumbFileInput.files[0];
-
-    if (!title || !videoFile) {
-      showToast('Por favor escribe un título y selecciona un archivo de video.', 'error');
-      return;
-    }
-
-    const btnSave = document.getElementById('btnSaveVideo');
-    btnSave.disabled = true;
-    btnSave.textContent = 'Subiendo...';
-
-    try {
-      showToast('Subiendo archivo de video...', 'info');
-      const videoFileName = `${Date.now()}_${cleanFileName(videoFile.name)}`;
-      
-      const { error: vErr } = await sb.storage
-        .from('videos')
-        .upload(videoFileName, videoFile);
-
-      if (vErr) throw new Error('Error en Storage (videos): ' + vErr.message);
-
-      const videoUrlData = sb.storage.from('videos').getPublicUrl(videoFileName);
-      const video_url = videoUrlData.data.publicUrl;
-
-      let thumbnail_url = null;
-      if (thumbFile) {
-        showToast('Subiendo miniatura...', 'info');
-        const thumbFileName = `${Date.now()}_${cleanFileName(thumbFile.name)}`;
-        const { error: tErr } = await sb.storage
-          .from('thumbnails')
-          .upload(thumbFileName, thumbFile);
-
-        if (!tErr) {
-          const thumbUrlData = sb.storage.from('thumbnails').getPublicUrl(thumbFileName);
-          thumbnail_url = thumbUrlData.data.publicUrl;
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(20px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
         }
-      }
 
-      const { error: dbErr } = await sb.from('videos').insert([
-        { title, video_url, thumbnail_url, description }
-      ]);
+        // ===== CARGAR VIDEOS =====
+        async function loadVideos() {
+            try {
+                const { data, error } = await sb
+                    .from('videos')
+                    .select('*')
+                    .order('created_at', { ascending: false });
 
-      if (dbErr) throw new Error('Error en la Tabla videos: ' + dbErr.message);
+                if (error) throw error;
 
-      showToast('¡Video publicado con éxito!', 'success');
-      document.getElementById('uploadModal').remove();
-      window.location.hash = '#/home';
-      renderPage();
+                if (!data || data.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-video"></i>
+                            <h3>No hay videos aún</h3>
+                            <p style="color:#666;margin-top:8px;">¡Sé el primero en subir contenido!</p>
+                        </div>
+                    `;
+                    return;
+                }
 
-    } catch (err) {
-      console.error(err);
-      showToast(err.message, 'error');
-      btnSave.disabled = false;
-      btnSave.textContent = 'Publicar';
-    }
-  });
-});
+                grid.innerHTML = data.map(v => `
+                    <div class="video-card" onclick="playVideo('${v.video_url}')">
+                        <div class="thumb">
+                            <img src="${v.thumbnail_url || ''}" 
+                                 alt="${v.title || 'Video'}"
+                                 loading="lazy"
+                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%23212121%22 width=%22320%22 height=%22180%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2232%22%3E🎬%3C/text%3E%3C/svg%3E'">
+                            <div class="play-overlay">
+                                <i class="fas fa-play"></i> Reproducir
+                            </div>
+                        </div>
+                        <div class="card-title">${v.title || 'Sin título'}</div>
+                        <div class="card-meta">
+                            <i class="far fa-calendar-alt"></i> ${new Date(v.created_at).toLocaleDateString('es-ES')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Error cargando videos:', err);
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Error al cargar</h3>
+                        <p style="color:#666;">Intenta de nuevo más tarde</p>
+                    </div>
+                `;
+            }
+        }
 
-window.addEventListener('hashchange', renderPage);
-document.addEventListener('DOMContentLoaded', renderPage);
-</script>
+        // ===== REPRODUCIR VIDEO =====
+        window.playVideo = function(url) {
+            if (!url) return showToast('Video no disponible', 'error');
+            window.open(url, '_blank');
+        };
+
+        // ===== ABRIR MODAL =====
+        document.getElementById('btnOpenModal').onclick = () => {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>
+                        <i class="fas fa-upload"></i> Subir video
+                    </h3>
+                    <input type="text" id="upTitle" placeholder="Título del video" maxlength="100">
+                    <textarea id="upDesc" placeholder="Descripción (opcional)" maxlength="500"></textarea>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="upVideo" accept="video/*" required>
+                        <small style="color:#666;display:block;margin-top:4px;">
+                            <i class="fas fa-info-circle"></i> Máx. 100MB
+                        </small>
+                    </div>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="upThumb" accept="image/*">
+                        <small style="color:#666;display:block;margin-top:4px;">
+                            <i class="fas fa-info-circle"></i> Miniatura (opcional)
+                        </small>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn-primary" id="btnUpload">
+                            <i class="fas fa-cloud-upload-alt"></i> Publicar
+                        </button>
+                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            document.getElementById('btnUpload').onclick = async () => {
+                const title = document.getElementById('upTitle').value.trim();
+                const desc = document.getElementById('upDesc').value.trim();
+                const videoFile = document.getElementById('upVideo').files[0];
+                const thumbFile = document.getElementById('upThumb').files[0];
+
+                if (!title) return showToast('Escribe un título', 'warning');
+                if (!videoFile) return showToast('Selecciona un video', 'warning');
+                if (videoFile.size > 100 * 1024 * 1024) {
+                    return showToast('El video no debe superar 100MB', 'error');
+                }
+
+                const btn = document.getElementById('btnUpload');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
+                btn.disabled = true;
+
+                try {
+                    // Subir video
+                    const vName = `${Date.now()}_${videoFile.name}`;
+                    const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
+                    if (vErr) throw vErr;
+
+                    const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
+                    let thumbUrl = '';
+
+                    // Subir thumbnail (opcional)
+                    if (thumbFile) {
+                        const tName = `${Date.now()}_${thumbFile.name}`;
+                        const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
+                        if (!tErr) {
+                            const { data: tData } = sb.storage.from('thumbnails').getPublicUrl(tName);
+                            thumbUrl = tData.publicUrl;
+                        }
+                    }
+
+                    // Guardar en base de datos
+                    const { error: insertErr } = await sb.from('videos').insert({
+                        title,
+                        description: desc || null,
+                        video_url: vData.publicUrl,
+                        thumbnail_url: thumbUrl
+                    });
+
+                    if (insertErr) throw insertErr;
+
+                    modal.remove();
+                    showToast('¡Video publicado con éxito! 🎉', 'success');
+                    loadVideos();
+                } catch (err) {
+                    console.error('Error al subir:', err);
+                    showToast('Error al publicar: ' + err.message, 'error');
+                    btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publicar';
+                    btn.disabled = false;
+                }
+            };
+        };
+
+        // ===== SERVICE WORKER =====
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        // ===== INICIALIZAR =====
+        loadVideos();
+    </script>
 </body>
 </html>
