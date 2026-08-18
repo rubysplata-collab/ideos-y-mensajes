@@ -1917,38 +1917,75 @@
             document.getElementById('loginUsername').focus();
         }
 
-        async function handleLogin() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const errEl = document.getElementById('loginError');
-            errEl.textContent = '';
-            
-            if (!username || !password) {
-                errEl.textContent = 'Completa todos los campos';
-                return;
+       async function handleRegister() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const confirm = document.getElementById('regConfirm').value;
+    
+    // Limpiar errores
+    document.getElementById('regUsernameError').textContent = '';
+    document.getElementById('regPasswordError').textContent = '';
+    document.getElementById('regConfirmError').textContent = '';
+    
+    let hasError = false;
+    const uErr = validateUsername(username);
+    if (uErr) { document.getElementById('regUsernameError').textContent = uErr; hasError = true; }
+    const pErr = validatePassword(password);
+    if (pErr) { document.getElementById('regPasswordError').textContent = pErr; hasError = true; }
+    if (password !== confirm) {
+        document.getElementById('regConfirmError').textContent = 'Las contraseñas no coinciden';
+        hasError = true;
+    }
+    if (hasError) return;
+    if (!sb) { showToast('Error: Cliente de Supabase no disponible', 'error'); return; }
+    
+    const btn = document.getElementById('btnRegister');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span> Creando...';
+    
+    try {
+        const email = `${username.toLowerCase()}@jheiler.local`;
+        
+        // 1. Crear usuario en Auth
+        const { data: authData, error: authErr } = await sb.auth.signUp({
+            email,
+            password
+        });
+
+        if (authErr) {
+            console.error('Auth Error:', authErr);
+            if (authErr.message.includes('already')) {
+                document.getElementById('regUsernameError').textContent = 'El usuario ya existe';
+            } else {
+                document.getElementById('regUsernameError').textContent = authErr.message;
             }
-            if (!sb) { errEl.textContent = 'Supabase no disponible'; return; }
-            
-            const btn = document.getElementById('btnLogin');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
-            
-            try {
-                const email = usernameToEmail(username);
-                const { error } = await sb.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                
-                closeAllModals();
-                showToast('¡Bienvenido de vuelta!', 'success');
-                await initAuth();
-                loadCurrentSection();
-            } catch (e) {
-                errEl.textContent = 'Nombre de usuario o contraseña incorrectos';
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check"></i> Entrar';
-            }
+            throw authErr;
         }
 
+        if (!authData.user) throw new Error('No se obtuvo información del usuario');
+
+        // ✅ 2. CREAR EL PERFIL DESDE AQUÍ (sin trigger)
+        const { error: profileErr } = await sb.from('profiles').insert({
+            id: authData.user.id,
+            username: username.toLowerCase()
+        });
+
+        if (profileErr) {
+            console.error('Profile Error:', profileErr);
+            // Si da error de RLS, lo ignoramos por ahora y dejamos que lo cree al iniciar sesión
+        }
+
+        showToast('¡Cuenta creada con éxito!', 'success');
+        closeModal('registerModal');
+        await initAuth();
+
+    } catch (err) {
+        console.error('Register Error:', err);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '✓ Crear cuenta';
+    }
+}
         // ============================================
         // AUTH: REGISTER MODAL
         // ============================================
