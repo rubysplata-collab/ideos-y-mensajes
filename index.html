@@ -1518,7 +1518,7 @@
             if (!STATE.user) return;
             try {
                 const { data, error } = await supabase.from('videos').select('*').eq('user_id', STATE.user.id).order(
-                'created_at', { ascending: false });
+                    'created_at', { ascending: false });
                 if (error) throw error;
                 STATE.videos = data || [];
                 STATE.stats.videos = STATE.videos.length;
@@ -1568,7 +1568,7 @@
                 let profile = null;
                 try {
                     const { data: p } = await supabase.from('profiles').select('*').eq('id', video.user_id)
-                    .maybeSingle();
+                        .maybeSingle();
                     profile = p;
                 } catch (e) { profile = null; }
                 const ch = profile || { display_name: 'Usuario' };
@@ -1627,7 +1627,13 @@
                 document.querySelectorAll('.comment-like-btn').forEach(btn => {
                     btn.addEventListener('click', () => toggleCommentLike(btn.dataset.commentId));
                 });
-                await supabase.rpc('increment_video_views', { video_id_input: videoId }).catch(() => {});
+                
+                // ✅ SUPABASE RPC CORREGIDO (sin .catch)
+                try {
+                    await supabase.rpc('increment_video_views', { video_id_input: videoId });
+                } catch (e) {
+                    console.log('Vista no incrementada (la función RPC no existe en Supabase)');
+                }
             } catch (err) {
                 container.innerHTML =
                     `<div class="empty-state"><span class="ico">⚠️</span><h3>Error</h3><p>${escapeHTML(err.message)}</p></div>`;
@@ -1687,7 +1693,7 @@
             try {
                 if (wasLiked) {
                     await supabase.from('comment_likes').delete().eq('comment_id', commentId).eq('user_id', STATE.user
-                    .id);
+                        .id);
                     btn.classList.remove('liked');
                     count = Math.max(0, count - 1);
                     await supabase.from('comments').update({ likes_count: count }).eq('id', commentId);
@@ -1919,41 +1925,144 @@
         });
 
         // ============================================================
-        // MINECRAFT 3D
+        // MINECRAFT 3D CON TEXTURAS REALES Y MUNDO INFINITO
         // ============================================================
-        let minecraftScene = null;
-        let minecraftCamera = null;
-        let minecraftRenderer = null;
-        let minecraftControls = null;
+        let minecraftScene, minecraftCamera, minecraftRenderer;
         let minecraftPlayer = null;
         let minecraftBlocks = [];
+        let minecraftWorld = {};
         let minecraftKeys = {};
         let minecraftIsLocked = false;
-        let minecraftWorld = [];
-        let minecraftBlockTypes = {
-            grass: { color: 0x7cb342, name: 'Césped' },
-            dirt: { color: 0x8d6e63, name: 'Tierra' },
-            stone: { color: 0x9e9e9e, name: 'Piedra' },
-            wood: { color: 0x8d6e63, name: 'Madera' },
-            sand: { color: 0xf5e6ca, name: 'Arena' },
-            brick: { color: 0xb85a33, name: 'Ladrillo' },
-            plank: { color: 0xdeb887, name: 'Tabla' },
-            leaf: { color: 0x4caf50, name: 'Hoja' },
-        };
         let minecraftCurrentBlock = 'grass';
-
-        // Joystick state
         let joystickActive = false;
-        let joystickX = 0;
-        let joystickY = 0;
-        let joystickTouchId = null;
+        let joystickX = 0,
+            joystickY = 0;
         let jumpPressedMobile = false;
         let buildPressedMobile = false;
         let destroyPressedMobile = false;
+        let minecraftReady = false;
+        let chunksLoaded = new Set();
+        let textureLoader = new THREE.TextureLoader();
+        let textures = {};
 
+        // ============================================================
+        // TEXTURAS REALES DE MINECRAFT (desde CDN)
+        // ============================================================
+        const TEXTURE_URLS = {
+            grass: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/grass.png',
+            dirt: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/dirt.png',
+            stone: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/stone.png',
+            wood: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/wood.png',
+            sand: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/sand.png',
+            brick: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/brick.png',
+            plank: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/plank.png',
+            leaf: 'https://raw.githubusercontent.com/mikewesthad/minecraft-textures/master/textures/leaf.png',
+        };
+
+        // Cargar texturas
+        function loadTextures(callback) {
+            let loaded = 0;
+            const total = Object.keys(TEXTURE_URLS).length;
+            for (const [key, url] of Object.entries(TEXTURE_URLS)) {
+                textureLoader.load(url, (tex) => {
+                    textures[key] = tex;
+                    loaded++;
+                    if (loaded === total) callback();
+                }, undefined, (err) => {
+                    console.warn('Error cargando textura:', key, err);
+                    // Usar color sólido como fallback
+                    textures[key] = null;
+                    loaded++;
+                    if (loaded === total) callback();
+                });
+            }
+        }
+
+        // ============================================================
+        // GENERACIÓN DE CHUNKS (mundo infinito)
+        // ============================================================
+        function generateChunk(cx, cz) {
+            const size = 16;
+            const height = 4;
+            const seed = cx * 1000 + cz * 7;
+
+            for (let x = 0; x < size; x++) {
+                for (let z = 0; z < size; z++) {
+                    const wx = cx * size + x;
+                    const wz = cz * size + z;
+                    // Ruido simple
+                    const noise = Math.sin(wx * 0.1 + seed) * Math.cos(wz * 0.12 + seed * 0.3) * 0.5 +
+                        Math.sin(wx * 0.05 + wz * 0.07 + seed * 0.7) * 0.3;
+                    const h = Math.floor((noise + 1) * 1.8) + 2;
+
+                    for (let y = 0; y < height + h; y++) {
+                        let blockType = 'grass';
+                        if (y < height + h - 1) blockType = 'dirt';
+                        if (y < height + h - 2) blockType = 'stone';
+                        if (y === 0) blockType = 'stone';
+                        if (y === height + h - 1 && Math.random() > 0.85) blockType = 'leaf';
+                        addBlock(wx, y, wz, blockType);
+                    }
+                }
+            }
+            chunksLoaded.add(`${cx},${cz}`);
+        }
+
+        function addBlock(x, y, z, type) {
+            const key = `${x},${y},${z}`;
+            if (minecraftWorld[key]) return;
+
+            const tex = textures[type];
+            const material = tex ? new THREE.MeshLambertMaterial({ map: tex }) :
+                new THREE.MeshLambertMaterial({ color: getFallbackColor(type) });
+
+            const geometry = new THREE.BoxGeometry(1, 1, 1);
+            const mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(x + 0.5, y + 0.5, z + 0.5);
+            mesh.userData = { blockType: type, x, y, z };
+            minecraftScene.add(mesh);
+            minecraftBlocks.push(mesh);
+            minecraftWorld[key] = type;
+        }
+
+        function getFallbackColor(type) {
+            const colors = {
+                grass: 0x7cb342,
+                dirt: 0x8d6e63,
+                stone: 0x9e9e9e,
+                wood: 0x8d6e63,
+                sand: 0xf5e6ca,
+                brick: 0xb85a33,
+                plank: 0xdeb887,
+                leaf: 0x4caf50
+            };
+            return colors[type] || 0xcccccc;
+        }
+
+        function removeBlockAt(x, y, z) {
+            const key = `${x},${y},${z}`;
+            if (!minecraftWorld[key] || y === 0) return;
+            delete minecraftWorld[key];
+
+            const index = minecraftBlocks.findIndex(m => {
+                const p = m.position;
+                return Math.round(p.x - 0.5) === x && Math.round(p.y - 0.5) === y && Math.round(p.z - 0.5) === z;
+            });
+            if (index !== -1) {
+                const mesh = minecraftBlocks[index];
+                minecraftScene.remove(mesh);
+                mesh.geometry.dispose();
+                if (mesh.material.map) mesh.material.map = null;
+                mesh.material.dispose();
+                minecraftBlocks.splice(index, 1);
+            }
+        }
+
+        // ============================================================
+        // INICIALIZAR MINECRAFT
+        // ============================================================
         function initMinecraft(container) {
-            if (STATE.minecraftReady) {
-                // Si ya está iniciado, solo redimensionar
+            if (minecraftReady) {
                 if (minecraftRenderer) {
                     const rect = container.getBoundingClientRect();
                     minecraftRenderer.setSize(rect.width, rect.height);
@@ -1961,21 +2070,19 @@
                 return;
             }
 
-            // Limpiar contenedor
             container.innerHTML = '';
 
-            // Crear escena
             const rect = container.getBoundingClientRect();
-            const width = rect.width || container.clientWidth || 800;
-            const height = rect.height || container.clientHeight || 500;
+            const width = rect.width || 800;
+            const height = rect.height || 500;
 
+            // Escena
             minecraftScene = new THREE.Scene();
             minecraftScene.background = new THREE.Color(0x87CEEB);
 
             // Cámara
             minecraftCamera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
             minecraftCamera.position.set(8, 6, 8);
-            minecraftCamera.lookAt(0, 0, 0);
 
             // Renderer
             minecraftRenderer = new THREE.WebGLRenderer({ antialias: true });
@@ -1984,68 +2091,71 @@
             container.appendChild(minecraftRenderer.domElement);
 
             // Luces
-            const ambientLight = new THREE.AmbientLight(0x404060, 0.5);
-            minecraftScene.add(ambientLight);
-
+            minecraftScene.add(new THREE.AmbientLight(0x404060, 0.5));
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
             dirLight.position.set(10, 20, 5);
             minecraftScene.add(dirLight);
+            minecraftScene.add(new THREE.HemisphereLight(0x87CEEB, 0x3a7d44, 0.4));
 
-            const hemiLight = new THREE.HemisphereLight(0x87CEEB, 0x3a7d44, 0.4);
-            minecraftScene.add(hemiLight);
+            // Cargar texturas y luego generar mundo
+            loadTextures(() => {
+                // Generar chunks iniciales
+                for (let cx = -1; cx <= 1; cx++) {
+                    for (let cz = -1; cz <= 1; cz++) {
+                        generateChunk(cx, cz);
+                    }
+                }
+            });
 
-            // Crear mundo
-            generateMinecraftWorld();
-
-            // Player (un cubo para representar al jugador)
+            // Player
             const playerGeo = new THREE.BoxGeometry(0.6, 1.8, 0.6);
             const playerMat = new THREE.MeshLambertMaterial({ color: 0x2196F3 });
             minecraftPlayer = new THREE.Mesh(playerGeo, playerMat);
-            minecraftPlayer.position.set(0, 2, 0);
+            minecraftPlayer.position.set(0, 10, 0);
             minecraftScene.add(minecraftPlayer);
 
-            // Controles con PointerLock
+            // Configurar controles
             setupMinecraftControls(container);
-
-            // Configurar controles táctiles
             setupMinecraftTouchControls(container);
 
-            // Configurar eventos de teclado
+            // Eventos teclado
             document.addEventListener('keydown', (e) => {
                 minecraftKeys[e.key.toLowerCase()] = true;
-                if (e.key === ' ') { e.preventDefault();
-                    minecraftJump(); }
-                if (e.key === 'e' || e.key === 'E') { e.preventDefault();
-                    cycleBlock(); }
+                if (e.key === ' ') e.preventDefault();
+                if (e.key === 'e' || e.key === 'E') cycleBlock();
             });
             document.addEventListener('keyup', (e) => {
                 minecraftKeys[e.key.toLowerCase()] = false;
             });
 
-            // Click para construir/destruir
-            container.addEventListener('click', (e) => {
-                if (!minecraftIsLocked) return;
-                minecraftPlaceBlock();
+            // Click / Contextmenu
+            container.addEventListener('click', () => {
+                if (!minecraftIsLocked) {
+                    const canvas = container.querySelector('canvas');
+                    if (canvas) canvas.requestPointerLock();
+                    return;
+                }
+                placeBlock();
             });
             container.addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 if (!minecraftIsLocked) return;
-                minecraftRemoveBlock();
+                removeBlock();
             });
 
-            // Ciclo de bloques con teclas numéricas
+            // Números para cambiar bloque
             document.addEventListener('keydown', (e) => {
                 const num = parseInt(e.key);
                 if (num >= 1 && num <= 8) {
-                    const types = Object.keys(minecraftBlockTypes);
+                    const types = Object.keys(TEXTURE_URLS);
                     if (num <= types.length) {
                         minecraftCurrentBlock = types[num - 1];
-                        toast(`Bloque: ${minecraftBlockTypes[minecraftCurrentBlock].name}`, 'success');
+                        toast(`Bloque: ${minecraftCurrentBlock}`, 'success');
                     }
                 }
             });
 
-            // Animación
+            // Loop
             let lastTime = 0;
 
             function animate(time) {
@@ -2056,7 +2166,7 @@
                 requestAnimationFrame(animate);
             }
 
-            // Redimensionar
+            // Resize
             const resizeObserver = new ResizeObserver(() => {
                 const r = container.getBoundingClientRect();
                 if (minecraftRenderer) {
@@ -2067,123 +2177,53 @@
             });
             resizeObserver.observe(container);
 
-            STATE.minecraftReady = true;
+            minecraftReady = true;
             animate(0);
 
-            // Asegurar que el contenedor tenga el foco para los controles
             setTimeout(() => {
                 const canvas = container.querySelector('canvas');
                 if (canvas) canvas.click();
             }, 500);
 
-            toast('⛏️ Minecraft 3D - Haz clic para jugar', 'info');
+            toast('⛏️ Haz clic para jugar | WASD mover | ESPACIO saltar', 'info');
         }
 
-        function generateMinecraftWorld() {
-            const size = 16;
-            const height = 4;
-
-            for (let x = -size / 2; x < size / 2; x++) {
-                for (let z = -size / 2; z < size / 2; z++) {
-                    // Ruido simple para el terreno
-                    const noise = Math.sin(x * 0.5) * Math.cos(z * 0.7) * 0.5 +
-                        Math.sin(x * 0.3 + z * 0.4) * 0.3;
-                    const h = Math.floor((noise + 1) * 1.5);
-
-                    for (let y = 0; y < height + h; y++) {
-                        let blockType = 'grass';
-                        if (y < height + h - 1) blockType = 'dirt';
-                        if (y < height + h - 2) blockType = 'stone';
-                        if (y === 0) blockType = 'stone';
-                        if (y === height + h - 1 && Math.random() > 0.7) blockType = 'leaf';
-                        minecraftAddBlock(x, y, z, blockType);
-                    }
-                }
-            }
-        }
-
-        function minecraftAddBlock(x, y, z, type) {
-            const blockData = minecraftBlockTypes[type];
-            if (!blockData) return;
-
-            const geometry = new THREE.BoxGeometry(1, 1, 1);
-            const material = new THREE.MeshLambertMaterial({
-                color: blockData.color,
-                roughness: 0.6,
-                metalness: 0.1
-            });
-            const mesh = new THREE.Mesh(geometry, material);
-            mesh.position.set(x + 0.5, y + 0.5, z + 0.5);
-            mesh.userData = { blockType: type, x: x, y: y, z: z };
-            minecraftScene.add(mesh);
-            minecraftBlocks.push(mesh);
-
-            // Guardar en el mundo
-            const key = `${x},${y},${z}`;
-            minecraftWorld[key] = type;
-        }
-
-        function minecraftRemoveBlockAt(x, y, z) {
-            const key = `${x},${y},${z}`;
-            if (!minecraftWorld[key]) return;
-
-            // No remover el bloque base (abajo del todo)
-            if (y === 0) return;
-
-            delete minecraftWorld[key];
-
-            // Remover el mesh
-            const index = minecraftBlocks.findIndex(m => {
-                const p = m.position;
-                return Math.round(p.x - 0.5) === x && Math.round(p.y - 0.5) === y && Math.round(p.z - 0.5) === z;
-            });
-            if (index !== -1) {
-                const mesh = minecraftBlocks[index];
-                minecraftScene.remove(mesh);
-                mesh.geometry.dispose();
-                mesh.material.dispose();
-                minecraftBlocks.splice(index, 1);
-            }
-        }
-
+        // ============================================================
+        // CONTROLES DE MINECRAFT
+        // ============================================================
         function setupMinecraftControls(container) {
             const canvas = container.querySelector('canvas');
             if (!canvas) return;
 
             canvas.addEventListener('click', () => {
-                if (!minecraftIsLocked) {
-                    canvas.requestPointerLock();
-                }
+                if (!minecraftIsLocked) canvas.requestPointerLock();
             });
 
             document.addEventListener('pointerlockchange', () => {
                 minecraftIsLocked = document.pointerLockElement === canvas;
                 if (minecraftIsLocked) {
-                    toast('🎮 Controles activados - WASD para mover, ESPACIO saltar', 'info');
-                    // Ocultar joystick en PC
+                    toast('🎮 Controles activados', 'info');
                     document.querySelector('.touch-controls')?.classList.remove('active');
                 } else {
-                    // Mostrar joystick si es móvil
                     checkMobileAndShowControls();
                 }
             });
 
-            // Movimiento del mouse para la cámara
             document.addEventListener('mousemove', (e) => {
                 if (!minecraftIsLocked) return;
                 const sensitivity = 0.002;
-                const deltaX = e.movementX * sensitivity;
-                const deltaY = e.movementY * sensitivity;
-
                 const euler = new THREE.Euler(0, 0, 0, 'YXZ');
                 euler.setFromQuaternion(minecraftCamera.quaternion);
-                euler.y -= deltaX;
-                euler.x -= deltaY;
+                euler.y -= e.movementX * sensitivity;
+                euler.x -= e.movementY * sensitivity;
                 euler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, euler.x));
                 minecraftCamera.quaternion.setFromEuler(euler);
             });
         }
 
+        // ============================================================
+        // ACTUALIZAR JUGADOR (con colisiones mejoradas)
+        // ============================================================
         function updateMinecraftPlayer(dt) {
             if (!minecraftIsLocked && !joystickActive) return;
 
@@ -2222,107 +2262,113 @@
                 }
             }
 
+            // Normalizar
             if (moveX !== 0 || moveZ !== 0) {
                 const len = Math.sqrt(moveX * moveX + moveZ * moveZ);
                 moveX = moveX / len * speed * dt;
                 moveZ = moveZ / len * speed * dt;
-            } else {
-                moveX = 0;
-                moveZ = 0;
             }
 
-            // Aplicar movimiento al jugador y a la cámara
+            // Movimiento horizontal con colisión
             const newX = minecraftPlayer.position.x + moveX;
             const newZ = minecraftPlayer.position.z + moveZ;
+            const px = Math.floor(newX + 0.5);
+            const pz = Math.floor(newZ + 0.5);
+            const py = Math.floor(minecraftPlayer.position.y + 0.5);
 
-            // Colisión simple con bloques
-            const px = Math.floor(newX);
-            const pz = Math.floor(newZ);
-            const py = Math.floor(minecraftPlayer.position.y);
-
-            let canMoveX = true;
-            let canMoveZ = true;
-
+            let canMoveX = true,
+                canMoveZ = true;
             for (let dy = 0; dy < 2; dy++) {
-                const keyX = `${px},${py+dy},${Math.floor(newZ)}`;
-                if (minecraftWorld[keyX]) canMoveX = false;
-                const keyZ = `${Math.floor(newX)},${py+dy},${pz}`;
-                if (minecraftWorld[keyZ]) canMoveZ = false;
+                if (minecraftWorld[`${px},${py+dy},${pz}`]) canMoveX = false;
+                if (minecraftWorld[`${px},${py+dy},${pz}`]) canMoveZ = false;
+            }
+            // Verificar X
+            const testX = Math.floor(newX + 0.5);
+            for (let dy = 0; dy < 2; dy++) {
+                if (minecraftWorld[`${testX},${py+dy},${pz}`]) canMoveX = false;
+            }
+            // Verificar Z
+            const testZ = Math.floor(newZ + 0.5);
+            for (let dy = 0; dy < 2; dy++) {
+                if (minecraftWorld[`${px},${py+dy},${testZ}`]) canMoveZ = false;
             }
 
             if (canMoveX) minecraftPlayer.position.x = newX;
             if (canMoveZ) minecraftPlayer.position.z = newZ;
 
-            // Gravedad
-            const gravity = -15;
+            // Cargar chunks cercanos
+            const cx = Math.floor(minecraftPlayer.position.x / 16);
+            const cz = Math.floor(minecraftPlayer.position.z / 16);
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dz = -1; dz <= 1; dz++) {
+                    const key = `${cx+dx},${cz+dz}`;
+                    if (!chunksLoaded.has(key) && textures.grass) {
+                        generateChunk(cx + dx, cz + dz);
+                    }
+                }
+            }
+
+            // Gravedad y salto
+            const gravity = -20;
             let vy = minecraftPlayer.userData.vy || 0;
             vy += gravity * dt;
 
             const newY = minecraftPlayer.position.y + vy * dt;
-            const py2 = Math.floor(newY);
-            const px2 = Math.floor(minecraftPlayer.position.x);
-            const pz2 = Math.floor(minecraftPlayer.position.z);
+            const px2 = Math.floor(minecraftPlayer.position.x + 0.5);
+            const pz2 = Math.floor(minecraftPlayer.position.z + 0.5);
+            const py2 = Math.floor(newY + 0.5);
 
-            let canMoveY = true;
             const footY = Math.floor(minecraftPlayer.position.y - 0.1);
-            const headY = Math.floor(minecraftPlayer.position.y + 1.8);
-
-            // Colisión vertical
-            for (let dy = 0; dy < 2; dy++) {
-                const key = `${px2},${py2+dy},${pz2}`;
-                if (minecraftWorld[key]) canMoveY = false;
-            }
-
-            // Detectar suelo
             const groundKey = `${px2},${footY},${pz2}`;
             const isGrounded = !!minecraftWorld[groundKey];
 
-            if (canMoveY) {
+            const headKey = `${px2},${Math.floor(minecraftPlayer.position.y + 1.9)},${pz2}`;
+            const hasCeiling = !!minecraftWorld[headKey];
+
+            let canMoveY = true;
+            for (let dy = 0; dy < 2; dy++) {
+                if (minecraftWorld[`${px2},${py2+dy},${pz2}`]) canMoveY = false;
+            }
+
+            if (canMoveY && !hasCeiling) {
                 minecraftPlayer.position.y = newY;
                 minecraftPlayer.userData.vy = vy;
             } else {
                 minecraftPlayer.userData.vy = 0;
-                if (vy < 0) {
-                    // Ajustar al bloque de arriba
-                    minecraftPlayer.position.y = Math.floor(minecraftPlayer.position.y) + 1;
+                if (vy < 0 && isGrounded) {
+                    minecraftPlayer.position.y = Math.floor(minecraftPlayer.position.y);
+                } else if (vy > 0 && hasCeiling) {
+                    minecraftPlayer.position.y = Math.floor(minecraftPlayer.position.y + 1.8) - 1.8;
                 }
             }
 
-            // Saltar
             if (isGrounded && (minecraftKeys[' '] || jumpPressedMobile)) {
-                minecraftPlayer.userData.vy = 6;
+                minecraftPlayer.userData.vy = 7;
                 jumpPressedMobile = false;
             }
 
-            // Si se cae al vacío, reaparecer
-            if (minecraftPlayer.position.y < -10) {
-                minecraftPlayer.position.set(0, 5, 0);
+            if (minecraftPlayer.position.y < -20) {
+                minecraftPlayer.position.set(0, 10, 0);
                 minecraftPlayer.userData.vy = 0;
             }
 
-            // Actualizar cámara
+            // Cámara
             const camOffset = new THREE.Vector3(0, 1.6, 0);
             minecraftCamera.position.copy(minecraftPlayer.position).add(camOffset);
-
-            // Rotar el jugador con la cámara
             const yaw = new THREE.Euler(0, minecraftCamera.rotation.y, 0);
             minecraftPlayer.quaternion.setFromEuler(yaw);
         }
 
-        function minecraftJump() {
-            if (minecraftIsLocked) {
-                // El salto se maneja en update
-            }
-        }
-
-        function minecraftPlaceBlock() {
+        // ============================================================
+        // CONSTRUIR / DESTRUIR
+        // ============================================================
+        function placeBlock() {
             if (!minecraftIsLocked) return;
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera({ x: 0, y: 0 }, minecraftCamera);
-
-            const direction = new THREE.Vector3(0, 0, -1);
-            direction.applyQuaternion(minecraftCamera.quaternion);
-            raycaster.ray.direction.copy(direction);
+            const dir = new THREE.Vector3(0, 0, -1);
+            dir.applyQuaternion(minecraftCamera.quaternion);
+            raycaster.ray.direction.copy(dir);
             raycaster.ray.origin.copy(minecraftCamera.position);
 
             const intersects = raycaster.intersectObjects(minecraftBlocks);
@@ -2331,32 +2377,30 @@
                 const normal = hit.face.normal.clone();
                 normal.transformDirection(hit.object.matrixWorld);
 
-                const pos = hit.object.position.clone();
+                const pos = hit.object.position;
                 const x = Math.round(pos.x - 0.5 + normal.x);
                 const y = Math.round(pos.y - 0.5 + normal.y);
                 const z = Math.round(pos.z - 0.5 + normal.z);
 
-                // No colocar dentro del jugador
                 const px = Math.floor(minecraftPlayer.position.x);
                 const py = Math.floor(minecraftPlayer.position.y);
                 const pz = Math.floor(minecraftPlayer.position.z);
                 if (x === px && (y === py || y === py + 1) && z === pz) return;
 
                 const key = `${x},${y},${z}`;
-                if (!minecraftWorld[key]) {
-                    minecraftAddBlock(x, y, z, minecraftCurrentBlock);
+                if (!minecraftWorld[key] && textures[minecraftCurrentBlock]) {
+                    addBlock(x, y, z, minecraftCurrentBlock);
                 }
             }
         }
 
-        function minecraftRemoveBlock() {
+        function removeBlock() {
             if (!minecraftIsLocked) return;
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera({ x: 0, y: 0 }, minecraftCamera);
-
-            const direction = new THREE.Vector3(0, 0, -1);
-            direction.applyQuaternion(minecraftCamera.quaternion);
-            raycaster.ray.direction.copy(direction);
+            const dir = new THREE.Vector3(0, 0, -1);
+            dir.applyQuaternion(minecraftCamera.quaternion);
+            raycaster.ray.direction.copy(dir);
             raycaster.ray.origin.copy(minecraftCamera.position);
 
             const intersects = raycaster.intersectObjects(minecraftBlocks);
@@ -2366,20 +2410,20 @@
                 const x = Math.round(pos.x - 0.5);
                 const y = Math.round(pos.y - 0.5);
                 const z = Math.round(pos.z - 0.5);
-                minecraftRemoveBlockAt(x, y, z);
+                removeBlockAt(x, y, z);
             }
         }
 
         function cycleBlock() {
-            const types = Object.keys(minecraftBlockTypes);
+            const types = Object.keys(TEXTURE_URLS);
             const idx = types.indexOf(minecraftCurrentBlock);
             const next = (idx + 1) % types.length;
             minecraftCurrentBlock = types[next];
-            toast(`Bloque: ${minecraftBlockTypes[minecraftCurrentBlock].name}`, 'success');
+            toast(`Bloque: ${minecraftCurrentBlock}`, 'success');
         }
 
         // ============================================================
-        // CONTROLES TÁCTILES PARA MINECRAFT
+        // CONTROLES TÁCTILES
         // ============================================================
         let touchControlsInitialized = false;
 
@@ -2387,7 +2431,6 @@
             if (touchControlsInitialized) return;
             touchControlsInitialized = true;
 
-            // Crear elementos de control táctil
             const controls = document.createElement('div');
             controls.className = 'touch-controls';
             controls.id = 'touchControls';
@@ -2400,7 +2443,7 @@
             knob.className = 'joystick-knob';
             joystick.appendChild(knob);
 
-            // Botones de acción
+            // Botones
             const actions = document.createElement('div');
             actions.className = 'action-buttons';
 
@@ -2425,7 +2468,6 @@
 
             controls.appendChild(joystick);
             controls.appendChild(actions);
-
             container.appendChild(controls);
 
             // Bloque selector
@@ -2433,60 +2475,48 @@
             blockSelector.className = 'block-selector';
             blockSelector.id = 'blockSelector';
 
-            const blockTypes = Object.keys(minecraftBlockTypes);
+            const blockTypes = Object.keys(TEXTURE_URLS);
             blockTypes.forEach((type, i) => {
                 const opt = document.createElement('div');
                 opt.className = 'block-option' + (i === 0 ? ' active' : '');
-                opt.style.background = `#${minecraftBlockTypes[type].color.toString(16).padStart(6,'0')}`;
+                opt.style.background = getFallbackColor(type).toString(16).padStart(6, '0');
                 opt.dataset.blockType = type;
                 opt.addEventListener('click', () => {
                     document.querySelectorAll('.block-option').forEach(o => o.classList.remove('active'));
                     opt.classList.add('active');
                     minecraftCurrentBlock = type;
-                    toast(`Bloque: ${minecraftBlockTypes[type].name}`, 'success');
+                    toast(`Bloque: ${type}`, 'success');
                 });
                 blockSelector.appendChild(opt);
             });
             container.appendChild(blockSelector);
 
-            // Detectar si es móvil
             checkMobileAndShowControls();
 
-            // ============================================================
-            // JOYSTICK (táctil)
-            // ============================================================
+            // Joystick lógica
             const joystickArea = document.getElementById('joystickArea');
             const joystickKnob = document.querySelector('.joystick-knob');
 
             joystickArea.addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 const touch = e.changedTouches[0];
-                joystickTouchId = touch.identifier;
                 joystickActive = true;
                 updateJoystickPosition(touch);
-                document.querySelector('.touch-controls').classList.add('active');
             });
 
             joystickArea.addEventListener('touchmove', (e) => {
                 e.preventDefault();
                 for (const touch of e.changedTouches) {
-                    if (touch.identifier === joystickTouchId) {
-                        updateJoystickPosition(touch);
-                    }
+                    updateJoystickPosition(touch);
                 }
             });
 
             joystickArea.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                for (const touch of e.changedTouches) {
-                    if (touch.identifier === joystickTouchId) {
-                        joystickActive = false;
-                        joystickX = 0;
-                        joystickY = 0;
-                        joystickKnob.style.transform = 'translate(-50%, -50%)';
-                        joystickTouchId = null;
-                    }
-                }
+                joystickActive = false;
+                joystickX = 0;
+                joystickY = 0;
+                joystickKnob.style.transform = 'translate(-50%, -50%)';
             });
 
             function updateJoystickPosition(touch) {
@@ -2505,72 +2535,30 @@
 
                 joystickX = moveX / maxDist;
                 joystickY = moveY / maxDist;
-
                 joystickKnob.style.transform = `translate(${-50 + moveX}%, ${-50 + moveY}%)`;
             }
 
-            // ============================================================
-            // BOTONES TÁCTILES
-            // ============================================================
-            const mobileJumpBtn = document.getElementById('mobileJumpBtn');
-            const mobileBuildBtn = document.getElementById('mobileBuildBtn');
-            const mobileDestroyBtn = document.getElementById('mobileDestroyBtn');
-
-            mobileJumpBtn.addEventListener('touchstart', (e) => {
+            // Botones táctiles
+            document.getElementById('mobileJumpBtn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
                 jumpPressedMobile = true;
-                if (minecraftIsLocked) {
-                    minecraftPlayer.userData.vy = 6;
-                }
+                if (minecraftIsLocked) minecraftPlayer.userData.vy = 7;
             });
-            mobileJumpBtn.addEventListener('touchend', (e) => {
+            document.getElementById('mobileJumpBtn').addEventListener('touchend', (e) => {
                 e.preventDefault();
                 jumpPressedMobile = false;
             });
 
-            mobileBuildBtn.addEventListener('touchstart', (e) => {
+            document.getElementById('mobileBuildBtn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                buildPressedMobile = true;
-                minecraftPlaceBlock();
+                placeBlock();
             });
-            mobileBuildBtn.addEventListener('touchend', (e) => {
+
+            document.getElementById('mobileDestroyBtn').addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                buildPressedMobile = false;
+                removeBlock();
             });
 
-            mobileDestroyBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                destroyPressedMobile = true;
-                minecraftRemoveBlock();
-            });
-            mobileDestroyBtn.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                destroyPressedMobile = false;
-            });
-
-            // Evento para cambiar de bloque (doble toque en el selector)
-            const blockSelectorEl = document.getElementById('blockSelector');
-            blockSelectorEl.addEventListener('touchstart', (e) => {
-                // Si se toca el selector, mostrar/ocultar
-                blockSelectorEl.classList.toggle('active');
-            });
-
-            // Activar el selector de bloques al hacer clic en el joystick
-            joystickArea.addEventListener('dblclick', () => {
-                blockSelectorEl.classList.toggle('active');
-            });
-
-            // Cerrar selector al hacer clic fuera
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.block-selector') && !e.target.closest('.joystick-area')) {
-                    document.getElementById('blockSelector')?.classList.remove('active');
-                }
-            });
-
-            // Mostrar controles en móvil
-            checkMobileAndShowControls();
-
-            // Redimensionar controles
             window.addEventListener('resize', checkMobileAndShowControls);
         }
 
@@ -2584,10 +2572,7 @@
                 blockSelector?.classList.add('active');
             } else if (!isMobile || minecraftIsLocked) {
                 controls?.classList.remove('active');
-                // No ocultar el selector si está activo manualmente
             }
-
-            // En móvil, el bloque selector siempre visible
             if (isMobile && blockSelector) {
                 blockSelector.classList.add('active');
             }
@@ -2635,20 +2620,13 @@
                 history.replaceState(null, '', '#/home');
             }
             handleRoute();
-            // Inicializar controles táctiles para Minecraft en todas las páginas
-            setTimeout(() => {
-                const container = document.getElementById('minecraft-container');
-                if (container) {
-                    // Los controles se inicializan al navegar a la página
-                }
-            }, 1000);
         }
 
         document.addEventListener('DOMContentLoaded', init);
-        console.log('🚀 JHEILER + MINECRAFT 3D cargado correctamente.');
+        console.log('🚀 JHEILER + MINECRAFT 3D con texturas reales y mundo infinito');
         console.log('📌 Rutas: #/home #/upload #/videos #/settings #/watch/:id #/minecraft');
         console.log('🎮 Controles: WASD mover, ESPACIO saltar, Click colocar, Click derecho destruir');
-        console.log('📱 En móvil: joystick para mover, botones para saltar/construir/destruir');
+        console.log('📱 En móvil: joystick + botones');
     </script>
 </body>
 </html>
