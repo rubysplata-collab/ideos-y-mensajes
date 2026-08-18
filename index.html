@@ -5,9 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>JHEILER</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ff304f%22/><polygon points=%2238,28 78,50 38,72%22 fill=%22white%22/></svg>">
-
 <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23ff304f'/><polygon points='38,28 78,50 38,72' fill='white'/></svg>%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]}"/>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
@@ -237,7 +235,13 @@ let isSubscribed = localStorage.getItem('jheiler_sub') === 'true';
 let localComments = JSON.parse(localStorage.getItem('jheiler_comments') || '{}');
 let deferredPrompt;
 
-// PWA Instalación
+// Registrar Service Worker para permitir la instalación PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
