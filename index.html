@@ -915,7 +915,7 @@
         let allVideos = [];
 
         // ============================================
-        // DATOS DE EJEMPLO (CON TUS COLUMNAS)
+        // DATOS DE EJEMPLO CON VISTAS REALES
         // ============================================
         const sampleVideos = [
             {
@@ -982,7 +982,7 @@
 
         // ===== FORMATO DE DURACIÓN (segundos → MM:SS) =====
         function formatDuration(seconds) {
-            if (!seconds) return '0:00';
+            if (!seconds || seconds === 0) return '0:00';
             const mins = Math.floor(seconds / 60);
             const secs = seconds % 60;
             return `${mins}:${String(secs).padStart(2, '0')}`;
@@ -1074,14 +1074,16 @@
 
         // ===== FORMATOS =====
         function formatDate(dateStr) {
+            if (!dateStr) return 'Fecha desconocida';
             const date = new Date(dateStr);
             return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
         }
 
         function formatViews(views) {
+            if (!views || views === 0) return '0';
             if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
             if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
-            return views || 0;
+            return views;
         }
 
         // ===== OBTENER VIDEOS =====
@@ -1145,7 +1147,9 @@
             return filtered;
         }
 
-        // ===== RENDER VIDEOS =====
+        // ============================================
+        // ⭐ RENDER VIDEOS (CON VISTAS REALES) ⭐
+        // ============================================
         function renderVideos(videos) {
             if (!videos || videos.length === 0) {
                 grid.innerHTML = `
@@ -1159,14 +1163,16 @@
             }
 
             grid.innerHTML = videos.map(v => {
-                const views = v.views || Math.floor(Math.random() * 5000) + 100;
+                // ✅ VISTAS REALES (0 si no hay)
+                const views = v.views || 0;
                 const duration = formatDuration(v.duration || 0);
                 const hashtags = v.hashtags || ['#Video'];
                 const channel = v.channel || 'JHEILER';
                 const initial = channel.charAt(0).toUpperCase();
-                
+
+                // ✅ CORREGIDO: startsWith (con S mayúscula)
                 let thumbUrl = v.thumbnail_url && v.thumbnail_url.startsWith('http') ? v.thumbnail_url : getDefaultThumbnail(v.category || 'general');
-                
+
                 return `
                     <div class="video-card" onclick='playVideo(${JSON.stringify(v)})'>
                         <div class="thumb">
@@ -1268,7 +1274,7 @@
         });
 
         // ============================================
-        // SUBIR VIDEO (CON TUS COLUMNAS)
+        // SUBIR VIDEO
         // ============================================
         document.getElementById('btnOpenModal').onclick = () => {
             const modal = document.createElement('div');
@@ -1353,7 +1359,6 @@
                         }
                     }
 
-                    // ===== NUEVO VIDEO CON TUS COLUMNAS =====
                     const newVideo = {
                         title: title,
                         description: desc || null,
@@ -1361,7 +1366,7 @@
                         video_url: vData.publicUrl,
                         thumbnail_url: thumbUrl || '',
                         views: 0,
-                        duration: 0, // Se actualizará después
+                        duration: 0,
                         channel: 'JHEILER',
                         hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
                         is_short: isShort,
