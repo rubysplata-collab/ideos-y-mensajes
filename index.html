@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>JHEILER - Tu plataforma de videos</title>
     
-    <!-- ===== FONT AWESOME (Iconos profesionales) ===== -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- ===== FONT AWESOME LOCAL ===== -->
+    <link rel="stylesheet" href="fontawesome/css/all.min.css">
     
     <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/3670/3670147.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -21,6 +21,7 @@
             --border: #303030;
             --text-secondary: #aaa;
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --radius: 12px;
         }
 
         * {
@@ -34,6 +35,7 @@
             background: var(--bg);
             color: #fff;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         /* ===== SCROLLBAR ===== */
@@ -73,6 +75,27 @@
         .brand i {
             font-size: 26px;
             color: var(--accent);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .search-btn {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .search-btn:hover {
+            background: var(--panel2);
         }
 
         .create-btn {
@@ -137,8 +160,9 @@
             text-decoration: none;
             border-radius: 8px;
             margin: 0 8px;
-            transition: background 0.15s ease;
+            transition: all 0.15s ease;
             cursor: pointer;
+            position: relative;
         }
 
         .sb-item:hover {
@@ -150,10 +174,30 @@
             width: 24px;
             text-align: center;
             color: var(--text-secondary);
+            transition: color 0.2s;
         }
 
         .sb-item:hover i {
             color: #fff;
+        }
+
+        .sb-item.active {
+            background: var(--panel2);
+        }
+
+        .sb-item.active i {
+            color: var(--accent);
+        }
+
+        .sb-item .badge {
+            position: absolute;
+            right: 24px;
+            background: var(--accent);
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 700;
         }
 
         /* ===== MAIN CONTENT ===== */
@@ -161,8 +205,45 @@
             margin-left: 220px;
             padding: 80px 24px 40px 24px;
             min-height: 100vh;
+            transition: opacity 0.3s ease;
         }
 
+        /* ===== CATEGORÍAS ===== */
+        .categories {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+        }
+
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+
+        .category-chip {
+            padding: 8px 20px;
+            background: var(--panel2);
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .category-chip:hover {
+            background: var(--border);
+        }
+
+        .category-chip.active {
+            background: #fff;
+            color: #000;
+        }
+
+        /* ===== VIDEO GRID ===== */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -182,7 +263,7 @@
             width: 100%;
             aspect-ratio: 16/9;
             background: var(--panel2);
-            border-radius: 12px;
+            border-radius: var(--radius);
             margin-bottom: 10px;
             overflow: hidden;
             position: relative;
@@ -199,23 +280,65 @@
             transform: scale(1.02);
         }
 
-        .play-overlay {
+        .thumb .duration {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
+            bottom: 8px;
+            right: 8px;
             background: rgba(0,0,0,0.85);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
             font-weight: 600;
+        }
+
+        .thumb .play-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.6);
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-card:hover .play-overlay {
+            opacity: 1;
         }
 
         .play-overlay i {
+            font-size: 20px;
+            color: #fff;
+            margin-left: 4px;
+        }
+
+        .video-info {
+            display: flex;
+            gap: 12px;
+        }
+
+        .channel-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
             font-size: 14px;
-            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .video-details {
+            flex: 1;
+            min-width: 0;
         }
 
         .card-title {
@@ -228,17 +351,25 @@
             overflow: hidden;
         }
 
-        .card-meta {
+        .channel-name {
             font-size: 13px;
             color: var(--text-secondary);
-            margin-top: 4px;
+            margin-top: 2px;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .card-meta i {
-            margin-right: 4px;
-            font-size: 12px;
+            font-size: 11px;
         }
 
+        /* ===== EMPTY STATE ===== */
         .empty-state {
             grid-column: 1 / -1;
             text-align: center;
@@ -259,6 +390,80 @@
             color: #fff;
         }
 
+        /* ===== REPRODUCTOR (PLAYER) ===== */
+        .player-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .player-overlay.active {
+            display: flex;
+        }
+
+        .player-container {
+            width: 90%;
+            max-width: 900px;
+            position: relative;
+        }
+
+        .player-container video {
+            width: 100%;
+            border-radius: 12px;
+            background: #000;
+            max-height: 80vh;
+        }
+
+        .player-close {
+            position: absolute;
+            top: -50px;
+            right: 0;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            padding: 8px;
+            transition: transform 0.2s;
+        }
+
+        .player-close:hover {
+            transform: scale(1.1);
+        }
+
+        .player-info {
+            width: 90%;
+            max-width: 900px;
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .player-channel {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
         /* ===== MODAL ===== */
         .modal {
             position: fixed;
@@ -273,11 +478,6 @@
             z-index: 1000;
             backdrop-filter: blur(6px);
             animation: fadeIn 0.25s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
         }
 
         .modal-content {
@@ -296,7 +496,6 @@
         .modal-content h3 {
             font-size: 22px;
             font-weight: 700;
-            margin-bottom: 4px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -307,7 +506,8 @@
         }
 
         .modal-content input,
-        .modal-content textarea {
+        .modal-content textarea,
+        .modal-content select {
             padding: 12px 14px;
             border-radius: 10px;
             border: 1px solid var(--border);
@@ -319,7 +519,8 @@
         }
 
         .modal-content input:focus,
-        .modal-content textarea:focus {
+        .modal-content textarea:focus,
+        .modal-content select:focus {
             outline: none;
             border-color: var(--accent);
         }
@@ -328,6 +529,10 @@
             resize: vertical;
             min-height: 60px;
             font-family: inherit;
+        }
+
+        .modal-content select option {
+            background: var(--panel);
         }
 
         .modal-actions {
@@ -358,6 +563,11 @@
 
         .btn-primary:hover {
             box-shadow: 0 0 24px rgba(255,48,79,0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -394,8 +604,10 @@
             margin-right: 12px;
         }
 
-        .file-input-wrapper i {
-            margin-right: 6px;
+        .file-input-wrapper small {
+            color: #666;
+            display: block;
+            margin-top: 4px;
         }
 
         /* ===== TOAST ===== */
@@ -450,8 +662,28 @@
                 padding: 8px 14px;
                 font-size: 13px;
             }
+            .create-btn span {
+                display: none;
+            }
             .modal-content {
                 padding: 20px;
+            }
+            .categories {
+                gap: 8px;
+            }
+            .category-chip {
+                font-size: 12px;
+                padding: 6px 14px;
+            }
+            .player-container video {
+                max-height: 60vh;
+            }
+            .player-close {
+                top: -40px;
+                font-size: 24px;
+            }
+            .player-title {
+                font-size: 15px;
             }
         }
 
@@ -463,6 +695,21 @@
             .card-title {
                 font-size: 13px;
             }
+            .channel-avatar {
+                width: 28px;
+                height: 28px;
+                font-size: 11px;
+            }
+            .channel-name {
+                font-size: 11px;
+            }
+            .card-meta {
+                font-size: 10px;
+            }
+            .thumb .duration {
+                font-size: 9px;
+                padding: 1px 6px;
+            }
         }
     </style>
 </head>
@@ -473,43 +720,82 @@
         <div class="brand">
             <i class="fas fa-play"></i> JHEILER
         </div>
-        <button class="create-btn" id="btnOpenModal">
-            <i class="fas fa-plus"></i> Crear
-        </button>
+        <div class="header-actions">
+            <button class="search-btn" id="btnSearch">
+                <i class="fas fa-search"></i>
+            </button>
+            <button class="create-btn" id="btnOpenModal">
+                <i class="fas fa-plus"></i>
+                <span>Crear</span>
+            </button>
+        </div>
     </header>
 
     <!-- ===== SIDEBAR ===== -->
     <aside>
         <div class="sb-section">
-            <a class="sb-item" href="#">
+            <a class="sb-item active" href="#" data-section="inicio">
                 <i class="fas fa-home"></i> Inicio
             </a>
-            <a class="sb-item" href="#">
+            <a class="sb-item" href="#" data-section="shorts">
                 <i class="fas fa-bolt"></i> Shorts
             </a>
-            <a class="sb-item" href="#">
+            <a class="sb-item" href="#" data-section="suscripciones">
                 <i class="fas fa-tv"></i> Suscripciones
             </a>
         </div>
         <div class="sb-section">
             <div class="sb-title">Biblioteca</div>
-            <a class="sb-item" href="#">
+            <a class="sb-item" href="#" data-section="historial">
                 <i class="fas fa-clock"></i> Historial
             </a>
-            <a class="sb-item" href="#">
+            <a class="sb-item" href="#" data-section="tus-videos">
                 <i class="fas fa-video"></i> Tus videos
             </a>
-            <a class="sb-item" href="#">
+            <a class="sb-item" href="#" data-section="favoritos">
                 <i class="fas fa-heart"></i> Favoritos
+                <span class="badge">3</span>
             </a>
-            <a class="sb-item" href="#">
+            <a class="sb-item" href="#" data-section="ver-despues">
                 <i class="fas fa-clock"></i> Ver después
             </a>
         </div>
     </aside>
 
+    <!-- ===== REPRODUCTOR (PLAYER) ===== -->
+    <div class="player-overlay" id="playerOverlay">
+        <div class="player-container">
+            <button class="player-close" id="playerClose">
+                <i class="fas fa-times"></i>
+            </button>
+            <video id="playerVideo" controls autoplay>
+                <source src="" type="video/mp4">
+                Tu navegador no soporta videos.
+            </video>
+        </div>
+        <div class="player-info">
+            <div>
+                <div class="player-title" id="playerTitle">Título del video</div>
+                <div class="player-channel" id="playerChannel">Canal</div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== MAIN ===== -->
     <main>
+        <!-- ===== CATEGORÍAS ===== -->
+        <div class="categories" id="categoriesContainer">
+            <span class="category-chip active">Todos</span>
+            <span class="category-chip">Roblox</span>
+            <span class="category-chip">IA</span>
+            <span class="category-chip">Minecraft</span>
+            <span class="category-chip">Programación</span>
+            <span class="category-chip">Música</span>
+            <span class="category-chip">Deportes</span>
+            <span class="category-chip">Videojuegos</span>
+        </div>
+
+        <!-- ===== VIDEO GRID ===== -->
         <div class="video-grid" id="videoGrid"></div>
     </main>
 
@@ -520,9 +806,67 @@
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const grid = document.getElementById('videoGrid');
+        const playerOverlay = document.getElementById('playerOverlay');
+        const playerVideo = document.getElementById('playerVideo');
+        const playerTitle = document.getElementById('playerTitle');
+        const playerChannel = document.getElementById('playerChannel');
+        const playerClose = document.getElementById('playerClose');
+
+        // ===== REPRODUCIR VIDEO (INTEGRADO) =====
+        function playVideo(url, title = 'Video', channel = 'JHEILER') {
+            if (!url) {
+                showToast('Video no disponible', 'error');
+                return;
+            }
+            
+            // Verificar que la URL sea válida
+            try {
+                new URL(url);
+            } catch {
+                showToast('URL de video inválida', 'error');
+                return;
+            }
+            
+            playerVideo.src = url;
+            playerVideo.load();
+            playerTitle.textContent = title || 'Sin título';
+            playerChannel.textContent = channel || 'JHEILER';
+            playerOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Reproducir automáticamente
+            playerVideo.play().catch(() => {
+                // Algunos navegadores bloquean autoplay
+                showToast('Toca play para reproducir', 'info');
+            });
+        }
+
+        // ===== CERRAR REPRODUCTOR =====
+        function closePlayer() {
+            playerVideo.pause();
+            playerVideo.src = '';
+            playerOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        playerClose.addEventListener('click', closePlayer);
+
+        // Cerrar con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && playerOverlay.classList.contains('active')) {
+                closePlayer();
+            }
+        });
+
+        // Cerrar clickeando fuera del video
+        playerOverlay.addEventListener('click', (e) => {
+            if (e.target === playerOverlay) {
+                closePlayer();
+            }
+        });
 
         // ===== TOAST NOTIFICATION =====
-        function showToast(message, type = 'info', duration = 2500) {
+        function showToast(message, type = 'info', duration = 3000) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
 
@@ -547,6 +891,22 @@
             }, duration);
         }
 
+        // ===== FORMATO DE FECHA =====
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // ===== FORMATO DE VISTAS =====
+        function formatViews(views) {
+            if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
+            if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
+            return views;
+        }
+
         // ===== CARGAR VIDEOS =====
         async function loadVideos() {
             try {
@@ -568,23 +928,39 @@
                     return;
                 }
 
-                grid.innerHTML = data.map(v => `
-                    <div class="video-card" onclick="playVideo('${v.video_url}')">
-                        <div class="thumb">
-                            <img src="${v.thumbnail_url || ''}" 
-                                 alt="${v.title || 'Video'}"
-                                 loading="lazy"
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%23212121%22 width=%22320%22 height=%22180%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2232%22%3E🎬%3C/text%3E%3C/svg%3E'">
-                            <div class="play-overlay">
-                                <i class="fas fa-play"></i> Reproducir
+                grid.innerHTML = data.map(v => {
+                    const views = v.views || Math.floor(Math.random() * 5000) + 100;
+                    const duration = v.duration || `${Math.floor(Math.random() * 15) + 3}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`;
+                    const channel = v.channel || 'JHEILER';
+                    const initial = channel.charAt(0).toUpperCase();
+                    
+                    return `
+                        <div class="video-card" onclick='playVideo("${v.video_url}", "${v.title || 'Sin título'}", "${channel}")'>
+                            <div class="thumb">
+                                <img src="${v.thumbnail_url || ''}" 
+                                     alt="${v.title || 'Video'}"
+                                     loading="lazy"
+                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%23212121%22 width=%22320%22 height=%22180%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2232%22%3E🎬%3C/text%3E%3C/svg%3E'">
+                                <span class="duration">${duration}</span>
+                                <div class="play-overlay">
+                                    <i class="fas fa-play"></i>
+                                </div>
+                            </div>
+                            <div class="video-info">
+                                <div class="channel-avatar">${initial}</div>
+                                <div class="video-details">
+                                    <div class="card-title">${v.title || 'Sin título'}</div>
+                                    <div class="channel-name">${channel}</div>
+                                    <div class="card-meta">
+                                        <i class="fas fa-eye"></i> ${formatViews(views)} vistas
+                                        <span style="margin:0 4px;">•</span>
+                                        <i class="far fa-calendar-alt"></i> ${formatDate(v.created_at)}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-title">${v.title || 'Sin título'}</div>
-                        <div class="card-meta">
-                            <i class="far fa-calendar-alt"></i> ${new Date(v.created_at).toLocaleDateString('es-ES')}
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             } catch (err) {
                 console.error('Error cargando videos:', err);
                 grid.innerHTML = `
@@ -597,11 +973,38 @@
             }
         }
 
-        // ===== REPRODUCIR VIDEO =====
-        window.playVideo = function(url) {
-            if (!url) return showToast('Video no disponible', 'error');
-            window.open(url, '_blank');
-        };
+        // ===== CAMBIAR CATEGORÍA =====
+        document.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                const category = this.textContent.trim();
+                if (category === 'Todos') {
+                    loadVideos();
+                } else {
+                    showToast(`Filtrando por: ${category}`, 'info');
+                }
+            });
+        });
+
+        // ===== SIDEBAR NAVEGACIÓN =====
+        document.querySelectorAll('.sb-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                const section = this.dataset.section;
+                showToast(`Navegando a: ${section}`, 'info');
+            });
+        });
+
+        // ===== BÚSQUEDA =====
+        document.getElementById('btnSearch').addEventListener('click', function() {
+            const searchTerm = prompt('🔍 ¿Qué estás buscando?');
+            if (searchTerm && searchTerm.trim()) {
+                showToast(`Buscando: "${searchTerm.trim()}"`, 'info');
+            }
+        });
 
         // ===== ABRIR MODAL =====
         document.getElementById('btnOpenModal').onclick = () => {
@@ -614,17 +1017,23 @@
                     </h3>
                     <input type="text" id="upTitle" placeholder="Título del video" maxlength="100">
                     <textarea id="upDesc" placeholder="Descripción (opcional)" maxlength="500"></textarea>
+                    <select id="upCategory">
+                        <option value="general">General</option>
+                        <option value="roblox">Roblox</option>
+                        <option value="ia">IA</option>
+                        <option value="minecraft">Minecraft</option>
+                        <option value="programacion">Programación</option>
+                        <option value="musica">Música</option>
+                        <option value="deportes">Deportes</option>
+                        <option value="videojuegos">Videojuegos</option>
+                    </select>
                     <div class="file-input-wrapper">
                         <input type="file" id="upVideo" accept="video/*" required>
-                        <small style="color:#666;display:block;margin-top:4px;">
-                            <i class="fas fa-info-circle"></i> Máx. 100MB
-                        </small>
+                        <small><i class="fas fa-info-circle"></i> Máx. 100MB</small>
                     </div>
                     <div class="file-input-wrapper">
                         <input type="file" id="upThumb" accept="image/*">
-                        <small style="color:#666;display:block;margin-top:4px;">
-                            <i class="fas fa-info-circle"></i> Miniatura (opcional)
-                        </small>
+                        <small><i class="fas fa-info-circle"></i> Miniatura (opcional)</small>
                     </div>
                     <div class="modal-actions">
                         <button class="btn-primary" id="btnUpload">
@@ -641,6 +1050,7 @@
             document.getElementById('btnUpload').onclick = async () => {
                 const title = document.getElementById('upTitle').value.trim();
                 const desc = document.getElementById('upDesc').value.trim();
+                const category = document.getElementById('upCategory').value;
                 const videoFile = document.getElementById('upVideo').files[0];
                 const thumbFile = document.getElementById('upThumb').files[0];
 
@@ -655,7 +1065,6 @@
                 btn.disabled = true;
 
                 try {
-                    // Subir video
                     const vName = `${Date.now()}_${videoFile.name}`;
                     const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
                     if (vErr) throw vErr;
@@ -663,7 +1072,6 @@
                     const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
                     let thumbUrl = '';
 
-                    // Subir thumbnail (opcional)
                     if (thumbFile) {
                         const tName = `${Date.now()}_${thumbFile.name}`;
                         const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
@@ -673,12 +1081,15 @@
                         }
                     }
 
-                    // Guardar en base de datos
                     const { error: insertErr } = await sb.from('videos').insert({
                         title,
                         description: desc || null,
+                        category: category || 'general',
                         video_url: vData.publicUrl,
-                        thumbnail_url: thumbUrl
+                        thumbnail_url: thumbUrl,
+                        views: 0,
+                        duration: '00:00',
+                        channel: 'JHEILER'
                     });
 
                     if (insertErr) throw insertErr;
