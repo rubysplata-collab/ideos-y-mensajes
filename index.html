@@ -8,22 +8,132 @@
     <!-- ===== FONT AWESOME LOCAL ===== -->
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     
+    <!-- ===== GOOGLE FONTS (para personalización) ===== -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Roboto:wght@400;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
     <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/3670/3670147.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* ===== RESET Y VARIABLES ===== */
+        /* ===== VARIABLES PERSONALIZABLES ===== */
         :root {
+            /* Colores principales */
+            --bg: #0f0f0f;
+            --panel: #181818;
+            --panel2: #212121;
+            --accent: #ff304f;
+            --accent2: #ff6b8a;
+            --border: #303030;
+            --text-secondary: #aaa;
+            --shadow: 0 8px 32px rgba(0,0,0,0.4);
+            --radius: 12px;
+            
+            /* Tipografía */
+            --font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --font-weight-title: 800;
+            --font-weight-body: 400;
+            --font-size-base: 14px;
+            
+            /* Fondos */
+            --bg-image: none;
+            --bg-overlay: rgba(0,0,0,0.85);
+            
+            /* Efectos */
+            --glass-effect: rgba(255,255,255,0.05);
+            --hover-scale: 1.02;
+        }
+
+        /* ===== TEMAS ===== */
+        .theme-dark {
             --bg: #0f0f0f;
             --panel: #181818;
             --panel2: #212121;
             --accent: #ff304f;
             --border: #303030;
-            --text-secondary: #aaa;
-            --shadow: 0 8px 32px rgba(0,0,0,0.4);
-            --radius: 12px;
+        }
+        
+        .theme-light {
+            --bg: #f5f5f5;
+            --panel: #ffffff;
+            --panel2: #e8e8e8;
+            --accent: #ff304f;
+            --border: #ddd;
+            --text-secondary: #666;
+        }
+        
+        .theme-neon {
+            --bg: #0a0a1a;
+            --panel: #111128;
+            --panel2: #1a1a3a;
+            --accent: #00ff88;
+            --accent2: #00ffcc;
+            --border: #333366;
+            --text-secondary: #8888cc;
+        }
+        
+        .theme-cyber {
+            --bg: #000000;
+            --panel: #0a0a0a;
+            --panel2: #1a1a1a;
+            --accent: #ff00ff;
+            --accent2: #ff44ff;
+            --border: #333333;
+            --text-secondary: #999999;
         }
 
+        /* ===== FONDOS ===== */
+        .bg-gradient {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a0a2e 50%, #0f0f0f 100%);
+        }
+        
+        .bg-gradient-neon {
+            background: linear-gradient(135deg, #0a0a1a 0%, #001a1a 50%, #0a0a1a 100%);
+        }
+        
+        .bg-pattern {
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255,48,79,0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255,48,79,0.05) 0%, transparent 50%);
+        }
+        
+        .bg-pattern-dots {
+            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .bg-image-1 {
+            background-image: url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .bg-image-2 {
+            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        
+        .bg-image-3 {
+            background-image: url('https://images.unsplash.com/photo-1470071459604-7b8ec44ffd18?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-overlay);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
@@ -31,11 +141,27 @@
         }
 
         body {
-            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: var(--font-family);
             background: var(--bg);
             color: #fff;
             min-height: 100vh;
             overflow-x: hidden;
+            font-size: var(--font-size-base);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            opacity: 0.3;
         }
 
         /* ===== SCROLLBAR ===== */
@@ -64,7 +190,7 @@
 
         .brand {
             font-size: 22px;
-            font-weight: 800;
+            font-weight: var(--font-weight-title);
             color: var(--accent);
             display: flex;
             align-items: center;
@@ -83,18 +209,23 @@
             gap: 16px;
         }
 
-        .search-btn {
+        .header-btn {
             background: transparent;
             border: none;
             color: #fff;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
-            padding: 6px;
+            padding: 8px;
             border-radius: 50%;
             transition: background 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .search-btn:hover {
+        .header-btn:hover {
             background: var(--panel2);
         }
 
@@ -206,6 +337,8 @@
             padding: 80px 24px 40px 24px;
             min-height: 100vh;
             transition: opacity 0.3s ease;
+            position: relative;
+            z-index: 1;
         }
 
         /* ===== CATEGORÍAS ===== */
@@ -239,14 +372,14 @@
         }
 
         .category-chip.active {
-            background: #fff;
-            color: #000;
+            background: var(--accent);
+            color: #fff;
         }
 
         /* ===== VIDEO GRID ===== */
         .video-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 28px 20px;
         }
 
@@ -277,7 +410,7 @@
         }
 
         .video-card:hover .thumb img {
-            transform: scale(1.02);
+            transform: scale(var(--hover-scale));
         }
 
         .thumb .duration {
@@ -343,12 +476,33 @@
 
         .card-title {
             font-size: 15px;
-            font-weight: 600;
+            font-weight: var(--font-weight-title);
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .card-hashtags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-top: 4px;
+        }
+
+        .card-hashtags span {
+            font-size: 11px;
+            color: var(--accent);
+            background: rgba(255,48,79,0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .card-hashtags span:hover {
+            background: rgba(255,48,79,0.2);
         }
 
         .channel-name {
@@ -363,10 +517,25 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            flex-wrap: wrap;
         }
 
         .card-meta i {
             font-size: 11px;
+        }
+
+        /* ===== SECCIÓN DE CONTENIDO ===== */
+        .section-title {
+            font-size: 20px;
+            font-weight: var(--font-weight-title);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: var(--accent);
         }
 
         /* ===== EMPTY STATE ===== */
@@ -390,7 +559,7 @@
             color: #fff;
         }
 
-        /* ===== REPRODUCTOR (PLAYER) ===== */
+        /* ===== REPRODUCTOR ===== */
         .player-overlay {
             position: fixed;
             top: 0;
@@ -447,11 +616,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .player-title {
             font-size: 18px;
-            font-weight: 600;
+            font-weight: var(--font-weight-title);
         }
 
         .player-channel {
@@ -459,12 +630,23 @@
             font-size: 14px;
         }
 
+        .player-hashtags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .player-hashtags span {
+            color: var(--accent);
+            font-size: 13px;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
 
-        /* ===== MODAL ===== */
+        /* ===== MODAL PERSONALIZACIÓN ===== */
         .modal {
             position: fixed;
             top: 0;
@@ -485,17 +667,19 @@
             padding: 28px 32px;
             border-radius: 20px;
             width: 90%;
-            max-width: 440px;
+            max-width: 480px;
             display: flex;
             flex-direction: column;
             gap: 16px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal-content h3 {
             font-size: 22px;
-            font-weight: 700;
+            font-weight: var(--font-weight-title);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -610,6 +794,69 @@
             margin-top: 4px;
         }
 
+        /* ===== OPCIONES DE PERSONALIZACIÓN ===== */
+        .customization-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .customization-option {
+            padding: 12px;
+            background: var(--panel2);
+            border-radius: 10px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .customization-option:hover {
+            border-color: var(--accent);
+        }
+
+        .customization-option.active {
+            border-color: var(--accent);
+            background: rgba(255,48,79,0.1);
+        }
+
+        .customization-option .preview {
+            width: 100%;
+            height: 40px;
+            border-radius: 6px;
+            margin-bottom: 6px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-picker input[type="color"] {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .font-option {
+            padding: 8px 12px;
+            background: var(--panel2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .font-option:hover,
+        .font-option.active {
+            border-color: var(--accent);
+        }
+
         /* ===== TOAST ===== */
         .toast {
             position: fixed;
@@ -685,6 +932,9 @@
             .player-title {
                 font-size: 15px;
             }
+            .customization-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
@@ -721,7 +971,10 @@
             <i class="fas fa-play"></i> JHEILER
         </div>
         <div class="header-actions">
-            <button class="search-btn" id="btnSearch">
+            <button class="header-btn" id="btnCustomize" title="Personalizar">
+                <i class="fas fa-palette"></i>
+            </button>
+            <button class="header-btn" id="btnSearch">
                 <i class="fas fa-search"></i>
             </button>
             <button class="create-btn" id="btnOpenModal">
@@ -734,35 +987,36 @@
     <!-- ===== SIDEBAR ===== -->
     <aside>
         <div class="sb-section">
-            <a class="sb-item active" href="#" data-section="inicio">
+            <a class="sb-item active" data-section="inicio">
                 <i class="fas fa-home"></i> Inicio
             </a>
-            <a class="sb-item" href="#" data-section="shorts">
+            <a class="sb-item" data-section="shorts">
                 <i class="fas fa-bolt"></i> Shorts
+                <span class="badge">Nuevo</span>
             </a>
-            <a class="sb-item" href="#" data-section="suscripciones">
+            <a class="sb-item" data-section="suscripciones">
                 <i class="fas fa-tv"></i> Suscripciones
             </a>
         </div>
         <div class="sb-section">
             <div class="sb-title">Biblioteca</div>
-            <a class="sb-item" href="#" data-section="historial">
+            <a class="sb-item" data-section="historial">
                 <i class="fas fa-clock"></i> Historial
             </a>
-            <a class="sb-item" href="#" data-section="tus-videos">
+            <a class="sb-item" data-section="tus-videos">
                 <i class="fas fa-video"></i> Tus videos
             </a>
-            <a class="sb-item" href="#" data-section="favoritos">
+            <a class="sb-item" data-section="favoritos">
                 <i class="fas fa-heart"></i> Favoritos
                 <span class="badge">3</span>
             </a>
-            <a class="sb-item" href="#" data-section="ver-despues">
+            <a class="sb-item" data-section="ver-despues">
                 <i class="fas fa-clock"></i> Ver después
             </a>
         </div>
     </aside>
 
-    <!-- ===== REPRODUCTOR (PLAYER) ===== -->
+    <!-- ===== REPRODUCTOR ===== -->
     <div class="player-overlay" id="playerOverlay">
         <div class="player-container">
             <button class="player-close" id="playerClose">
@@ -777,6 +1031,7 @@
             <div>
                 <div class="player-title" id="playerTitle">Título del video</div>
                 <div class="player-channel" id="playerChannel">Canal</div>
+                <div class="player-hashtags" id="playerHashtags"></div>
             </div>
         </div>
     </div>
@@ -785,14 +1040,14 @@
     <main>
         <!-- ===== CATEGORÍAS ===== -->
         <div class="categories" id="categoriesContainer">
-            <span class="category-chip active">Todos</span>
-            <span class="category-chip">Roblox</span>
-            <span class="category-chip">IA</span>
-            <span class="category-chip">Minecraft</span>
-            <span class="category-chip">Programación</span>
-            <span class="category-chip">Música</span>
-            <span class="category-chip">Deportes</span>
-            <span class="category-chip">Videojuegos</span>
+            <span class="category-chip active" data-category="todos">Todos</span>
+            <span class="category-chip" data-category="roblox">Roblox</span>
+            <span class="category-chip" data-category="ia">IA</span>
+            <span class="category-chip" data-category="minecraft">Minecraft</span>
+            <span class="category-chip" data-category="programacion">Programación</span>
+            <span class="category-chip" data-category="musica">Música</span>
+            <span class="category-chip" data-category="deportes">Deportes</span>
+            <span class="category-chip" data-category="videojuegos">Videojuegos</span>
         </div>
 
         <!-- ===== VIDEO GRID ===== -->
@@ -810,33 +1065,131 @@
         const playerVideo = document.getElementById('playerVideo');
         const playerTitle = document.getElementById('playerTitle');
         const playerChannel = document.getElementById('playerChannel');
+        const playerHashtags = document.getElementById('playerHashtags');
         const playerClose = document.getElementById('playerClose');
 
-        // ===== REPRODUCIR VIDEO (INTEGRADO) =====
-        function playVideo(url, title = 'Video', channel = 'JHEILER') {
-            if (!url) {
+        let currentSection = 'inicio';
+        let currentCategory = 'todos';
+        let allVideos = [];
+
+        // ===== DATOS DE EJEMPLO CON MINIATURAS REALES =====
+        const sampleVideos = [
+            {
+                id: 1,
+                title: 'ROBLOX: La mejor aventura épica',
+                description: 'Explorando el mundo de Roblox con amigos',
+                channel: 'JHEILER',
+                category: 'roblox',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=225&fit=crop',
+                views: 4700,
+                duration: '11:20',
+                hashtags: ['#Roblox', '#Aventura', '#Gaming'],
+                created_at: '2026-08-17T00:00:00Z'
+            },
+            {
+                id: 2,
+                title: 'IA: El futuro de la tecnología',
+                description: 'Inteligencia artificial explicada fácil',
+                channel: 'JHEILER',
+                category: 'ia',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=225&fit=crop',
+                views: 4400,
+                duration: '8:46',
+                hashtags: ['#IA', '#Tecnología', '#Futuro'],
+                created_at: '2026-08-17T00:00:00Z'
+            },
+            {
+                id: 3,
+                title: 'MINECRAFT: Construyendo una ciudad',
+                description: 'Construcción masiva en Minecraft',
+                channel: 'JHEILER',
+                category: 'minecraft',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85f30a?w=400&h=225&fit=crop',
+                views: 3200,
+                duration: '15:30',
+                hashtags: ['#Minecraft', '#Construcción', '#Creativo'],
+                created_at: '2026-08-16T00:00:00Z'
+            },
+            {
+                id: 4,
+                title: 'Programación Web: Curso Completo',
+                description: 'Aprende a programar desde cero',
+                channel: 'JHEILER',
+                category: 'programacion',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=225&fit=crop',
+                views: 2800,
+                duration: '22:15',
+                hashtags: ['#Programación', '#Web', '#Coding'],
+                created_at: '2026-08-15T00:00:00Z'
+            },
+            {
+                id: 5,
+                title: 'Música Electrónica 2026',
+                description: 'Los mejores beats del año',
+                channel: 'JHEILER',
+                category: 'musica',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=225&fit=crop',
+                views: 5600,
+                duration: '5:20',
+                hashtags: ['#Música', '#Electrónica', '#Beats'],
+                created_at: '2026-08-14T00:00:00Z'
+            },
+            {
+                id: 6,
+                title: 'Deportes Extremos: Paracaidismo',
+                description: 'Saltando desde 4000 metros',
+                channel: 'JHEILER',
+                category: 'deportes',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1518099074172-2e47d6cfdc28?w=400&h=225&fit=crop',
+                views: 1900,
+                duration: '10:45',
+                hashtags: ['#Deportes', '#Extremo', '#Aventura'],
+                created_at: '2026-08-13T00:00:00Z'
+            },
+            {
+                id: 7,
+                title: 'Top 10 Videojuegos 2026',
+                description: 'Los mejores juegos del año',
+                channel: 'JHEILER',
+                category: 'videojuegos',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=225&fit=crop',
+                views: 3800,
+                duration: '14:20',
+                hashtags: ['#Videojuegos', '#Gaming', '#Top10'],
+                created_at: '2026-08-12T00:00:00Z'
+            }
+        ];
+
+        // ===== FUNCIONES =====
+
+        // ===== REPRODUCIR VIDEO =====
+        function playVideo(video) {
+            if (!video || !video.video_url) {
                 showToast('Video no disponible', 'error');
                 return;
             }
             
-            // Verificar que la URL sea válida
-            try {
-                new URL(url);
-            } catch {
-                showToast('URL de video inválida', 'error');
-                return;
-            }
-            
-            playerVideo.src = url;
+            playerVideo.src = video.video_url;
             playerVideo.load();
-            playerTitle.textContent = title || 'Sin título';
-            playerChannel.textContent = channel || 'JHEILER';
+            playerTitle.textContent = video.title || 'Sin título';
+            playerChannel.textContent = video.channel || 'JHEILER';
+            
+            // Hashtags
+            playerHashtags.innerHTML = (video.hashtags || []).map(tag => 
+                `<span>${tag}</span>`
+            ).join('');
+            
             playerOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
             
-            // Reproducir automáticamente
             playerVideo.play().catch(() => {
-                // Algunos navegadores bloquean autoplay
                 showToast('Toca play para reproducir', 'info');
             });
         }
@@ -851,21 +1204,19 @@
 
         playerClose.addEventListener('click', closePlayer);
 
-        // Cerrar con ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && playerOverlay.classList.contains('active')) {
                 closePlayer();
             }
         });
 
-        // Cerrar clickeando fuera del video
         playerOverlay.addEventListener('click', (e) => {
             if (e.target === playerOverlay) {
                 closePlayer();
             }
         });
 
-        // ===== TOAST NOTIFICATION =====
+        // ===== TOAST =====
         function showToast(message, type = 'info', duration = 3000) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -907,8 +1258,8 @@
             return views;
         }
 
-        // ===== CARGAR VIDEOS =====
-        async function loadVideos() {
+        // ===== OBTENER VIDEOS =====
+        async function getVideos() {
             try {
                 const { data, error } = await sb
                     .from('videos')
@@ -917,84 +1268,126 @@
 
                 if (error) throw error;
 
-                if (!data || data.length === 0) {
-                    grid.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-video"></i>
-                            <h3>No hay videos aún</h3>
-                            <p style="color:#666;margin-top:8px;">¡Sé el primero en subir contenido!</p>
-                        </div>
-                    `;
-                    return;
+                if (data && data.length > 0) {
+                    allVideos = data;
+                    return data;
                 }
-
-                grid.innerHTML = data.map(v => {
-                    const views = v.views || Math.floor(Math.random() * 5000) + 100;
-                    const duration = v.duration || `${Math.floor(Math.random() * 15) + 3}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`;
-                    const channel = v.channel || 'JHEILER';
-                    const initial = channel.charAt(0).toUpperCase();
-                    
-                    return `
-                        <div class="video-card" onclick='playVideo("${v.video_url}", "${v.title || 'Sin título'}", "${channel}")'>
-                            <div class="thumb">
-                                <img src="${v.thumbnail_url || ''}" 
-                                     alt="${v.title || 'Video'}"
-                                     loading="lazy"
-                                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22%3E%3Crect fill=%22%23212121%22 width=%22320%22 height=%22180%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23666%22 font-size=%2232%22%3E🎬%3C/text%3E%3C/svg%3E'">
-                                <span class="duration">${duration}</span>
-                                <div class="play-overlay">
-                                    <i class="fas fa-play"></i>
-                                </div>
-                            </div>
-                            <div class="video-info">
-                                <div class="channel-avatar">${initial}</div>
-                                <div class="video-details">
-                                    <div class="card-title">${v.title || 'Sin título'}</div>
-                                    <div class="channel-name">${channel}</div>
-                                    <div class="card-meta">
-                                        <i class="fas fa-eye"></i> ${formatViews(views)} vistas
-                                        <span style="margin:0 4px;">•</span>
-                                        <i class="far fa-calendar-alt"></i> ${formatDate(v.created_at)}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
+                
+                // Si no hay datos en Supabase, usar los de ejemplo
+                allVideos = sampleVideos;
+                return sampleVideos;
             } catch (err) {
-                console.error('Error cargando videos:', err);
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h3>Error al cargar</h3>
-                        <p style="color:#666;">Intenta de nuevo más tarde</p>
-                    </div>
-                `;
+                console.log('Usando datos de ejemplo');
+                allVideos = sampleVideos;
+                return sampleVideos;
             }
         }
 
-        // ===== CAMBIAR CATEGORÍA =====
-        document.querySelectorAll('.category-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                const category = this.textContent.trim();
-                if (category === 'Todos') {
-                    loadVideos();
-                } else {
-                    showToast(`Filtrando por: ${category}`, 'info');
-                }
-            });
-        });
+        // ===== FILTRAR VIDEOS =====
+        function filterVideos(videos, section, category) {
+            let filtered = [...videos];
+            
+            // Filtrar por sección
+            if (section === 'favoritos') {
+                // Simular favoritos
+                filtered = filtered.slice(0, 3);
+            } else if (section === 'tus-videos') {
+                // Tus videos (solo los del canal JHEILER)
+                filtered = filtered.filter(v => v.channel === 'JHEILER');
+            } else if (section === 'historial') {
+                // Historial (últimos 5 vistos)
+                filtered = filtered.slice(0, 5);
+            } else if (section === 'ver-despues') {
+                // Ver después (aleatorio)
+                filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+            }
+            
+            // Filtrar por categoría
+            if (category && category !== 'todos') {
+                filtered = filtered.filter(v => v.category === category);
+            }
+            
+            return filtered;
+        }
 
-        // ===== SIDEBAR NAVEGACIÓN =====
+        // ===== RENDER VIDEOS =====
+        function renderVideos(videos) {
+            if (!videos || videos.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-video"></i>
+                        <h3>No hay videos aquí</h3>
+                        <p style="color:#666;margin-top:8px;">¡Sube tu primer video!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = videos.map(v => {
+                const views = v.views || Math.floor(Math.random() * 5000) + 100;
+                const duration = v.duration || `${Math.floor(Math.random() * 15) + 3}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`;
+                const channel = v.channel || 'JHEILER';
+                const initial = channel.charAt(0).toUpperCase();
+                const hashtags = v.hashtags || ['#Video'];
+                
+                return `
+                    <div class="video-card" onclick='playVideo(${JSON.stringify(v)})'>
+                        <div class="thumb">
+                            <img src="${v.thumbnail_url || 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop'}" 
+                                 alt="${v.title || 'Video'}"
+                                 loading="lazy"
+                                 onerror="this.src='https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop'">
+                            <span class="duration">${duration}</span>
+                            <div class="play-overlay">
+                                <i class="fas fa-play"></i>
+                            </div>
+                        </div>
+                        <div class="video-info">
+                            <div class="channel-avatar">${initial}</div>
+                            <div class="video-details">
+                                <div class="card-title">${v.title || 'Sin título'}</div>
+                                <div class="card-hashtags">
+                                    ${hashtags.slice(0, 3).map(tag => `<span>${tag}</span>`).join('')}
+                                </div>
+                                <div class="channel-name">${channel}</div>
+                                <div class="card-meta">
+                                    <i class="fas fa-eye"></i> ${formatViews(views)} vistas
+                                    <span style="margin:0 4px;">•</span>
+                                    <i class="far fa-calendar-alt"></i> ${formatDate(v.created_at)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== CARGAR Y FILTRAR VIDEOS =====
+        async function loadVideos() {
+            const videos = await getVideos();
+            const filtered = filterVideos(videos, currentSection, currentCategory);
+            renderVideos(filtered);
+        }
+
+        // ===== NAVEGACIÓN SIDEBAR =====
         document.querySelectorAll('.sb-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
                 document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
-                const section = this.dataset.section;
-                showToast(`Navegando a: ${section}`, 'info');
+                currentSection = this.dataset.section;
+                loadVideos();
+                showToast(`📂 ${this.textContent.trim()}`, 'info');
+            });
+        });
+
+        // ===== CATEGORÍAS =====
+        document.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentCategory = this.dataset.category;
+                loadVideos();
             });
         });
 
@@ -1002,11 +1395,163 @@
         document.getElementById('btnSearch').addEventListener('click', function() {
             const searchTerm = prompt('🔍 ¿Qué estás buscando?');
             if (searchTerm && searchTerm.trim()) {
-                showToast(`Buscando: "${searchTerm.trim()}"`, 'info');
+                const term = searchTerm.trim().toLowerCase();
+                const videos = allVideos.filter(v => 
+                    v.title?.toLowerCase().includes(term) || 
+                    v.description?.toLowerCase().includes(term) ||
+                    (v.hashtags || []).some(tag => tag.toLowerCase().includes(term))
+                );
+                renderVideos(videos);
+                showToast(`🔍 Resultados para: "${searchTerm.trim()}"`, 'info');
             }
         });
 
-        // ===== ABRIR MODAL =====
+        // ===== PERSONALIZACIÓN =====
+        document.getElementById('btnCustomize').addEventListener('click', function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>
+                        <i class="fas fa-palette"></i> Personalizar JHEILER
+                    </h3>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎨 Tema</label>
+                        <div class="customization-grid">
+                            <div class="customization-option active" data-theme="dark">
+                                <div class="preview" style="background:#0f0f0f;"></div>
+                                Oscuro
+                            </div>
+                            <div class="customization-option" data-theme="light">
+                                <div class="preview" style="background:#f5f5f5;border:1px solid #ddd;"></div>
+                                Claro
+                            </div>
+                            <div class="customization-option" data-theme="neon">
+                                <div class="preview" style="background:linear-gradient(135deg,#0a0a1a,#001a1a);"></div>
+                                Neon
+                            </div>
+                            <div class="customization-option" data-theme="cyber">
+                                <div class="preview" style="background:linear-gradient(135deg,#000,#1a001a);"></div>
+                                Cyber
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🖌️ Fondo</label>
+                        <div class="customization-grid">
+                            <div class="customization-option active" data-bg="default">
+                                <div class="preview" style="background:#0f0f0f;"></div>
+                            </div>
+                            <div class="customization-option" data-bg="gradient">
+                                <div class="preview" style="background:linear-gradient(135deg,#0f0f0f,#1a0a2e);"></div>
+                            </div>
+                            <div class="customization-option" data-bg="pattern">
+                                <div class="preview" style="background:radial-gradient(circle at 20% 50%, rgba(255,48,79,0.1) 0%, transparent 50%);"></div>
+                            </div>
+                            <div class="customization-option" data-bg="dots">
+                                <div class="preview" style="background-image:radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);background-size:10px 10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🔤 Fuente</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <span class="font-option active" data-font="Inter" style="font-family:'Inter';">Inter</span>
+                            <span class="font-option" data-font="Poppins" style="font-family:'Poppins';">Poppins</span>
+                            <span class="font-option" data-font="Roboto" style="font-family:'Roboto';">Roboto</span>
+                            <span class="font-option" data-font="Montserrat" style="font-family:'Montserrat';">Montserrat</span>
+                            <span class="font-option" data-font="Orbitron" style="font-family:'Orbitron';font-size:13px;">Orbitron</span>
+                            <span class="font-option" data-font="Press Start 2P" style="font-family:'Press Start 2P';font-size:10px;">Pixel</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎯 Color de acento</label>
+                        <div class="color-picker">
+                            <input type="color" id="accentColor" value="#ff304f">
+                            <input type="color" id="accentColor2" value="#ff6b8a">
+                        </div>
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button class="btn-primary" onclick="applyCustomization();this.closest('.modal').remove();">
+                            <i class="fas fa-check"></i> Aplicar
+                        </button>
+                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            // Event listeners para temas
+            document.querySelectorAll('[data-theme]').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    document.querySelectorAll('[data-theme]').forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            document.querySelectorAll('[data-bg]').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    document.querySelectorAll('[data-bg]').forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            document.querySelectorAll('.font-option').forEach(opt => {
+                opt.addEventListener('click', function() {
+                    document.querySelectorAll('.font-option').forEach(o => o.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        });
+
+        // ===== APLICAR PERSONALIZACIÓN =====
+        window.applyCustomization = function() {
+            // Tema
+            const activeTheme = document.querySelector('[data-theme].active');
+            if (activeTheme) {
+                const theme = activeTheme.dataset.theme;
+                document.body.className = `theme-${theme}`;
+            }
+
+            // Fondo
+            const activeBg = document.querySelector('[data-bg].active');
+            if (activeBg) {
+                const bg = activeBg.dataset.bg;
+                const bgClasses = ['bg-gradient', 'bg-gradient-neon', 'bg-pattern', 'bg-pattern-dots'];
+                bgClasses.forEach(cls => document.body.classList.remove(cls));
+                if (bg !== 'default') {
+                    document.body.classList.add(`bg-${bg}`);
+                }
+            }
+
+            // Fuente
+            const activeFont = document.querySelector('.font-option.active');
+            if (activeFont) {
+                const font = activeFont.dataset.font;
+                document.documentElement.style.setProperty('--font-family', `'${font}', -apple-system, 'Segoe UI', Roboto, sans-serif`);
+            }
+
+            // Color de acento
+            const accentColor = document.getElementById('accentColor')?.value;
+            const accentColor2 = document.getElementById('accentColor2')?.value;
+            if (accentColor) {
+                document.documentElement.style.setProperty('--accent', accentColor);
+            }
+            if (accentColor2) {
+                document.documentElement.style.setProperty('--accent2', accentColor2);
+            }
+
+            showToast('✅ Personalización aplicada', 'success');
+        };
+
+        // ===== SUBIR VIDEO =====
         document.getElementById('btnOpenModal').onclick = () => {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -1017,6 +1562,7 @@
                     </h3>
                     <input type="text" id="upTitle" placeholder="Título del video" maxlength="100">
                     <textarea id="upDesc" placeholder="Descripción (opcional)" maxlength="500"></textarea>
+                    <input type="text" id="upHashtags" placeholder="Hashtags (ej: #Roblox #Gaming)" maxlength="200">
                     <select id="upCategory">
                         <option value="general">General</option>
                         <option value="roblox">Roblox</option>
@@ -1050,6 +1596,7 @@
             document.getElementById('btnUpload').onclick = async () => {
                 const title = document.getElementById('upTitle').value.trim();
                 const desc = document.getElementById('upDesc').value.trim();
+                const hashtags = document.getElementById('upHashtags').value.trim().split(' ').filter(t => t.startsWith('#'));
                 const category = document.getElementById('upCategory').value;
                 const videoFile = document.getElementById('upVideo').files[0];
                 const thumbFile = document.getElementById('upThumb').files[0];
@@ -1081,19 +1628,23 @@
                         }
                     }
 
-                    const { error: insertErr } = await sb.from('videos').insert({
+                    const newVideo = {
                         title,
                         description: desc || null,
                         category: category || 'general',
                         video_url: vData.publicUrl,
-                        thumbnail_url: thumbUrl,
+                        thumbnail_url: thumbUrl || 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop',
                         views: 0,
                         duration: '00:00',
-                        channel: 'JHEILER'
-                    });
+                        channel: 'JHEILER',
+                        hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
+                        created_at: new Date().toISOString()
+                    };
 
+                    const { error: insertErr } = await sb.from('videos').insert(newVideo);
                     if (insertErr) throw insertErr;
 
+                    allVideos.unshift(newVideo);
                     modal.remove();
                     showToast('¡Video publicado con éxito! 🎉', 'success');
                     loadVideos();
