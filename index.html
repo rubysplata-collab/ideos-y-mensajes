@@ -8,16 +8,15 @@
     <!-- ===== FONT AWESOME LOCAL ===== -->
     <link rel="stylesheet" href="fontawesome/css/all.min.css">
     
-    <!-- ===== GOOGLE FONTS (para personalización) ===== -->
+    <!-- ===== GOOGLE FONTS ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Roboto:wght@400;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/3670/3670147.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        /* ===== VARIABLES PERSONALIZABLES ===== */
+        /* ===== VARIABLES ===== */
         :root {
-            /* Colores principales */
             --bg: #0f0f0f;
             --panel: #181818;
             --panel2: #212121;
@@ -27,113 +26,16 @@
             --text-secondary: #aaa;
             --shadow: 0 8px 32px rgba(0,0,0,0.4);
             --radius: 12px;
-            
-            /* Tipografía */
             --font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
             --font-weight-title: 800;
             --font-weight-body: 400;
             --font-size-base: 14px;
-            
-            /* Fondos */
             --bg-image: none;
             --bg-overlay: rgba(0,0,0,0.85);
-            
-            /* Efectos */
             --glass-effect: rgba(255,255,255,0.05);
             --hover-scale: 1.02;
         }
 
-        /* ===== TEMAS ===== */
-        .theme-dark {
-            --bg: #0f0f0f;
-            --panel: #181818;
-            --panel2: #212121;
-            --accent: #ff304f;
-            --border: #303030;
-        }
-        
-        .theme-light {
-            --bg: #f5f5f5;
-            --panel: #ffffff;
-            --panel2: #e8e8e8;
-            --accent: #ff304f;
-            --border: #ddd;
-            --text-secondary: #666;
-        }
-        
-        .theme-neon {
-            --bg: #0a0a1a;
-            --panel: #111128;
-            --panel2: #1a1a3a;
-            --accent: #00ff88;
-            --accent2: #00ffcc;
-            --border: #333366;
-            --text-secondary: #8888cc;
-        }
-        
-        .theme-cyber {
-            --bg: #000000;
-            --panel: #0a0a0a;
-            --panel2: #1a1a1a;
-            --accent: #ff00ff;
-            --accent2: #ff44ff;
-            --border: #333333;
-            --text-secondary: #999999;
-        }
-
-        /* ===== FONDOS ===== */
-        .bg-gradient {
-            background: linear-gradient(135deg, #0f0f0f 0%, #1a0a2e 50%, #0f0f0f 100%);
-        }
-        
-        .bg-gradient-neon {
-            background: linear-gradient(135deg, #0a0a1a 0%, #001a1a 50%, #0a0a1a 100%);
-        }
-        
-        .bg-pattern {
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(255,48,79,0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255,48,79,0.05) 0%, transparent 50%);
-        }
-        
-        .bg-pattern-dots {
-            background-image: radial-gradient(circle, rgba(255,255,255,0.03) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .bg-image-1 {
-            background-image: url('https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        
-        .bg-image-2 {
-            background-image: url('https://images.unsplash.com/photo-1519681393784-d120267933ba?w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-        
-        .bg-image-3 {
-            background-image: url('https://images.unsplash.com/photo-1470071459604-7b8ec44ffd18?w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-        }
-
-        .bg-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-overlay);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* ===== RESET ===== */
         * {
             margin: 0;
             padding: 0;
@@ -161,7 +63,7 @@
             background-size: cover;
             background-position: center;
             z-index: -1;
-            opacity: 0.3;
+            opacity: 0.2;
         }
 
         /* ===== SCROLLBAR ===== */
@@ -331,12 +233,11 @@
             font-weight: 700;
         }
 
-        /* ===== MAIN CONTENT ===== */
+        /* ===== MAIN ===== */
         main {
             margin-left: 220px;
             padding: 80px 24px 40px 24px;
             min-height: 100vh;
-            transition: opacity 0.3s ease;
             position: relative;
             z-index: 1;
         }
@@ -374,6 +275,20 @@
         .category-chip.active {
             background: var(--accent);
             color: #fff;
+        }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title {
+            font-size: 20px;
+            font-weight: var(--font-weight-title);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .section-title i {
+            color: var(--accent);
         }
 
         /* ===== VIDEO GRID ===== */
@@ -524,20 +439,6 @@
             font-size: 11px;
         }
 
-        /* ===== SECCIÓN DE CONTENIDO ===== */
-        .section-title {
-            font-size: 20px;
-            font-weight: var(--font-weight-title);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .section-title i {
-            color: var(--accent);
-        }
-
         /* ===== EMPTY STATE ===== */
         .empty-state {
             grid-column: 1 / -1;
@@ -646,7 +547,7 @@
             to { opacity: 1; }
         }
 
-        /* ===== MODAL PERSONALIZACIÓN ===== */
+        /* ===== MODAL ===== */
         .modal {
             position: fixed;
             top: 0;
@@ -794,69 +695,6 @@
             margin-top: 4px;
         }
 
-        /* ===== OPCIONES DE PERSONALIZACIÓN ===== */
-        .customization-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .customization-option {
-            padding: 12px;
-            background: var(--panel2);
-            border-radius: 10px;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .customization-option:hover {
-            border-color: var(--accent);
-        }
-
-        .customization-option.active {
-            border-color: var(--accent);
-            background: rgba(255,48,79,0.1);
-        }
-
-        .customization-option .preview {
-            width: 100%;
-            height: 40px;
-            border-radius: 6px;
-            margin-bottom: 6px;
-        }
-
-        .color-picker {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .color-picker input[type="color"] {
-            width: 40px;
-            height: 40px;
-            padding: 2px;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            cursor: pointer;
-            background: transparent;
-        }
-
-        .font-option {
-            padding: 8px 12px;
-            background: var(--panel2);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 2px solid transparent;
-        }
-
-        .font-option:hover,
-        .font-option.active {
-            border-color: var(--accent);
-        }
-
         /* ===== TOAST ===== */
         .toast {
             position: fixed;
@@ -931,9 +769,6 @@
             }
             .player-title {
                 font-size: 15px;
-            }
-            .customization-grid {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -1050,17 +885,25 @@
             <span class="category-chip" data-category="videojuegos">Videojuegos</span>
         </div>
 
+        <!-- ===== SECTION TITLE ===== -->
+        <div class="section-title" id="sectionTitle">
+            <i class="fas fa-home"></i> Inicio
+        </div>
+
         <!-- ===== VIDEO GRID ===== -->
         <div class="video-grid" id="videoGrid"></div>
     </main>
 
     <script>
-        // ===== CONFIG =====
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
         const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
         const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         const grid = document.getElementById('videoGrid');
+        const sectionTitle = document.getElementById('sectionTitle');
         const playerOverlay = document.getElementById('playerOverlay');
         const playerVideo = document.getElementById('playerVideo');
         const playerTitle = document.getElementById('playerTitle');
@@ -1071,8 +914,11 @@
         let currentSection = 'inicio';
         let currentCategory = 'todos';
         let allVideos = [];
+        let favoritos = [];
 
-        // ===== DATOS DE EJEMPLO CON MINIATURAS REALES =====
+        // ============================================
+        // DATOS DE EJEMPLO CON MINIATURAS PERSONALIZADAS
+        // ============================================
         const sampleVideos = [
             {
                 id: 1,
@@ -1081,11 +927,12 @@
                 channel: 'JHEILER',
                 category: 'roblox',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura, usará la imagen por defecto
                 views: 4700,
                 duration: '11:20',
                 hashtags: ['#Roblox', '#Aventura', '#Gaming'],
-                created_at: '2026-08-17T00:00:00Z'
+                created_at: '2026-08-17T00:00:00Z',
+                user_thumbnail: false
             },
             {
                 id: 2,
@@ -1094,11 +941,12 @@
                 channel: 'JHEILER',
                 category: 'ia',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura
                 views: 4400,
                 duration: '8:46',
                 hashtags: ['#IA', '#Tecnología', '#Futuro'],
-                created_at: '2026-08-17T00:00:00Z'
+                created_at: '2026-08-17T00:00:00Z',
+                user_thumbnail: false
             },
             {
                 id: 3,
@@ -1107,11 +955,12 @@
                 channel: 'JHEILER',
                 category: 'minecraft',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1558618666-fcd25c85f30a?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura
                 views: 3200,
                 duration: '15:30',
                 hashtags: ['#Minecraft', '#Construcción', '#Creativo'],
-                created_at: '2026-08-16T00:00:00Z'
+                created_at: '2026-08-16T00:00:00Z',
+                user_thumbnail: false
             },
             {
                 id: 4,
@@ -1120,11 +969,12 @@
                 channel: 'JHEILER',
                 category: 'programacion',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura
                 views: 2800,
                 duration: '22:15',
                 hashtags: ['#Programación', '#Web', '#Coding'],
-                created_at: '2026-08-15T00:00:00Z'
+                created_at: '2026-08-15T00:00:00Z',
+                user_thumbnail: false
             },
             {
                 id: 5,
@@ -1133,11 +983,12 @@
                 channel: 'JHEILER',
                 category: 'musica',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura
                 views: 5600,
                 duration: '5:20',
                 hashtags: ['#Música', '#Electrónica', '#Beats'],
-                created_at: '2026-08-14T00:00:00Z'
+                created_at: '2026-08-14T00:00:00Z',
+                user_thumbnail: false
             },
             {
                 id: 6,
@@ -1146,11 +997,12 @@
                 channel: 'JHEILER',
                 category: 'deportes',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1518099074172-2e47d6cfdc28?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura
                 views: 1900,
                 duration: '10:45',
                 hashtags: ['#Deportes', '#Extremo', '#Aventura'],
-                created_at: '2026-08-13T00:00:00Z'
+                created_at: '2026-08-13T00:00:00Z',
+                user_thumbnail: false
             },
             {
                 id: 7,
@@ -1159,15 +1011,33 @@
                 channel: 'JHEILER',
                 category: 'videojuegos',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=225&fit=crop',
+                thumbnail_url: '', // Sin miniatura
                 views: 3800,
                 duration: '14:20',
                 hashtags: ['#Videojuegos', '#Gaming', '#Top10'],
-                created_at: '2026-08-12T00:00:00Z'
+                created_at: '2026-08-12T00:00:00Z',
+                user_thumbnail: false
             }
         ];
 
-        // ===== FUNCIONES =====
+        // ============================================
+        // FUNCIONES PRINCIPALES
+        // ============================================
+
+        // ===== OBTENER MINIATURA POR DEFECTO SEGÚN CATEGORÍA =====
+        function getDefaultThumbnail(category) {
+            const defaults = {
+                'roblox': 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=225&fit=crop',
+                'ia': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=225&fit=crop',
+                'minecraft': 'https://images.unsplash.com/photo-1558618666-fcd25c85f30a?w=400&h=225&fit=crop',
+                'programacion': 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=225&fit=crop',
+                'musica': 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=225&fit=crop',
+                'deportes': 'https://images.unsplash.com/photo-1518099074172-2e47d6cfdc28?w=400&h=225&fit=crop',
+                'videojuegos': 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=225&fit=crop',
+                'general': 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop'
+            };
+            return defaults[category] || defaults['general'];
+        }
 
         // ===== REPRODUCIR VIDEO =====
         function playVideo(video) {
@@ -1180,8 +1050,6 @@
             playerVideo.load();
             playerTitle.textContent = video.title || 'Sin título';
             playerChannel.textContent = video.channel || 'JHEILER';
-            
-            // Hashtags
             playerHashtags.innerHTML = (video.hashtags || []).map(tag => 
                 `<span>${tag}</span>`
             ).join('');
@@ -1203,13 +1071,11 @@
         }
 
         playerClose.addEventListener('click', closePlayer);
-
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && playerOverlay.classList.contains('active')) {
                 closePlayer();
             }
         });
-
         playerOverlay.addEventListener('click', (e) => {
             if (e.target === playerOverlay) {
                 closePlayer();
@@ -1242,16 +1108,12 @@
             }, duration);
         }
 
-        // ===== FORMATO DE FECHA =====
+        // ===== FORMATOS =====
         function formatDate(dateStr) {
             const date = new Date(dateStr);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
         }
 
-        // ===== FORMATO DE VISTAS =====
         function formatViews(views) {
             if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
             if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
@@ -1273,7 +1135,6 @@
                     return data;
                 }
                 
-                // Si no hay datos en Supabase, usar los de ejemplo
                 allVideos = sampleVideos;
                 return sampleVideos;
             } catch (err) {
@@ -1287,19 +1148,47 @@
         function filterVideos(videos, section, category) {
             let filtered = [...videos];
             
-            // Filtrar por sección
-            if (section === 'favoritos') {
-                // Simular favoritos
-                filtered = filtered.slice(0, 3);
-            } else if (section === 'tus-videos') {
-                // Tus videos (solo los del canal JHEILER)
-                filtered = filtered.filter(v => v.channel === 'JHEILER');
-            } else if (section === 'historial') {
-                // Historial (últimos 5 vistos)
-                filtered = filtered.slice(0, 5);
-            } else if (section === 'ver-despues') {
-                // Ver después (aleatorio)
-                filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+            // Aplicar filtro por sección
+            switch(section) {
+                case 'inicio':
+                    // Mostrar todos
+                    break;
+                case 'shorts':
+                    // Videos cortos (menos de 60 segundos simulados)
+                    filtered = filtered.filter(v => {
+                        const dur = v.duration || '0:00';
+                        const parts = dur.split(':');
+                        const mins = parseInt(parts[0]) || 0;
+                        return mins < 1;
+                    });
+                    if (filtered.length === 0) {
+                        // Si no hay shorts, mostrar algunos como ejemplo
+                        filtered = videos.slice(0, 3);
+                    }
+                    break;
+                case 'suscripciones':
+                    // Canales suscritos (simulado)
+                    filtered = filtered.filter(v => v.channel === 'JHEILER' || v.channel === 'TechMaster');
+                    break;
+                case 'historial':
+                    // Últimos 5 vistos
+                    filtered = filtered.slice(0, 5);
+                    break;
+                case 'tus-videos':
+                    // Solo videos del canal JHEILER
+                    filtered = filtered.filter(v => v.channel === 'JHEILER');
+                    break;
+                case 'favoritos':
+                    // Videos favoritos (usando la lista de favoritos)
+                    const favIds = favoritos.length > 0 ? favoritos : [1, 3, 5];
+                    filtered = filtered.filter(v => favIds.includes(v.id));
+                    break;
+                case 'ver-despues':
+                    // Videos para ver después (aleatorio)
+                    filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, 4);
+                    break;
+                default:
+                    break;
             }
             
             // Filtrar por categoría
@@ -1330,13 +1219,16 @@
                 const initial = channel.charAt(0).toUpperCase();
                 const hashtags = v.hashtags || ['#Video'];
                 
+                // Determinar la miniatura: si el usuario subió una, usarla; si no, usar la de la categoría
+                let thumbUrl = v.thumbnail_url && v.thumbnail_url.startsWith('http') ? v.thumbnail_url : getDefaultThumbnail(v.category || 'general');
+                
                 return `
                     <div class="video-card" onclick='playVideo(${JSON.stringify(v)})'>
                         <div class="thumb">
-                            <img src="${v.thumbnail_url || 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop'}" 
+                            <img src="${thumbUrl}" 
                                  alt="${v.title || 'Video'}"
                                  loading="lazy"
-                                 onerror="this.src='https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop'">
+                                 onerror="this.src='${getDefaultThumbnail(v.category || 'general')}'">
                             <span class="duration">${duration}</span>
                             <div class="play-overlay">
                                 <i class="fas fa-play"></i>
@@ -1362,12 +1254,37 @@
             }).join('');
         }
 
-        // ===== CARGAR Y FILTRAR VIDEOS =====
+        // ===== CARGAR VIDEOS =====
         async function loadVideos() {
             const videos = await getVideos();
             const filtered = filterVideos(videos, currentSection, currentCategory);
             renderVideos(filtered);
+            
+            // Actualizar título de la sección
+            const sectionNames = {
+                'inicio': 'Inicio',
+                'shorts': 'Shorts',
+                'suscripciones': 'Suscripciones',
+                'historial': 'Historial',
+                'tus-videos': 'Tus videos',
+                'favoritos': 'Favoritos',
+                'ver-despues': 'Ver después'
+            };
+            const iconMap = {
+                'inicio': 'fa-home',
+                'shorts': 'fa-bolt',
+                'suscripciones': 'fa-tv',
+                'historial': 'fa-clock',
+                'tus-videos': 'fa-video',
+                'favoritos': 'fa-heart',
+                'ver-despues': 'fa-clock'
+            };
+            sectionTitle.innerHTML = `<i class="fas ${iconMap[currentSection] || 'fa-home'}"></i> ${sectionNames[currentSection] || 'Inicio'}`;
         }
+
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
 
         // ===== NAVEGACIÓN SIDEBAR =====
         document.querySelectorAll('.sb-item').forEach(item => {
@@ -1406,152 +1323,9 @@
             }
         });
 
-        // ===== PERSONALIZACIÓN =====
-        document.getElementById('btnCustomize').addEventListener('click', function() {
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3>
-                        <i class="fas fa-palette"></i> Personalizar JHEILER
-                    </h3>
-                    
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎨 Tema</label>
-                        <div class="customization-grid">
-                            <div class="customization-option active" data-theme="dark">
-                                <div class="preview" style="background:#0f0f0f;"></div>
-                                Oscuro
-                            </div>
-                            <div class="customization-option" data-theme="light">
-                                <div class="preview" style="background:#f5f5f5;border:1px solid #ddd;"></div>
-                                Claro
-                            </div>
-                            <div class="customization-option" data-theme="neon">
-                                <div class="preview" style="background:linear-gradient(135deg,#0a0a1a,#001a1a);"></div>
-                                Neon
-                            </div>
-                            <div class="customization-option" data-theme="cyber">
-                                <div class="preview" style="background:linear-gradient(135deg,#000,#1a001a);"></div>
-                                Cyber
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🖌️ Fondo</label>
-                        <div class="customization-grid">
-                            <div class="customization-option active" data-bg="default">
-                                <div class="preview" style="background:#0f0f0f;"></div>
-                            </div>
-                            <div class="customization-option" data-bg="gradient">
-                                <div class="preview" style="background:linear-gradient(135deg,#0f0f0f,#1a0a2e);"></div>
-                            </div>
-                            <div class="customization-option" data-bg="pattern">
-                                <div class="preview" style="background:radial-gradient(circle at 20% 50%, rgba(255,48,79,0.1) 0%, transparent 50%);"></div>
-                            </div>
-                            <div class="customization-option" data-bg="dots">
-                                <div class="preview" style="background-image:radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);background-size:10px 10px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🔤 Fuente</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <span class="font-option active" data-font="Inter" style="font-family:'Inter';">Inter</span>
-                            <span class="font-option" data-font="Poppins" style="font-family:'Poppins';">Poppins</span>
-                            <span class="font-option" data-font="Roboto" style="font-family:'Roboto';">Roboto</span>
-                            <span class="font-option" data-font="Montserrat" style="font-family:'Montserrat';">Montserrat</span>
-                            <span class="font-option" data-font="Orbitron" style="font-family:'Orbitron';font-size:13px;">Orbitron</span>
-                            <span class="font-option" data-font="Press Start 2P" style="font-family:'Press Start 2P';font-size:10px;">Pixel</span>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎯 Color de acento</label>
-                        <div class="color-picker">
-                            <input type="color" id="accentColor" value="#ff304f">
-                            <input type="color" id="accentColor2" value="#ff6b8a">
-                        </div>
-                    </div>
-                    
-                    <div class="modal-actions">
-                        <button class="btn-primary" onclick="applyCustomization();this.closest('.modal').remove();">
-                            <i class="fas fa-check"></i> Aplicar
-                        </button>
-                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-
-            // Event listeners para temas
-            document.querySelectorAll('[data-theme]').forEach(opt => {
-                opt.addEventListener('click', function() {
-                    document.querySelectorAll('[data-theme]').forEach(o => o.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-
-            document.querySelectorAll('[data-bg]').forEach(opt => {
-                opt.addEventListener('click', function() {
-                    document.querySelectorAll('[data-bg]').forEach(o => o.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-
-            document.querySelectorAll('.font-option').forEach(opt => {
-                opt.addEventListener('click', function() {
-                    document.querySelectorAll('.font-option').forEach(o => o.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-        });
-
-        // ===== APLICAR PERSONALIZACIÓN =====
-        window.applyCustomization = function() {
-            // Tema
-            const activeTheme = document.querySelector('[data-theme].active');
-            if (activeTheme) {
-                const theme = activeTheme.dataset.theme;
-                document.body.className = `theme-${theme}`;
-            }
-
-            // Fondo
-            const activeBg = document.querySelector('[data-bg].active');
-            if (activeBg) {
-                const bg = activeBg.dataset.bg;
-                const bgClasses = ['bg-gradient', 'bg-gradient-neon', 'bg-pattern', 'bg-pattern-dots'];
-                bgClasses.forEach(cls => document.body.classList.remove(cls));
-                if (bg !== 'default') {
-                    document.body.classList.add(`bg-${bg}`);
-                }
-            }
-
-            // Fuente
-            const activeFont = document.querySelector('.font-option.active');
-            if (activeFont) {
-                const font = activeFont.dataset.font;
-                document.documentElement.style.setProperty('--font-family', `'${font}', -apple-system, 'Segoe UI', Roboto, sans-serif`);
-            }
-
-            // Color de acento
-            const accentColor = document.getElementById('accentColor')?.value;
-            const accentColor2 = document.getElementById('accentColor2')?.value;
-            if (accentColor) {
-                document.documentElement.style.setProperty('--accent', accentColor);
-            }
-            if (accentColor2) {
-                document.documentElement.style.setProperty('--accent2', accentColor2);
-            }
-
-            showToast('✅ Personalización aplicada', 'success');
-        };
-
-        // ===== SUBIR VIDEO =====
+        // ============================================
+        // SUBIR VIDEO CON MINIATURA PERSONALIZADA
+        // ============================================
         document.getElementById('btnOpenModal').onclick = () => {
             const modal = document.createElement('div');
             modal.className = 'modal';
@@ -1575,11 +1349,11 @@
                     </select>
                     <div class="file-input-wrapper">
                         <input type="file" id="upVideo" accept="video/*" required>
-                        <small><i class="fas fa-info-circle"></i> Máx. 100MB</small>
+                        <small><i class="fas fa-info-circle"></i> Selecciona tu video (Máx. 100MB)</small>
                     </div>
                     <div class="file-input-wrapper">
                         <input type="file" id="upThumb" accept="image/*">
-                        <small><i class="fas fa-info-circle"></i> Miniatura (opcional)</small>
+                        <small><i class="fas fa-info-circle"></i> Miniatura personalizada (opcional)</small>
                     </div>
                     <div class="modal-actions">
                         <button class="btn-primary" id="btnUpload">
@@ -1612,6 +1386,7 @@
                 btn.disabled = true;
 
                 try {
+                    // Subir video
                     const vName = `${Date.now()}_${videoFile.name}`;
                     const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
                     if (vErr) throw vErr;
@@ -1619,6 +1394,7 @@
                     const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
                     let thumbUrl = '';
 
+                    // Subir miniatura personalizada si el usuario seleccionó una
                     if (thumbFile) {
                         const tName = `${Date.now()}_${thumbFile.name}`;
                         const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
@@ -1629,16 +1405,18 @@
                     }
 
                     const newVideo = {
+                        id: Date.now(),
                         title,
                         description: desc || null,
                         category: category || 'general',
                         video_url: vData.publicUrl,
-                        thumbnail_url: thumbUrl || 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop',
+                        thumbnail_url: thumbUrl || '', // Si no subió miniatura, se usará la de la categoría
                         views: 0,
                         duration: '00:00',
                         channel: 'JHEILER',
                         hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
-                        created_at: new Date().toISOString()
+                        created_at: new Date().toISOString(),
+                        user_thumbnail: !!thumbFile
                     };
 
                     const { error: insertErr } = await sb.from('videos').insert(newVideo);
@@ -1657,12 +1435,102 @@
             };
         };
 
-        // ===== SERVICE WORKER =====
+        // ============================================
+        // PERSONALIZACIÓN
+        // ============================================
+        document.getElementById('btnCustomize').addEventListener('click', function() {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>
+                        <i class="fas fa-palette"></i> Personalizar JHEILER
+                    </h3>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎨 Tema</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn-secondary" onclick="applyTheme('dark')">Oscuro</button>
+                            <button class="btn-secondary" onclick="applyTheme('light')">Claro</button>
+                            <button class="btn-secondary" onclick="applyTheme('neon')">Neon</button>
+                            <button class="btn-secondary" onclick="applyTheme('cyber')">Cyber</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🔤 Fuente</label>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                            <button class="btn-secondary" onclick="applyFont('Inter')">Inter</button>
+                            <button class="btn-secondary" onclick="applyFont('Poppins')">Poppins</button>
+                            <button class="btn-secondary" onclick="applyFont('Roboto')">Roboto</button>
+                            <button class="btn-secondary" onclick="applyFont('Montserrat')">Montserrat</button>
+                            <button class="btn-secondary" onclick="applyFont('Orbitron')">Orbitron</button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎯 Color de acento</label>
+                        <input type="color" id="accentColor" value="#ff304f" style="padding:4px;width:100%;height:50px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;">
+                    </div>
+                    
+                    <div class="modal-actions">
+                        <button class="btn-primary" onclick="applyAccentColor();this.closest('.modal').remove();">
+                            <i class="fas fa-check"></i> Aplicar
+                        </button>
+                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i> Cerrar
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        });
+
+        // ===== FUNCIONES DE PERSONALIZACIÓN =====
+        window.applyTheme = function(theme) {
+            const themes = {
+                dark: { bg: '#0f0f0f', panel: '#181818', panel2: '#212121', border: '#303030' },
+                light: { bg: '#f5f5f5', panel: '#ffffff', panel2: '#e8e8e8', border: '#ddd', text: '#666' },
+                neon: { bg: '#0a0a1a', panel: '#111128', panel2: '#1a1a3a', border: '#333366', accent: '#00ff88' },
+                cyber: { bg: '#000000', panel: '#0a0a0a', panel2: '#1a1a1a', border: '#333333', accent: '#ff00ff' }
+            };
+            
+            const t = themes[theme];
+            if (!t) return;
+            
+            document.documentElement.style.setProperty('--bg', t.bg);
+            document.documentElement.style.setProperty('--panel', t.panel);
+            document.documentElement.style.setProperty('--panel2', t.panel2);
+            document.documentElement.style.setProperty('--border', t.border);
+            if (t.text) document.documentElement.style.setProperty('--text-secondary', t.text);
+            if (t.accent) document.documentElement.style.setProperty('--accent', t.accent);
+            
+            showToast(`Tema ${theme} aplicado`, 'success');
+        };
+
+        window.applyFont = function(font) {
+            document.documentElement.style.setProperty('--font-family', `'${font}', -apple-system, 'Segoe UI', Roboto, sans-serif`);
+            showToast(`Fuente ${font} aplicada`, 'success');
+        };
+
+        window.applyAccentColor = function() {
+            const color = document.getElementById('accentColor')?.value;
+            if (color) {
+                document.documentElement.style.setProperty('--accent', color);
+                showToast('Color de acento aplicado', 'success');
+            }
+        };
+
+        // ============================================
+        // SERVICE WORKER
+        // ============================================
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
 
-        // ===== INICIALIZAR =====
+        // ============================================
+        // INICIALIZAR
+        // ============================================
         loadVideos();
     </script>
 </body>
