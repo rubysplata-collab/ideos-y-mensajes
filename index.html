@@ -66,7 +66,6 @@
             opacity: 0.2;
         }
 
-        /* ===== SCROLLBAR ===== */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -865,7 +864,7 @@
         <div class="player-info">
             <div>
                 <div class="player-title" id="playerTitle">Título del video</div>
-                <div class="player-channel" id="playerChannel">Canal</div>
+                <div class="player-channel" id="playerChannel">JHEILER</div>
                 <div class="player-hashtags" id="playerHashtags"></div>
             </div>
         </div>
@@ -914,101 +913,80 @@
         let currentSection = 'inicio';
         let currentCategory = 'todos';
         let allVideos = [];
-        let favoritos = [];
 
         // ============================================
-        // DATOS DE EJEMPLO
+        // DATOS DE EJEMPLO (CON TUS COLUMNAS)
         // ============================================
         const sampleVideos = [
             {
-                id: 1,
+                id: '1',
                 title: 'ROBLOX: La mejor aventura épica',
                 description: 'Explorando el mundo de Roblox con amigos',
                 category: 'roblox',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: '',
                 views: 4700,
-                duration: '11:20',
+                duration: 680,
+                channel: 'JHEILER',
                 hashtags: ['#Roblox', '#Aventura', '#Gaming'],
+                is_short: false,
                 created_at: '2026-08-17T00:00:00Z'
             },
             {
-                id: 2,
+                id: '2',
                 title: 'IA: El futuro de la tecnología',
                 description: 'Inteligencia artificial explicada fácil',
                 category: 'ia',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: '',
                 views: 4400,
-                duration: '8:46',
+                duration: 526,
+                channel: 'JHEILER',
                 hashtags: ['#IA', '#Tecnología', '#Futuro'],
+                is_short: false,
                 created_at: '2026-08-17T00:00:00Z'
             },
             {
-                id: 3,
+                id: '3',
                 title: 'MINECRAFT: Construyendo una ciudad',
                 description: 'Construcción masiva en Minecraft',
                 category: 'minecraft',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: '',
                 views: 3200,
-                duration: '15:30',
+                duration: 930,
+                channel: 'JHEILER',
                 hashtags: ['#Minecraft', '#Construcción', '#Creativo'],
+                is_short: false,
                 created_at: '2026-08-16T00:00:00Z'
             },
             {
-                id: 4,
+                id: '4',
                 title: 'Programación Web: Curso Completo',
                 description: 'Aprende a programar desde cero',
                 category: 'programacion',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: '',
                 views: 2800,
-                duration: '22:15',
+                duration: 1335,
+                channel: 'JHEILER',
                 hashtags: ['#Programación', '#Web', '#Coding'],
+                is_short: false,
                 created_at: '2026-08-15T00:00:00Z'
-            },
-            {
-                id: 5,
-                title: 'Música Electrónica 2026',
-                description: 'Los mejores beats del año',
-                category: 'musica',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
-                views: 5600,
-                duration: '5:20',
-                hashtags: ['#Música', '#Electrónica', '#Beats'],
-                created_at: '2026-08-14T00:00:00Z'
-            },
-            {
-                id: 6,
-                title: 'Deportes Extremos: Paracaidismo',
-                description: 'Saltando desde 4000 metros',
-                category: 'deportes',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
-                views: 1900,
-                duration: '10:45',
-                hashtags: ['#Deportes', '#Extremo', '#Aventura'],
-                created_at: '2026-08-13T00:00:00Z'
-            },
-            {
-                id: 7,
-                title: 'Top 10 Videojuegos 2026',
-                description: 'Los mejores juegos del año',
-                category: 'videojuegos',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
-                views: 3800,
-                duration: '14:20',
-                hashtags: ['#Videojuegos', '#Gaming', '#Top10'],
-                created_at: '2026-08-12T00:00:00Z'
             }
         ];
 
         // ============================================
         // FUNCIONES PRINCIPALES
         // ============================================
+
+        // ===== FORMATO DE DURACIÓN (segundos → MM:SS) =====
+        function formatDuration(seconds) {
+            if (!seconds) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${String(secs).padStart(2, '0')}`;
+        }
 
         // ===== OBTENER MINIATURA POR DEFECTO =====
         function getDefaultThumbnail(category) {
@@ -1035,7 +1013,7 @@
             playerVideo.src = video.video_url;
             playerVideo.load();
             playerTitle.textContent = video.title || 'Sin título';
-            playerChannel.textContent = 'JHEILER';
+            playerChannel.textContent = video.channel || 'JHEILER';
             playerHashtags.innerHTML = (video.hashtags || []).map(tag => 
                 `<span>${tag}</span>`
             ).join('');
@@ -1103,7 +1081,7 @@
         function formatViews(views) {
             if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
             if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
-            return views;
+            return views || 0;
         }
 
         // ===== OBTENER VIDEOS =====
@@ -1138,7 +1116,8 @@
                 case 'inicio':
                     break;
                 case 'shorts':
-                    filtered = filtered.slice(0, 3);
+                    filtered = filtered.filter(v => v.is_short === true);
+                    if (filtered.length === 0) filtered = videos.slice(0, 3);
                     break;
                 case 'suscripciones':
                     filtered = filtered.slice(0, 4);
@@ -1147,11 +1126,10 @@
                     filtered = filtered.slice(0, 5);
                     break;
                 case 'tus-videos':
-                    filtered = filtered.slice(0, 4);
+                    filtered = filtered.filter(v => v.channel === 'JHEILER');
                     break;
                 case 'favoritos':
-                    const favIds = [1, 3, 5];
-                    filtered = filtered.filter(v => favIds.includes(v.id));
+                    filtered = filtered.slice(0, 3);
                     break;
                 case 'ver-despues':
                     filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, 4);
@@ -1182,8 +1160,10 @@
 
             grid.innerHTML = videos.map(v => {
                 const views = v.views || Math.floor(Math.random() * 5000) + 100;
-                const duration = v.duration || `${Math.floor(Math.random() * 15) + 3}:${String(Math.floor(Math.random() * 60)).padStart(2, '0')}`;
+                const duration = formatDuration(v.duration || 0);
                 const hashtags = v.hashtags || ['#Video'];
+                const channel = v.channel || 'JHEILER';
+                const initial = channel.charAt(0).toUpperCase();
                 
                 let thumbUrl = v.thumbnail_url && v.thumbnail_url.startsWith('http') ? v.thumbnail_url : getDefaultThumbnail(v.category || 'general');
                 
@@ -1200,13 +1180,13 @@
                             </div>
                         </div>
                         <div class="video-info">
-                            <div class="channel-avatar">J</div>
+                            <div class="channel-avatar">${initial}</div>
                             <div class="video-details">
                                 <div class="card-title">${v.title || 'Sin título'}</div>
                                 <div class="card-hashtags">
                                     ${hashtags.slice(0, 3).map(tag => `<span>${tag}</span>`).join('')}
                                 </div>
-                                <div class="channel-name">JHEILER</div>
+                                <div class="channel-name">${channel}</div>
                                 <div class="card-meta">
                                     <i class="fas fa-eye"></i> ${formatViews(views)} vistas
                                     <span style="margin:0 4px;">•</span>
@@ -1288,7 +1268,7 @@
         });
 
         // ============================================
-        // SUBIR VIDEO (SIN COLUMNA channel)
+        // SUBIR VIDEO (CON TUS COLUMNAS)
         // ============================================
         document.getElementById('btnOpenModal').onclick = () => {
             const modal = document.createElement('div');
@@ -1311,6 +1291,12 @@
                         <option value="deportes">Deportes</option>
                         <option value="videojuegos">Videojuegos</option>
                     </select>
+                    <div style="display:flex;gap:12px;align-items:center;">
+                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+                            <input type="checkbox" id="upIsShort"> 
+                            <span>Es Short</span>
+                        </label>
+                    </div>
                     <div class="file-input-wrapper">
                         <input type="file" id="upVideo" accept="video/*" required>
                         <small><i class="fas fa-info-circle"></i> Selecciona tu video (Máx. 100MB)</small>
@@ -1336,6 +1322,7 @@
                 const desc = document.getElementById('upDesc').value.trim();
                 const hashtags = document.getElementById('upHashtags').value.trim().split(' ').filter(t => t.startsWith('#'));
                 const category = document.getElementById('upCategory').value;
+                const isShort = document.getElementById('upIsShort').checked;
                 const videoFile = document.getElementById('upVideo').files[0];
                 const thumbFile = document.getElementById('upThumb').files[0];
 
@@ -1366,17 +1353,18 @@
                         }
                     }
 
-                    // 🔥 IMPORTANTE: SIN la columna 'channel'
+                    // ===== NUEVO VIDEO CON TUS COLUMNAS =====
                     const newVideo = {
-                        id: Date.now(),
                         title: title,
                         description: desc || null,
                         category: category || 'general',
                         video_url: vData.publicUrl,
                         thumbnail_url: thumbUrl || '',
                         views: 0,
-                        duration: '00:00',
+                        duration: 0, // Se actualizará después
+                        channel: 'JHEILER',
                         hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
+                        is_short: isShort,
                         created_at: new Date().toISOString()
                     };
 
