@@ -509,7 +509,7 @@
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             flex-shrink: 0;
             box-shadow: 0 2px 6px rgba(255,48,79,0.25);
         }
@@ -957,7 +957,6 @@
             <div id="authContainer"></div>
         </div>
     </header>
-
     <!-- ===== SIDEBAR ===== -->
     <aside>
         <div class="sb-section">
@@ -988,7 +987,6 @@
             </a>
         </div>
     </aside>
-
     <!-- ===== REPRODUCTOR ===== -->
     <div class="player-overlay" id="playerOverlay">
         <div class="player-container">
@@ -1007,7 +1005,6 @@
             </div>
         </div>
     </div>
-
     <!-- ===== MAIN ===== -->
     <main>
         <!-- ===== CATEGORÍAS ===== -->
@@ -1021,7 +1018,6 @@
             <span class="category-chip" data-category="deportes">Deportes</span>
             <span class="category-chip" data-category="videojuegos">Videojuegos</span>
         </div>
-
         <!-- ===== ORDENAMIENTO ===== -->
         <div class="sort-bar">
             <h2 class="section-title" id="sectionTitle" style="margin:0;">
@@ -1033,11 +1029,9 @@
                 <option value="antiguos">Más antiguos</option>
             </select>
         </div>
-
         <!-- ===== VIDEO GRID ===== -->
         <div class="video-grid" id="videoGrid"></div>
     </main>
-
     <script>
         // ============================================
         // CONFIGURACIÓN
@@ -1056,7 +1050,6 @@
         } catch (e) {
             console.warn('Supabase no disponible:', e.message);
         }
-
         const grid = document.getElementById('videoGrid');
         const sectionTitle = document.getElementById('sectionTitle');
         const playerOverlay = document.getElementById('playerOverlay');
@@ -1068,7 +1061,6 @@
         const sortSelect = document.getElementById('sortSelect');
         const authContainer = document.getElementById('authContainer');
         const categoriesContainer = document.getElementById('categoriesContainer');
-
         let currentSection = 'inicio';
         let currentCategory = 'todos';
         let currentSort = 'recientes';
@@ -1076,7 +1068,6 @@
         let currentProfile = null;
         let favoriteIds = new Set();
         let watchLaterIds = new Set();
-
         // ============================================
         // DATOS DE EJEMPLO (solo si Supabase falla en Inicio)
         // ============================================
@@ -1127,7 +1118,6 @@
                 created_at: '2026-08-15T00:00:00Z'
             }
         ];
-
         // ============================================
         // FUNCIONES AUXILIARES
         // ============================================
@@ -1137,14 +1127,12 @@
             const secs = Math.floor(seconds % 60);
             return `${mins}:${String(secs).padStart(2, '0')}`;
         }
-
         function formatViews(views) {
             if (!views || views === 0) return '0';
             if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
             if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
             return views.toString();
         }
-
         function formatDate(dateStr) {
             if (!dateStr) return 'Fecha desconocida';
             const date = new Date(dateStr);
@@ -1157,7 +1145,6 @@
             if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
             return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
         }
-
         function getDefaultThumbnail(category) {
             const seeds = {
                 'roblox': 'roblox', 'ia': 'ai', 'minecraft': 'minecraft',
@@ -1167,7 +1154,6 @@
             const seed = seeds[category] || 'video';
             return `https://picsum.photos/seed/${seed}${Math.floor(Math.random() * 100)}/400/225`;
         }
-
         function showToast(message, type = 'info', duration = 3500) {
             const existing = document.querySelector('.toast');
             if (existing) existing.remove();
@@ -1189,855 +1175,57 @@
                 setTimeout(() => toast.remove(), 300);
             }, duration);
         }
-
         function escapeHtml(str) {
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
         }
-
         function usernameToEmail(username) {
-            return `${username.toLowerCase()}@${EMAIL_DOMAIN}`;
+            return `${username.toLowerCase().replace(/_/g, '')}@${EMAIL_DOMAIN}`;
         }
-
+        // ✅ VALIDACIÓN CORREGIDA: SIN GUION BAJO
         function validateUsername(username) {
             if (!username) return 'El nombre de usuario es obligatorio';
             if (username.length < 3) return 'Mínimo 3 caracteres';
             if (username.length > 20) return 'Máximo 20 caracteres';
             if (/\s/.test(username)) return 'No se permiten espacios';
-            if (!/^[a-zA-Z0-9_]+$/.test(username)) return 'Solo letras, números y _';
+            // Solo letras y números — SIN guion bajo
+            if (!/^[a-zA-Z0-9]+$/.test(username)) return 'Solo letras y números (sin símbolos ni guiones bajos)';
             return null;
         }
-
         function validatePassword(password) {
             if (!password) return 'La contraseña es obligatoria';
             if (password.length < 8) return 'Mínimo 8 caracteres';
             return null;
         }
-
-        // ============================================
-        // RENDER: SKELETON
-        // ============================================
-        function renderSkeleton(count = 6) {
-            let html = '<div class="skeleton-grid">';
-            for (let i = 0; i < count; i++) {
-                html += `
-                    <div>
-                        <div class="skeleton-card skeleton-thumb"></div>
-                        <div class="skeleton-card skeleton-line"></div>
-                        <div class="skeleton-card skeleton-line short"></div>
-                    </div>
-                `;
-            }
-            html += '</div>';
-            grid.innerHTML = html;
+                function usernameToEmail(username) {
+            return `${username.toLowerCase().replace(/_/g, '')}@${EMAIL_DOMAIN}`;
         }
 
         // ============================================
-        // RENDER: ESTADOS
+        // AUTENTICACIÓN - REGISTRO CORREGIDO
         // ============================================
-        function renderEmpty(icon, title, message, actionHtml = '') {
-            grid.innerHTML = `
-                <div class="empty-state">
-                    <i class="${icon}"></i>
-                    <h3>${title}</h3>
-                    <p>${message}</p>
-                    ${actionHtml}
-                </div>
-            `;
-        }
-
-        function renderAuthRequired(message, actionHtml) {
-            grid.innerHTML = `
-                <div class="auth-state">
-                    <i class="fas fa-lock"></i>
-                    <h3>${message}</h3>
-                    ${actionHtml}
-                </div>
-            `;
-        }
-
-        function renderError(message) {
-            grid.innerHTML = `
-                <div class="error-state">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <h3>Error</h3>
-                    <p>${message}</p>
-                    <button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="loadCurrentSection()">Reintentar</button>
-                </div>
-            `;
-        }
-
-        // ============================================
-        // RENDER: VIDEOS
-        // ============================================
-        function renderVideos(videos) {
-            if (!videos || videos.length === 0) {
-                renderEmpty('fas fa-video-slash', 'No hay videos aquí', 'Intenta con otra categoría');
-                return;
-            }
-            grid.innerHTML = videos.map(v => {
-                const views = v.views || 0;
-                const duration = formatDuration(v.duration || 0);
-                const hashtags = Array.isArray(v.hashtags) && v.hashtags.length > 0 ? v.hashtags : ['#Video'];
-                const username = v.username || v.channel || 'usuario';
-                const initial = username.charAt(0).toUpperCase();
-                let thumbUrl = '';
-                if (v.thumbnail_url && typeof v.thumbnail_url === 'string' && v.thumbnail_url.startsWith('http')) {
-                    thumbUrl = v.thumbnail_url;
-                } else {
-                    thumbUrl = getDefaultThumbnail(v.category || 'general');
-                }
-                const isFav = favoriteIds.has(v.id);
-                const isWL = watchLaterIds.has(v.id);
-                const videoJson = encodeURIComponent(JSON.stringify(v).replace(/'/g, "\\'"));
-                return `
-                    <div class="video-card" onclick='playVideo(JSON.parse(decodeURIComponent("${videoJson}")))'>
-                        <div class="thumb">
-                            <img src="${thumbUrl}" alt="${escapeHtml(v.title || 'Video')}" loading="lazy"
-                                 onerror="this.src='${getDefaultThumbnail(v.category || 'general')}'">
-                            <span class="duration">${duration}</span>
-                            <div class="play-overlay"><i class="fas fa-play"></i></div>
-                            <div class="video-actions" onclick="event.stopPropagation()">
-                                <button class="action-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}')" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
-                                    <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
-                                </button>
-                                <button class="action-btn ${isWL ? 'active' : ''}" onclick="toggleWatchLater('${v.id}')" title="${isWL ? 'Quitar de Ver después' : 'Añadir a Ver después'}">
-                                    <i class="${isWL ? 'fas' : 'far'} fa-bookmark"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="video-info">
-                            <div class="channel-avatar">${initial}</div>
-                            <div class="video-details">
-                                <div class="card-title">${escapeHtml(v.title || 'Sin título')}</div>
-                                <div class="card-hashtags">
-                                    ${hashtags.slice(0, 3).map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}
-                                </div>
-                                <div class="channel-name">@${escapeHtml(username)}</div>
-                                <div class="card-meta">
-                                    <i class="fas fa-eye"></i> ${formatViews(views)} vistas
-                                    <span style="margin:0 4px;">•</span>
-                                    <i class="far fa-calendar-alt"></i> ${formatDate(v.created_at)}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // ============================================
-        // REPRODUCTOR + HISTORIAL
-        // ============================================
-        async function playVideo(video) {
-            if (!video || !video.video_url) {
-                showToast('Video no disponible', 'error');
-                return;
-            }
-            playerVideo.src = video.video_url;
-            playerVideo.load();
-            playerTitle.textContent = video.title || 'Sin título';
-            playerChannel.textContent = `@${video.username || video.channel || 'usuario'}`;
-            playerHashtags.innerHTML = (video.hashtags || []).map(tag => `<span>${escapeHtml(tag)}</span>`).join('');
-            playerOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            
-            playerVideo.play().catch(() => {});
-            
-            await addToHistory(video.id);
-        }
-
-        function closePlayer() {
-            playerVideo.pause();
-            playerVideo.src = '';
-            playerOverlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        playerClose.addEventListener('click', closePlayer);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && playerOverlay.classList.contains('active')) closePlayer();
-        });
-        playerOverlay.addEventListener('click', (e) => {
-            if (e.target === playerOverlay) closePlayer();
-        });
-
-        async function addToHistory(videoId) {
-            if (currentUser && sb) {
-                try {
-                    await sb.from('watch_history').upsert({
-                        user_id: currentUser.id,
-                        video_id: videoId,
-                        watched_at: new Date().toISOString(),
-                        progress: 0
-                    }, { onConflict: 'user_id,video_id' });
-                } catch (e) { console.warn('Historial (DB):', e.message); }
-            } else {
-                try {
-                    let history = JSON.parse(localStorage.getItem('jheiler_history') || '[]');
-                    history = history.filter(h => h.video_id !== videoId);
-                    history.unshift({ video_id: videoId, watched_at: new Date().toISOString() });
-                    if (history.length > 50) history = history.slice(0, 50);
-                    localStorage.setItem('jheiler_history', JSON.stringify(history));
-                } catch (e) {}
-            }
-        }
-
-        // ============================================
-        // FAVORITOS
-        // ============================================
-        async function toggleFavorite(videoId) {
-            if (!currentUser) {
-                showToast('Inicia sesión para guardar favoritos', 'warning');
-                openLoginModal();
-                return;
-            }
-            if (!sb) return;
-            try {
-                if (favoriteIds.has(videoId)) {
-                    await sb.from('favorites').delete()
-                        .eq('user_id', currentUser.id).eq('video_id', videoId);
-                    favoriteIds.delete(videoId);
-                    showToast('Quitado de favoritos', 'info');
-                } else {
-                    await sb.from('favorites').insert({
-                        user_id: currentUser.id, video_id: videoId
-                    });
-                    favoriteIds.add(videoId);
-                    showToast('Añadido a favoritos', 'success');
-                }
-                if (currentSection === 'favoritos') {
-                    loadFavorites();
-                } else {
-                    const btn = document.querySelector(`.action-btn[onclick="toggleFavorite('${videoId}')"]`);
-                    if (btn) {
-                        btn.classList.toggle('active', favoriteIds.has(videoId));
-                        const icon = btn.querySelector('i');
-                        if (icon) icon.className = favoriteIds.has(videoId) ? 'fas fa-heart' : 'far fa-heart';
-                    }
-                }
-            } catch (e) {
-                showToast('Error: ' + e.message, 'error');
-            }
-        }
-
-        async function loadFavoriteIds() {
-            favoriteIds.clear();
-            if (!currentUser || !sb) return;
-            try {
-                const { data } = await sb.from('favorites').select('video_id').eq('user_id', currentUser.id);
-                if (data) data.forEach(f => favoriteIds.add(f.video_id));
-            } catch (e) { console.warn('Favoritos IDs:', e.message); }
-        }
-
-        // ============================================
-        // VER DESPUÉS
-        // ============================================
-        async function toggleWatchLater(videoId) {
-            if (!currentUser) {
-                showToast('Inicia sesión para guardar videos', 'warning');
-                openLoginModal();
-                return;
-            }
-            if (!sb) return;
-            try {
-                if (watchLaterIds.has(videoId)) {
-                    await sb.from('watch_later').delete()
-                        .eq('user_id', currentUser.id).eq('video_id', videoId);
-                    watchLaterIds.delete(videoId);
-                    showToast('Quitado de Ver después', 'info');
-                } else {
-                    await sb.from('watch_later').insert({
-                        user_id: currentUser.id, video_id: videoId
-                    });
-                    watchLaterIds.add(videoId);
-                    showToast('Añadido a Ver después', 'success');
-                }
-                if (currentSection === 'ver-despues') {
-                    loadWatchLater();
-                } else {
-                    const btn = document.querySelector(`.action-btn[onclick="toggleWatchLater('${videoId}')"]`);
-                    if (btn) {
-                        btn.classList.toggle('active', watchLaterIds.has(videoId));
-                        const icon = btn.querySelector('i');
-                        if (icon) icon.className = watchLaterIds.has(videoId) ? 'fas fa-bookmark' : 'far fa-bookmark';
-                    }
-                }
-            } catch (e) {
-                showToast('Error: ' + e.message, 'error');
-            }
-        }
-
-        async function loadWatchLaterIds() {
-            watchLaterIds.clear();
-            if (!currentUser || !sb) return;
-            try {
-                const { data } = await sb.from('watch_later').select('video_id').eq('user_id', currentUser.id);
-                if (data) data.forEach(w => watchLaterIds.add(w.video_id));
-            } catch (e) { console.warn('Ver después IDs:', e.message); }
-        }
-
-        // ============================================
-        // CARGADORES POR SECCIÓN (REALES, NO SIMULADOS)
-        // ============================================
-        function applyCategoryFilter(videos) {
-            if (currentCategory && currentCategory !== 'todos') {
-                return videos.filter(v => (v.category || '').toLowerCase() === currentCategory.toLowerCase());
-            }
-            return videos;
-        }
-
-        function applySort(videos) {
-            const sorted = [...videos];
-            switch (currentSort) {
-                case 'recientes':
-                    return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                case 'antiguos':
-                    return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                case 'vistos':
-                    return sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
-                default:
-                    return sorted;
-            }
-        }
-
-        async function loadHomeVideos() {
-            renderSkeleton();
-            try {
-                let videos = sampleVideos;
-                if (sb) {
-                    const { data, error } = await sb
-                        .from('videos')
-                        .select(`*, profiles!inner(username)`)
-                        .order('created_at', { ascending: false });
-                    if (!error && data) {
-                        videos = data.map(v => ({ ...v, username: v.profiles?.username || 'usuario', channel: v.profiles?.username }));
-                    }
-                }
-                videos = applyCategoryFilter(videos);
-                videos = applySort(videos);
-                renderVideos(videos);
-            } catch (e) {
-                renderError('No se pudieron cargar los videos');
-            }
-        }
-
-        async function loadShorts() {
-            renderSkeleton();
-            try {
-                if (!sb) {
-                    renderEmpty('fas fa-bolt', 'No hay Shorts todavía', 'Conéctate a Supabase para ver contenido real');
-                    return;
-                }
-                const { data, error } = await sb
-                    .from('videos')
-                    .select(`*, profiles!inner(username)`)
-                    .eq('is_short', true)
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
-                let videos = (data || []).map(v => ({ ...v, username: v.profiles?.username || 'usuario' }));
-                videos = applyCategoryFilter(videos);
-                videos = applySort(videos);
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-bolt', 'No hay Shorts todavía', 'Sé el primero en subir un Short');
-                } else {
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudieron cargar los Shorts');
-            }
-        }
-
-        async function loadSubscriptions() {
-            renderSkeleton();
-            if (!currentUser) {
-                renderAuthRequired('Inicia sesión para ver tus suscripciones',
-                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
-                return;
-            }
-            if (!sb) { renderError('Supabase no disponible'); return; }
-            try {
-                const { data: subs, error: subsErr } = await sb
-                    .from('subscriptions').select('channel_id').eq('subscriber_id', currentUser.id);
-                if (subsErr) throw subsErr;
-                if (!subs || subs.length === 0) {
-                    renderEmpty('fas fa-tv', 'Aún no estás suscrito a ningún canal',
-                        'Explora Inicio y suscríbete a tus creadores favoritos');
-                    return;
-                }
-                const channelIds = subs.map(s => s.channel_id);
-                const { data, error } = await sb
-                    .from('videos')
-                    .select(`*, profiles!inner(username)`)
-                    .in('user_id', channelIds)
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
-                let videos = (data || []).map(v => ({ ...v, username: v.profiles?.username || 'usuario' }));
-                videos = applyCategoryFilter(videos);
-                videos = applySort(videos);
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-video', 'Tus canales no han subido videos', 'Vuelve pronto para ver contenido nuevo');
-                } else {
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudieron cargar tus suscripciones');
-            }
-        }
-
-        async function loadHistory() {
-            renderSkeleton();
-            try {
-                let videos = [];
-                if (currentUser && sb) {
-                    const { data, error } = await sb
-                        .from('watch_history')
-                        .select(`video_id, watched_at, videos(*, profiles!inner(username))`)
-                        .eq('user_id', currentUser.id)
-                        .order('watched_at', { ascending: false });
-                    if (error) throw error;
-                    videos = (data || []).filter(h => h.videos).map(h => ({
-                        ...h.videos,
-                        username: h.videos.profiles?.username || 'usuario',
-                        watched_at: h.watched_at
-                    }));
-                } else {
-                    const history = JSON.parse(localStorage.getItem('jheiler_history') || '[]');
-                    if (sb) {
-                        const ids = history.map(h => h.video_id);
-                        if (ids.length > 0) {
-                            const { data } = await sb
-                                .from('videos')
-                                .select(`*, profiles!inner(username)`)
-                                .in('id', ids);
-                            if (data) {
-                                const map = {};
-                                data.forEach(v => map[v.id] = { ...v, username: v.profiles?.username });
-                                videos = history.map(h => map[h.video_id]).filter(Boolean);
-                            }
-                        }
-                    }
-                }
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-clock', 'Tu historial está vacío', 'Empieza a ver videos para que aparezcan aquí');
-                } else {
-                    videos = applyCategoryFilter(videos);
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudo cargar tu historial');
-            }
-        }
-
-        async function loadMyVideos() {
-            renderSkeleton();
-            if (!currentUser) {
-                renderAuthRequired('Inicia sesión para ver tus videos',
-                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
-                return;
-            }
-            if (!sb) { renderError('Supabase no disponible'); return; }
-            try {
-                const { data, error } = await sb
-                    .from('videos')
-                    .select(`*, profiles!inner(username)`)
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
-                let videos = (data || []).map(v => ({ ...v, username: v.profiles?.username || 'usuario' }));
-                videos = applyCategoryFilter(videos);
-                videos = applySort(videos);
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-video', 'Aún no has subido ningún video',
-                        `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="document.getElementById('btnOpenModal').click()">Subir mi primer video</button>`);
-                } else {
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudieron cargar tus videos');
-            }
-        }
-
-        async function loadFavorites() {
-            renderSkeleton();
-            if (!currentUser) {
-                renderAuthRequired('Inicia sesión para ver tus favoritos',
-                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
-                return;
-            }
-            if (!sb) { renderError('Supabase no disponible'); return; }
-            try {
-                const { data, error } = await sb
-                    .from('favorites')
-                    .select(`video_id, created_at, videos(*, profiles!inner(username))`)
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: false });
-                if (error) throw error;
-                let videos = (data || []).filter(f => f.videos).map(f => ({
-                    ...f.videos,
-                    username: f.videos.profiles?.username || 'usuario'
-                }));
-                videos = applyCategoryFilter(videos);
-                videos = applySort(videos);
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-heart', 'No tienes videos favoritos todavía',
-                        'Explora Inicio y dale ❤️ a lo que te guste');
-                } else {
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudieron cargar tus favoritos');
-            }
-        }
-
-        async function loadWatchLater() {
-            renderSkeleton();
-            if (!currentUser) {
-                renderAuthRequired('Inicia sesión para guardar videos',
-                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
-                return;
-            }
-            if (!sb) { renderError('Supabase no disponible'); return; }
-            try {
-                const { data, error } = await sb
-                    .from('watch_later')
-                    .select(`video_id, created_at, videos(*, profiles!inner(username))`)
-                    .eq('user_id', currentUser.id)
-                    .order('created_at', { ascending: true });
-                if (error) throw error;
-                let videos = (data || []).filter(w => w.videos).map(w => ({
-                    ...w.videos,
-                    username: w.videos.profiles?.username || 'usuario'
-                }));
-                videos = applyCategoryFilter(videos);
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-bookmark', 'No tienes videos guardados',
-                        'Guarda videos para verlos más tarde desde cualquier dispositivo');
-                } else {
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudieron cargar tus videos guardados');
-            }
-        }
-
-        function loadCurrentSection() {
-            const sectionMap = {
-                'inicio': loadHomeVideos,
-                'shorts': loadShorts,
-                'suscripciones': loadSubscriptions,
-                'historial': loadHistory,
-                'tus-videos': loadMyVideos,
-                'favoritos': loadFavorites,
-                'ver-despues': loadWatchLater
-            };
-            const loader = sectionMap[currentSection] || loadHomeVideos;
-            loader();
-        }
-
-        function goToHome() {
-            currentSection = 'inicio';
-            currentCategory = 'todos';
-            document.querySelectorAll('.sb-item').forEach(i => i.classList.toggle('active', i.dataset.section === 'inicio'));
-            document.querySelectorAll('.category-chip').forEach(c => c.classList.toggle('active', c.dataset.category === 'todos'));
-            updateSectionTitle();
-            loadHomeVideos();
-        }
-
-        function updateSectionTitle() {
-            const sectionNames = {
-                'inicio': 'Inicio', 'shorts': 'Shorts', 'suscripciones': 'Suscripciones',
-                'historial': 'Historial', 'tus-videos': 'Tus videos',
-                'favoritos': 'Favoritos', 'ver-despues': 'Ver después'
-            };
-            const iconMap = {
-                'inicio': 'fa-home', 'shorts': 'fa-bolt', 'suscripciones': 'fa-tv',
-                'historial': 'fa-clock', 'tus-videos': 'fa-video',
-                'favoritos': 'fa-heart', 'ver-despues': 'fa-bookmark'
-            };
-            sectionTitle.innerHTML = `<i class="fas ${iconMap[currentSection] || 'fa-home'}"></i> ${sectionNames[currentSection] || 'Inicio'}`;
-        }
-
-        // ============================================
-        // EVENT LISTENERS: NAVEGACIÓN
-        // ============================================
-        document.querySelectorAll('.sb-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-                this.classList.add('active');
-                currentSection = this.dataset.section;
-                updateSectionTitle();
-                loadCurrentSection();
-            });
-        });
-
-        document.querySelectorAll('.category-chip').forEach(chip => {
-            chip.addEventListener('click', function() {
-                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-                this.classList.add('active');
-                currentCategory = this.dataset.category;
-                loadCurrentSection();
-            });
-        });
-
-        sortSelect.addEventListener('change', function() {
-            currentSort = this.value;
-            loadCurrentSection();
-        });
-
-        document.getElementById('btnSearch').addEventListener('click', async function() {
-            const term = prompt('¿Qué estás buscando?');
-            if (!term || !term.trim()) return;
-            const q = term.trim().toLowerCase();
-            renderSkeleton();
-            try {
-                let videos = [];
-                if (sb) {
-                    const { data } = await sb
-                        .from('videos')
-                        .select(`*, profiles!inner(username)`);
-                    if (data) {
-                        videos = data
-                            .map(v => ({ ...v, username: v.profiles?.username }))
-                            .filter(v => {
-                                const t = (v.title || '').toLowerCase();
-                                const d = (v.description || '').toLowerCase();
-                                const tags = Array.isArray(v.hashtags) ? v.hashtags.join(' ').toLowerCase() : '';
-                                return t.includes(q) || d.includes(q) || tags.includes(q);
-                            });
-                    }
-                } else {
-                    videos = sampleVideos.filter(v =>
-                        (v.title || '').toLowerCase().includes(q) ||
-                        (v.description || '').toLowerCase().includes(q)
-                    );
-                }
-                sectionTitle.innerHTML = `<i class="fas fa-search"></i> Resultados: "${escapeHtml(term.trim())}"`;
-                if (videos.length === 0) {
-                    renderEmpty('fas fa-search', 'Sin resultados', `No se encontraron videos para "${escapeHtml(term.trim())}"`);
-                } else {
-                    renderVideos(videos);
-                }
-            } catch (e) {
-                renderError('No se pudo realizar la búsqueda');
-            }
-        });
-
-        // ============================================
-        // AUTH: RENDER HEADER
-        // ============================================
-        function renderAuthHeader() {
-            if (currentUser && currentProfile) {
-                const initial = currentProfile.username.charAt(0).toUpperCase();
-                authContainer.innerHTML = `
-                    <div class="profile-wrapper">
-                        <button class="profile-btn" onclick="toggleProfileDropdown(event)">
-                            <div class="profile-avatar">${initial}</div>
-                            <span class="profile-username">${escapeHtml(currentProfile.username)}</span>
-                        </button>
-                        <div class="profile-dropdown" id="profileDropdown">
-                            <div class="profile-dropdown-item" onclick="navigateTo('tus-videos')">
-                                <i class="fas fa-video"></i> Mis videos
-                            </div>
-                            <div class="profile-dropdown-item" onclick="navigateTo('favoritos')">
-                                <i class="fas fa-heart"></i> Favoritos
-                            </div>
-                            <div class="profile-dropdown-item" onclick="navigateTo('historial')">
-                                <i class="fas fa-clock"></i> Historial
-                            </div>
-                            <div class="profile-dropdown-item" onclick="navigateTo('ver-despues')">
-                                <i class="fas fa-bookmark"></i> Ver después
-                            </div>
-                            <div class="profile-dropdown-item danger" onclick="logout()">
-                                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                authContainer.innerHTML = `
-                    <button class="auth-btn" onclick="openLoginModal()">
-                        <i class="fas fa-sign-in-alt"></i> Iniciar sesión
-                    </button>
-                `;
-            }
-        }
-
-        function toggleProfileDropdown(e) {
-            e.stopPropagation();
-            document.getElementById('profileDropdown').classList.toggle('active');
-        }
-
-        document.addEventListener('click', () => {
-            const dd = document.getElementById('profileDropdown');
-            if (dd) dd.classList.remove('active');
-        });
-
-        function navigateTo(section) {
-            const item = document.querySelector(`.sb-item[data-section="${section}"]`);
-            if (item) item.click();
-            const dd = document.getElementById('profileDropdown');
-            if (dd) dd.classList.remove('active');
-        }
-
-        // ============================================
-        // AUTH: LOGIN MODAL
-        // ============================================
-        function openLoginModal() {
-            closeAllModals();
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.id = 'authModal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3><i class="fas fa-sign-in-alt"></i> Iniciar sesión</h3>
-                    <input type="text" id="loginUsername" placeholder="Nombre de usuario" autocomplete="username">
-                    <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
-                    <div class="input-error" id="loginError"></div>
-                    <div class="modal-actions">
-                        <button class="btn-primary" id="btnLogin">
-                            <i class="fas fa-check"></i> Entrar
-                        </button>
-                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                    <div class="modal-switch">
-                        ¿No tienes cuenta? <a onclick="openRegisterModal()">Crear cuenta</a>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            document.getElementById('btnLogin').onclick = handleLogin;
-            document.getElementById('loginPassword').addEventListener('keydown', e => {
-                if (e.key === 'Enter') handleLogin();
-            });
-            document.getElementById('loginUsername').focus();
-        }
-
-       async function handleRegister() {
-    const username = document.getElementById('regUsername').value.trim();
-    const password = document.getElementById('regPassword').value;
-    const confirm = document.getElementById('regConfirm').value;
-    
-    // Limpiar errores
-    document.getElementById('regUsernameError').textContent = '';
-    document.getElementById('regPasswordError').textContent = '';
-    document.getElementById('regConfirmError').textContent = '';
-    
-    let hasError = false;
-    const uErr = validateUsername(username);
-    if (uErr) { document.getElementById('regUsernameError').textContent = uErr; hasError = true; }
-    const pErr = validatePassword(password);
-    if (pErr) { document.getElementById('regPasswordError').textContent = pErr; hasError = true; }
-    if (password !== confirm) {
-        document.getElementById('regConfirmError').textContent = 'Las contraseñas no coinciden';
-        hasError = true;
-    }
-    if (hasError) return;
-    if (!sb) { showToast('Error: Cliente de Supabase no disponible', 'error'); return; }
-    
-    const btn = document.getElementById('btnRegister');
-    btn.disabled = true;
-    btn.innerHTML = '<span class="loading"></span> Creando...';
-    
-    try {
-        const email = `${username.toLowerCase()}@jheiler.local`;
-        
-        // 1. Crear usuario en Auth
-        const { data: authData, error: authErr } = await sb.auth.signUp({
-            email,
-            password
-        });
-
-        if (authErr) {
-            console.error('Auth Error:', authErr);
-            if (authErr.message.includes('already')) {
-                document.getElementById('regUsernameError').textContent = 'El usuario ya existe';
-            } else {
-                document.getElementById('regUsernameError').textContent = authErr.message;
-            }
-            throw authErr;
-        }
-
-        if (!authData.user) throw new Error('No se obtuvo información del usuario');
-
-        // ✅ 2. CREAR EL PERFIL DESDE AQUÍ (sin trigger)
-        const { error: profileErr } = await sb.from('profiles').insert({
-            id: authData.user.id,
-            username: username.toLowerCase()
-        });
-
-        if (profileErr) {
-            console.error('Profile Error:', profileErr);
-            // Si da error de RLS, lo ignoramos por ahora y dejamos que lo cree al iniciar sesión
-        }
-
-        showToast('¡Cuenta creada con éxito!', 'success');
-        closeModal('registerModal');
-        await initAuth();
-
-    } catch (err) {
-        console.error('Register Error:', err);
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '✓ Crear cuenta';
-    }
-}
-        // ============================================
-        // AUTH: REGISTER MODAL
-        // ============================================
-        function openRegisterModal() {
-            closeAllModals();
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.id = 'authModal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3><i class="fas fa-user-plus"></i> Crear cuenta</h3>
-                    <input type="text" id="regUsername" placeholder="Nombre de usuario" autocomplete="username">
-                    <div class="input-error" id="regUsernameError"></div>
-                    <input type="password" id="regPassword" placeholder="Contraseña" autocomplete="new-password">
-                    <div class="input-error" id="regPasswordError"></div>
-                    <input type="password" id="regConfirm" placeholder="Confirmar contraseña" autocomplete="new-password">
-                    <div class="input-error" id="regConfirmError"></div>
-                    <div class="modal-actions">
-                        <button class="btn-primary" id="btnRegister">
-                            <i class="fas fa-check"></i> Crear cuenta
-                        </button>
-                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                    <div class="modal-switch">
-                        ¿Ya tienes cuenta? <a onclick="openLoginModal()">Iniciar sesión</a>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            document.getElementById('btnRegister').onclick = handleRegister;
-            document.getElementById('regConfirm').addEventListener('keydown', e => {
-                if (e.key === 'Enter') handleRegister();
-            });
-            document.getElementById('regUsername').focus();
-        }
-
         async function handleRegister() {
             const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirm').value;
+            const confirm = document.getElementById('regConfirmPassword').value;
             
+            // Limpiar errores
             document.getElementById('regUsernameError').textContent = '';
             document.getElementById('regPasswordError').textContent = '';
             document.getElementById('regConfirmError').textContent = '';
             
             let hasError = false;
             const uErr = validateUsername(username);
-            if (uErr) { document.getElementById('regUsernameError').textContent = uErr; hasError = true; }
+            if (uErr) {
+                document.getElementById('regUsernameError').textContent = uErr;
+                hasError = true;
+            }
             const pErr = validatePassword(password);
-            if (pErr) { document.getElementById('regPasswordError').textContent = pErr; hasError = true; }
+            if (pErr) {
+                document.getElementById('regPasswordError').textContent = pErr;
+                hasError = true;
+            }
             if (password !== confirm) {
                 document.getElementById('regConfirmError').textContent = 'Las contraseñas no coinciden';
                 hasError = true;
@@ -2045,299 +1233,429 @@
             if (hasError) return;
             if (!sb) { showToast('Supabase no disponible', 'error'); return; }
             
-            const btn = document.getElementById('btnRegister');
+            const btn = document.getElementById('btnRegisterSubmit');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
             
             try {
-                const { data: checkData } = await sb
-                    .from('profiles').select('username').eq('username', username).maybeSingle();
-                if (checkData) {
-                    document.getElementById('regUsernameError').textContent = 'Este nombre de usuario ya está en uso';
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
-                    return;
-                }
-                
+                // Generamos correo SIN caracteres especiales
                 const email = usernameToEmail(username);
-                const { error: signUpErr } = await sb.auth.signUp({ email, password });
-                if (signUpErr) {
-                    if (signUpErr.message.includes('already registered') || signUpErr.code === 'user_already_exists') {
-                        document.getElementById('regUsernameError').textContent = 'Este nombre de usuario ya está en uso';
+
+                // 1. Crear usuario en Auth
+                const { data: authData, error: authErr } = await sb.auth.signUp({
+                    email,
+                    password
+                });
+
+                if (authErr) {
+                    console.error('Error Auth:', authErr);
+                    if (authErr.message.includes('already') || authErr.code === 'user_already_exists') {
+                        document.getElementById('regUsernameError').textContent = 'El usuario ya existe';
                     } else {
-                        document.getElementById('regUsernameError').textContent = signUpErr.message;
+                        document.getElementById('regUsernameError').textContent = authErr.message;
                     }
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
-                    return;
+                    throw authErr;
                 }
-                
+
+                if (!authData.user) throw new Error('No se pudo crear el usuario');
+
+                // ✅ 2. Crear perfil manualmente
+                const { error: profileErr } = await sb.from('profiles').insert({
+                    id: authData.user.id,
+                    username: username.toLowerCase()
+                });
+
+                if (profileErr) {
+                    console.warn('Perfil:', profileErr.message);
+                }
+
+                showToast('¡Cuenta creada con éxito! Iniciando sesión...', 'success');
                 closeAllModals();
-                showToast('¡Cuenta creada correctamente!', 'success');
+                await new Promise(r => setTimeout(r, 800));
                 await initAuth();
-                loadCurrentSection();
-            } catch (e) {
-                showToast('Error: ' + e.message, 'error');
+                loadVideos();
+
+            } catch (err) {
+                console.error('Registro Error:', err);
+                showToast('Error: ' + err.message, 'error');
+            } finally {
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
             }
         }
 
-        function closeAllModals() {
-            document.querySelectorAll('.modal').forEach(m => m.remove());
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const email = usernameToEmail(username);
+
+            if (!sb) { showToast('Supabase no disponible', 'error'); return; }
+
+            const btn = document.getElementById('btnLoginSubmit');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+
+            try {
+                const { error } = await sb.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                showToast('¡Bienvenido de nuevo!', 'success');
+                closeAllModals();
+                await initAuth();
+                loadVideos();
+            } catch (err) {
+                showToast('Usuario o contraseña incorrectos', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
+            }
         }
 
-        async function logout() {
-            if (sb) await sb.auth.signOut();
+        async function handleLogout() {
+            if (!sb) return;
+            await sb.auth.signOut();
             currentUser = null;
             currentProfile = null;
-            favoriteIds.clear();
-            watchLaterIds.clear();
-            renderAuthHeader();
             showToast('Sesión cerrada', 'info');
-            goToHome();
+            renderAuthButton();
+            loadVideos();
         }
 
         // ============================================
-        // AUTH: INIT
+        // INICIALIZAR AUTENTICACIÓN
         // ============================================
         async function initAuth() {
-            if (!sb) { renderAuthHeader(); return; }
-            try {
-                const { data: { user } } = await sb.auth.getUser();
-                currentUser = user;
-                if (user) {
-                    const { data } = await sb
-                        .from('profiles').select('username').eq('id', user.id).maybeSingle();
-                    currentProfile = data || { username: user.email?.split('@')[0] || 'usuario' };
-                    await loadFavoriteIds();
-                    await loadWatchLaterIds();
-                } else {
-                    currentProfile = null;
-                }
-            } catch (e) {
-                currentUser = null;
+            if (!sb) { renderAuthButton(); return; }
+            const { data: { session } } = await sb.auth.getSession();
+            currentUser = session?.user || null;
+
+            if (currentUser) {
+                const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+                currentProfile = data;
+            } else {
                 currentProfile = null;
-                console.warn('Auth init:', e.message);
             }
-            renderAuthHeader();
+            renderAuthButton();
         }
 
-        sb?.auth.onAuthStateChange(async (event) => {
-            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-                await initAuth();
+        function renderAuthButton() {
+            if (currentUser && currentProfile) {
+                authContainer.innerHTML = `
+                    <div class="profile-wrapper">
+                        <button class="profile-btn" id="profileToggle">
+                            <div class="profile-avatar">${currentProfile.username.charAt(0).toUpperCase()}</div>
+                            <span class="profile-username">${escapeHtml(currentProfile.username)}</span>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-dropdown-item" onclick="switchSection('tus-videos')">
+                                <i class="fas fa-video"></i> Mis videos
+                            </div>
+                            <div class="profile-dropdown-item" onclick="switchSection('favoritos')">
+                                <i class="fas fa-heart"></i> Favoritos
+                            </div>
+                            <div class="profile-dropdown-item" onclick="switchSection('ver-despues')">
+                                <i class="fas fa-bookmark"></i> Ver después
+                            </div>
+                            <div class="profile-dropdown-item danger" onclick="handleLogout()">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('profileToggle')?.addEventListener('click', () => {
+                    document.getElementById('profileDropdown').classList.toggle('active');
+                });
+            } else {
+                authContainer.innerHTML = `<button class="auth-btn" id="btnShowLogin">Iniciar sesión</button>`;
+                document.getElementById('btnShowLogin')?.addEventListener('click', () => openModal('loginModal'));
             }
-        });
+        }
 
         // ============================================
-        // SUBIR VIDEO
+        // MODALES
         // ============================================
-        document.getElementById('btnOpenModal').onclick = () => {
-            if (!currentUser) {
-                showToast('Inicia sesión para subir videos', 'warning');
-                openLoginModal();
+        function openModal(id) {
+            document.getElementById(id)?.classList.add('active');
+        }
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+        }
+
+        // ============================================
+        // CARGAR VIDEOS
+        // ============================================
+        async function loadVideos() {
+            renderLoading();
+            if (!sb) {
+                renderVideos(sampleVideos);
                 return;
             }
-            closeAllModals();
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3><i class="fas fa-upload"></i> Subir video</h3>
-                    <input type="text" id="upTitle" placeholder="Título del video" maxlength="100">
-                    <textarea id="upDesc" placeholder="Descripción (opcional)" maxlength="500"></textarea>
-                    <input type="text" id="upHashtags" placeholder="Hashtags (ej: #Roblox #Gaming)" maxlength="200">
-                    <select id="upCategory">
-                        <option value="general">General</option>
-                        <option value="roblox">Roblox</option>
-                        <option value="ia">Inteligencia Artificial</option>
-                        <option value="minecraft">Minecraft</option>
-                        <option value="programacion">Programación</option>
-                        <option value="musica">Música</option>
-                        <option value="deportes">Deportes</option>
-                        <option value="videojuegos">Videojuegos</option>
-                    </select>
-                    <div style="display:flex;gap:12px;align-items:center;">
-                        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                            <input type="checkbox" id="upIsShort"> 
-                            <span>Es Short</span>
-                        </label>
-                    </div>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="upVideo" accept="video/*" required>
-                        <small><i class="fas fa-info-circle"></i> Selecciona tu video (Máx. 100MB)</small>
-                    </div>
-                    <div class="file-input-wrapper">
-                        <input type="file" id="upThumb" accept="image/*">
-                        <small><i class="fas fa-info-circle"></i> Miniatura personalizada (opcional)</small>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn-primary" id="btnUpload">
-                            <i class="fas fa-cloud-upload-alt"></i> Publicar
-                        </button>
-                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            <i class="fas fa-times"></i> Cancelar
-                        </button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+            try {
+                let query = sb.from('videos').select('*');
 
-            document.getElementById('btnUpload').onclick = async () => {
-                const title = document.getElementById('upTitle').value.trim();
-                const desc = document.getElementById('upDesc').value.trim();
-                const hashtagsRaw = document.getElementById('upHashtags').value.trim();
-                const hashtags = hashtagsRaw ? hashtagsRaw.split(/\s+/).filter(t => t.startsWith('#')) : [];
-                const category = document.getElementById('upCategory').value;
-                const isShort = document.getElementById('upIsShort').checked;
-                const videoFile = document.getElementById('upVideo').files[0];
-                const thumbFile = document.getElementById('upThumb').files[0];
-
-                if (!title) return showToast('Escribe un título', 'warning');
-                if (!videoFile) return showToast('Selecciona un video', 'warning');
-                if (videoFile.size > 100 * 1024 * 1024) {
-                    return showToast('El video no debe superar 100MB', 'error');
+                if (currentSection === 'tus-videos' && currentProfile) {
+                    query = query.eq('user_id', currentUser.id);
+                }
+                if (currentSection === 'shorts') {
+                    query = query.eq('is_short', true);
+                }
+                if (currentCategory !== 'todos') {
+                    query = query.eq('category', currentCategory);
                 }
 
-                const btn = document.getElementById('btnUpload');
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Subiendo...';
-                btn.disabled = true;
+                const { data, error } = await query.order('created_at', { ascending: false });
 
-                try {
-                    let videoUrl = '';
-                    let thumbUrl = '';
-
-                    const vName = `${Date.now()}_${videoFile.name}`;
-                    const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
-                    if (vErr) throw vErr;
-                    const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
-                    videoUrl = vData.publicUrl;
-
-                    if (thumbFile) {
-                        const tName = `${Date.now()}_${thumbFile.name}`;
-                        const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
-                        if (!tErr) {
-                            const { data: tData } = sb.storage.from('thumbnails').getPublicUrl(tName);
-                            thumbUrl = tData.publicUrl;
-                        }
-                    }
-
-                    const { error: insertErr } = await sb.from('videos').insert({
-                        title,
-                        description: desc || null,
-                        category: category || 'general',
-                        video_url: videoUrl,
-                        thumbnail_url: thumbUrl,
-                        views: 0,
-                        duration: 0,
-                        user_id: currentUser.id,
-                        hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
-                        is_short: isShort
-                    });
-                    if (insertErr) throw insertErr;
-
-                    closeAllModals();
-                    showToast('¡Video publicado con éxito!', 'success');
-                    loadCurrentSection();
-                } catch (err) {
-                    showToast('Error: ' + err.message, 'error');
-                    btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publicar';
-                    btn.disabled = false;
+                if (error) throw error;
+                if (!data || data.length === 0) {
+                    renderVideos(sampleVideos);
+                } else {
+                    renderVideos(data);
                 }
-            };
-        };
+            } catch (err) {
+                console.warn('Usando datos de prueba:', err);
+                renderVideos(sampleVideos);
+            }
+        }
 
         // ============================================
-        // PERSONALIZACIÓN
+        // RENDERIZAR VIDEOS
         // ============================================
-        document.getElementById('btnCustomize').addEventListener('click', function() {
-            closeAllModals();
-            const modal = document.createElement('div');
-            modal.className = 'modal';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <h3><i class="fas fa-palette"></i> Personalizar JHEILER</h3>
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:8px;">Tema</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-secondary" onclick="applyTheme('dark');this.closest('.modal').remove();">Oscuro</button>
-                            <button class="btn-secondary" onclick="applyTheme('light');this.closest('.modal').remove();">Claro</button>
-                            <button class="btn-secondary" onclick="applyTheme('neon');this.closest('.modal').remove();">Neón</button>
-                            <button class="btn-secondary" onclick="applyTheme('cyber');this.closest('.modal').remove();">Cyber</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:8px;">Fuente</label>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-secondary" onclick="applyFont('Inter');this.closest('.modal').remove();">Inter</button>
-                            <button class="btn-secondary" onclick="applyFont('Poppins');this.closest('.modal').remove();">Poppins</button>
-                            <button class="btn-secondary" onclick="applyFont('Roboto');this.closest('.modal').remove();">Roboto</button>
-                            <button class="btn-secondary" onclick="applyFont('Montserrat');this.closest('.modal').remove();">Montserrat</button>
-                            <button class="btn-secondary" onclick="applyFont('Orbitron');this.closest('.modal').remove();">Orbitron</button>
-                        </div>
-                    </div>
-                    <div>
-                        <label style="font-weight:600;display:block;margin-bottom:8px;">Color de acento</label>
-                        <input type="color" id="accentColor" value="#ff304f" style="padding:4px;width:100%;height:50px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;">
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn-primary" onclick="applyAccentColor();this.closest('.modal').remove();">
-                            <i class="fas fa-check"></i> Aplicar color
-                        </button>
-                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
-                            <i class="fas fa-times"></i> Cerrar
-                        </button>
-                    </div>
+        function renderLoading() {
+            grid.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner"></i>
+                    <h3>Cargando...</h3>
                 </div>
             `;
-            document.body.appendChild(modal);
+        }
+
+        function renderVideos(videos) {
+            if (!videos || videos.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-film"></i>
+                        <h3>No hay videos aún</h3>
+                        <p>Sé el primero en compartir un video 🎉</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (currentSort === 'vistos') {
+                videos.sort((a, b) => (b.views || 0) - (a.views || 0));
+            } else if (currentSort === 'antiguos') {
+                videos.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+            } else {
+                videos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            }
+
+            grid.innerHTML = videos.map(v => `
+                <div class="video-card" onclick="playVideo('${v.video_url || ''}', '${escapeHtml(v.title)}', '@${escapeHtml(v.username || v.channel || 'demo')}', '${(v.hashtags || []).join(',')}')">
+                    <div class="thumb">
+                        <img src="${v.thumbnail_url || getDefaultThumbnail(v.category)}" alt="${escapeHtml(v.title)}" loading="lazy">
+                        <span class="duration">${formatDuration(v.duration)}</span>
+                        <div class="play-overlay"><i class="fas fa-play"></i></div>
+                    </div>
+                    <div class="video-info">
+                        <div class="channel-avatar">${(v.username || v.channel || 'D').charAt(0).toUpperCase()}</div>
+                        <div class="video-details">
+                            <h3 class="card-title">${escapeHtml(v.title)}</h3>
+                            <p class="channel-name">${escapeHtml(v.username || v.channel || 'Canal')}</p>
+                            <p class="card-meta">
+                                ${formatViews(v.views)} vistas • ${formatDate(v.created_at)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ============================================
+        // REPRODUCIR VIDEO
+        // ============================================
+        function playVideo(url, title, channel, hashtags = '') {
+            if (!url) { showToast('Video no disponible', 'warning'); return; }
+            playerVideo.src = url;
+            playerTitle.textContent = title;
+            playerChannel.textContent = channel;
+            playerHashtags.innerHTML = hashtags ? hashtags.split(',').map(t => `<span>#${t.trim()}</span>`).join('') : '';
+            playerOverlay.classList.add('active');
+            playerVideo.play();
+        }
+
+        playerClose.addEventListener('click', () => {
+            playerOverlay.classList.remove('active');
+            playerVideo.pause();
+            playerVideo.src = '';
+        });
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                playerOverlay.classList.remove('active');
+                playerVideo.pause();
+            }
         });
 
-        window.applyTheme = function(theme) {
-            const themes = {
-                dark: { bg: '#0f0f0f', panel: '#181818', panel2: '#212121', border: '#303030', text: '#aaa', accent: '#ff304f', accent2: '#ff6b8a', bodyColor: '#fff' },
-                light: { bg: '#f5f5f5', panel: '#ffffff', panel2: '#e8e8e8', border: '#ddd', text: '#666', accent: '#ff304f', accent2: '#ff6b8a', bodyColor: '#111' },
-                neon: { bg: '#0a0a1a', panel: '#111128', panel2: '#1a1a3a', border: '#333366', text: '#aaa', accent: '#00ff88', accent2: '#66ffbb', bodyColor: '#fff' },
-                cyber: { bg: '#000000', panel: '#0a0a0a', panel2: '#1a1a1a', border: '#333333', text: '#aaa', accent: '#ff00ff', accent2: '#ff66ff', bodyColor: '#fff' }
-            };
-            const t = themes[theme];
-            if (!t) return;
-            document.documentElement.style.setProperty('--bg', t.bg);
-            document.documentElement.style.setProperty('--panel', t.panel);
-            document.documentElement.style.setProperty('--panel2', t.panel2);
-            document.documentElement.style.setProperty('--border', t.border);
-            document.documentElement.style.setProperty('--text-secondary', t.text);
-            document.documentElement.style.setProperty('--accent', t.accent);
-            document.documentElement.style.setProperty('--accent2', t.accent2);
-            document.body.style.color = t.bodyColor;
-            showToast(`Tema ${theme} aplicado`, 'success');
-        };
+        // ============================================
+        // NAVEGACIÓN
+        // ============================================
+        document.querySelectorAll('.sb-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                currentSection = item.dataset.section;
+                sectionTitle.innerHTML = `<i class="fas fa-${item.querySelector('i').classList[2]}"></i> ${item.textContent.trim()}`;
+                loadVideos();
+            });
+        });
 
-        window.applyFont = function(font) {
-            document.documentElement.style.setProperty('--font-family', `'${font}', -apple-system, 'Segoe UI', Roboto, sans-serif`);
-            showToast(`Fuente ${font} aplicada`, 'success');
-        };
+        document.querySelectorAll('.category-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                currentCategory = chip.dataset.category;
+                loadVideos();
+            });
+        });
 
-        window.applyAccentColor = function() {
-            const color = document.getElementById('accentColor')?.value;
-            if (color) {
-                document.documentElement.style.setProperty('--accent', color);
-                const r = parseInt(color.slice(1,3), 16);
-                const g = parseInt(color.slice(3,5), 16);
-                const b = parseInt(color.slice(5,7), 16);
-                const lighter = `rgb(${Math.min(255,r+60)}, ${Math.min(255,g+60)}, ${Math.min(255,b+60)})`;
-                document.documentElement.style.setProperty('--accent2', lighter);
-                showToast('Color de acento aplicado', 'success');
+        sortSelect.addEventListener('change', e => {
+            currentSort = e.target.value;
+            loadVideos();
+        });
+
+        function goToHome() {
+            currentSection = 'inicio';
+            currentCategory = 'todos';
+            document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+            document.querySelector('.sb-item[data-section="inicio"]')?.classList.add('active');
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+            document.querySelector('.category-chip[data-category="todos"]')?.classList.add('active');
+            sectionTitle.innerHTML = `<i class="fas fa-home"></i> Inicio`;
+            loadVideos();
+        }
+
+        // ============================================
+        // PUBLICAR VIDEO
+        // ============================================
+        document.getElementById('btnOpenModal')?.addEventListener('click', () => {
+            if (!currentUser) { openModal('loginModal'); showToast('Inicia sesión para publicar', 'warning'); return; }
+            openModal('uploadModal');
+        });
+
+        document.getElementById('btnUploadSubmit')?.addEventListener('click', async () => {
+            const title = document.getElementById('vidTitle').value.trim();
+            const url = document.getElementById('vidUrl').value.trim();
+            const category = document.getElementById('vidCategory').value;
+            const hashtags = document.getElementById('vidTags').value.split(',').map(t => t.trim()).filter(t => t);
+
+            if (!title || !url) { showToast('Título y enlace son obligatorios', 'warning'); return; }
+            if (!sb || !currentUser) { showToast('Debes iniciar sesión', 'warning'); return; }
+
+            const btn = document.getElementById('btnUploadSubmit');
+            btn.disabled = true;
+            btn.textContent = 'Publicando...';
+
+            try {
+                const { error } = await sb.from('videos').insert({
+                    user_id: currentUser.id,
+                    title,
+                    video_url: url,
+                    category,
+                    hashtags,
+                    username: currentProfile.username
+                });
+                if (error) throw error;
+                showToast('¡Video publicado! 🎉', 'success');
+                closeAllModals();
+                document.getElementById('vidTitle').value = '';
+                document.getElementById('vidUrl').value = '';
+                document.getElementById('vidTags').value = '';
+                loadVideos();
+            } catch (err) {
+                showToast('Error: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Publicar video';
             }
-        };
+        });
+
+        // Cambio entre login y registro
+        document.getElementById('goToRegister')?.addEventListener('click', () => {
+            closeAllModals(); openModal('registerModal');
+        });
+        document.getElementById('goToLogin')?.addEventListener('click', () => {
+            closeAllModals(); openModal('loginModal');
+        });
+
+        // Envío formularios
+        document.getElementById('btnRegisterSubmit')?.addEventListener('click', handleRegister);
+        document.getElementById('btnLoginSubmit')?.addEventListener('click', handleLogin);
+
+        // Cerrar menú perfil al hacer clic fuera
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.profile-wrapper')) {
+                document.getElementById('profileDropdown')?.classList.remove('active');
+            }
+        });
 
         // ============================================
-        // INICIALIZAR
+        // INICIO GENERAL
         // ============================================
-        (async function init() {
+        document.addEventListener('DOMContentLoaded', async () => {
             await initAuth();
-            loadHomeVideos();
-        })();
+            loadVideos();
+        });
     </script>
+
+    <!-- ===== MODALES ===== -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-sign-in-alt"></i> Iniciar sesión</h3>
+            <input type="text" id="loginUsername" placeholder="Usuario (sin @correo)" required>
+            <input type="password" id="loginPassword" placeholder="Contraseña" required>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeAllModals()">Cancelar</button>
+                <button class="btn-primary" id="btnLoginSubmit">Entrar</button>
+            </div>
+            <div class="modal-switch">¿No tienes cuenta? <a id="goToRegister">Crear cuenta</a></div>
+        </div>
+    </div>
+
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-user-plus"></i> Crear cuenta</h3>
+            <input type="text" id="regUsername" placeholder="Usuario (solo letras y números)" required>
+            <small class="input-error" id="regUsernameError"></small>
+            <input type="password" id="regPassword" placeholder="Contraseña (mínimo 8 caracteres)" required>
+            <small class="input-error" id="regPasswordError"></small>
+            <input type="password" id="regConfirmPassword" placeholder="Repetir contraseña" required>
+            <small class="input-error" id="regConfirmError"></small>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeAllModals()">Cancelar</button>
+                <button class="btn-primary" id="btnRegisterSubmit">Crear cuenta</button>
+            </div>
+            <div class="modal-switch">¿Ya tienes cuenta? <a id="goToLogin">Iniciar sesión</a></div>
+        </div>
+    </div>
+
+    <div class="modal" id="uploadModal">
+        <div class="modal-content">
+            <h3><i class="fas fa-upload"></i> Publicar video</h3>
+            <input type="text" id="vidTitle" placeholder="Título del video" required>
+            <input type="url" id="vidUrl" placeholder="Enlace del video (URL directa .mp4)" required>
+            <select id="vidCategory">
+                <option value="roblox">Roblox</option>
+                <option value="ia">Inteligencia Artificial</option>
+                <option value="minecraft">Minecraft</option>
+                <option value="programacion">Programación</option>
+                <option value="musica">Música</option>
+                <option value="deportes">Deportes</option>
+                <option value="videojuegos">Videojuegos</option>
+            </select>
+            <input type="text" id="vidTags" placeholder="Etiquetas (separadas por coma)">
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeAllModals()">Cancelar</button>
+                <button class="btn-primary" id="btnUploadSubmit">Publicar video</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
