@@ -1,1661 +1,2540 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>JHEILER - Tu plataforma de videos</title>
-    
-    <!-- ===== FONT AWESOME ===== -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- ===== GOOGLE FONTS ===== -->
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Roboto:wght@400;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://picsum.photos/512/512%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <style>
-        /* ===== VARIABLES ===== */
-        :root {
-            --bg: #0f0f0f;
-            --panel: #181818;
-            --panel2: #212121;
-            --accent: #ff304f;
-            --accent2: #ff6b8a;
-            --border: #303030;
-            --text-secondary: #aaa;
-            --shadow: 0 8px 32px rgba(0,0,0,0.4);
-            --radius: 12px;
-            --font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
-            --font-weight-title: 800;
-            --font-weight-body: 400;
-            --font-size-base: 14px;
-            --bg-image: none;
-            --bg-overlay: rgba(0,0,0,0.85);
-            --glass-effect: rgba(255,255,255,0.05);
-            --hover-scale: 1.03;
-            --transition-fast: 0.15s ease;
-            --transition-normal: 0.3s ease;
-        }
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: var(--font-family);
-            background: var(--bg);
-            color: #fff;
-            min-height: 100vh;
-            overflow-x: hidden;
-            font-size: var(--font-size-base);
-            position: relative;
-            transition: background var(--transition-normal), color var(--transition-normal);
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-image);
-            background-size: cover;
-            background-position: center;
-            z-index: -1;
-            opacity: 0.15;
-            pointer-events: none;
-        }
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-        
-        /* ===== HEADER ===== */
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 60px;
-            background: rgba(15,15,15,0.92);
-            backdrop-filter: blur(12px);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 24px;
-            border-bottom: 1px solid var(--border);
-            z-index: 200;
-        }
-        .brand {
-            font-size: 22px;
-            font-weight: var(--font-weight-title);
-            color: var(--accent);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            letter-spacing: -0.5px;
-            text-decoration: none;
-            transition: transform var(--transition-fast);
-        }
-        .brand:hover { transform: scale(1.02); }
-        .brand i {
-            font-size: 26px;
-            color: var(--accent);
-            filter: drop-shadow(0 0 4px rgba(255,48,79,0.4));
-        }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .header-btn {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 18px;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all var(--transition-fast);
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .header-btn:hover {
-            background: var(--panel2);
-            transform: scale(1.08);
-        }
-        .create-btn {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            border-radius: 24px;
-            border: none;
-            color: #fff;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.25s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 2px 8px rgba(255,48,79,0.2);
-        }
-        .create-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(255,48,79,0.4);
-        }
-        .create-btn:active { transform: scale(0.98); }
-        
-        /* ===== PERFIL / AUTH ===== */
-        .auth-btn {
-            padding: 8px 18px;
-            background: var(--panel2);
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            color: #fff;
-            font-weight: 600;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .auth-btn:hover {
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-        .profile-wrapper {
-            position: relative;
-        }
-        .profile-btn {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 12px 4px 4px;
-            background: var(--panel2);
-            border-radius: 24px;
-            border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .profile-btn:hover {
-            border-color: var(--accent);
-        }
-        .profile-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-        }
-        .profile-username {
-            font-size: 13px;
-            font-weight: 600;
-            max-width: 120px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .profile-dropdown {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            min-width: 200px;
-            box-shadow: var(--shadow);
-            display: none;
-            overflow: hidden;
-            z-index: 300;
-        }
-        .profile-dropdown.active { display: block; }
-        .profile-dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background var(--transition-fast);
-            font-size: 14px;
-        }
-        .profile-dropdown-item:hover {
-            background: var(--panel2);
-        }
-        .profile-dropdown-item i {
-            width: 18px;
-            text-align: center;
-            color: var(--text-secondary);
-        }
-        .profile-dropdown-item.danger {
-            color: #ff6b6b;
-            border-top: 1px solid var(--border);
-        }
-        .profile-dropdown-item.danger i { color: #ff6b6b; }
-        
-        /* ===== SIDEBAR ===== */
-        aside {
-            position: fixed;
-            top: 60px;
-            left: 0;
-            bottom: 0;
-            width: 220px;
-            background: var(--bg);
-            border-right: 1px solid var(--border);
-            padding-top: 12px;
-            overflow-y: auto;
-            z-index: 100;
-        }
-        .sb-section {
-            padding: 6px 0 10px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        .sb-title {
-            padding: 6px 24px 8px 24px;
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-        .sb-item {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            padding: 10px 24px;
-            font-size: 14px;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 8px;
-            margin: 0 8px;
-            transition: all var(--transition-fast);
-            cursor: pointer;
-            position: relative;
-        }
-        .sb-item:hover {
-            background: var(--panel2);
-            transform: translateX(2px);
-        }
-        .sb-item i {
-            font-size: 20px;
-            width: 24px;
-            text-align: center;
-            color: var(--text-secondary);
-            transition: color var(--transition-fast);
-        }
-        .sb-item:hover i { color: #fff; }
-        .sb-item.active {
-            background: linear-gradient(90deg, rgba(255,48,79,0.15), transparent);
-        }
-        .sb-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 60%;
-            background: var(--accent);
-            border-radius: 0 3px 3px 0;
-        }
-        .sb-item.active i { color: var(--accent); }
-        .sb-item .badge {
-            position: absolute;
-            right: 24px;
-            background: var(--accent);
-            color: #fff;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 700;
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        /* ===== MAIN ===== */
-        main {
-            margin-left: 220px;
-            padding: 80px 24px 40px 24px;
-            min-height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* ===== CATEGORÍAS ===== */
-        .categories {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 16px;
-            margin-bottom: 24px;
-            scrollbar-width: none;
-        }
-        .categories::-webkit-scrollbar { display: none; }
-        .category-chip {
-            padding: 8px 18px;
-            background: var(--panel2);
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            white-space: nowrap;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            border: 1px solid transparent;
-        }
-        .category-chip:hover {
-            background: var(--border);
-            transform: translateY(-1px);
-        }
-        .category-chip.active {
-            background: var(--accent);
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(255,48,79,0.3);
-        }
-        
-        /* ===== ORDENAMIENTO ===== */
-        .sort-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .sort-select {
-            padding: 6px 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--panel2);
-            color: #fff;
-            font-size: 13px;
-            cursor: pointer;
-        }
-        .sort-select:focus { outline: none; border-color: var(--accent); }
-        
-        /* ===== SECTION TITLE ===== */
-        .section-title {
-            font-size: 22px;
-            font-weight: var(--font-weight-title);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .section-title i {
-            color: var(--accent);
-            filter: drop-shadow(0 0 4px rgba(255,48,79,0.3));
-        }
-        
-        /* ===== VIDEO GRID ===== */
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 28px 20px;
-        }
-        .video-card {
-            transition: all var(--transition-normal);
-            cursor: pointer;
-            border-radius: var(--radius);
-            position: relative;
-        }
-        .video-card:hover {
-            transform: translateY(-5px);
-        }
-        .thumb {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: linear-gradient(135deg, var(--panel2), var(--panel));
-            border-radius: var(--radius);
-            margin-bottom: 10px;
-            overflow: hidden;
-            position: relative;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        .thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-        .video-card:hover .thumb img {
-            transform: scale(var(--hover-scale));
-        }
-        .thumb .duration {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background: rgba(0,0,0,0.85);
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            backdrop-filter: blur(4px);
-        }
-        .thumb .play-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.6);
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity var(--transition-normal);
-            backdrop-filter: blur(6px);
-        }
-        .video-card:hover .play-overlay {
-            opacity: 1;
-        }
-        .play-overlay i {
-            font-size: 20px;
-            color: #fff;
-            margin-left: 4px;
-        }
-        .video-actions {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            display: flex;
-            gap: 6px;
-            opacity: 0;
-            transition: opacity var(--transition-fast);
-            z-index: 2;
-        }
-        .video-card:hover .video-actions { opacity: 1; }
-        .action-btn {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(4px);
-            border: none;
-            color: #fff;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            transition: all var(--transition-fast);
-        }
-        .action-btn:hover {
-            background: var(--accent);
-            transform: scale(1.1);
-        }
-        .action-btn.active {
-            background: var(--accent);
-        }
-        .video-info {
-            display: flex;
-            gap: 12px;
-        }
-        .channel-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 13px;
-            flex-shrink: 0;
-            box-shadow: 0 2px 6px rgba(255,48,79,0.25);
-        }
-        .video-details {
-            flex: 1;
-            min-width: 0;
-        }
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            transition: color var(--transition-fast);
-        }
-        .video-card:hover .card-title { color: var(--accent); }
-        .card-hashtags {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-top: 4px;
-        }
-        .card-hashtags span {
-            font-size: 11px;
-            color: var(--accent);
-            background: rgba(255,48,79,0.1);
-            padding: 2px 8px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .card-hashtags span:hover {
-            background: rgba(255,48,79,0.2);
-        }
-        .channel-name {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-        .card-meta {
-            font-size: 12px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            flex-wrap: wrap;
-        }
-        .card-meta i { font-size: 11px; }
-        
-        /* ===== EMPTY STATE & LOADING ===== */
-        .empty-state, .loading-state, .auth-state, .error-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--text-secondary);
-        }
-        .empty-state i, .loading-state i, .auth-state i, .error-state i {
-            font-size: 64px;
-            display: block;
-            margin-bottom: 16px;
-            color: var(--border);
-        }
-        .empty-state h3, .loading-state h3, .auth-state h3, .error-state h3 {
-            font-size: 22px;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-        .empty-state p, .auth-state p, .error-state p {
-            margin-bottom: 20px;
-        }
-        .loading-state i {
-            color: var(--accent);
-            animation: spin 1s linear infinite;
-        }
-        .error-state i { color: #ff6b6b; }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        /* ===== SKELETON ===== */
-        .skeleton-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 28px 20px;
-            grid-column: 1 / -1;
-        }
-        .skeleton-card {
-            animation: shimmer 1.5s infinite linear;
-            background: linear-gradient(90deg, var(--panel2) 25%, var(--border) 50%, var(--panel2) 75%);
-            background-size: 200% 100%;
-            border-radius: var(--radius);
-        }
-        .skeleton-thumb {
-            width: 100%;
-            aspect-ratio: 16/9;
-            border-radius: var(--radius);
-            margin-bottom: 12px;
-        }
-        .skeleton-line {
-            height: 12px;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        .skeleton-line.short { width: 60%; }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        /* ===== REPRODUCTOR ===== */
-        .player-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.96);
-            z-index: 10000;
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease;
-            padding: 20px;
-        }
-        .player-overlay.active { display: flex; }
-        .player-container {
-            width: 100%;
-            max-width: 960px;
-            position: relative;
-        }
-        .player-container video {
-            width: 100%;
-            border-radius: 12px;
-            background: #000;
-            max-height: 78vh;
-            box-shadow: 0 0 40px rgba(0,0,0,0.8);
-        }
-        .player-close {
-            position: absolute;
-            top: -45px;
-            right: 0;
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 26px;
-            cursor: pointer;
-            padding: 8px;
-            transition: all var(--transition-fast);
-        }
-        .player-close:hover {
-            transform: scale(1.15);
-            color: var(--accent);
-        }
-        .player-info {
-            width: 100%;
-            max-width: 960px;
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-        .player-title {
-            font-size: 18px;
-            font-weight: 700;
-            line-height: 1.3;
-        }
-        .player-channel {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-top: 4px;
-        }
-        .player-hashtags {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-        .player-hashtags span {
-            color: var(--accent);
-            font-size: 13px;
-            background: rgba(255,48,79,0.15);
-            padding: 4px 10px;
-            border-radius: 12px;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        /* ===== MODAL ===== */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            backdrop-filter: blur(8px);
-            animation: fadeIn 0.25s ease;
-            padding: 16px;
-        }
-        .modal-content {
-            background: var(--panel);
-            padding: 28px 32px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 440px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            max-height: 90vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .modal-content h3 {
-            font-size: 22px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 4px;
-        }
-        .modal-content h3 i { color: var(--accent); }
-        .modal-content input,
-        .modal-content textarea,
-        .modal-content select {
-            padding: 12px 14px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--panel2);
-            color: #fff;
-            font-size: 14px;
-            transition: border var(--transition-fast), box-shadow var(--transition-fast);
-            width: 100%;
-            font-family: inherit;
-        }
-        .modal-content input:focus,
-        .modal-content textarea:focus,
-        .modal-content select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(255,48,79,0.1);
-        }
-        .modal-content textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-        .modal-actions button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            font-family: inherit;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), var(--accent2));
-            color: #fff;
-        }
-        .btn-primary:hover {
-            box-shadow: 0 4px 16px rgba(255,48,79,0.35);
-            transform: translateY(-1px);
-        }
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-secondary {
-            background: var(--panel2);
-            color: #aaa;
-        }
-        .btn-secondary:hover {
-            background: var(--border);
-            color: #fff;
-        }
-        .file-input-wrapper { position: relative; }
-        .file-input-wrapper input[type="file"] {
-            padding: 12px;
-            background: var(--panel2);
-            border-radius: 10px;
-            border: 1px dashed var(--border);
-            cursor: pointer;
-            width: 100%;
-            transition: border var(--transition-fast);
-        }
-        .file-input-wrapper input[type="file"]:hover { border-color: var(--accent); }
-        .file-input-wrapper input[type="file"]::file-selector-button {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-right: 12px;
-        }
-        .file-input-wrapper small {
-            color: #888;
-            display: block;
-            margin-top: 6px;
-            font-size: 12px;
-        }
-        .modal-switch {
-            text-align: center;
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-        .modal-switch a {
-            color: var(--accent);
-            cursor: pointer;
-            font-weight: 600;
-            text-decoration: none;
-        }
-        .modal-switch a:hover { text-decoration: underline; }
-        .input-error {
-            color: #ff6b6b;
-            font-size: 12px;
-            margin-top: -6px;
-        }
-        
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--panel2);
-            color: #fff;
-            padding: 14px 24px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
-            z-index: 20000;
-            font-weight: 500;
-            animation: slideUp 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 90%;
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-        
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 768px) {
-            aside { display: none; }
-            main {
-                margin-left: 0;
-                padding: 76px 16px 24px 16px;
-            }
-            .video-grid, .skeleton-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 16px;
-            }
-            .brand { font-size: 18px; }
-            .brand i { font-size: 20px; }
-            .create-btn {
-                padding: 8px 14px;
-                font-size: 13px;
-            }
-            .create-btn span { display: none; }
-            .modal-content { padding: 20px; }
-            .categories { gap: 8px; }
-            .category-chip {
-                font-size: 12px;
-                padding: 6px 14px;
-            }
-            .player-container video { max-height: 60vh; }
-            .player-close {
-                top: -40px;
-                font-size: 24px;
-            }
-            .player-title { font-size: 15px; }
-            .sort-bar { flex-direction: column; align-items: flex-start; }
-            .profile-username { display: none; }
-        }
-        @media (max-width: 480px) {
-            .video-grid, .skeleton-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 12px;
-            }
-            .card-title { font-size: 13px; }
-            .channel-avatar {
-                width: 28px;
-                height: 28px;
-                font-size: 11px;
-            }
-            .channel-name { font-size: 11px; }
-            .card-meta { font-size: 10px; }
-            .thumb .duration {
-                font-size: 9px;
-                padding: 1px 6px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>JHEILER</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ff304f%22/><polygon points=%2238,28 78,50 38,72%22 fill=%22white%22/></svg>">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ============================================================
+   RESET / BASE
+============================================================ */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  font-family:"Roboto","Segoe UI",Arial,sans-serif;
+  background:#0f0f0f;
+  color:#ffffff;
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+input,textarea,select{font-family:inherit;color:#fff;}
+img{display:block;max-width:100%;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:#0f0f0f;}
+::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:#ff304f;}
+
+:root{
+  --bg:#0f0f0f;
+  --panel:#181818;
+  --panel2:#212121;
+  --text:#ffffff;
+  --text-secondary:#aaaaaa;
+  --accent:#ff304f;
+  --accent-dark:#c9223c;
+  --border:#303030;
+  --header-h:56px;
+  --sidebar-w:240px;
+  --sidebar-w-mini:72px;
+}
+
+.hidden{display:none !important;}
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);}
+
+/* ============================================================
+   HEADER
+============================================================ */
+#appHeader{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+  z-index:200;
+  border-bottom:1px solid transparent;
+}
+.header-left{display:flex;align-items:center;gap:20px;min-width:0;}
+.icon-btn{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text);font-size:20px;
+  transition:background .15s;
+  flex-shrink:0;
+}
+.icon-btn:hover{background:#3a3a3a;}
+.brand{
+  display:flex;align-items:center;gap:4px;
+  font-size:20px;font-weight:700;letter-spacing:-0.5px;
+  color:var(--text);white-space:nowrap;
+}
+.brand .play-ico{color:var(--accent);font-size:22px;transform:translateY(-1px);}
+.brand span.hl{color:var(--accent);}
+
+.header-center{
+  flex:1;display:flex;justify-content:center;align-items:center;
+  gap:8px;max-width:720px;margin:0 32px;
+}
+.search-form{
+  display:flex;flex:1;align-items:center;
+  border:1px solid var(--border);border-radius:20px 0 0 20px;
+  background:var(--bg);height:40px;overflow:hidden;
+}
+.search-form input{
+  flex:1;background:transparent;border:none;outline:none;
+  padding:0 16px;font-size:15px;color:var(--text);
+}
+.search-btn{
+  width:64px;height:40px;background:var(--panel2);
+  border:1px solid var(--border);border-left:none;border-radius:0 20px 20px 0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  flex-shrink:0;
+}
+.search-btn:hover{background:#3a3a3a;}
+.mic-btn{
+  width:40px;height:40px;border-radius:50%;background:var(--panel2);
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;
+}
+.mic-btn:hover{background:#3a3a3a;}
+
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.create-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:20px;background:var(--panel2);
+  font-size:14px;font-weight:500;white-space:nowrap;
+}
+.create-btn:hover{background:#3a3a3a;}
+.avatar-circle{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--accent);display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:#fff;overflow:hidden;flex-shrink:0;
+}
+.avatar-circle img{width:100%;height:100%;object-fit:cover;}
+.auth-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border:1px solid var(--border);border-radius:20px;
+  color:#3ea6ff;font-size:14px;font-weight:500;white-space:nowrap;
+}
+.auth-btn:hover{background:rgba(62,166,255,0.1);}
+.badge-dot{
+  position:absolute;top:6px;right:6px;width:8px;height:8px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);
+}
+.icon-btn-wrap{position:relative;}
+
+/* ============================================================
+   SIDEBAR
+============================================================ */
+#sidebar{
+  position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg);overflow-y:auto;z-index:150;
+  transition:transform .2s ease, width .2s ease;
+  padding-bottom:24px;
+}
+#sidebar.mini{width:var(--sidebar-w-mini);}
+.sb-section{padding:12px 0;border-bottom:1px solid var(--border);}
+.sb-section:last-child{border-bottom:none;}
+.sb-title{
+  padding:6px 24px;font-size:13px;font-weight:600;color:var(--text-secondary);
+  text-transform:none;
+}
+.sb-item{
+  display:flex;align-items:center;gap:20px;
+  padding:10px 24px;font-size:14px;border-radius:0 20px 20px 0;
+  white-space:nowrap;overflow:hidden;
+}
+#sidebar.mini .sb-item{
+  flex-direction:column;gap:4px;padding:14px 4px;font-size:10px;
+  border-radius:8px;margin:0 4px;text-align:center;
+}
+#sidebar.mini .sb-title{display:none;}
+.sb-item .sb-ico{font-size:20px;width:24px;text-align:center;flex-shrink:0;}
+#sidebar.mini .sb-item .sb-ico{width:auto;font-size:20px;}
+.sb-item:hover{background:#3a3a3a;}
+.sb-item.active{background:var(--panel2);font-weight:600;}
+.sb-item.active .sb-ico{color:var(--accent);}
+
+#sidebarOverlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:140;
+}
+
+/* ============================================================
+   LAYOUT / MAIN
+============================================================ */
+#appBody{padding-top:var(--header-h);display:flex;min-height:100vh;}
+#mainContent{
+  flex:1;margin-left:var(--sidebar-w);padding:24px;min-width:0;
+  transition:margin-left .2s ease;
+}
+#mainContent.mini-margin{margin-left:var(--sidebar-w-mini);}
+
+@media (max-width:900px){
+  #sidebar{transform:translateX(-100%);width:260px;}
+  #sidebar.show{transform:translateX(0);}
+  #mainContent{margin-left:0 !important;}
+  .header-center{margin:0 12px;}
+  .brand{font-size:17px;}
+}
+@media (max-width:600px){
+  .header-center{display:none;}
+  .create-btn span{display:none;}
+  #mainContent{padding:12px;}
+}
+
+/* ============================================================
+   VIDEO GRID / CARDS
+============================================================ */
+.section-heading{font-size:18px;font-weight:600;margin:4px 0 16px;}
+.video-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px 12px;
+}
+@media (min-width:1600px){.video-grid{grid-template-columns:repeat(5,1fr);}}
+@media (max-width:900px){.video-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));}}
+@media (max-width:520px){.video-grid{grid-template-columns:1fr;}}
+
+.video-card{cursor:pointer;}
+.thumb-wrap{
+  position:relative;width:100%;aspect-ratio:16/9;border-radius:12px;overflow:hidden;
+  background:var(--panel2);margin-bottom:8px;
+}
+.thumb-wrap img{width:100%;height:100%;object-fit:cover;}
+.thumb-wrap .no-thumb{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:32px;color:var(--text-secondary);background:linear-gradient(135deg,#212121,#0f0f0f);
+}
+.duration-badge{
+  position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,0.85);
+  color:#fff;font-size:12px;font-weight:600;padding:2px 5px;border-radius:4px;
+}
+.card-meta{display:flex;gap:10px;}
+.card-meta .avatar-circle{width:36px;height:36px;font-size:13px;margin-top:2px;}
+.card-info{flex:1;min-width:0;}
+.card-title{
+  font-size:14px;font-weight:600;line-height:1.35;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  margin-bottom:4px;
+}
+.card-channel{font-size:13px;color:var(--text-secondary);}
+.card-channel:hover{color:var(--text);}
+.card-stats{font-size:13px;color:var(--text-secondary);}
+.card-menu-btn{flex-shrink:0;align-self:flex-start;}
+.card-menu-btn:hover{background:#3a3a3a;border-radius:50%;}
+
+/* skeleton loading */
+.skeleton{background:linear-gradient(90deg,#181818 25%,#2a2a2a 37%,#181818 63%);
+  background-size:400% 100%;animation:skel-loading 1.4s ease infinite;}
+@keyframes skel-loading{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
+.skel-card .thumb-wrap{background:none;}
+.skel-line{height:12px;border-radius:6px;margin-bottom:6px;}
+
+/* ============================================================
+   EMPTY / ERROR STATES
+============================================================ */
+.state-box{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:80px 20px;text-align:center;color:var(--text-secondary);gap:12px;
+}
+.state-box .state-ico{font-size:52px;opacity:.6;}
+.state-box h3{color:var(--text);font-size:18px;font-weight:600;}
+.state-box p{font-size:14px;max-width:360px;}
+.retry-btn{
+  margin-top:8px;padding:9px 20px;border-radius:20px;background:var(--panel2);
+  font-size:14px;font-weight:500;
+}
+.retry-btn:hover{background:#3a3a3a;}
+
+/* ============================================================
+   BUTTONS / FORM ELEMENTS
+============================================================ */
+.btn{
+  padding:10px 20px;border-radius:20px;font-size:14px;font-weight:600;
+  transition:filter .15s, background .15s;
+}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{filter:brightness(1.1);}
+.btn-primary:disabled{background:#5a2530;color:#999;cursor:not-allowed;}
+.btn-secondary{background:var(--panel2);color:var(--text);}
+.btn-secondary:hover{background:#3a3a3a;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text);}
+.btn-ghost:hover{background:var(--panel2);}
+.btn-danger{background:transparent;border:1px solid var(--accent);color:var(--accent);}
+.btn-danger:hover{background:rgba(255,48,79,0.1);}
+.btn-full{width:100%;}
+.btn[disabled]{opacity:.6;cursor:not-allowed;}
+
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;color:var(--text-secondary);margin-bottom:6px;}
+.field input,.field textarea,.field select{
+  width:100%;padding:11px 12px;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;font-size:14px;outline:none;
+}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;min-height:80px;}
+.field-error{color:var(--accent);font-size:12px;margin-top:4px;}
+.field-hint{color:var(--text-secondary);font-size:12px;margin-top:4px;}
+
+/* ============================================================
+   MODALS
+============================================================ */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+  animation:fadeIn .15s ease;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-box{
+  background:var(--panel);border-radius:12px;width:100%;max-width:440px;
+  max-height:90vh;overflow-y:auto;padding:24px;
+  animation:popIn .18s ease;
+}
+.modal-box.wide{max-width:640px;}
+@keyframes popIn{from{transform:scale(.95);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-head h2{font-size:18px;font-weight:600;}
+.modal-close{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.modal-close:hover{background:#3a3a3a;}
+.modal-tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.modal-tab{padding:10px 4px;font-size:14px;font-weight:600;color:var(--text-secondary);border-bottom:2px solid transparent;margin-right:16px;}
+.modal-tab.active{color:var(--text);border-color:var(--accent);}
+.modal-footer-text{text-align:center;font-size:13px;color:var(--text-secondary);margin-top:16px;}
+.modal-footer-text a{color:#3ea6ff;font-weight:500;}
+.modal-footer-text a:hover{text-decoration:underline;}
+
+/* upload dropzone */
+.dropzone{
+  border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;
+  color:var(--text-secondary);font-size:13px;cursor:pointer;transition:border-color .15s;
+}
+.dropzone:hover,.dropzone.dragover{border-color:var(--accent);color:var(--text);}
+.dropzone .dz-ico{font-size:30px;margin-bottom:8px;}
+.file-preview{display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px;margin-top:8px;font-size:13px;}
+.file-preview img{width:60px;height:34px;object-fit:cover;border-radius:4px;}
+.progress-track{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:var(--accent);width:0%;transition:width .2s;}
+
+/* ============================================================
+   TOASTS
+============================================================ */
+#toastContainer{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  z-index:900;display:flex;flex-direction:column;gap:8px;align-items:center;
+  width:100%;pointer-events:none;
+}
+.toast{
+  background:#2a2a2a;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);animation:toastIn .2s ease;
+  max-width:90vw;text-align:center;
+}
+.toast.error{background:#3a1418;border:1px solid var(--accent);}
+.toast.success{background:#123a20;border:1px solid #2ecc71;}
+@keyframes toastIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+
+/* ============================================================
+   DROPDOWN MENUS
+============================================================ */
+.dropdown{position:relative;}
+.dropdown-menu{
+  position:absolute;top:calc(100% + 8px);right:0;background:var(--panel2);
+  border-radius:8px;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.5);
+  z-index:300;overflow:hidden;padding:6px 0;
+}
+.dropdown-item{
+  display:flex;align-items:center;gap:14px;padding:10px 16px;font-size:14px;
+  white-space:nowrap;
+}
+.dropdown-item:hover{background:#3a3a3a;}
+.dropdown-sep{height:1px;background:var(--border);margin:6px 0;}
+.dropdown-user-head{padding:12px 16px;display:flex;gap:12px;align-items:center;}
+.dropdown-user-head .name{font-weight:600;font-size:14px;}
+.dropdown-user-head .handle{font-size:12px;color:var(--text-secondary);}
+.card-dropdown{position:absolute;}
+
+/* ============================================================
+   WATCH PAGE
+============================================================ */
+.watch-layout{display:flex;gap:24px;align-items:flex-start;max-width:1600px;margin:0 auto;}
+.watch-main{flex:1;min-width:0;}
+.watch-side{width:400px;flex-shrink:0;}
+@media (max-width:1100px){.watch-layout{flex-direction:column;}.watch-side{width:100%;}}
+
+.player-wrap{width:100%;background:#000;border-radius:12px;overflow:hidden;margin-bottom:16px;position:relative;}
+.player-wrap video{width:100%;display:block;max-height:80vh;background:#000;}
+.watch-title{font-size:20px;font-weight:600;margin-bottom:8px;line-height:1.3;}
+.watch-meta-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:12px;}
+.watch-stats{font-size:14px;color:var(--text-secondary);}
+.watch-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.pill-btn{
+  display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:20px;
+  background:var(--panel2);font-size:14px;font-weight:500;
+}
+.pill-btn:hover{background:#3a3a3a;}
+.pill-btn.liked{color:var(--accent);}
+.pill-group{display:flex;border-radius:20px;overflow:hidden;background:var(--panel2);}
+.pill-group .pill-btn{border-radius:0;}
+.pill-group .pill-btn:first-child{padding-right:12px;}
+.pill-group .pill-divider{width:1px;background:var(--border);}
+
+.channel-row{
+  display:flex;align-items:center;gap:12px;padding:16px 0;border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap;
+}
+.channel-row .avatar-circle{width:48px;height:48px;font-size:17px;}
+.channel-row-info{flex:1;min-width:150px;}
+.channel-row-info .cname{font-weight:600;font-size:15px;}
+.channel-row-info .csubs{font-size:13px;color:var(--text-secondary);}
+.subscribe-btn{padding:10px 20px;border-radius:20px;background:var(--text);color:#0f0f0f;font-weight:600;font-size:14px;}
+.subscribe-btn:hover{filter:brightness(.9);}
+.subscribe-btn.subscribed{background:var(--panel2);color:var(--text);}
+
+.watch-desc{background:var(--panel2);border-radius:12px;padding:12px 16px;font-size:14px;line-height:1.5;margin-bottom:20px;white-space:pre-wrap;word-break:break-word;}
+.watch-desc .desc-toggle{color:var(--text-secondary);font-weight:600;margin-top:6px;display:inline-block;}
+
+.comments-head{font-size:16px;font-weight:600;margin-bottom:16px;}
+.comment-form{display:flex;gap:12px;margin-bottom:24px;}
+.comment-form .avatar-circle{width:40px;height:40px;flex-shrink:0;}
+.comment-input-wrap{flex:1;}
+.comment-input-wrap input{
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
+  padding:6px 0;font-size:14px;outline:none;
+}
+.comment-input-wrap input:focus{border-color:var(--text);}
+.comment-form-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px;}
+.comment-item{display:flex;gap:12px;margin-bottom:20px;}
+.comment-item .avatar-circle{width:40px;height:40px;flex-shrink:0;}
+.comment-body{flex:1;min-width:0;}
+.comment-head{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.comment-author{font-size:13px;font-weight:600;}
+.comment-date{font-size:12px;color:var(--text-secondary);}
+.comment-text{font-size:14px;line-height:1.4;word-break:break-word;}
+.comment-actions{display:flex;align-items:center;gap:14px;margin-top:6px;font-size:12px;color:var(--text-secondary);}
+.comment-like-btn{display:flex;align-items:center;gap:5px;}
+.comment-like-btn.liked{color:var(--accent);}
+
+.side-video-item{display:flex;gap:8px;margin-bottom:10px;cursor:pointer;}
+.side-video-item .thumb-wrap{width:168px;flex-shrink:0;margin-bottom:0;}
+.side-video-item .card-title{font-size:13px;-webkit-line-clamp:2;}
+.side-video-item .card-channel,.side-video-item .card-stats{font-size:12px;}
+
+/* ============================================================
+   SHORTS
+============================================================ */
+.shorts-feed{
+  height:calc(100vh - var(--header-h));
+  overflow-y:scroll;scroll-snap-type:y mandatory;
+  display:flex;flex-direction:column;align-items:center;
+}
+.short-item{
+  height:calc(100vh - var(--header-h));width:100%;
+  scroll-snap-align:start;display:flex;align-items:center;justify-content:center;
+  position:relative;flex-shrink:0;
+}
+.short-frame{
+  height:92%;aspect-ratio:9/16;background:#000;border-radius:14px;overflow:hidden;
+  position:relative;max-width:100%;
+}
+.short-frame video{width:100%;height:100%;object-fit:cover;}
+.short-side-actions{
+  position:absolute;right:-56px;bottom:16px;display:flex;flex-direction:column;gap:20px;align-items:center;
+}
+@media (max-width:700px){.short-side-actions{right:8px;}}
+.short-action-btn{display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;font-size:11px;}
+.short-action-btn .circle{
+  width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.short-action-btn.liked{color:var(--accent);}
+.short-action-btn.liked .circle{color:var(--accent);}
+.short-info-overlay{
+  position:absolute;left:12px;bottom:16px;right:80px;color:#fff;
+}
+.short-info-overlay .schannel{font-weight:600;font-size:14px;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.short-info-overlay .stitle{font-size:13px;opacity:.9;}
+
+/* ============================================================
+   CHANNEL PAGE
+============================================================ */
+.channel-banner{width:100%;height:180px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#212121,#0f0f0f);margin-bottom:20px;}
+.channel-banner img{width:100%;height:100%;object-fit:cover;}
+.channel-head{display:flex;gap:20px;align-items:center;flex-wrap:wrap;margin-bottom:20px;}
+.channel-head .avatar-circle{width:88px;height:88px;font-size:32px;flex-shrink:0;}
+.channel-head-info h1{font-size:24px;font-weight:700;}
+.channel-head-info .chandle{font-size:14px;color:var(--text-secondary);margin:4px 0;}
+.channel-head-info .cdesc{font-size:13px;color:var(--text-secondary);max-width:600px;margin-top:6px;}
+.channel-tabs{display:flex;gap:24px;border-bottom:1px solid var(--border);margin-bottom:20px;}
+.channel-tab{padding:14px 4px;font-size:14px;font-weight:600;color:var(--text-secondary);border-bottom:2px solid transparent;}
+.channel-tab.active{color:var(--text);border-color:var(--text);}
+
+/* ============================================================
+   SETTINGS
+============================================================ */
+.settings-wrap{max-width:640px;}
+.settings-group{background:var(--panel);border-radius:12px;padding:8px 0;margin-bottom:20px;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-row-label{font-size:14px;}
+.settings-row-desc{font-size:12px;color:var(--text-secondary);margin-top:2px;}
+.radio-group{display:flex;gap:16px;}
+.radio-opt{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-secondary);}
+.switch{position:relative;width:40px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.switch-track{position:absolute;inset:0;background:#3a3a3a;border-radius:22px;transition:.2s;cursor:pointer;}
+.switch-track:before{content:"";position:absolute;width:16px;height:16px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s;}
+.switch input:checked + .switch-track{background:var(--accent);}
+.switch input:checked + .switch-track:before{transform:translateX(18px);}
+
+/* ============================================================
+   MISC
+============================================================ */
+.spinner{
+  width:20px;height:20px;border:2.5px solid rgba(255,255,255,0.25);border-top-color:#fff;
+  border-radius:50%;animation:spin .7s linear infinite;display:inline-block;
+}
+.spinner.dark{border:2.5px solid rgba(0,0,0,0.2);border-top-color:#0f0f0f;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.page-loading{display:flex;align-items:center;justify-content:center;padding:100px 0;}
+.tag-pill{display:inline-flex;padding:7px 14px;border-radius:8px;background:var(--panel2);font-size:14px;font-weight:500;white-space:nowrap;}
+.tag-pill:hover{background:#3a3a3a;}
+.tag-pill.active{background:var(--text);color:#0f0f0f;}
+.chip-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:16px;margin-bottom:8px;}
+.chip-row::-webkit-scrollbar{display:none;}
+.load-more-wrap{display:flex;justify-content:center;padding:24px 0;}
+.required-star{color:var(--accent);}
+</style>
 </head>
 <body>
-    <!-- ===== HEADER ===== -->
-    <header>
-        <a href="#" class="brand" onclick="goToHome(); return false;">
-            <i class="fas fa-play"></i> JHEILER
-        </a>
-        <div class="header-actions">
-            <button class="header-btn" id="btnCustomize" title="Personalizar">
-                <i class="fas fa-palette"></i>
-            </button>
-            <button class="header-btn" id="btnSearch" title="Buscar">
-                <i class="fas fa-search"></i>
-            </button>
-            <button class="create-btn" id="btnOpenModal">
-                <i class="fas fa-plus"></i>
-                <span>Crear</span>
-            </button>
-            <div id="authContainer"></div>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header id="appHeader">
+  <div class="header-left">
+    <button class="icon-btn" id="btnToggleSidebar" title="Menú" aria-label="Menú">☰</button>
+    <a href="#/home" class="brand">
+      <span class="play-ico">▶</span> JHEILER
+    </a>
+  </div>
+
+  <div class="header-center">
+    <form class="search-form" id="searchForm">
+      <input type="text" id="searchInput" placeholder="Buscar" autocomplete="off">
+    </form>
+    <button class="search-btn" id="searchSubmitBtn" title="Buscar" aria-label="Buscar">🔍</button>
+    <button class="mic-btn" id="micBtn" title="Buscar por voz" aria-label="Buscar por voz">🎤</button>
+  </div>
+
+  <div class="header-right">
+    <button class="create-btn" id="btnCreate">
+      <span>➕</span><span>Crear</span>
+    </button>
+
+    <div class="icon-btn-wrap dropdown" id="notifDropdownWrap">
+      <button class="icon-btn" id="btnNotifications" title="Notificaciones" aria-label="Notificaciones">
+        🔔
+      </button>
+      <div class="dropdown-menu hidden" id="notifMenu" style="width:320px;">
+        <div class="dropdown-item" style="font-weight:600;">Notificaciones</div>
+        <div class="dropdown-sep"></div>
+        <div style="padding:20px 16px;text-align:center;color:var(--text-secondary);font-size:13px;">
+          No tienes notificaciones nuevas.
         </div>
-    </header>
-    <!-- ===== SIDEBAR ===== -->
-    <aside>
-        <div class="sb-section">
-            <a class="sb-item active" data-section="inicio">
-                <i class="fas fa-home"></i> Inicio
-            </a>
-            <a class="sb-item" data-section="shorts">
-                <i class="fas fa-bolt"></i> Shorts
-                <span class="badge">Nuevo</span>
-            </a>
-            <a class="sb-item" data-section="suscripciones">
-                <i class="fas fa-tv"></i> Suscripciones
-            </a>
+      </div>
+    </div>
+
+    <div id="authAreaLoggedOut" class="hidden">
+      <button class="auth-btn" id="btnOpenLogin">
+        <span style="font-size:18px;">👤</span> Iniciar sesión
+      </button>
+    </div>
+
+    <div id="authAreaLoggedIn" class="dropdown hidden">
+      <button class="icon-btn" id="btnUserMenu" style="width:auto;height:auto;border-radius:50%;padding:0;">
+        <span class="avatar-circle" id="headerAvatar">U</span>
+      </button>
+      <div class="dropdown-menu hidden" id="userMenu" style="width:260px;">
+        <div class="dropdown-user-head">
+          <span class="avatar-circle" id="userMenuAvatar">U</span>
+          <div>
+            <div class="name" id="userMenuName">Usuario</div>
+            <div class="handle" id="userMenuHandle">@usuario</div>
+          </div>
         </div>
-        <div class="sb-section">
-            <div class="sb-title">Biblioteca</div>
-            <a class="sb-item" data-section="historial">
-                <i class="fas fa-clock"></i> Historial
-            </a>
-            <a class="sb-item" data-section="tus-videos">
-                <i class="fas fa-video"></i> Tus videos
-            </a>
-            <a class="sb-item" data-section="favoritos">
-                <i class="fas fa-heart"></i> Favoritos
-            </a>
-            <a class="sb-item" data-section="ver-despues">
-                <i class="fas fa-bookmark"></i> Ver después
-            </a>
+        <div class="dropdown-sep"></div>
+        <a class="dropdown-item" id="userMenuChannel" href="#/home"><span>👤</span> Mi canal</a>
+        <a class="dropdown-item" href="#/your-videos"><span>🎬</span> Tus videos</a>
+        <a class="dropdown-item" href="#/settings"><span>⚙️</span> Configuración</a>
+        <div class="dropdown-sep"></div>
+        <button class="dropdown-item" id="btnLogout" style="width:100%;text-align:left;"><span>🚪</span> Cerrar sesión</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================
+     SIDEBAR
+============================================================ -->
+<div id="sidebarOverlay" class="hidden"></div>
+<nav id="sidebar">
+  <div class="sb-section">
+    <a class="sb-item" data-route="home" href="#/home"><span class="sb-ico">🏠</span><span class="sb-label">Inicio</span></a>
+    <a class="sb-item" data-route="shorts" href="#/shorts"><span class="sb-ico">⚡</span><span class="sb-label">Shorts</span></a>
+    <a class="sb-item" data-route="subscriptions" href="#/subscriptions"><span class="sb-ico">📺</span><span class="sb-label">Suscripciones</span></a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Biblioteca</div>
+    <a class="sb-item" data-route="history" href="#/history"><span class="sb-ico">🕒</span><span class="sb-label">Historial</span></a>
+    <a class="sb-item" data-route="your-videos" href="#/your-videos"><span class="sb-ico">🎬</span><span class="sb-label">Tus videos</span></a>
+    <a class="sb-item" data-route="watch-later" href="#/watch-later"><span class="sb-ico">⏰</span><span class="sb-label">Ver más tarde</span></a>
+    <a class="sb-item" data-route="liked" href="#/liked"><span class="sb-ico">👍</span><span class="sb-label">Videos que me gustan</span></a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Explorar</div>
+    <a class="sb-item" data-route="trending" href="#/trending"><span class="sb-ico">🔥</span><span class="sb-label">Tendencias</span></a>
+    <a class="sb-item" data-route="gaming" href="#/gaming"><span class="sb-ico">🎮</span><span class="sb-label">Gaming</span></a>
+    <a class="sb-item" data-route="music" href="#/music"><span class="sb-ico">🎵</span><span class="sb-label">Música</span></a>
+    <a class="sb-item" data-route="news" href="#/news"><span class="sb-ico">📰</span><span class="sb-label">Noticias</span></a>
+    <a class="sb-item" data-route="sports" href="#/sports"><span class="sb-ico">⚽</span><span class="sb-label">Deportes</span></a>
+  </div>
+  <div class="sb-section">
+    <a class="sb-item" data-route="settings" href="#/settings"><span class="sb-ico">⚙️</span><span class="sb-label">Configuración</span></a>
+    <a class="sb-item" id="helpLink" href="#"><span class="sb-ico">❓</span><span class="sb-label">Ayuda</span></a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     APP BODY
+============================================================ -->
+<div id="appBody">
+  <div id="mainContent"><!-- rendered by router --></div>
+</div>
+
+<!-- ============================================================
+     TOASTS
+============================================================ -->
+<div id="toastContainer"></div>
+
+<!-- ============================================================
+     MODAL ROOT (auth, create, comments-mobile, etc.)
+============================================================ -->
+<div id="modalRoot"></div>
+
+<script>
+/* ================================================================
+   JHEILER — index.html
+   Vanilla JS + Supabase (CDN). Hash router. Un solo archivo.
+================================================================ */
+"use strict";
+
+/* ============================================================
+   SUPABASE CLIENT
+============================================================ */
+const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+/* ============================================================
+   GLOBAL STATE
+============================================================ */
+const STATE = {
+  session: null,
+  user: null,        // auth user
+  profile: null,      // row from public.profiles
+  sidebarMini: false,
+  sidebarMobileOpen: false,
+  theme: localStorage.getItem('jh_theme') || 'dark',
+  autoplay: localStorage.getItem('jh_autoplay') !== 'false',
+  notifPref: localStorage.getItem('jh_notif') !== 'false',
+};
+
+const PAGE_SIZE = 20;
+
+/* ============================================================
+   SMALL UTILITIES
+============================================================ */
+function qs(sel, root){ return (root||document).querySelector(sel); }
+function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+function escapeHTML(str){
+  if(str===null||str===undefined) return '';
+  return String(str)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+}
+function initials(name){
+  if(!name) return 'U';
+  const parts = String(name).trim().split(/\s+/);
+  if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0]+parts[1][0]).toUpperCase();
+}
+function timeAgo(dateStr){
+  if(!dateStr) return '';
+  const d = new Date(dateStr);
+  const diff = (Date.now() - d.getTime())/1000;
+  const units = [
+    ['año',31536000],['mes',2592000],['semana',604800],
+    ['día',86400],['hora',3600],['minuto',60]
+  ];
+  for(const [label,secs] of units){
+    const val = Math.floor(diff/secs);
+    if(val>=1) return `hace ${val} ${label}${val>1?(label==='mes'?'es':'s'):''}`;
+  }
+  return 'hace un momento';
+}
+function formatCount(n){
+  n = Number(n)||0;
+  if(n>=1000000) return (n/1000000).toFixed(1).replace('.0','')+'M';
+  if(n>=1000) return (n/1000).toFixed(1).replace('.0','')+'K';
+  return String(n);
+}
+function formatDuration(sec){
+  sec = Math.floor(Number(sec)||0);
+  const h = Math.floor(sec/3600);
+  const m = Math.floor((sec%3600)/60);
+  const s = sec%60;
+  const mm = h>0 ? String(m).padStart(2,'0') : String(m);
+  const ss = String(s).padStart(2,'0');
+  return h>0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}
+function debounce(fn, ms){
+  let t;
+  return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args), ms); };
+}
+function avatarHTML(profile, size){
+  const cls = 'avatar-circle';
+  if(profile && profile.avatar_url){
+    return `<span class="${cls}"><img src="${escapeHTML(profile.avatar_url)}" alt=""></span>`;
+  }
+  const label = profile ? (profile.display_name||profile.username) : 'U';
+  return `<span class="${cls}">${escapeHTML(initials(label))}</span>`;
+}
+
+/* ============================================================
+   TOASTS
+============================================================ */
+function toast(msg, type){
+  const c = qs('#toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type?(' '+type):'');
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),260); }, 3200);
+}
+function toastSuccess(msg){ toast(msg,'success'); }
+function toastError(msg){ toast(msg,'error'); }
+
+/* ============================================================
+   MODAL HELPERS
+============================================================ */
+function openModal(innerHTML, opts){
+  opts = opts||{};
+  closeModal();
+  const root = qs('#modalRoot');
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'activeModalOverlay';
+  overlay.innerHTML = `<div class="modal-box ${opts.wide?'wide':''}" id="activeModalBox">${innerHTML}</div>`;
+  overlay.addEventListener('click', (e)=>{ if(e.target===overlay && !opts.persistent) closeModal(); });
+  root.appendChild(overlay);
+  document.addEventListener('keydown', escCloseModalHandler);
+  return overlay;
+}
+function escCloseModalHandler(e){ if(e.key==='Escape') closeModal(); }
+function closeModal(){
+  const ov = qs('#activeModalOverlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', escCloseModalHandler);
+}
+
+/* ============================================================
+   DROPDOWN HELPERS (generic toggling + outside click close)
+============================================================ */
+function setupDropdown(triggerId, menuId){
+  const trigger = qs('#'+triggerId);
+  const menu = qs('#'+menuId);
+  if(!trigger||!menu) return;
+  trigger.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const willOpen = menu.classList.contains('hidden');
+    closeAllDropdowns();
+    if(willOpen) menu.classList.remove('hidden');
+  });
+}
+function closeAllDropdowns(){
+  qsa('.dropdown-menu').forEach(m=>m.classList.add('hidden'));
+}
+document.addEventListener('click', closeAllDropdowns);
+
+/* ================================================================
+   AUTH
+================================================================ */
+async function initAuth(){
+  const { data:{ session } } = await supabase.auth.getSession();
+  STATE.session = session;
+  STATE.user = session ? session.user : null;
+  if(STATE.user) await loadProfile();
+  updateHeaderAuthUI();
+
+  supabase.auth.onAuthStateChange(async (event, session)=>{
+    STATE.session = session;
+    STATE.user = session ? session.user : null;
+    if(STATE.user){
+      await loadProfile();
+    } else {
+      STATE.profile = null;
+    }
+    updateHeaderAuthUI();
+    renderRoute(); // re-render current page with new auth context
+  });
+}
+
+async function loadProfile(){
+  if(!STATE.user) return;
+  try{
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', STATE.user.id)
+      .maybeSingle();
+    if(error) throw error;
+    STATE.profile = data || null;
+  }catch(err){
+    console.error('loadProfile error', err);
+  }
+}
+
+function updateHeaderAuthUI(){
+  const loggedOut = qs('#authAreaLoggedOut');
+  const loggedIn = qs('#authAreaLoggedIn');
+  if(STATE.user){
+    loggedOut.classList.add('hidden');
+    loggedIn.classList.remove('hidden');
+    const name = STATE.profile ? (STATE.profile.display_name || STATE.profile.username) : (STATE.user.email||'Usuario');
+    const initialsHTML = avatarHTML(STATE.profile, 34);
+    qs('#headerAvatar').outerHTML = initialsHTML.replace('<span','<span id="headerAvatar"');
+    qs('#userMenuAvatar').outerHTML = initialsHTML.replace('<span','<span id="userMenuAvatar"');
+    qs('#userMenuName').textContent = name;
+    qs('#userMenuHandle').textContent = '@' + (STATE.profile ? STATE.profile.username : 'usuario');
+    qs('#userMenuChannel').href = '#/channel/' + STATE.user.id;
+  } else {
+    loggedOut.classList.remove('hidden');
+    loggedIn.classList.add('hidden');
+  }
+}
+
+async function doSignOut(){
+  await supabase.auth.signOut();
+  toastSuccess('Sesión cerrada.');
+  location.hash = '#/home';
+}
+
+/* ---------------- AUTH MODAL (login / signup) ---------------- */
+function openAuthModal(mode){
+  mode = mode || 'login';
+  const html = authModalHTML(mode);
+  openModal(html);
+  bindAuthModalEvents(mode);
+}
+function authModalHTML(mode){
+  return `
+    <div class="modal-head">
+      <h2>${mode==='login' ? 'Iniciar sesión' : 'Crear cuenta'}</h2>
+      <button class="modal-close" id="authModalClose">✕</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab ${mode==='login'?'active':''}" data-tab="login">Iniciar sesión</button>
+      <button class="modal-tab ${mode==='signup'?'active':''}" data-tab="signup">Registrarse</button>
+    </div>
+    <div id="authFormArea">${mode==='login' ? loginFormHTML() : signupFormHTML()}</div>
+  `;
+}
+function loginFormHTML(){
+  return `
+    <form id="loginForm">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="loginEmail" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <div id="loginError" class="field-error hidden"></div>
+      <button type="submit" class="btn btn-primary btn-full" id="loginSubmitBtn">Iniciar sesión</button>
+      <div class="modal-footer-text">
+        <a href="#" id="forgotPasswordLink">¿Olvidaste tu contraseña?</a>
+      </div>
+    </form>
+  `;
+}
+function signupFormHTML(){
+  return `
+    <form id="signupForm">
+      <div class="field">
+        <label>Nombre visible</label>
+        <input type="text" id="signupDisplayName" required maxlength="60">
+      </div>
+      <div class="field">
+        <label>Nombre de usuario (username)</label>
+        <input type="text" id="signupUsername" required maxlength="30" pattern="[a-zA-Z0-9_\\.]+" title="Solo letras, números, punto y guion bajo">
+        <div class="field-hint">Solo letras, números, punto y guion bajo. Sin espacios.</div>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="signupEmail" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="signupPassword" required minlength="6" autocomplete="new-password">
+        <div class="field-hint">Mínimo 6 caracteres.</div>
+      </div>
+      <div id="signupError" class="field-error hidden"></div>
+      <button type="submit" class="btn btn-primary btn-full" id="signupSubmitBtn">Crear cuenta</button>
+    </form>
+  `;
+}
+function bindAuthModalEvents(){
+  qs('#authModalClose').addEventListener('click', closeModal);
+  qsa('.modal-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      qsa('.modal-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      const tabName = tab.dataset.tab;
+      qs('#authFormArea').innerHTML = tabName==='login' ? loginFormHTML() : signupFormHTML();
+      bindActiveAuthForm(tabName);
+    });
+  });
+  const initialTab = qs('.modal-tab.active').dataset.tab;
+  bindActiveAuthForm(initialTab);
+}
+function bindActiveAuthForm(tabName){
+  if(tabName==='login'){
+    qs('#loginForm').addEventListener('submit', handleLoginSubmit);
+    const forgot = qs('#forgotPasswordLink');
+    if(forgot) forgot.addEventListener('click', handleForgotPassword);
+  } else {
+    qs('#signupForm').addEventListener('submit', handleSignupSubmit);
+  }
+}
+async function handleLoginSubmit(e){
+  e.preventDefault();
+  const btn = qs('#loginSubmitBtn');
+  const errBox = qs('#loginError');
+  errBox.classList.add('hidden');
+  const email = qs('#loginEmail').value.trim();
+  const password = qs('#loginPassword').value;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try{
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    closeModal();
+    toastSuccess('Sesión iniciada correctamente.');
+  }catch(err){
+    errBox.textContent = translateAuthError(err.message);
+    errBox.classList.remove('hidden');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Iniciar sesión';
+  }
+}
+async function handleForgotPassword(e){
+  e.preventDefault();
+  const email = qs('#loginEmail').value.trim();
+  if(!email){ toastError('Escribe tu email primero.'); return; }
+  try{
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if(error) throw error;
+    toastSuccess('Te enviamos un correo para restablecer tu contraseña.');
+  }catch(err){
+    toastError('No se pudo enviar el correo: ' + err.message);
+  }
+}
+async function handleSignupSubmit(e){
+  e.preventDefault();
+  const btn = qs('#signupSubmitBtn');
+  const errBox = qs('#signupError');
+  errBox.classList.add('hidden');
+  const displayName = qs('#signupDisplayName').value.trim();
+  const username = qs('#signupUsername').value.trim().toLowerCase();
+  const email = qs('#signupEmail').value.trim();
+  const password = qs('#signupPassword').value;
+
+  if(!/^[a-zA-Z0-9_.]+$/.test(username)){
+    errBox.textContent = 'El nombre de usuario solo puede tener letras, números, punto y guion bajo.';
+    errBox.classList.remove('hidden');
+    return;
+  }
+
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try{
+    // check username availability first
+    const { data:existing, error:checkErr } = await supabase
+      .from('profiles').select('id').eq('username', username).maybeSingle();
+    if(checkErr) throw checkErr;
+    if(existing){
+      throw new Error('Ese nombre de usuario ya está en uso.');
+    }
+
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if(error) throw error;
+
+    const newUser = data.user;
+    if(newUser){
+      const { error: profileErr } = await supabase.from('profiles').insert({
+        id: newUser.id,
+        username: username,
+        display_name: displayName,
+        avatar_url: null,
+        banner_url: null,
+        description: ''
+      });
+      if(profileErr){
+        if(String(profileErr.message||'').toLowerCase().includes('duplicate')){
+          throw new Error('Ese nombre de usuario ya está en uso.');
+        }
+        throw profileErr;
+      }
+    }
+
+    closeModal();
+    if(data.session){
+      toastSuccess('Cuenta creada. ¡Bienvenido a JHEILER!');
+    } else {
+      toastSuccess('Cuenta creada. Revisa tu correo para confirmar tu cuenta.');
+    }
+  }catch(err){
+    errBox.textContent = translateAuthError(err.message);
+    errBox.classList.remove('hidden');
+  }finally{
+    btn.disabled = false; btn.textContent = 'Crear cuenta';
+  }
+}
+function translateAuthError(msg){
+  if(!msg) return 'Ocurrió un error. Intenta de nuevo.';
+  const m = msg.toLowerCase();
+  if(m.includes('invalid login credentials')) return 'Email o contraseña incorrectos.';
+  if(m.includes('user already registered')) return 'Ya existe una cuenta con ese email.';
+  if(m.includes('password should be at least')) return 'La contraseña es demasiado corta.';
+  if(m.includes('duplicate')) return 'Ese nombre de usuario ya está en uso.';
+  if(m.includes('rate limit')) return 'Demasiados intentos. Espera un momento.';
+  return msg;
+}
+
+function requireAuth(actionLabel){
+  if(!STATE.user){
+    toastError('Debes iniciar sesión' + (actionLabel?(' para '+actionLabel):'') + '.');
+    openAuthModal('login');
+    return false;
+  }
+  return true;
+}
+
+/* ================================================================
+   ROUTER (hash-based)
+================================================================ */
+const ROUTES = {}; // path-pattern -> handler
+
+function defineRoute(pattern, handler){ ROUTES[pattern] = handler; }
+
+function parseHash(){
+  let hash = location.hash || '#/home';
+  hash = hash.replace(/^#/, '');
+  if(!hash.startsWith('/')) hash = '/'+hash;
+  const [pathPart, queryPart] = hash.split('?');
+  const segments = pathPart.split('/').filter(Boolean);
+  const query = {};
+  if(queryPart){
+    queryPart.split('&').forEach(kv=>{
+      const [k,v] = kv.split('=');
+      if(k) query[decodeURIComponent(k)] = decodeURIComponent(v||'');
+    });
+  }
+  return { segments, query, raw: hash };
+}
+
+async function renderRoute(){
+  const { segments, query } = parseHash();
+  closeMobileSidebarIfOpen();
+  markActiveSidebarItem(segments[0]||'home');
+  window.scrollTo(0,0);
+
+  const main = qs('#mainContent');
+  main.innerHTML = pageLoadingHTML();
+
+  try{
+    if(segments.length===0 || segments[0]==='home'){
+      await renderHomePage(main);
+    } else if(segments[0]==='watch' && segments[1]){
+      await renderWatchPage(main, segments[1]);
+    } else if(segments[0]==='shorts'){
+      await renderShortsPage(main, segments[1]||null);
+    } else if(segments[0]==='search'){
+      await renderSearchPage(main, query.q||'');
+    } else if(segments[0]==='history'){
+      await renderHistoryPage(main);
+    } else if(segments[0]==='watch-later'){
+      await renderWatchLaterPage(main);
+    } else if(segments[0]==='liked'){
+      await renderLikedPage(main);
+    } else if(segments[0]==='your-videos'){
+      await renderYourVideosPage(main);
+    } else if(segments[0]==='subscriptions'){
+      await renderSubscriptionsPage(main);
+    } else if(segments[0]==='trending'){
+      await renderCategoryPage(main,'Tendencias',null,true);
+    } else if(segments[0]==='gaming'){
+      await renderCategoryPage(main,'Gaming','Gaming');
+    } else if(segments[0]==='music'){
+      await renderCategoryPage(main,'Música','Música');
+    } else if(segments[0]==='news'){
+      await renderCategoryPage(main,'Noticias','Noticias');
+    } else if(segments[0]==='sports'){
+      await renderCategoryPage(main,'Deportes','Deportes');
+    } else if(segments[0]==='settings'){
+      await renderSettingsPage(main);
+    } else if(segments[0]==='channel' && segments[1]){
+      await renderChannelPage(main, segments[1], segments[2]||'home');
+    } else {
+      renderNotFoundPage(main);
+    }
+  }catch(err){
+    console.error('Route render error', err);
+    renderErrorPage(main, err);
+  }
+}
+window.addEventListener('hashchange', renderRoute);
+
+function markActiveSidebarItem(route){
+  qsa('.sb-item[data-route]').forEach(el=>{
+    el.classList.toggle('active', el.dataset.route===route);
+  });
+}
+
+function pageLoadingHTML(){
+  return `<div class="page-loading"><span class="spinner"></span></div>`;
+}
+function renderErrorPage(main, err){
+  main.innerHTML = `
+    <div class="state-box">
+      <div class="state-ico">⚠️</div>
+      <h3>Algo salió mal</h3>
+      <p>${escapeHTML(err && err.message ? err.message : 'No se pudo cargar el contenido.')}</p>
+      <button class="retry-btn" onclick="renderRoute()">Reintentar</button>
+    </div>`;
+}
+function renderNotFoundPage(main){
+  main.innerHTML = `
+    <div class="state-box">
+      <div class="state-ico">🔎</div>
+      <h3>Página no encontrada</h3>
+      <p>No existe la ruta que buscas.</p>
+      <a class="retry-btn" href="#/home">Volver al inicio</a>
+    </div>`;
+}
+
+/* ================================================================
+   VIDEO CARD RENDERING (shared by home/search/category/channel/etc.)
+================================================================ */
+function skeletonCardsHTML(count){
+  let out = '';
+  for(let i=0;i<count;i++){
+    out += `
+      <div class="video-card skel-card">
+        <div class="thumb-wrap skeleton"></div>
+        <div class="card-meta">
+          <div style="width:36px;height:36px;border-radius:50%;" class="skeleton"></div>
+          <div class="card-info">
+            <div class="skel-line skeleton" style="width:90%;"></div>
+            <div class="skel-line skeleton" style="width:60%;"></div>
+            <div class="skel-line skeleton" style="width:40%;"></div>
+          </div>
         </div>
-    </aside>
-    <!-- ===== REPRODUCTOR ===== -->
-    <div class="player-overlay" id="playerOverlay">
-        <div class="player-container">
-            <button class="player-close" id="playerClose" title="Cerrar (Esc)">
-                <i class="fas fa-times"></i>
-            </button>
-            <video id="playerVideo" controls preload="metadata">
-                Tu navegador no soporta la reproducción de videos.
+      </div>`;
+  }
+  return out;
+}
+
+function videoCardHTML(video){
+  const channel = video.profiles || {};
+  const thumbInner = video.thumbnail_url
+    ? `<img src="${escapeHTML(video.thumbnail_url)}" alt="" loading="lazy">`
+    : `<div class="no-thumb">▶</div>`;
+  const durBadge = video.duration ? `<span class="duration-badge">${formatDuration(video.duration)}</span>` : '';
+  return `
+    <div class="video-card" data-video-id="${escapeHTML(video.id)}">
+      <a href="#/watch/${escapeHTML(video.id)}" class="thumb-link">
+        <div class="thumb-wrap">${thumbInner}${durBadge}</div>
+      </a>
+      <div class="card-meta">
+        <a href="#/channel/${escapeHTML(video.user_id)}">${avatarHTML(channel)}</a>
+        <div class="card-info">
+          <a href="#/watch/${escapeHTML(video.id)}"><div class="card-title">${escapeHTML(video.title)}</div></a>
+          <a href="#/channel/${escapeHTML(video.user_id)}" class="card-channel">${escapeHTML(channel.display_name||channel.username||'Canal')}</a>
+          <div class="card-stats">${formatCount(video.views||0)} vistas · ${timeAgo(video.created_at)}</div>
+        </div>
+        <div class="dropdown">
+          <button class="icon-btn card-menu-btn" data-card-menu-btn="${escapeHTML(video.id)}">⋮</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindCardMenus(container, videosById){
+  qsa('[data-card-menu-btn]', container).forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      e.preventDefault(); e.stopPropagation();
+      closeAllDropdowns();
+      const id = btn.dataset.cardMenuBtn;
+      const video = videosById[id];
+      openCardQuickMenu(btn, video);
+    });
+  });
+}
+function openCardQuickMenu(anchorBtn, video){
+  const rect = anchorBtn.getBoundingClientRect();
+  const menu = document.createElement('div');
+  menu.className = 'dropdown-menu';
+  menu.style.position = 'fixed';
+  menu.style.top = (rect.bottom+4)+'px';
+  menu.style.left = Math.min(rect.left, window.innerWidth-240)+'px';
+  menu.style.zIndex = 400;
+  menu.innerHTML = `
+    <button class="dropdown-item" data-act="watch-later"><span>⏰</span> Guardar en Ver más tarde</button>
+    <button class="dropdown-item" data-act="share"><span>🔗</span> Compartir</button>
+  `;
+  document.body.appendChild(menu);
+  const closeThis = (ev)=>{ if(!menu.contains(ev.target)) { menu.remove(); document.removeEventListener('click',closeThis);} };
+  setTimeout(()=>document.addEventListener('click', closeThis),0);
+  menu.addEventListener('click', async (e)=>{
+    const act = e.target.closest('[data-act]');
+    if(!act) return;
+    if(act.dataset.act==='watch-later'){
+      await addToWatchLater(video.id);
+    } else if(act.dataset.act==='share'){
+      shareVideo(video.id);
+    }
+    menu.remove();
+  });
+}
+async function shareVideo(videoId){
+  const url = location.origin + location.pathname + '#/watch/' + videoId;
+  if(navigator.share){
+    try{ await navigator.share({ title:'JHEILER', url }); return; }catch(e){ /* cancelled */ return; }
+  }
+  try{
+    await navigator.clipboard.writeText(url);
+    toastSuccess('Enlace copiado.');
+  }catch(e){
+    toastError('No se pudo copiar el enlace.');
+  }
+}
+async function addToWatchLater(videoId){
+  if(!requireAuth('guardar videos')) return;
+  try{
+    const { data: existing } = await supabase.from('watch_later')
+      .select('id').eq('user_id', STATE.user.id).eq('video_id', videoId).maybeSingle();
+    if(existing){ toastSuccess('Ya estaba en Ver más tarde.'); return; }
+    const { error } = await supabase.from('watch_later').insert({ user_id: STATE.user.id, video_id: videoId });
+    if(error) throw error;
+    toastSuccess('Guardado en Ver más tarde.');
+  }catch(err){
+    toastError('No se pudo guardar: ' + err.message);
+  }
+}
+
+/* ================================================================
+   HOME PAGE
+================================================================ */
+let homePageOffset = 0;
+async function renderHomePage(main, append){
+  if(!append){
+    homePageOffset = 0;
+    main.innerHTML = `
+      <h2 class="section-heading">Inicio</h2>
+      <div class="video-grid" id="homeGrid">${skeletonCardsHTML(10)}</div>
+      <div class="load-more-wrap hidden" id="homeLoadMoreWrap">
+        <button class="btn btn-secondary" id="homeLoadMoreBtn">Cargar más</button>
+      </div>
+    `;
+    qs('#homeLoadMoreBtn').addEventListener('click', ()=>renderHomePage(main, true));
+  }
+  try{
+    const from = homePageOffset;
+    const to = homePageOffset + PAGE_SIZE - 1;
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .eq('is_short', false)
+      .order('created_at', { ascending:false })
+      .range(from, to);
+    if(error) throw error;
+
+    const grid = qs('#homeGrid');
+    if(!append) grid.innerHTML = '';
+    if((!data || data.length===0) && homePageOffset===0){
+      grid.innerHTML = '';
+      main.querySelector('#homeGrid').outerHTML = `
+        <div class="state-box">
+          <div class="state-ico">🎬</div>
+          <h3>Todavía no hay videos</h3>
+          <p>Sé el primero en publicar contenido en JHEILER.</p>
+          <button class="retry-btn" id="homeUploadCta">Subir un video</button>
+        </div>`;
+      const cta = qs('#homeUploadCta');
+      if(cta) cta.addEventListener('click', ()=>openCreateModal());
+      return;
+    }
+    const map = window.__homeVideosMap = window.__homeVideosMap || {};
+    (data||[]).forEach(v=>map[v.id]=v);
+    grid.insertAdjacentHTML('beforeend', (data||[]).map(videoCardHTML).join(''));
+    bindCardMenus(grid, map);
+
+    homePageOffset += (data?data.length:0);
+    const loadMoreWrap = qs('#homeLoadMoreWrap');
+    if(data && data.length===PAGE_SIZE){ loadMoreWrap.classList.remove('hidden'); }
+    else if(loadMoreWrap){ loadMoreWrap.classList.add('hidden'); }
+  }catch(err){
+    console.error(err);
+    main.innerHTML = `
+      <div class="state-box">
+        <div class="state-ico">⚠️</div>
+        <h3>No se pudieron cargar los videos</h3>
+        <p>${escapeHTML(err.message)}</p>
+        <button class="retry-btn" onclick="renderRoute()">Reintentar</button>
+      </div>`;
+  }
+}
+
+/* ================================================================
+   CATEGORY / TRENDING PAGE
+================================================================ */
+async function renderCategoryPage(main, title, category, trending){
+  main.innerHTML = `
+    <h2 class="section-heading">${escapeHTML(title)}</h2>
+    <div class="video-grid" id="catGrid">${skeletonCardsHTML(10)}</div>
+  `;
+  try{
+    let q = supabase.from('videos').select('*, profiles!videos_user_id_fkey(*)').eq('is_short', false);
+    if(category) q = q.eq('category', category);
+    q = trending ? q.order('views', { ascending:false }) : q.order('created_at', { ascending:false });
+    q = q.range(0, PAGE_SIZE-1);
+    const { data, error } = await q;
+    if(error) throw error;
+    const grid = qs('#catGrid');
+    if(!data || data.length===0){
+      grid.outerHTML = `
+        <div class="state-box">
+          <div class="state-ico">📭</div>
+          <h3>No hay videos en esta categoría todavía</h3>
+          <p>Vuelve más tarde o explora otras secciones.</p>
+        </div>`;
+      return;
+    }
+    const map = {}; data.forEach(v=>map[v.id]=v);
+    grid.innerHTML = data.map(videoCardHTML).join('');
+    bindCardMenus(grid, map);
+  }catch(err){
+    renderErrorPage(main, err);
+  }
+}
+
+/* ================================================================
+   SEARCH PAGE
+================================================================ */
+async function renderSearchPage(main, queryStr){
+  main.innerHTML = `
+    <h2 class="section-heading">Resultados para "${escapeHTML(queryStr)}"</h2>
+    <div class="video-grid" id="searchGrid">${skeletonCardsHTML(8)}</div>
+  `;
+  qs('#searchInput').value = queryStr;
+  if(!queryStr){
+    qs('#searchGrid').outerHTML = `
+      <div class="state-box"><div class="state-ico">🔎</div><h3>Escribe algo para buscar</h3></div>`;
+    return;
+  }
+  try{
+    const like = `%${queryStr.replace(/[%_]/g,'')}%`;
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .or(`title.ilike.${like},description.ilike.${like},category.ilike.${like}`)
+      .order('created_at', { ascending:false })
+      .range(0, PAGE_SIZE-1);
+    if(error) throw error;
+    const grid = qs('#searchGrid');
+    if(!data || data.length===0){
+      grid.outerHTML = `
+        <div class="state-box">
+          <div class="state-ico">🔎</div>
+          <h3>Sin resultados</h3>
+          <p>No encontramos videos que coincidan con "${escapeHTML(queryStr)}".</p>
+        </div>`;
+      return;
+    }
+    const map = {}; data.forEach(v=>map[v.id]=v);
+    grid.innerHTML = data.map(videoCardHTML).join('');
+    bindCardMenus(grid, map);
+  }catch(err){
+    renderErrorPage(main, err);
+  }
+}
+function doSearch(){
+  const val = qs('#searchInput').value.trim();
+  if(!val) return;
+  location.hash = '#/search?q=' + encodeURIComponent(val);
+}
+
+/* ================================================================
+   WATCH PAGE
+================================================================ */
+async function renderWatchPage(main, videoId){
+  main.innerHTML = pageLoadingHTML();
+  try{
+    const { data: video, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .eq('id', videoId)
+      .maybeSingle();
+    if(error) throw error;
+    if(!video){
+      main.innerHTML = `
+        <div class="state-box">
+          <div class="state-ico">🎬</div>
+          <h3>Video no encontrado</h3>
+          <p>Es posible que haya sido eliminado.</p>
+          <a class="retry-btn" href="#/home">Volver al inicio</a>
+        </div>`;
+      return;
+    }
+
+    const channel = video.profiles || {};
+    let isSubscribed = false;
+    let likeCount = 0;
+    let userLiked = false;
+    let subsCount = 0;
+
+    const [{ count: lc }, { count: sc }] = await Promise.all([
+      supabase.from('video_likes').select('*', { count:'exact', head:true }).eq('video_id', video.id),
+      supabase.from('subscriptions').select('*', { count:'exact', head:true }).eq('channel_id', video.user_id)
+    ]);
+    likeCount = lc||0; subsCount = sc||0;
+
+    if(STATE.user){
+      const [{ data: likeRow }, { data: subRow }] = await Promise.all([
+        supabase.from('video_likes').select('id').eq('video_id', video.id).eq('user_id', STATE.user.id).maybeSingle(),
+        supabase.from('subscriptions').select('id').eq('channel_id', video.user_id).eq('subscriber_id', STATE.user.id).maybeSingle()
+      ]);
+      userLiked = !!likeRow;
+      isSubscribed = !!subRow;
+    }
+
+    main.innerHTML = `
+      <div class="watch-layout">
+        <div class="watch-main">
+          <div class="player-wrap">
+            <video id="mainPlayer" controls playsinline ${STATE.autoplay?'autoplay':''} poster="${escapeHTML(video.thumbnail_url||'')}">
+              <source src="${escapeHTML(video.video_url)}">
+              Tu navegador no soporta la reproducción de video.
             </video>
-        </div>
-        <div class="player-info">
-            <div>
-                <div class="player-title" id="playerTitle">Título del video</div>
-                <div class="player-channel" id="playerChannel">@JHEILER</div>
-                <div class="player-hashtags" id="playerHashtags"></div>
+          </div>
+          <h1 class="watch-title">${escapeHTML(video.title)}</h1>
+          <div class="watch-meta-row">
+            <div class="watch-stats">${formatCount(video.views||0)} vistas · ${timeAgo(video.created_at)}</div>
+            <div class="watch-actions">
+              <div class="pill-group">
+                <button class="pill-btn ${userLiked?'liked':''}" id="likeBtn">👍 <span id="likeCount">${formatCount(likeCount)}</span></button>
+              </div>
+              <button class="pill-btn" id="shareBtnWatch">🔗 Compartir</button>
+              <button class="pill-btn" id="watchLaterBtnWatch">⏰ Ver más tarde</button>
             </div>
-        </div>
-    </div>
-    <!-- ===== MAIN ===== -->
-    <main>
-        <!-- ===== CATEGORÍAS ===== -->
-        <div class="categories" id="categoriesContainer">
-            <span class="category-chip active" data-category="todos">Todos</span>
-            <span class="category-chip" data-category="roblox">Roblox</span>
-            <span class="category-chip" data-category="ia">Inteligencia Artificial</span>
-            <span class="category-chip" data-category="minecraft">Minecraft</span>
-            <span class="category-chip" data-category="programacion">Programación</span>
-            <span class="category-chip" data-category="musica">Música</span>
-            <span class="category-chip" data-category="deportes">Deportes</span>
-            <span class="category-chip" data-category="videojuegos">Videojuegos</span>
-        </div>
-        <!-- ===== ORDENAMIENTO ===== -->
-        <div class="sort-bar">
-            <h2 class="section-title" id="sectionTitle" style="margin:0;">
-                <i class="fas fa-home"></i> Inicio
-            </h2>
-            <select class="sort-select" id="sortSelect">
-                <option value="recientes">Más recientes</option>
-                <option value="vistos">Más vistos</option>
-                <option value="antiguos">Más antiguos</option>
-            </select>
-        </div>
-        <!-- ===== VIDEO GRID ===== -->
-        <div class="video-grid" id="videoGrid"></div>
-    </main>
-    <script>
-        // ============================================
-        // CONFIGURACIÓN
-        // ============================================
-        const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
-        const SUPABASE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
-        const EMAIL_DOMAIN = "jheiler.local";
-        
-        let sb = null;
-        try {
-            if (window.supabase) {
-                sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                    auth: { persistSession: true, autoRefreshToken: true }
-                });
-            }
-        } catch (e) {
-            console.warn('Supabase no disponible:', e.message);
-        }
-        const grid = document.getElementById('videoGrid');
-        const sectionTitle = document.getElementById('sectionTitle');
-        const playerOverlay = document.getElementById('playerOverlay');
-        const playerVideo = document.getElementById('playerVideo');
-        const playerTitle = document.getElementById('playerTitle');
-        const playerChannel = document.getElementById('playerChannel');
-        const playerHashtags = document.getElementById('playerHashtags');
-        const playerClose = document.getElementById('playerClose');
-        const sortSelect = document.getElementById('sortSelect');
-        const authContainer = document.getElementById('authContainer');
-        const categoriesContainer = document.getElementById('categoriesContainer');
-        let currentSection = 'inicio';
-        let currentCategory = 'todos';
-        let currentSort = 'recientes';
-        let currentUser = null;
-        let currentProfile = null;
-        let favoriteIds = new Set();
-        let watchLaterIds = new Set();
-        // ============================================
-        // DATOS DE EJEMPLO (solo si Supabase falla en Inicio)
-        // ============================================
-        const sampleVideos = [
-            {
-                id: '1',
-                title: 'ROBLOX: La mejor aventura épica',
-                description: 'Explorando el mundo de Roblox con amigos',
-                category: 'roblox',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://picsum.photos/seed/roblox1/400/225',
-                views: 4700,
-                duration: 680,
-                channel: 'demo',
-                username: 'demo',
-                hashtags: ['#Roblox', '#Aventura', '#Gaming'],
-                is_short: false,
-                created_at: '2026-08-17T00:00:00Z'
-            },
-            {
-                id: '2',
-                title: 'IA: El futuro de la tecnología explicado',
-                description: 'Inteligencia artificial explicada fácil',
-                category: 'ia',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://picsum.photos/seed/ai1/400/225',
-                views: 4400,
-                duration: 526,
-                channel: 'demo',
-                username: 'demo',
-                hashtags: ['#IA', '#Tecnología', '#Futuro'],
-                is_short: false,
-                created_at: '2026-08-16T00:00:00Z'
-            },
-            {
-                id: '3',
-                title: 'MINECRAFT: Construyendo una ciudad',
-                description: 'Construcción masiva en Minecraft',
-                category: 'minecraft',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://picsum.photos/seed/minecraft1/400/225',
-                views: 3200,
-                duration: 930,
-                channel: 'demo',
-                username: 'demo',
-                hashtags: ['#Minecraft', '#Construcción', '#Creativo'],
-                is_short: false,
-                created_at: '2026-08-15T00:00:00Z'
-            }
-        ];
-        // ============================================
-        // FUNCIONES AUXILIARES
-        // ============================================
-        function formatDuration(seconds) {
-            if (!seconds || seconds <= 0) return '0:00';
-            const mins = Math.floor(seconds / 60);
-            const secs = Math.floor(seconds % 60);
-            return `${mins}:${String(secs).padStart(2, '0')}`;
-        }
-        function formatViews(views) {
-            if (!views || views === 0) return '0';
-            if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
-            if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
-            return views.toString();
-        }
-        function formatDate(dateStr) {
-            if (!dateStr) return 'Fecha desconocida';
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            if (diffDays === 0) return 'Hoy';
-            if (diffDays === 1) return 'Ayer';
-            if (diffDays < 7) return `Hace ${diffDays} días`;
-            if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
-            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-        }
-        function getDefaultThumbnail(category) {
-            const seeds = {
-                'roblox': 'roblox', 'ia': 'ai', 'minecraft': 'minecraft',
-                'programacion': 'code', 'musica': 'music', 'deportes': 'sports',
-                'videojuegos': 'games'
-            };
-            const seed = seeds[category] || 'video';
-            return `https://picsum.photos/seed/${seed}${Math.floor(Math.random() * 100)}/400/225`;
-        }
-        function showToast(message, type = 'info', duration = 3500) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            const iconMap = {
-                success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle',
-                warning: 'fas fa-exclamation-triangle', info: 'fas fa-info-circle'
-            };
-            const colors = {
-                success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6'
-            };
-            toast.innerHTML = `<i class="${iconMap[type] || iconMap.info}" style="color:${colors[type]}"></i> ${message}`;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(10px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-        function escapeHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-        function usernameToEmail(username) {
-            return `${username.toLowerCase().replace(/_/g, '')}@${EMAIL_DOMAIN}`;
-        }
-        // ✅ VALIDACIÓN CORREGIDA: SIN GUION BAJO
-        function validateUsername(username) {
-            if (!username) return 'El nombre de usuario es obligatorio';
-            if (username.length < 3) return 'Mínimo 3 caracteres';
-            if (username.length > 20) return 'Máximo 20 caracteres';
-            if (/\s/.test(username)) return 'No se permiten espacios';
-            // Solo letras y números — SIN guion bajo
-            if (!/^[a-zA-Z0-9]+$/.test(username)) return 'Solo letras y números (sin símbolos ni guiones bajos)';
-            return null;
-        }
-        function validatePassword(password) {
-            if (!password) return 'La contraseña es obligatoria';
-            if (password.length < 8) return 'Mínimo 8 caracteres';
-            return null;
-        }
-                function usernameToEmail(username) {
-            return `${username.toLowerCase().replace(/_/g, '')}@${EMAIL_DOMAIN}`;
-        }
+          </div>
 
-        // ============================================
-        // AUTENTICACIÓN - REGISTRO CORREGIDO
-        // ============================================
-        async function handleRegister() {
-            const username = document.getElementById('regUsername').value.trim();
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirmPassword').value;
-            
-            // Limpiar errores
-            document.getElementById('regUsernameError').textContent = '';
-            document.getElementById('regPasswordError').textContent = '';
-            document.getElementById('regConfirmError').textContent = '';
-            
-            let hasError = false;
-            const uErr = validateUsername(username);
-            if (uErr) {
-                document.getElementById('regUsernameError').textContent = uErr;
-                hasError = true;
-            }
-            const pErr = validatePassword(password);
-            if (pErr) {
-                document.getElementById('regPasswordError').textContent = pErr;
-                hasError = true;
-            }
-            if (password !== confirm) {
-                document.getElementById('regConfirmError').textContent = 'Las contraseñas no coinciden';
-                hasError = true;
-            }
-            if (hasError) return;
-            if (!sb) { showToast('Supabase no disponible', 'error'); return; }
-            
-            const btn = document.getElementById('btnRegisterSubmit');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
-            
-            try {
-                // Generamos correo SIN caracteres especiales
-                const email = usernameToEmail(username);
+          <div class="channel-row">
+            <a href="#/channel/${escapeHTML(video.user_id)}">${avatarHTML(channel).replace('avatar-circle','avatar-circle')}</a>
+            <div class="channel-row-info">
+              <a href="#/channel/${escapeHTML(video.user_id)}" class="cname">${escapeHTML(channel.display_name||channel.username||'Canal')}</a>
+              <div class="csubs" id="subsCountLabel">${formatCount(subsCount)} suscriptores</div>
+            </div>
+            ${STATE.user && STATE.user.id===video.user_id ? '' : `
+              <button class="subscribe-btn ${isSubscribed?'subscribed':''}" id="subscribeBtn">${isSubscribed?'Suscrito ✓':'Suscribirse'}</button>
+            `}
+          </div>
 
-                // 1. Crear usuario en Auth
-                const { data: authData, error: authErr } = await sb.auth.signUp({
-                    email,
-                    password
-                });
+          <div class="watch-desc" id="watchDesc">
+            ${video.description ? escapeHTML(video.description).replace(/\n/g,'<br>') : '<span style="color:var(--text-secondary);">Sin descripción.</span>'}
+          </div>
 
-                if (authErr) {
-                    console.error('Error Auth:', authErr);
-                    if (authErr.message.includes('already') || authErr.code === 'user_already_exists') {
-                        document.getElementById('regUsernameError').textContent = 'El usuario ya existe';
-                    } else {
-                        document.getElementById('regUsernameError').textContent = authErr.message;
-                    }
-                    throw authErr;
-                }
-
-                if (!authData.user) throw new Error('No se pudo crear el usuario');
-
-                // ✅ 2. Crear perfil manualmente
-                const { error: profileErr } = await sb.from('profiles').insert({
-                    id: authData.user.id,
-                    username: username.toLowerCase()
-                });
-
-                if (profileErr) {
-                    console.warn('Perfil:', profileErr.message);
-                }
-
-                showToast('¡Cuenta creada con éxito! Iniciando sesión...', 'success');
-                closeAllModals();
-                await new Promise(r => setTimeout(r, 800));
-                await initAuth();
-                loadVideos();
-
-            } catch (err) {
-                console.error('Registro Error:', err);
-                showToast('Error: ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
-            }
-        }
-
-        async function handleLogin() {
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const email = usernameToEmail(username);
-
-            if (!sb) { showToast('Supabase no disponible', 'error'); return; }
-
-            const btn = document.getElementById('btnLoginSubmit');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
-
-            try {
-                const { error } = await sb.auth.signInWithPassword({ email, password });
-                if (error) throw error;
-                showToast('¡Bienvenido de nuevo!', 'success');
-                closeAllModals();
-                await initAuth();
-                loadVideos();
-            } catch (err) {
-                showToast('Usuario o contraseña incorrectos', 'error');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Iniciar sesión';
-            }
-        }
-
-        async function handleLogout() {
-            if (!sb) return;
-            await sb.auth.signOut();
-            currentUser = null;
-            currentProfile = null;
-            showToast('Sesión cerrada', 'info');
-            renderAuthButton();
-            loadVideos();
-        }
-
-        // ============================================
-        // INICIALIZAR AUTENTICACIÓN
-        // ============================================
-        async function initAuth() {
-            if (!sb) { renderAuthButton(); return; }
-            const { data: { session } } = await sb.auth.getSession();
-            currentUser = session?.user || null;
-
-            if (currentUser) {
-                const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-                currentProfile = data;
-            } else {
-                currentProfile = null;
-            }
-            renderAuthButton();
-        }
-
-        function renderAuthButton() {
-            if (currentUser && currentProfile) {
-                authContainer.innerHTML = `
-                    <div class="profile-wrapper">
-                        <button class="profile-btn" id="profileToggle">
-                            <div class="profile-avatar">${currentProfile.username.charAt(0).toUpperCase()}</div>
-                            <span class="profile-username">${escapeHtml(currentProfile.username)}</span>
-                        </button>
-                        <div class="profile-dropdown" id="profileDropdown">
-                            <div class="profile-dropdown-item" onclick="switchSection('tus-videos')">
-                                <i class="fas fa-video"></i> Mis videos
-                            </div>
-                            <div class="profile-dropdown-item" onclick="switchSection('favoritos')">
-                                <i class="fas fa-heart"></i> Favoritos
-                            </div>
-                            <div class="profile-dropdown-item" onclick="switchSection('ver-despues')">
-                                <i class="fas fa-bookmark"></i> Ver después
-                            </div>
-                            <div class="profile-dropdown-item danger" onclick="handleLogout()">
-                                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
-                            </div>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('profileToggle')?.addEventListener('click', () => {
-                    document.getElementById('profileDropdown').classList.toggle('active');
-                });
-            } else {
-                authContainer.innerHTML = `<button class="auth-btn" id="btnShowLogin">Iniciar sesión</button>`;
-                document.getElementById('btnShowLogin')?.addEventListener('click', () => openModal('loginModal'));
-            }
-        }
-
-        // ============================================
-        // MODALES
-        // ============================================
-        function openModal(id) {
-            document.getElementById(id)?.classList.add('active');
-        }
-        function closeAllModals() {
-            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
-        }
-
-        // ============================================
-        // CARGAR VIDEOS
-        // ============================================
-        async function loadVideos() {
-            renderLoading();
-            if (!sb) {
-                renderVideos(sampleVideos);
-                return;
-            }
-            try {
-                let query = sb.from('videos').select('*');
-
-                if (currentSection === 'tus-videos' && currentProfile) {
-                    query = query.eq('user_id', currentUser.id);
-                }
-                if (currentSection === 'shorts') {
-                    query = query.eq('is_short', true);
-                }
-                if (currentCategory !== 'todos') {
-                    query = query.eq('category', currentCategory);
-                }
-
-                const { data, error } = await query.order('created_at', { ascending: false });
-
-                if (error) throw error;
-                if (!data || data.length === 0) {
-                    renderVideos(sampleVideos);
-                } else {
-                    renderVideos(data);
-                }
-            } catch (err) {
-                console.warn('Usando datos de prueba:', err);
-                renderVideos(sampleVideos);
-            }
-        }
-
-        // ============================================
-        // RENDERIZAR VIDEOS
-        // ============================================
-        function renderLoading() {
-            grid.innerHTML = `
-                <div class="loading-state">
-                    <i class="fas fa-spinner"></i>
-                    <h3>Cargando...</h3>
+          <div id="commentsSection">
+            <div class="comments-head" id="commentsHead">Comentarios</div>
+            ${STATE.user ? `
+              <form class="comment-form" id="commentForm">
+                ${avatarHTML(STATE.profile)}
+                <div class="comment-input-wrap">
+                  <input type="text" id="commentInput" placeholder="Añade un comentario público..." maxlength="1000">
+                  <div class="comment-form-actions">
+                    <button type="button" class="btn btn-secondary" id="commentCancelBtn">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Comentar</button>
+                  </div>
                 </div>
-            `;
-        }
-
-        function renderVideos(videos) {
-            if (!videos || videos.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-film"></i>
-                        <h3>No hay videos aún</h3>
-                        <p>Sé el primero en compartir un video 🎉</p>
-                    </div>
-                `;
-                return;
-            }
-
-            if (currentSort === 'vistos') {
-                videos.sort((a, b) => (b.views || 0) - (a.views || 0));
-            } else if (currentSort === 'antiguos') {
-                videos.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-            } else {
-                videos.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            }
-
-            grid.innerHTML = videos.map(v => `
-                <div class="video-card" onclick="playVideo('${v.video_url || ''}', '${escapeHtml(v.title)}', '@${escapeHtml(v.username || v.channel || 'demo')}', '${(v.hashtags || []).join(',')}')">
-                    <div class="thumb">
-                        <img src="${v.thumbnail_url || getDefaultThumbnail(v.category)}" alt="${escapeHtml(v.title)}" loading="lazy">
-                        <span class="duration">${formatDuration(v.duration)}</span>
-                        <div class="play-overlay"><i class="fas fa-play"></i></div>
-                    </div>
-                    <div class="video-info">
-                        <div class="channel-avatar">${(v.username || v.channel || 'D').charAt(0).toUpperCase()}</div>
-                        <div class="video-details">
-                            <h3 class="card-title">${escapeHtml(v.title)}</h3>
-                            <p class="channel-name">${escapeHtml(v.username || v.channel || 'Canal')}</p>
-                            <p class="card-meta">
-                                ${formatViews(v.views)} vistas • ${formatDate(v.created_at)}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // ============================================
-        // REPRODUCIR VIDEO
-        // ============================================
-        function playVideo(url, title, channel, hashtags = '') {
-            if (!url) { showToast('Video no disponible', 'warning'); return; }
-            playerVideo.src = url;
-            playerTitle.textContent = title;
-            playerChannel.textContent = channel;
-            playerHashtags.innerHTML = hashtags ? hashtags.split(',').map(t => `<span>#${t.trim()}</span>`).join('') : '';
-            playerOverlay.classList.add('active');
-            playerVideo.play();
-        }
-
-        playerClose.addEventListener('click', () => {
-            playerOverlay.classList.remove('active');
-            playerVideo.pause();
-            playerVideo.src = '';
-        });
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') {
-                playerOverlay.classList.remove('active');
-                playerVideo.pause();
-            }
-        });
-
-        // ============================================
-        // NAVEGACIÓN
-        // ============================================
-        document.querySelectorAll('.sb-item').forEach(item => {
-            item.addEventListener('click', () => {
-                document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
-                currentSection = item.dataset.section;
-                sectionTitle.innerHTML = `<i class="fas fa-${item.querySelector('i').classList[2]}"></i> ${item.textContent.trim()}`;
-                loadVideos();
-            });
-        });
-
-        document.querySelectorAll('.category-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                currentCategory = chip.dataset.category;
-                loadVideos();
-            });
-        });
-
-        sortSelect.addEventListener('change', e => {
-            currentSort = e.target.value;
-            loadVideos();
-        });
-
-        function goToHome() {
-            currentSection = 'inicio';
-            currentCategory = 'todos';
-            document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
-            document.querySelector('.sb-item[data-section="inicio"]')?.classList.add('active');
-            document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
-            document.querySelector('.category-chip[data-category="todos"]')?.classList.add('active');
-            sectionTitle.innerHTML = `<i class="fas fa-home"></i> Inicio`;
-            loadVideos();
-        }
-
-        // ============================================
-        // PUBLICAR VIDEO
-        // ============================================
-        document.getElementById('btnOpenModal')?.addEventListener('click', () => {
-            if (!currentUser) { openModal('loginModal'); showToast('Inicia sesión para publicar', 'warning'); return; }
-            openModal('uploadModal');
-        });
-
-        document.getElementById('btnUploadSubmit')?.addEventListener('click', async () => {
-            const title = document.getElementById('vidTitle').value.trim();
-            const url = document.getElementById('vidUrl').value.trim();
-            const category = document.getElementById('vidCategory').value;
-            const hashtags = document.getElementById('vidTags').value.split(',').map(t => t.trim()).filter(t => t);
-
-            if (!title || !url) { showToast('Título y enlace son obligatorios', 'warning'); return; }
-            if (!sb || !currentUser) { showToast('Debes iniciar sesión', 'warning'); return; }
-
-            const btn = document.getElementById('btnUploadSubmit');
-            btn.disabled = true;
-            btn.textContent = 'Publicando...';
-
-            try {
-                const { error } = await sb.from('videos').insert({
-                    user_id: currentUser.id,
-                    title,
-                    video_url: url,
-                    category,
-                    hashtags,
-                    username: currentProfile.username
-                });
-                if (error) throw error;
-                showToast('¡Video publicado! 🎉', 'success');
-                closeAllModals();
-                document.getElementById('vidTitle').value = '';
-                document.getElementById('vidUrl').value = '';
-                document.getElementById('vidTags').value = '';
-                loadVideos();
-            } catch (err) {
-                showToast('Error: ' + err.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Publicar video';
-            }
-        });
-
-        // Cambio entre login y registro
-        document.getElementById('goToRegister')?.addEventListener('click', () => {
-            closeAllModals(); openModal('registerModal');
-        });
-        document.getElementById('goToLogin')?.addEventListener('click', () => {
-            closeAllModals(); openModal('loginModal');
-        });
-
-        // Envío formularios
-        document.getElementById('btnRegisterSubmit')?.addEventListener('click', handleRegister);
-        document.getElementById('btnLoginSubmit')?.addEventListener('click', handleLogin);
-
-        // Cerrar menú perfil al hacer clic fuera
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.profile-wrapper')) {
-                document.getElementById('profileDropdown')?.classList.remove('active');
-            }
-        });
-
-        // ============================================
-        // INICIO GENERAL
-        // ============================================
-        document.addEventListener('DOMContentLoaded', async () => {
-            await initAuth();
-            loadVideos();
-        });
-    </script>
-
-    <!-- ===== MODALES ===== -->
-    <div class="modal" id="loginModal">
-        <div class="modal-content">
-            <h3><i class="fas fa-sign-in-alt"></i> Iniciar sesión</h3>
-            <input type="text" id="loginUsername" placeholder="Usuario (sin @correo)" required>
-            <input type="password" id="loginPassword" placeholder="Contraseña" required>
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeAllModals()">Cancelar</button>
-                <button class="btn-primary" id="btnLoginSubmit">Entrar</button>
-            </div>
-            <div class="modal-switch">¿No tienes cuenta? <a id="goToRegister">Crear cuenta</a></div>
+              </form>
+            ` : `
+              <div class="watch-desc" style="margin-bottom:20px;">
+                <a href="#" id="commentLoginPrompt" style="color:#3ea6ff;">Inicia sesión</a> para comentar.
+              </div>
+            `}
+            <div id="commentsList"><span class="spinner"></span></div>
+          </div>
         </div>
-    </div>
 
-    <div class="modal" id="registerModal">
-        <div class="modal-content">
-            <h3><i class="fas fa-user-plus"></i> Crear cuenta</h3>
-            <input type="text" id="regUsername" placeholder="Usuario (solo letras y números)" required>
-            <small class="input-error" id="regUsernameError"></small>
-            <input type="password" id="regPassword" placeholder="Contraseña (mínimo 8 caracteres)" required>
-            <small class="input-error" id="regPasswordError"></small>
-            <input type="password" id="regConfirmPassword" placeholder="Repetir contraseña" required>
-            <small class="input-error" id="regConfirmError"></small>
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeAllModals()">Cancelar</button>
-                <button class="btn-primary" id="btnRegisterSubmit">Crear cuenta</button>
-            </div>
-            <div class="modal-switch">¿Ya tienes cuenta? <a id="goToLogin">Iniciar sesión</a></div>
+        <div class="watch-side" id="watchSide">
+          <div class="page-loading" style="padding:20px 0;"><span class="spinner"></span></div>
         </div>
-    </div>
+      </div>
+    `;
 
-    <div class="modal" id="uploadModal">
-        <div class="modal-content">
-            <h3><i class="fas fa-upload"></i> Publicar video</h3>
-            <input type="text" id="vidTitle" placeholder="Título del video" required>
-            <input type="url" id="vidUrl" placeholder="Enlace del video (URL directa .mp4)" required>
-            <select id="vidCategory">
-                <option value="roblox">Roblox</option>
-                <option value="ia">Inteligencia Artificial</option>
-                <option value="minecraft">Minecraft</option>
-                <option value="programacion">Programación</option>
-                <option value="musica">Música</option>
-                <option value="deportes">Deportes</option>
-                <option value="videojuegos">Videojuegos</option>
-            </select>
-            <input type="text" id="vidTags" placeholder="Etiquetas (separadas por coma)">
-            <div class="modal-actions">
-                <button class="btn-secondary" onclick="closeAllModals()">Cancelar</button>
-                <button class="btn-primary" id="btnUploadSubmit">Publicar video</button>
-            </div>
+    bindWatchPageEvents(video);
+    loadComments(video.id);
+    loadSideRecommendations(video);
+    registerWatchHistory(video.id);
+    incrementViewCount(video.id);
+
+  }catch(err){
+    renderErrorPage(main, err);
+  }
+}
+
+async function incrementViewCount(videoId){
+  try{
+    await supabase.rpc('increment_video_views', { video_id_input: videoId });
+  }catch(e){
+    // fallback if RPC doesn't exist: best-effort manual increment (non-atomic)
+    try{
+      const { data } = await supabase.from('videos').select('views').eq('id', videoId).maybeSingle();
+      const current = data ? (data.views||0) : 0;
+      await supabase.from('videos').update({ views: current+1 }).eq('id', videoId);
+    }catch(e2){ /* silent — view counting is non-critical */ }
+  }
+}
+
+async function registerWatchHistory(videoId){
+  if(!STATE.user) return;
+  try{
+    const { data: existing } = await supabase.from('watch_history')
+      .select('id').eq('user_id', STATE.user.id).eq('video_id', videoId).maybeSingle();
+    if(existing){
+      await supabase.from('watch_history').update({ created_at: new Date().toISOString() }).eq('id', existing.id);
+    } else {
+      await supabase.from('watch_history').insert({ user_id: STATE.user.id, video_id: videoId });
+    }
+  }catch(e){ console.warn('watch_history error', e); }
+}
+
+function bindWatchPageEvents(video){
+  const likeBtn = qs('#likeBtn');
+  if(likeBtn) likeBtn.addEventListener('click', ()=>toggleLike(video.id, likeBtn));
+
+  const shareBtn = qs('#shareBtnWatch');
+  if(shareBtn) shareBtn.addEventListener('click', ()=>shareVideo(video.id));
+
+  const wlBtn = qs('#watchLaterBtnWatch');
+  if(wlBtn) wlBtn.addEventListener('click', ()=>addToWatchLater(video.id));
+
+  const subBtn = qs('#subscribeBtn');
+  if(subBtn) subBtn.addEventListener('click', ()=>toggleSubscribe(video.user_id, subBtn));
+
+  const commentForm = qs('#commentForm');
+  if(commentForm) commentForm.addEventListener('submit', (e)=>submitComment(e, video.id));
+  const cancelBtn = qs('#commentCancelBtn');
+  if(cancelBtn) cancelBtn.addEventListener('click', ()=>{ qs('#commentInput').value=''; });
+
+  const loginPrompt = qs('#commentLoginPrompt');
+  if(loginPrompt) loginPrompt.addEventListener('click', (e)=>{ e.preventDefault(); openAuthModal('login'); });
+}
+
+async function toggleLike(videoId, btn){
+  if(!requireAuth('dar like')) return;
+  const wasLiked = btn.classList.contains('liked');
+  const countEl = qs('#likeCount', btn.closest('.watch-actions')) || qs('#likeCount');
+  let count = parseInt((countEl.textContent||'0').replace(/[^0-9]/g,'')) || 0;
+  btn.disabled = true;
+  try{
+    if(wasLiked){
+      const { error } = await supabase.from('video_likes').delete().eq('video_id', videoId).eq('user_id', STATE.user.id);
+      if(error) throw error;
+      btn.classList.remove('liked');
+      count = Math.max(0,count-1);
+    } else {
+      const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id',videoId).eq('user_id',STATE.user.id).maybeSingle();
+      if(!existing){
+        const { error } = await supabase.from('video_likes').insert({ video_id: videoId, user_id: STATE.user.id });
+        if(error) throw error;
+      }
+      btn.classList.add('liked');
+      count = count+1;
+    }
+    countEl.textContent = formatCount(count);
+  }catch(err){
+    toastError('No se pudo actualizar el like: ' + err.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+async function toggleSubscribe(channelId, btn){
+  if(!requireAuth('suscribirte')) return;
+  if(STATE.user.id===channelId){ toastError('No puedes suscribirte a tu propio canal.'); return; }
+  const wasSubbed = btn.classList.contains('subscribed');
+  btn.disabled = true;
+  try{
+    if(wasSubbed){
+      const { error } = await supabase.from('subscriptions').delete().eq('channel_id',channelId).eq('subscriber_id',STATE.user.id);
+      if(error) throw error;
+      btn.classList.remove('subscribed');
+      btn.textContent = 'Suscribirse';
+    } else {
+      const { data: existing } = await supabase.from('subscriptions').select('id').eq('channel_id',channelId).eq('subscriber_id',STATE.user.id).maybeSingle();
+      if(!existing){
+        const { error } = await supabase.from('subscriptions').insert({ channel_id: channelId, subscriber_id: STATE.user.id });
+        if(error) throw error;
+      }
+      btn.classList.add('subscribed');
+      btn.textContent = 'Suscrito ✓';
+    }
+    const subsLabel = qs('#subsCountLabel');
+    if(subsLabel){
+      let n = parseInt((subsLabel.textContent||'0').replace(/[^0-9]/g,'')) || 0;
+      n = wasSubbed ? Math.max(0,n-1) : n+1;
+      subsLabel.textContent = formatCount(n) + ' suscriptores';
+    }
+    toastSuccess(wasSubbed ? 'Te has dado de baja.' : '¡Suscripción exitosa!');
+  }catch(err){
+    toastError('No se pudo actualizar la suscripción: ' + err.message);
+  }finally{
+    btn.disabled = false;
+  }
+}
+
+/* ---------------- COMMENTS ---------------- */
+async function loadComments(videoId){
+  const list = qs('#commentsList');
+  try{
+    const { data, error } = await supabase
+      .from('comments')
+      .select('*, profiles!comments_user_id_fkey(*)')
+      .eq('video_id', videoId)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    const head = qs('#commentsHead');
+    if(head) head.textContent = `${data?data.length:0} comentarios`;
+    if(!data || data.length===0){
+      list.innerHTML = `<div style="color:var(--text-secondary);font-size:14px;padding:12px 0;">Sé el primero en comentar.</div>`;
+      return;
+    }
+    list.innerHTML = data.map(commentHTML).join('');
+  }catch(err){
+    list.innerHTML = `<div style="color:var(--text-secondary);font-size:13px;">No se pudieron cargar los comentarios.</div>`;
+  }
+}
+function commentHTML(c){
+  const author = c.profiles || {};
+  return `
+    <div class="comment-item">
+      ${avatarHTML(author)}
+      <div class="comment-body">
+        <div class="comment-head">
+          <span class="comment-author">${escapeHTML(author.display_name||author.username||'Usuario')}</span>
+          <span class="comment-date">${timeAgo(c.created_at)}</span>
         </div>
+        <div class="comment-text">${escapeHTML(c.content||c.text||c.comment||'')}</div>
+        <div class="comment-actions">
+          <span class="comment-like-btn">👍 ${formatCount(c.likes||0)}</span>
+        </div>
+      </div>
+    </div>`;
+}
+async function submitComment(e, videoId){
+  e.preventDefault();
+  if(!requireAuth('comentar')) return;
+  const input = qs('#commentInput');
+  const text = input.value.trim();
+  if(!text) return;
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  try{
+    const { error } = await supabase.from('comments').insert({
+      video_id: videoId,
+      user_id: STATE.user.id,
+      content: text
+    });
+    if(error) throw error;
+    input.value = '';
+    toastSuccess('Comentario publicado.');
+    loadComments(videoId);
+  }catch(err){
+    toastError('No se pudo publicar el comentario: ' + err.message);
+  }finally{
+    submitBtn.disabled = false;
+  }
+}
+
+/* ---------------- SIDE RECOMMENDATIONS ---------------- */
+async function loadSideRecommendations(currentVideo){
+  const side = qs('#watchSide');
+  try{
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .eq('is_short', false)
+      .neq('id', currentVideo.id)
+      .order('created_at', { ascending:false })
+      .limit(12);
+    if(error) throw error;
+    if(!data || data.length===0){
+      side.innerHTML = `<div style="color:var(--text-secondary);font-size:13px;">No hay más videos por ahora.</div>`;
+      return;
+    }
+    side.innerHTML = data.map(sideVideoHTML).join('');
+  }catch(err){
+    side.innerHTML = '';
+  }
+}
+function sideVideoHTML(v){
+  const ch = v.profiles||{};
+  const thumbInner = v.thumbnail_url ? `<img src="${escapeHTML(v.thumbnail_url)}" loading="lazy" alt="">` : `<div class="no-thumb">▶</div>`;
+  const dur = v.duration ? `<span class="duration-badge">${formatDuration(v.duration)}</span>` : '';
+  return `
+    <a href="#/watch/${escapeHTML(v.id)}" class="side-video-item">
+      <div class="thumb-wrap">${thumbInner}${dur}</div>
+      <div class="card-info">
+        <div class="card-title">${escapeHTML(v.title)}</div>
+        <div class="card-channel">${escapeHTML(ch.display_name||ch.username||'Canal')}</div>
+        <div class="card-stats">${formatCount(v.views||0)} vistas · ${timeAgo(v.created_at)}</div>
+      </div>
+    </a>`;
+}
+
+/* ================================================================
+   CREATE / UPLOAD MODAL
+================================================================ */
+const CATEGORIES = ['Gaming','Música','Noticias','Deportes','Educación','Entretenimiento','Tecnología','Vlog','Otros'];
+
+function openCreateModal(){
+  if(!requireAuth('subir contenido')) return;
+  const html = `
+    <div class="modal-head">
+      <h2>Crear</h2>
+      <button class="modal-close" id="createModalClose">✕</button>
     </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-ctab="video">Subir video</button>
+      <button class="modal-tab" data-ctab="short">Crear Short</button>
+    </div>
+    <div id="createFormArea"></div>
+  `;
+  openModal(html, { wide:true, persistent:true });
+  qs('#createModalClose').addEventListener('click', closeModal);
+  qsa('.modal-tab').forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      qsa('.modal-tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      renderUploadForm(tab.dataset.ctab==='short');
+    });
+  });
+  renderUploadForm(false);
+}
+
+function renderUploadForm(isShort){
+  const area = qs('#createFormArea');
+  area.innerHTML = `
+    <form id="uploadForm">
+      <div class="field">
+        <label>Archivo de ${isShort?'Short (vertical recomendado)':'video'} <span class="required-star">*</span></label>
+        <div class="dropzone" id="videoDropzone">
+          <div class="dz-ico">🎬</div>
+          <div>Haz clic para seleccionar o arrastra tu archivo aquí</div>
+          <input type="file" id="videoFileInput" accept="video/*" class="hidden">
+        </div>
+        <div id="videoFilePreview"></div>
+      </div>
+      <div class="field">
+        <label>Miniatura (thumbnail)</label>
+        <div class="dropzone" id="thumbDropzone">
+          <div class="dz-ico">🖼️</div>
+          <div>Haz clic para seleccionar una imagen (opcional)</div>
+          <input type="file" id="thumbFileInput" accept="image/*" class="hidden">
+        </div>
+        <div id="thumbFilePreview"></div>
+      </div>
+      <div class="field">
+        <label>Título <span class="required-star">*</span></label>
+        <input type="text" id="uploadTitle" maxlength="100" required placeholder="Dale un título a tu ${isShort?'Short':'video'}">
+      </div>
+      <div class="field">
+        <label>Descripción</label>
+        <textarea id="uploadDescription" maxlength="5000" placeholder="Cuéntale a la audiencia sobre tu contenido"></textarea>
+      </div>
+      <div class="field">
+        <label>Categoría</label>
+        <select id="uploadCategory">
+          ${CATEGORIES.map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div id="uploadError" class="field-error hidden"></div>
+      <div class="progress-track hidden" id="uploadProgressTrack"><div class="progress-fill" id="uploadProgressFill"></div></div>
+      <div id="uploadStatusText" style="font-size:12px;color:var(--text-secondary);margin-top:6px;"></div>
+      <button type="submit" class="btn btn-primary btn-full" id="uploadSubmitBtn" style="margin-top:16px;" disabled>
+        Publicar ${isShort?'Short':'video'}
+      </button>
+    </form>
+  `;
+
+  let selectedVideoFile = null;
+  let selectedThumbFile = null;
+  let videoDuration = 0;
+
+  const submitBtn = qs('#uploadSubmitBtn');
+  function refreshSubmitState(){
+    submitBtn.disabled = !(selectedVideoFile && qs('#uploadTitle').value.trim());
+  }
+
+  const videoDz = qs('#videoDropzone');
+  const videoInput = qs('#videoFileInput');
+  videoDz.addEventListener('click', ()=>videoInput.click());
+  ['dragover','dragenter'].forEach(evt=>videoDz.addEventListener(evt,(e)=>{e.preventDefault();videoDz.classList.add('dragover');}));
+  ['dragleave','drop'].forEach(evt=>videoDz.addEventListener(evt,(e)=>{e.preventDefault();videoDz.classList.remove('dragover');}));
+  videoDz.addEventListener('drop',(e)=>{
+    if(e.dataTransfer.files && e.dataTransfer.files[0]){ handleVideoFile(e.dataTransfer.files[0]); }
+  });
+  videoInput.addEventListener('change', (e)=>{ if(e.target.files[0]) handleVideoFile(e.target.files[0]); });
+
+  function handleVideoFile(file){
+    if(!file.type.startsWith('video/')){ toastError('Selecciona un archivo de video válido.'); return; }
+    selectedVideoFile = file;
+    const url = URL.createObjectURL(file);
+    const tempVideo = document.createElement('video');
+    tempVideo.preload = 'metadata';
+    tempVideo.src = url;
+    tempVideo.onloadedmetadata = ()=>{
+      videoDuration = Math.floor(tempVideo.duration)||0;
+    };
+    qs('#videoFilePreview').innerHTML = `
+      <div class="file-preview">
+        <video src="${url}" style="width:60px;height:34px;object-fit:cover;border-radius:4px;" muted></video>
+        <span>${escapeHTML(file.name)} (${(file.size/1024/1024).toFixed(1)} MB)</span>
+      </div>`;
+    refreshSubmitState();
+  }
+
+  const thumbDz = qs('#thumbDropzone');
+  const thumbInput = qs('#thumbFileInput');
+  thumbDz.addEventListener('click', ()=>thumbInput.click());
+  ['dragover','dragenter'].forEach(evt=>thumbDz.addEventListener(evt,(e)=>{e.preventDefault();thumbDz.classList.add('dragover');}));
+  ['dragleave','drop'].forEach(evt=>thumbDz.addEventListener(evt,(e)=>{e.preventDefault();thumbDz.classList.remove('dragover');}));
+  thumbDz.addEventListener('drop',(e)=>{
+    if(e.dataTransfer.files && e.dataTransfer.files[0]){ handleThumbFile(e.dataTransfer.files[0]); }
+  });
+  thumbInput.addEventListener('change', (e)=>{ if(e.target.files[0]) handleThumbFile(e.target.files[0]); });
+  function handleThumbFile(file){
+    if(!file.type.startsWith('image/')){ toastError('Selecciona una imagen válida.'); return; }
+    selectedThumbFile = file;
+    const url = URL.createObjectURL(file);
+    qs('#thumbFilePreview').innerHTML = `
+      <div class="file-preview">
+        <img src="${url}" alt="">
+        <span>${escapeHTML(file.name)}</span>
+      </div>`;
+  }
+
+  qs('#uploadTitle').addEventListener('input', refreshSubmitState);
+
+  qs('#uploadForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    if(!selectedVideoFile) return;
+    const errBox = qs('#uploadError');
+    errBox.classList.add('hidden');
+    submitBtn.disabled = true;
+    const progressTrack = qs('#uploadProgressTrack');
+    const progressFill = qs('#uploadProgressFill');
+    const statusText = qs('#uploadStatusText');
+    progressTrack.classList.remove('hidden');
+
+    try{
+      const userId = STATE.user.id;
+      const timestamp = Date.now();
+      const safeVideoName = selectedVideoFile.name.replace(/[^a-zA-Z0-9_.\-]/g,'_');
+      const videoPath = `${userId}/${timestamp}_${safeVideoName}`;
+
+      statusText.textContent = 'Subiendo video...';
+      progressFill.style.width = '20%';
+      const { error: videoUploadErr } = await supabase.storage
+        .from('videos')
+        .upload(videoPath, selectedVideoFile, { cacheControl:'3600', upsert:false });
+      if(videoUploadErr) throw new Error('Error subiendo el video: ' + videoUploadErr.message);
+      progressFill.style.width = '55%';
+
+      const { data: videoPublic } = supabase.storage.from('videos').getPublicUrl(videoPath);
+      const videoUrl = videoPublic.publicUrl;
+
+      let thumbnailUrl = null;
+      if(selectedThumbFile){
+        statusText.textContent = 'Subiendo miniatura...';
+        const safeThumbName = selectedThumbFile.name.replace(/[^a-zA-Z0-9_.\-]/g,'_');
+        const thumbPath = `${userId}/${timestamp}_${safeThumbName}`;
+        const { error: thumbUploadErr } = await supabase.storage
+          .from('thumbnails')
+          .upload(thumbPath, selectedThumbFile, { cacheControl:'3600', upsert:false });
+        if(thumbUploadErr) throw new Error('Error subiendo la miniatura: ' + thumbUploadErr.message);
+        const { data: thumbPublic } = supabase.storage.from('thumbnails').getPublicUrl(thumbPath);
+        thumbnailUrl = thumbPublic.publicUrl;
+      }
+      progressFill.style.width = '80%';
+
+      statusText.textContent = 'Publicando...';
+      const { data: inserted, error: insertErr } = await supabase.from('videos').insert({
+        user_id: userId,
+        title: qs('#uploadTitle').value.trim(),
+        description: qs('#uploadDescription').value.trim(),
+        video_url: videoUrl,
+        thumbnail_url: thumbnailUrl,
+        duration: videoDuration,
+        category: qs('#uploadCategory').value,
+        is_short: isShort,
+        views: 0
+      }).select().maybeSingle();
+      if(insertErr) throw new Error('El archivo se subió pero no se pudo publicar: ' + insertErr.message);
+
+      progressFill.style.width = '100%';
+      statusText.textContent = '¡Listo!';
+      toastSuccess('Video publicado correctamente.');
+      closeModal();
+      if(inserted && inserted.id){
+        location.hash = '#/watch/' + inserted.id;
+      } else {
+        renderRoute();
+      }
+    }catch(err){
+      errBox.textContent = err.message || 'No se pudo completar la subida.';
+      errBox.classList.remove('hidden');
+      statusText.textContent = '';
+      progressTrack.classList.add('hidden');
+    }finally{
+      submitBtn.disabled = false;
+    }
+  });
+}
+
+/* ================================================================
+   SHORTS PAGE
+================================================================ */
+async function renderShortsPage(main, focusId){
+  main.innerHTML = `<div class="shorts-feed" id="shortsFeed"><div class="page-loading"><span class="spinner"></span></div></div>`;
+  try{
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .eq('is_short', true)
+      .order('created_at', { ascending:false })
+      .limit(30);
+    if(error) throw error;
+    const feed = qs('#shortsFeed');
+    if(!data || data.length===0){
+      feed.innerHTML = `
+        <div class="state-box" style="height:100%;">
+          <div class="state-ico">⚡</div>
+          <h3>No hay Shorts todavía</h3>
+          <p>Crea el primer Short de JHEILER.</p>
+          <button class="retry-btn" id="shortsUploadCta">Crear un Short</button>
+        </div>`;
+      const cta = qs('#shortsUploadCta');
+      if(cta) cta.addEventListener('click', ()=>openCreateModal());
+      return;
+    }
+    let ordered = data;
+    if(focusId){
+      const idx = ordered.findIndex(v=>v.id===focusId);
+      if(idx>0){ const [item] = ordered.splice(idx,1); ordered.unshift(item); }
+    }
+    const likeStates = {};
+    if(STATE.user){
+      const ids = ordered.map(v=>v.id);
+      const { data: likedRows } = await supabase.from('video_likes').select('video_id').eq('user_id',STATE.user.id).in('video_id', ids);
+      (likedRows||[]).forEach(r=>likeStates[r.video_id]=true);
+    }
+    feed.innerHTML = ordered.map(v=>shortItemHTML(v, likeStates[v.id])).join('');
+    bindShortsEvents(feed, ordered);
+    setupShortsAutoplay(feed);
+  }catch(err){
+    renderErrorPage(main, err);
+  }
+}
+function shortItemHTML(v, liked){
+  const ch = v.profiles||{};
+  return `
+    <div class="short-item" data-short-id="${escapeHTML(v.id)}">
+      <div class="short-frame">
+        <video src="${escapeHTML(v.video_url)}" loop muted playsinline data-short-video></video>
+        <div class="short-info-overlay">
+          <a href="#/channel/${escapeHTML(v.user_id)}" class="schannel">${avatarHTML(ch)} ${escapeHTML(ch.display_name||ch.username||'Canal')}</a>
+          <div class="stitle">${escapeHTML(v.title)}</div>
+        </div>
+        <div class="short-side-actions">
+          <button class="short-action-btn ${liked?'liked':''}" data-short-like="${escapeHTML(v.id)}">
+            <span class="circle">👍</span><span class="like-label">Me gusta</span>
+          </button>
+          <button class="short-action-btn" data-short-comment="${escapeHTML(v.id)}">
+            <span class="circle">💬</span><span>Comentar</span>
+          </button>
+          <button class="short-action-btn" data-short-share="${escapeHTML(v.id)}">
+            <span class="circle">🔗</span><span>Compartir</span>
+          </button>
+        </div>
+      </div>
+    </div>`;
+}
+function bindShortsEvents(feed, videos){
+  const byId = {}; videos.forEach(v=>byId[v.id]=v);
+
+  qsa('[data-short-video]', feed).forEach(vid=>{
+    vid.addEventListener('click', ()=>{ vid.paused ? vid.play() : vid.pause(); });
+  });
+
+  qsa('[data-short-like]', feed).forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      if(!requireAuth('dar like')) return;
+      const id = btn.dataset.shortLike;
+      const liked = btn.classList.contains('liked');
+      btn.disabled = true;
+      try{
+        if(liked){
+          await supabase.from('video_likes').delete().eq('video_id',id).eq('user_id',STATE.user.id);
+          btn.classList.remove('liked');
+        } else {
+          const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id',id).eq('user_id',STATE.user.id).maybeSingle();
+          if(!existing) await supabase.from('video_likes').insert({ video_id:id, user_id:STATE.user.id });
+          btn.classList.add('liked');
+        }
+      }catch(err){
+        toastError('No se pudo actualizar el like.');
+      }finally{
+        btn.disabled = false;
+      }
+    });
+  });
+  qsa('[data-short-share]', feed).forEach(btn=>{
+    btn.addEventListener('click', ()=>shareVideo(btn.dataset.shortShare));
+  });
+  qsa('[data-short-comment]', feed).forEach(btn=>{
+    btn.addEventListener('click', ()=>openShortCommentsModal(byId[btn.dataset.shortComment]));
+  });
+}
+function setupShortsAutoplay(feed){
+  const videos = qsa('[data-short-video]', feed);
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      const vid = entry.target;
+      if(entry.isIntersecting && entry.intersectionRatio>0.6){
+        vid.play().catch(()=>{});
+        const parentItem = vid.closest('.short-item');
+        registerWatchHistory(parentItem.dataset.shortId);
+        incrementViewCount(parentItem.dataset.shortId);
+      } else {
+        vid.pause();
+      }
+    });
+  }, { threshold:[0,0.6,1] });
+  videos.forEach(v=>observer.observe(v));
+}
+function openShortCommentsModal(video){
+  if(!video) return;
+  const html = `
+    <div class="modal-head">
+      <h2>Comentarios</h2>
+      <button class="modal-close" id="shortCommentsClose">✕</button>
+    </div>
+    ${STATE.user ? `
+      <form class="comment-form" id="shortCommentForm">
+        ${avatarHTML(STATE.profile)}
+        <div class="comment-input-wrap">
+          <input type="text" id="shortCommentInput" placeholder="Añade un comentario..." maxlength="1000">
+          <div class="comment-form-actions">
+            <button type="submit" class="btn btn-primary">Comentar</button>
+          </div>
+        </div>
+      </form>` : `<div style="margin-bottom:16px;font-size:13px;color:var(--text-secondary);"><a href="#" id="shortCommentLoginPrompt" style="color:#3ea6ff;">Inicia sesión</a> para comentar.</div>`}
+    <div id="shortCommentsList"><span class="spinner"></span></div>
+  `;
+  openModal(html);
+  qs('#shortCommentsClose').addEventListener('click', closeModal);
+  const loginPrompt = qs('#shortCommentLoginPrompt');
+  if(loginPrompt) loginPrompt.addEventListener('click',(e)=>{e.preventDefault();closeModal();openAuthModal('login');});
+  const form = qs('#shortCommentForm');
+  if(form) form.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const input = qs('#shortCommentInput');
+    const text = input.value.trim();
+    if(!text) return;
+    try{
+      const { error } = await supabase.from('comments').insert({ video_id: video.id, user_id: STATE.user.id, content:text });
+      if(error) throw error;
+      input.value = '';
+      loadModalComments(video.id);
+    }catch(err){ toastError('No se pudo comentar: '+err.message); }
+  });
+  loadModalComments(video.id);
+}
+async function loadModalComments(videoId){
+  const list = qs('#shortCommentsList');
+  if(!list) return;
+  try{
+    const { data, error } = await supabase.from('comments').select('*, profiles!comments_user_id_fkey(*)').eq('video_id',videoId).order('created_at',{ascending:false});
+    if(error) throw error;
+    list.innerHTML = (!data||data.length===0) ? `<div style="color:var(--text-secondary);font-size:14px;">Sé el primero en comentar.</div>` : data.map(commentHTML).join('');
+  }catch(err){
+    list.innerHTML = `<div style="color:var(--text-secondary);font-size:13px;">No se pudieron cargar los comentarios.</div>`;
+  }
+}
+
+/* ================================================================
+   HISTORY / WATCH LATER / LIKED / YOUR VIDEOS / SUBSCRIPTIONS
+================================================================ */
+async function renderAuthGatedListPage(main, opts){
+  if(!requireAuth(opts.actionLabel)){
+    main.innerHTML = `
+      <div class="state-box">
+        <div class="state-ico">${opts.icon}</div>
+        <h3>${escapeHTML(opts.title)}</h3>
+        <p>Inicia sesión para ver esta sección.</p>
+        <button class="retry-btn" onclick="openAuthModal('login')">Iniciar sesión</button>
+      </div>`;
+    return null;
+  }
+  main.innerHTML = `<h2 class="section-heading">${escapeHTML(opts.title)}</h2><div class="video-grid" id="listGrid">${skeletonCardsHTML(8)}</div>`;
+  return qs('#listGrid');
+}
+
+async function renderHistoryPage(main){
+  const grid = await renderAuthGatedListPage(main, { title:'Historial', icon:'🕒', actionLabel:'ver tu historial' });
+  if(!grid) return;
+  try{
+    const { data, error } = await supabase
+      .from('watch_history')
+      .select('created_at, videos(*, profiles!videos_user_id_fkey(*))')
+      .eq('user_id', STATE.user.id)
+      .order('created_at', { ascending:false })
+      .limit(60);
+    if(error) throw error;
+    const videos = (data||[]).map(r=>r.videos).filter(Boolean);
+    renderListGridResult(grid, videos, { icon:'🕒', title:'Sin historial todavía', desc:'Los videos que veas aparecerán aquí.' });
+  }catch(err){
+    grid.outerHTML = `<div class="state-box"><div class="state-ico">⚠️</div><h3>Error al cargar</h3><p>${escapeHTML(err.message)}</p></div>`;
+  }
+}
+
+async function renderWatchLaterPage(main){
+  const grid = await renderAuthGatedListPage(main, { title:'Ver más tarde', icon:'⏰', actionLabel:'ver tu lista' });
+  if(!grid) return;
+  try{
+    const { data, error } = await supabase
+      .from('watch_later')
+      .select('created_at, id, videos(*, profiles!videos_user_id_fkey(*))')
+      .eq('user_id', STATE.user.id)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    const videos = (data||[]).map(r=>r.videos).filter(Boolean);
+    renderListGridResult(grid, videos, { icon:'⏰', title:'Nada guardado todavía', desc:'Guarda videos para verlos más tarde.' });
+  }catch(err){
+    grid.outerHTML = `<div class="state-box"><div class="state-ico">⚠️</div><h3>Error al cargar</h3><p>${escapeHTML(err.message)}</p></div>`;
+  }
+}
+
+async function renderLikedPage(main){
+  const grid = await renderAuthGatedListPage(main, { title:'Videos que me gustan', icon:'👍', actionLabel:'ver tus likes' });
+  if(!grid) return;
+  try{
+    const { data, error } = await supabase
+      .from('video_likes')
+      .select('created_at, videos(*, profiles!videos_user_id_fkey(*))')
+      .eq('user_id', STATE.user.id)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    const videos = (data||[]).map(r=>r.videos).filter(Boolean);
+    renderListGridResult(grid, videos, { icon:'👍', title:'Ningún video con like todavía', desc:'Los videos que marques con like aparecerán aquí.' });
+  }catch(err){
+    grid.outerHTML = `<div class="state-box"><div class="state-ico">⚠️</div><h3>Error al cargar</h3><p>${escapeHTML(err.message)}</p></div>`;
+  }
+}
+
+async function renderYourVideosPage(main){
+  const grid = await renderAuthGatedListPage(main, { title:'Tus videos', icon:'🎬', actionLabel:'ver tus videos' });
+  if(!grid) return;
+  try{
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .eq('user_id', STATE.user.id)
+      .order('created_at', { ascending:false });
+    if(error) throw error;
+    renderListGridResult(grid, data||[], { icon:'🎬', title:'Todavía no has publicado videos', desc:'Sube tu primer video a JHEILER.', ctaText:'Subir un video', ctaFn:openCreateModal });
+  }catch(err){
+    grid.outerHTML = `<div class="state-box"><div class="state-ico">⚠️</div><h3>Error al cargar</h3><p>${escapeHTML(err.message)}</p></div>`;
+  }
+}
+
+async function renderSubscriptionsPage(main){
+  const grid = await renderAuthGatedListPage(main, { title:'Suscripciones', icon:'📺', actionLabel:'ver tus suscripciones' });
+  if(!grid) return;
+  try{
+    const { data: subs, error: subErr } = await supabase
+      .from('subscriptions').select('channel_id').eq('subscriber_id', STATE.user.id);
+    if(subErr) throw subErr;
+    const channelIds = (subs||[]).map(s=>s.channel_id);
+    if(channelIds.length===0){
+      renderListGridResult(grid, [], { icon:'📺', title:'No sigues ningún canal todavía', desc:'Suscríbete a canales para ver sus videos aquí.' });
+      return;
+    }
+    const { data, error } = await supabase
+      .from('videos')
+      .select('*, profiles!videos_user_id_fkey(*)')
+      .in('user_id', channelIds)
+      .order('created_at', { ascending:false })
+      .limit(40);
+    if(error) throw error;
+    renderListGridResult(grid, data||[], { icon:'📺', title:'Tus canales aún no han publicado', desc:'Vuelve más tarde para ver contenido nuevo.' });
+  }catch(err){
+    grid.outerHTML = `<div class="state-box"><div class="state-ico">⚠️</div><h3>Error al cargar</h3><p>${escapeHTML(err.message)}</p></div>`;
+  }
+}
+
+function renderListGridResult(grid, videos, emptyOpts){
+  if(!videos || videos.length===0){
+    grid.outerHTML = `
+      <div class="state-box">
+        <div class="state-ico">${emptyOpts.icon}</div>
+        <h3>${escapeHTML(emptyOpts.title)}</h3>
+        <p>${escapeHTML(emptyOpts.desc)}</p>
+        ${emptyOpts.ctaText ? `<button class="retry-btn" id="listEmptyCta">${escapeHTML(emptyOpts.ctaText)}</button>` : ''}
+      </div>`;
+    if(emptyOpts.ctaFn){
+      const cta = qs('#listEmptyCta');
+      if(cta) cta.addEventListener('click', emptyOpts.ctaFn);
+    }
+    return;
+  }
+  const map = {}; videos.forEach(v=>map[v.id]=v);
+  grid.innerHTML = videos.map(videoCardHTML).join('');
+  bindCardMenus(grid, map);
+}
+
+/* ================================================================
+   CHANNEL PAGE
+================================================================ */
+async function renderChannelPage(main, channelId, tab){
+  main.innerHTML = pageLoadingHTML();
+  try{
+    const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', channelId).maybeSingle();
+    if(error) throw error;
+    if(!profile){
+      main.innerHTML = `
+        <div class="state-box">
+          <div class="state-ico">👤</div>
+          <h3>Canal no encontrado</h3>
+          <a class="retry-btn" href="#/home">Volver al inicio</a>
+        </div>`;
+      return;
+    }
+    const { count: subsCount } = await supabase.from('subscriptions').select('*',{count:'exact',head:true}).eq('channel_id',channelId);
+    let isSubscribed = false;
+    if(STATE.user && STATE.user.id!==channelId){
+      const { data: subRow } = await supabase.from('subscriptions').select('id').eq('channel_id',channelId).eq('subscriber_id',STATE.user.id).maybeSingle();
+      isSubscribed = !!subRow;
+    }
+
+    main.innerHTML = `
+      <div class="channel-banner">
+        ${profile.banner_url ? `<img src="${escapeHTML(profile.banner_url)}" alt="">` : ''}
+      </div>
+      <div class="channel-head">
+        ${avatarHTML(profile)}
+        <div class="channel-head-info">
+          <h1>${escapeHTML(profile.display_name||profile.username)}</h1>
+          <div class="chandle">@${escapeHTML(profile.username)} · ${formatCount(subsCount||0)} suscriptores</div>
+          ${profile.description ? `<div class="cdesc">${escapeHTML(profile.description)}</div>` : ''}
+        </div>
+        ${STATE.user && STATE.user.id===channelId ? `
+          <button class="btn btn-secondary" id="editProfileBtn">Editar perfil</button>
+        ` : `
+          <button class="subscribe-btn ${isSubscribed?'subscribed':''}" id="channelSubscribeBtn">${isSubscribed?'Suscrito ✓':'Suscribirse'}</button>
+        `}
+      </div>
+      <div class="channel-tabs">
+        <a class="channel-tab ${tab==='home'?'active':''}" href="#/channel/${escapeHTML(channelId)}/home">Inicio</a>
+        <a class="channel-tab ${tab==='videos'?'active':''}" href="#/channel/${escapeHTML(channelId)}/videos">Videos</a>
+        <a class="channel-tab ${tab==='shorts'?'active':''}" href="#/channel/${escapeHTML(channelId)}/shorts">Shorts</a>
+      </div>
+      <div class="video-grid" id="channelGrid">${skeletonCardsHTML(8)}</div>
+    `;
+
+    const subBtn = qs('#channelSubscribeBtn');
+    if(subBtn) subBtn.addEventListener('click', ()=>toggleSubscribe(channelId, subBtn));
+    const editBtn = qs('#editProfileBtn');
+    if(editBtn) editBtn.addEventListener('click', openEditProfileModal);
+
+    const isShortTab = tab==='shorts';
+    let q = supabase.from('videos').select('*, profiles!videos_user_id_fkey(*)').eq('user_id', channelId);
+    if(tab==='videos') q = q.eq('is_short', false);
+    else if(tab==='shorts') q = q.eq('is_short', true);
+    q = q.order('created_at',{ascending:false}).limit(30);
+    const { data: videos, error: vErr } = await q;
+    if(vErr) throw vErr;
+
+    const grid = qs('#channelGrid');
+    if(!videos || videos.length===0){
+      grid.outerHTML = `
+        <div class="state-box">
+          <div class="state-ico">🎬</div>
+          <h3>Este canal aún no tiene contenido${tab!=='home'?(' de este tipo'):''}</h3>
+        </div>`;
+      return;
+    }
+    const map = {}; videos.forEach(v=>map[v.id]=v);
+    grid.innerHTML = videos.map(videoCardHTML).join('');
+    bindCardMenus(grid, map);
+  }catch(err){
+    renderErrorPage(main, err);
+  }
+}
+
+function openEditProfileModal(){
+  const p = STATE.profile || {};
+  const html = `
+    <div class="modal-head">
+      <h2>Editar perfil</h2>
+      <button class="modal-close" id="editProfileClose">✕</button>
+    </div>
+    <form id="editProfileForm">
+      <div class="field">
+        <label>Nombre visible</label>
+        <input type="text" id="editDisplayName" value="${escapeHTML(p.display_name||'')}" maxlength="60" required>
+      </div>
+      <div class="field">
+        <label>Descripción</label>
+        <textarea id="editDescription" maxlength="1000">${escapeHTML(p.description||'')}</textarea>
+      </div>
+      <div class="field">
+        <label>Avatar (imagen)</label>
+        <div class="dropzone" id="avatarDropzone">
+          <div class="dz-ico">🙂</div><div>Seleccionar imagen de avatar (opcional)</div>
+          <input type="file" id="avatarFileInput" accept="image/*" class="hidden">
+        </div>
+        <div id="avatarFilePreview"></div>
+      </div>
+      <div class="field">
+        <label>Banner (imagen)</label>
+        <div class="dropzone" id="bannerDropzone">
+          <div class="dz-ico">🖼️</div><div>Seleccionar imagen de banner (opcional)</div>
+          <input type="file" id="bannerFileInput" accept="image/*" class="hidden">
+        </div>
+        <div id="bannerFilePreview"></div>
+      </div>
+      <div id="editProfileError" class="field-error hidden"></div>
+      <button type="submit" class="btn btn-primary btn-full" id="editProfileSubmitBtn">Guardar cambios</button>
+    </form>
+  `;
+  openModal(html, { persistent:true });
+  qs('#editProfileClose').addEventListener('click', closeModal);
+
+  let avatarFile=null, bannerFile=null;
+  const avatarDz = qs('#avatarDropzone'), avatarInput = qs('#avatarFileInput');
+  avatarDz.addEventListener('click', ()=>avatarInput.click());
+  avatarInput.addEventListener('change',(e)=>{
+    if(e.target.files[0]){ avatarFile=e.target.files[0]; qs('#avatarFilePreview').innerHTML=`<div class="file-preview"><img src="${URL.createObjectURL(avatarFile)}">${escapeHTML(avatarFile.name)}</div>`; }
+  });
+  const bannerDz = qs('#bannerDropzone'), bannerInput = qs('#bannerFileInput');
+  bannerDz.addEventListener('click', ()=>bannerInput.click());
+  bannerInput.addEventListener('change',(e)=>{
+    if(e.target.files[0]){ bannerFile=e.target.files[0]; qs('#bannerFilePreview').innerHTML=`<div class="file-preview"><img src="${URL.createObjectURL(bannerFile)}">${escapeHTML(bannerFile.name)}</div>`; }
+  });
+
+  qs('#editProfileForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const btn = qs('#editProfileSubmitBtn');
+    const errBox = qs('#editProfileError');
+    errBox.classList.add('hidden');
+    btn.disabled = true; btn.innerHTML='<span class="spinner"></span>';
+    try{
+      const updates = {
+        display_name: qs('#editDisplayName').value.trim(),
+        description: qs('#editDescription').value.trim()
+      };
+      if(avatarFile){
+        const path = `${STATE.user.id}/${Date.now()}_avatar_${avatarFile.name.replace(/[^a-zA-Z0-9_.\-]/g,'_')}`;
+        const { error: upErr } = await supabase.storage.from('thumbnails').upload(path, avatarFile, { upsert:false });
+        if(upErr) throw upErr;
+        const { data: pub } = supabase.storage.from('thumbnails').getPublicUrl(path);
+        updates.avatar_url = pub.publicUrl;
+      }
+      if(bannerFile){
+        const path = `${STATE.user.id}/${Date.now()}_banner_${bannerFile.name.replace(/[^a-zA-Z0-9_.\-]/g,'_')}`;
+        const { error: upErr } = await supabase.storage.from('thumbnails').upload(path, bannerFile, { upsert:false });
+        if(upErr) throw upErr;
+        const { data: pub } = supabase.storage.from('thumbnails').getPublicUrl(path);
+        updates.banner_url = pub.publicUrl;
+      }
+      const { error } = await supabase.from('profiles').update(updates).eq('id', STATE.user.id);
+      if(error) throw error;
+      await loadProfile();
+      updateHeaderAuthUI();
+      toastSuccess('Perfil actualizado.');
+      closeModal();
+      renderRoute();
+    }catch(err){
+      errBox.textContent = err.message || 'No se pudo actualizar el perfil.';
+      errBox.classList.remove('hidden');
+    }finally{
+      btn.disabled=false; btn.textContent='Guardar cambios';
+    }
+  });
+}
+
+/* ================================================================
+   SETTINGS PAGE
+================================================================ */
+async function renderSettingsPage(main){
+  main.innerHTML = `
+    <div class="settings-wrap">
+      <h2 class="section-heading">Configuración</h2>
+      <div class="settings-group">
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Tema</div>
+            <div class="settings-row-desc">Elige cómo se ve JHEILER</div>
+          </div>
+          <div class="radio-group">
+            <label class="radio-opt"><input type="radio" name="themeOpt" value="dark" ${STATE.theme==='dark'?'checked':''}> Oscuro</label>
+            <label class="radio-opt"><input type="radio" name="themeOpt" value="light" ${STATE.theme==='light'?'checked':''}> Claro</label>
+            <label class="radio-opt"><input type="radio" name="themeOpt" value="system" ${STATE.theme==='system'?'checked':''}> Sistema</label>
+          </div>
+        </div>
+      </div>
+      <div class="settings-group">
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Reproducción automática</div>
+            <div class="settings-row-desc">Reproduce el siguiente video automáticamente</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="autoplayToggle" ${STATE.autoplay?'checked':''}>
+            <span class="switch-track"></span>
+          </label>
+        </div>
+        <div class="settings-row">
+          <div>
+            <div class="settings-row-label">Notificaciones</div>
+            <div class="settings-row-desc">Recibe avisos de actividad en tu canal</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="notifToggle" ${STATE.notifPref?'checked':''}>
+            <span class="switch-track"></span>
+          </label>
+        </div>
+      </div>
+      ${STATE.user ? `
+      <div class="settings-group">
+        <div class="settings-row">
+          <div class="settings-row-label">Cuenta: ${escapeHTML(STATE.user.email||'')}</div>
+          <button class="btn btn-danger" id="settingsLogoutBtn">Cerrar sesión</button>
+        </div>
+      </div>` : ''}
+    </div>
+  `;
+  qsa('input[name="themeOpt"]').forEach(r=>{
+    r.addEventListener('change', ()=>{
+      STATE.theme = r.value;
+      localStorage.setItem('jh_theme', STATE.theme);
+      toastSuccess('Preferencia de tema guardada.');
+    });
+  });
+  qs('#autoplayToggle').addEventListener('change',(e)=>{
+    STATE.autoplay = e.target.checked;
+    localStorage.setItem('jh_autoplay', String(STATE.autoplay));
+    toastSuccess('Preferencia guardada.');
+  });
+  qs('#notifToggle').addEventListener('change',(e)=>{
+    STATE.notifPref = e.target.checked;
+    localStorage.setItem('jh_notif', String(STATE.notifPref));
+    toastSuccess('Preferencia guardada.');
+  });
+  const logoutBtn = qs('#settingsLogoutBtn');
+  if(logoutBtn) logoutBtn.addEventListener('click', doSignOut);
+}
+
+/* ================================================================
+   SIDEBAR TOGGLE / MOBILE MENU
+================================================================ */
+function closeMobileSidebarIfOpen(){
+  if(window.innerWidth<=900){
+    qs('#sidebar').classList.remove('show');
+    qs('#sidebarOverlay').classList.add('hidden');
+    STATE.sidebarMobileOpen = false;
+  }
+}
+function toggleSidebar(){
+  if(window.innerWidth<=900){
+    STATE.sidebarMobileOpen = !STATE.sidebarMobileOpen;
+    qs('#sidebar').classList.toggle('show', STATE.sidebarMobileOpen);
+    qs('#sidebarOverlay').classList.toggle('hidden', !STATE.sidebarMobileOpen);
+  } else {
+    STATE.sidebarMini = !STATE.sidebarMini;
+    qs('#sidebar').classList.toggle('mini', STATE.sidebarMini);
+    qs('#mainContent').classList.toggle('mini-margin', STATE.sidebarMini);
+  }
+}
+
+/* ================================================================
+   GLOBAL EVENT BINDING (runs once)
+================================================================ */
+function bindGlobalEvents(){
+  qs('#btnToggleSidebar').addEventListener('click', toggleSidebar);
+  qs('#sidebarOverlay').addEventListener('click', closeMobileSidebarIfOpen);
+
+  qs('#searchForm').addEventListener('submit', (e)=>{ e.preventDefault(); doSearch(); });
+  qs('#searchSubmitBtn').addEventListener('click', doSearch);
+  qs('#micBtn').addEventListener('click', ()=>{
+    if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+      try{
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const rec = new SR();
+        rec.lang = 'es-ES';
+        rec.onresult = (ev)=>{ qs('#searchInput').value = ev.results[0][0].transcript; doSearch(); };
+        rec.start();
+        toastSuccess('Escuchando...');
+      }catch(e){ toastError('Búsqueda por voz no disponible.'); }
+    } else {
+      toastError('Tu navegador no soporta búsqueda por voz.');
+    }
+  });
+
+  qs('#btnCreate').addEventListener('click', openCreateModal);
+  qs('#btnOpenLogin').addEventListener('click', ()=>openAuthModal('login'));
+  qs('#btnLogout').addEventListener('click', doSignOut);
+  qs('#helpLink').addEventListener('click', (e)=>{
+    e.preventDefault();
+    toast('JHEILER — plataforma de videos. Para soporte, contacta al administrador.');
+  });
+
+  setupDropdown('btnUserMenu','userMenu');
+  setupDropdown('btnNotifications','notifMenu');
+}
+
+/* ================================================================
+   BOOTSTRAP
+================================================================ */
+(async function bootstrap(){
+  bindGlobalEvents();
+  await initAuth();
+  if(!location.hash) location.hash = '#/home';
+  renderRoute();
+})();
+</script>
 </body>
 </html>
