@@ -149,6 +149,95 @@
         }
         .create-btn:active { transform: scale(0.98); }
         
+        /* ===== PERFIL / AUTH ===== */
+        .auth-btn {
+            padding: 8px 18px;
+            background: var(--panel2);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            color: #fff;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .auth-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        .profile-wrapper {
+            position: relative;
+        }
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px 4px 4px;
+            background: var(--panel2);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        .profile-btn:hover {
+            border-color: var(--accent);
+        }
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .profile-username {
+            font-size: 13px;
+            font-weight: 600;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .profile-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            min-width: 200px;
+            box-shadow: var(--shadow);
+            display: none;
+            overflow: hidden;
+            z-index: 300;
+        }
+        .profile-dropdown.active { display: block; }
+        .profile-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background var(--transition-fast);
+            font-size: 14px;
+        }
+        .profile-dropdown-item:hover {
+            background: var(--panel2);
+        }
+        .profile-dropdown-item i {
+            width: 18px;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+        .profile-dropdown-item.danger {
+            color: #ff6b6b;
+            border-top: 1px solid var(--border);
+        }
+        .profile-dropdown-item.danger i { color: #ff6b6b; }
+        
         /* ===== SIDEBAR ===== */
         aside {
             position: fixed;
@@ -315,6 +404,7 @@
             transition: all var(--transition-normal);
             cursor: pointer;
             border-radius: var(--radius);
+            position: relative;
         }
         .video-card:hover {
             transform: translateY(-5px);
@@ -372,6 +462,39 @@
             font-size: 20px;
             color: #fff;
             margin-left: 4px;
+        }
+        .video-actions {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity var(--transition-fast);
+            z-index: 2;
+        }
+        .video-card:hover .video-actions { opacity: 1; }
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: all var(--transition-fast);
+        }
+        .action-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        .action-btn.active {
+            background: var(--accent);
         }
         .video-info {
             display: flex;
@@ -439,30 +562,64 @@
         .card-meta i { font-size: 11px; }
         
         /* ===== EMPTY STATE & LOADING ===== */
-        .empty-state, .loading-state {
+        .empty-state, .loading-state, .auth-state, .error-state {
             grid-column: 1 / -1;
             text-align: center;
             padding: 80px 20px;
             color: var(--text-secondary);
         }
-        .empty-state i, .loading-state i {
+        .empty-state i, .loading-state i, .auth-state i, .error-state i {
             font-size: 64px;
             display: block;
             margin-bottom: 16px;
             color: var(--border);
         }
-        .empty-state h3, .loading-state h3 {
+        .empty-state h3, .loading-state h3, .auth-state h3, .error-state h3 {
             font-size: 22px;
             margin-bottom: 8px;
             color: #fff;
+        }
+        .empty-state p, .auth-state p, .error-state p {
+            margin-bottom: 20px;
         }
         .loading-state i {
             color: var(--accent);
             animation: spin 1s linear infinite;
         }
+        .error-state i { color: #ff6b6b; }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        
+        /* ===== SKELETON ===== */
+        .skeleton-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 28px 20px;
+            grid-column: 1 / -1;
+        }
+        .skeleton-card {
+            animation: shimmer 1.5s infinite linear;
+            background: linear-gradient(90deg, var(--panel2) 25%, var(--border) 50%, var(--panel2) 75%);
+            background-size: 200% 100%;
+            border-radius: var(--radius);
+        }
+        .skeleton-thumb {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+        }
+        .skeleton-line {
+            height: 12px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .skeleton-line.short { width: 60%; }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
         
         /* ===== REPRODUCTOR ===== */
@@ -569,10 +726,10 @@
             padding: 28px 32px;
             border-radius: 20px;
             width: 100%;
-            max-width: 500px;
+            max-width: 440px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 14px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             max-height: 90vh;
@@ -589,6 +746,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 4px;
         }
         .modal-content h3 i { color: var(--accent); }
         .modal-content input,
@@ -602,6 +760,7 @@
             font-size: 14px;
             transition: border var(--transition-fast), box-shadow var(--transition-fast);
             width: 100%;
+            font-family: inherit;
         }
         .modal-content input:focus,
         .modal-content textarea:focus,
@@ -613,7 +772,6 @@
         .modal-content textarea {
             resize: vertical;
             min-height: 80px;
-            font-family: inherit;
         }
         .modal-actions {
             display: flex;
@@ -633,6 +791,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            font-family: inherit;
         }
         .btn-primary {
             background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -682,6 +841,23 @@
             margin-top: 6px;
             font-size: 12px;
         }
+        .modal-switch {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        .modal-switch a {
+            color: var(--accent);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .modal-switch a:hover { text-decoration: underline; }
+        .input-error {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: -6px;
+        }
         
         /* ===== TOAST ===== */
         .toast {
@@ -715,7 +891,7 @@
                 margin-left: 0;
                 padding: 76px 16px 24px 16px;
             }
-            .video-grid {
+            .video-grid, .skeleton-grid {
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
                 gap: 16px;
             }
@@ -739,9 +915,10 @@
             }
             .player-title { font-size: 15px; }
             .sort-bar { flex-direction: column; align-items: flex-start; }
+            .profile-username { display: none; }
         }
         @media (max-width: 480px) {
-            .video-grid {
+            .video-grid, .skeleton-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 12px;
             }
@@ -763,7 +940,7 @@
 <body>
     <!-- ===== HEADER ===== -->
     <header>
-        <a href="#" class="brand" onclick="location.reload()">
+        <a href="#" class="brand" onclick="goToHome(); return false;">
             <i class="fas fa-play"></i> JHEILER
         </a>
         <div class="header-actions">
@@ -777,6 +954,7 @@
                 <i class="fas fa-plus"></i>
                 <span>Crear</span>
             </button>
+            <div id="authContainer"></div>
         </div>
     </header>
 
@@ -804,10 +982,9 @@
             </a>
             <a class="sb-item" data-section="favoritos">
                 <i class="fas fa-heart"></i> Favoritos
-                <span class="badge">3</span>
             </a>
             <a class="sb-item" data-section="ver-despues">
-                <i class="fas fa-clock"></i> Ver después
+                <i class="fas fa-bookmark"></i> Ver después
             </a>
         </div>
     </aside>
@@ -854,7 +1031,6 @@
                 <option value="recientes">Más recientes</option>
                 <option value="vistos">Más vistos</option>
                 <option value="antiguos">Más antiguos</option>
-                <option value="aleatorio">Aleatorio</option>
             </select>
         </div>
 
@@ -868,13 +1044,17 @@
         // ============================================
         const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
+        const EMAIL_DOMAIN = "jheiler.local";
+        
         let sb = null;
         try {
             if (window.supabase) {
-                sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                    auth: { persistSession: true, autoRefreshToken: true }
+                });
             }
         } catch (e) {
-            console.warn('Supabase no disponible, usando datos locales');
+            console.warn('Supabase no disponible:', e.message);
         }
 
         const grid = document.getElementById('videoGrid');
@@ -886,26 +1066,32 @@
         const playerHashtags = document.getElementById('playerHashtags');
         const playerClose = document.getElementById('playerClose');
         const sortSelect = document.getElementById('sortSelect');
+        const authContainer = document.getElementById('authContainer');
+        const categoriesContainer = document.getElementById('categoriesContainer');
 
         let currentSection = 'inicio';
         let currentCategory = 'todos';
         let currentSort = 'recientes';
-        let allVideos = [];
+        let currentUser = null;
+        let currentProfile = null;
+        let favoriteIds = new Set();
+        let watchLaterIds = new Set();
 
         // ============================================
-        // DATOS DE EJEMPLO
+        // DATOS DE EJEMPLO (solo si Supabase falla en Inicio)
         // ============================================
         const sampleVideos = [
             {
                 id: '1',
                 title: 'ROBLOX: La mejor aventura épica',
-                description: 'Explorando el mundo de Roblox con amigos y construyendo increíbles estructuras.',
+                description: 'Explorando el mundo de Roblox con amigos',
                 category: 'roblox',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: 'https://picsum.photos/seed/roblox1/400/225',
                 views: 4700,
                 duration: 680,
-                channel: 'JHEILER',
+                channel: 'demo',
+                username: 'demo',
                 hashtags: ['#Roblox', '#Aventura', '#Gaming'],
                 is_short: false,
                 created_at: '2026-08-17T00:00:00Z'
@@ -913,72 +1099,32 @@
             {
                 id: '2',
                 title: 'IA: El futuro de la tecnología explicado',
-                description: 'Inteligencia artificial explicada de forma sencilla para todos.',
+                description: 'Inteligencia artificial explicada fácil',
                 category: 'ia',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: 'https://picsum.photos/seed/ai1/400/225',
                 views: 4400,
                 duration: 526,
-                channel: 'JHEILER',
-                hashtags: ['#InteligenciaArtificial', '#Tecnología', '#Futuro'],
+                channel: 'demo',
+                username: 'demo',
+                hashtags: ['#IA', '#Tecnología', '#Futuro'],
                 is_short: false,
                 created_at: '2026-08-16T00:00:00Z'
             },
             {
                 id: '3',
-                title: 'MINECRAFT: Construyendo una ciudad desde cero',
-                description: 'Construcción masiva en Minecraft — desde el suelo hasta las nubes.',
+                title: 'MINECRAFT: Construyendo una ciudad',
+                description: 'Construcción masiva en Minecraft',
                 category: 'minecraft',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
                 thumbnail_url: 'https://picsum.photos/seed/minecraft1/400/225',
                 views: 3200,
                 duration: 930,
-                channel: 'JHEILER',
+                channel: 'demo',
+                username: 'demo',
                 hashtags: ['#Minecraft', '#Construcción', '#Creativo'],
                 is_short: false,
                 created_at: '2026-08-15T00:00:00Z'
-            },
-            {
-                id: '4',
-                title: 'Programación Web: Curso Completo desde Cero',
-                description: 'Aprende HTML, CSS y JavaScript paso a paso.',
-                category: 'programacion',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://picsum.photos/seed/code1/400/225',
-                views: 2800,
-                duration: 1335,
-                channel: 'JHEILER',
-                hashtags: ['#Programación', '#Web', '#Coding'],
-                is_short: false,
-                created_at: '2026-08-14T00:00:00Z'
-            },
-            {
-                id: '5',
-                title: '🎵 Música electrónica — Sesión en vivo',
-                description: 'Mezclando los mejores temas del momento.',
-                category: 'musica',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://picsum.photos/seed/music1/400/225',
-                views: 5600,
-                duration: 245,
-                channel: 'JHEILER',
-                hashtags: ['#Música', '#Electrónica', '#Live'],
-                is_short: true,
-                created_at: '2026-08-13T00:00:00Z'
-            },
-            {
-                id: '6',
-                title: '⚽ Análisis del mejor partido del torneo',
-                description: 'Revisión táctica y jugadas destacadas.',
-                category: 'deportes',
-                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: 'https://picsum.photos/seed/sports1/400/225',
-                views: 1800,
-                duration: 410,
-                channel: 'JHEILER',
-                hashtags: ['#Fútbol', '#Deportes', '#Análisis'],
-                is_short: false,
-                created_at: '2026-08-12T00:00:00Z'
             }
         ];
 
@@ -1014,12 +1160,8 @@
 
         function getDefaultThumbnail(category) {
             const seeds = {
-                'roblox': 'roblox',
-                'ia': 'ai',
-                'minecraft': 'minecraft',
-                'programacion': 'code',
-                'musica': 'music',
-                'deportes': 'sports',
+                'roblox': 'roblox', 'ia': 'ai', 'minecraft': 'minecraft',
+                'programacion': 'code', 'musica': 'music', 'deportes': 'sports',
                 'videojuegos': 'games'
             };
             const seed = seeds[category] || 'video';
@@ -1032,16 +1174,11 @@
             const toast = document.createElement('div');
             toast.className = 'toast';
             const iconMap = {
-                success: 'fas fa-check-circle',
-                error: 'fas fa-exclamation-circle',
-                warning: 'fas fa-exclamation-triangle',
-                info: 'fas fa-info-circle'
+                success: 'fas fa-check-circle', error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle', info: 'fas fa-info-circle'
             };
             const colors = {
-                success: '#22c55e',
-                error: '#ef4444',
-                warning: '#f59e0b',
-                info: '#3b82f6'
+                success: '#22c55e', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6'
             };
             toast.innerHTML = `<i class="${iconMap[type] || iconMap.info}" style="color:${colors[type]}"></i> ${message}`;
             document.body.appendChild(toast);
@@ -1053,163 +1190,131 @@
             }, duration);
         }
 
-        // ============================================
-        // REPRODUCTOR
-        // ============================================
-        function playVideo(video) {
-            if (!video || !video.video_url) {
-                showToast('Video no disponible', 'error');
-                return;
-            }
-            playerVideo.src = video.video_url;
-            playerVideo.load();
-            playerTitle.textContent = video.title || 'Sin título';
-            playerChannel.textContent = `@${video.channel || 'JHEILER'}`;
-            playerHashtags.innerHTML = (video.hashtags || []).map(tag => `<span>${tag}</span>`).join('');
-            playerOverlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
-            playerVideo.play().catch(() => {
-                showToast('Presiona ▶ para reproducir', 'info');
-            });
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
-        function closePlayer() {
-            playerVideo.pause();
-            playerVideo.src = '';
-            playerOverlay.classList.remove('active');
-            document.body.style.overflow = '';
+        function usernameToEmail(username) {
+            return `${username.toLowerCase()}@${EMAIL_DOMAIN}`;
         }
 
-        playerClose.addEventListener('click', closePlayer);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && playerOverlay.classList.contains('active')) {
-                closePlayer();
-            }
-        });
-        playerOverlay.addEventListener('click', (e) => {
-            if (e.target === playerOverlay) closePlayer();
-        });
+        function validateUsername(username) {
+            if (!username) return 'El nombre de usuario es obligatorio';
+            if (username.length < 3) return 'Mínimo 3 caracteres';
+            if (username.length > 20) return 'Máximo 20 caracteres';
+            if (/\s/.test(username)) return 'No se permiten espacios';
+            if (!/^[a-zA-Z0-9_]+$/.test(username)) return 'Solo letras, números y _';
+            return null;
+        }
+
+        function validatePassword(password) {
+            if (!password) return 'La contraseña es obligatoria';
+            if (password.length < 8) return 'Mínimo 8 caracteres';
+            return null;
+        }
 
         // ============================================
-        // OBTENER Y PROCESAR VIDEOS
+        // RENDER: SKELETON
         // ============================================
-        async function getVideos() {
+        function renderSkeleton(count = 6) {
+            let html = '<div class="skeleton-grid">';
+            for (let i = 0; i < count; i++) {
+                html += `
+                    <div>
+                        <div class="skeleton-card skeleton-thumb"></div>
+                        <div class="skeleton-card skeleton-line"></div>
+                        <div class="skeleton-card skeleton-line short"></div>
+                    </div>
+                `;
+            }
+            html += '</div>';
+            grid.innerHTML = html;
+        }
+
+        // ============================================
+        // RENDER: ESTADOS
+        // ============================================
+        function renderEmpty(icon, title, message, actionHtml = '') {
             grid.innerHTML = `
-                <div class="loading-state">
-                    <i class="fas fa-spinner"></i>
-                    <h3>Cargando videos...</h3>
+                <div class="empty-state">
+                    <i class="${icon}"></i>
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                    ${actionHtml}
                 </div>
             `;
-            if (sb) {
-                try {
-                    const { data, error } = await sb
-                        .from('videos')
-                        .select('*')
-                        .order('created_at', { ascending: false });
-                    if (!error && data && data.length > 0) {
-                        allVideos = data;
-                        return data;
-                    }
-                } catch (err) {
-                    console.warn('Base de datos no disponible:', err.message);
-                }
-            }
-            allVideos = [...sampleVideos];
-            return sampleVideos;
         }
 
-        function applySorting(videos, sortType) {
-            const sorted = [...videos];
-            switch (sortType) {
-                case 'recientes':
-                    return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-                case 'antiguos':
-                    return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                case 'vistos':
-                    return sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
-                case 'aleatorio':
-                    return sorted.sort(() => Math.random() - 0.5);
-                default:
-                    return sorted;
-            }
+        function renderAuthRequired(message, actionHtml) {
+            grid.innerHTML = `
+                <div class="auth-state">
+                    <i class="fas fa-lock"></i>
+                    <h3>${message}</h3>
+                    ${actionHtml}
+                </div>
+            `;
         }
 
-        function filterVideos(videos, section, category) {
-            let filtered = [...videos];
-            switch (section) {
-                case 'inicio': break;
-                case 'shorts':
-                    filtered = filtered.filter(v => v.is_short === true);
-                    if (filtered.length === 0) filtered = videos.slice(0, 3);
-                    break;
-                case 'suscripciones':
-                    filtered = filtered.slice(0, 4);
-                    break;
-                case 'historial':
-                    filtered = filtered.slice(0, 5);
-                    break;
-                case 'tus-videos':
-                    filtered = filtered.filter(v => (v.channel || '').toLowerCase() === 'jheiler');
-                    break;
-                case 'favoritos':
-                    filtered = filtered.slice(0, 3);
-                    break;
-                case 'ver-despues':
-                    filtered = filtered.sort(() => Math.random() - 0.5).slice(0, 4);
-                    break;
-            }
-            if (category && category !== 'todos') {
-                filtered = filtered.filter(v => (v.category || '').toLowerCase() === category.toLowerCase());
-            }
-            return applySorting(filtered, currentSort);
+        function renderError(message) {
+            grid.innerHTML = `
+                <div class="error-state">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h3>Error</h3>
+                    <p>${message}</p>
+                    <button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="loadCurrentSection()">Reintentar</button>
+                </div>
+            `;
         }
+
         // ============================================
-        // RENDERIZAR VIDEOS
+        // RENDER: VIDEOS
         // ============================================
         function renderVideos(videos) {
             if (!videos || videos.length === 0) {
-                grid.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-video-slash"></i>
-                        <h3>No hay videos aquí</h3>
-                        <p style="color:#888;margin-top:8px;">Intenta con otra categoría o sube tu primer video</p>
-                    </div>
-                `;
+                renderEmpty('fas fa-video-slash', 'No hay videos aquí', 'Intenta con otra categoría');
                 return;
             }
             grid.innerHTML = videos.map(v => {
                 const views = v.views || 0;
                 const duration = formatDuration(v.duration || 0);
                 const hashtags = Array.isArray(v.hashtags) && v.hashtags.length > 0 ? v.hashtags : ['#Video'];
-                const channel = v.channel || 'JHEILER';
-                const initial = channel.charAt(0).toUpperCase();
+                const username = v.username || v.channel || 'usuario';
+                const initial = username.charAt(0).toUpperCase();
                 let thumbUrl = '';
                 if (v.thumbnail_url && typeof v.thumbnail_url === 'string' && v.thumbnail_url.startsWith('http')) {
                     thumbUrl = v.thumbnail_url;
                 } else {
                     thumbUrl = getDefaultThumbnail(v.category || 'general');
                 }
-                const videoData = encodeURIComponent(JSON.stringify(v).replace(/'/g, "\\'"));
+                const isFav = favoriteIds.has(v.id);
+                const isWL = watchLaterIds.has(v.id);
+                const videoJson = encodeURIComponent(JSON.stringify(v).replace(/'/g, "\\'"));
                 return `
-                    <div class="video-card" onclick='playVideo(JSON.parse(decodeURIComponent("${videoData}")))'>
+                    <div class="video-card" onclick='playVideo(JSON.parse(decodeURIComponent("${videoJson}")))'>
                         <div class="thumb">
-                            <img src="${thumbUrl}" 
-                                 alt="${v.title || 'Video'}"
-                                 loading="lazy"
+                            <img src="${thumbUrl}" alt="${escapeHtml(v.title || 'Video')}" loading="lazy"
                                  onerror="this.src='${getDefaultThumbnail(v.category || 'general')}'">
                             <span class="duration">${duration}</span>
-                            <div class="play-overlay">
-                                <i class="fas fa-play"></i>
+                            <div class="play-overlay"><i class="fas fa-play"></i></div>
+                            <div class="video-actions" onclick="event.stopPropagation()">
+                                <button class="action-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite('${v.id}')" title="${isFav ? 'Quitar de favoritos' : 'Añadir a favoritos'}">
+                                    <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
+                                </button>
+                                <button class="action-btn ${isWL ? 'active' : ''}" onclick="toggleWatchLater('${v.id}')" title="${isWL ? 'Quitar de Ver después' : 'Añadir a Ver después'}">
+                                    <i class="${isWL ? 'fas' : 'far'} fa-bookmark"></i>
+                                </button>
                             </div>
                         </div>
                         <div class="video-info">
                             <div class="channel-avatar">${initial}</div>
                             <div class="video-details">
-                                <div class="card-title">${v.title || 'Sin título'}</div>
+                                <div class="card-title">${escapeHtml(v.title || 'Sin título')}</div>
                                 <div class="card-hashtags">
-                                    ${hashtags.slice(0, 3).map(tag => `<span>${tag}</span>`).join('')}
+                                    ${hashtags.slice(0, 3).map(tag => `<span>${escapeHtml(tag)}</span>`).join('')}
                                 </div>
-                                <div class="channel-name">${channel}</div>
+                                <div class="channel-name">@${escapeHtml(username)}</div>
                                 <div class="card-meta">
                                     <i class="fas fa-eye"></i> ${formatViews(views)} vistas
                                     <span style="margin:0 4px;">•</span>
@@ -1223,80 +1328,767 @@
         }
 
         // ============================================
-        // CARGAR VIDEOS
+        // REPRODUCTOR + HISTORIAL
         // ============================================
-        async function loadVideos() {
-            const videos = await getVideos();
-            const filtered = filterVideos(videos, currentSection, currentCategory);
-            renderVideos(filtered);
+        async function playVideo(video) {
+            if (!video || !video.video_url) {
+                showToast('Video no disponible', 'error');
+                return;
+            }
+            playerVideo.src = video.video_url;
+            playerVideo.load();
+            playerTitle.textContent = video.title || 'Sin título';
+            playerChannel.textContent = `@${video.username || video.channel || 'usuario'}`;
+            playerHashtags.innerHTML = (video.hashtags || []).map(tag => `<span>${escapeHtml(tag)}</span>`).join('');
+            playerOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            playerVideo.play().catch(() => {});
+            
+            await addToHistory(video.id);
+        }
 
+        function closePlayer() {
+            playerVideo.pause();
+            playerVideo.src = '';
+            playerOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        playerClose.addEventListener('click', closePlayer);
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && playerOverlay.classList.contains('active')) closePlayer();
+        });
+        playerOverlay.addEventListener('click', (e) => {
+            if (e.target === playerOverlay) closePlayer();
+        });
+
+        async function addToHistory(videoId) {
+            if (currentUser && sb) {
+                try {
+                    await sb.from('watch_history').upsert({
+                        user_id: currentUser.id,
+                        video_id: videoId,
+                        watched_at: new Date().toISOString(),
+                        progress: 0
+                    }, { onConflict: 'user_id,video_id' });
+                } catch (e) { console.warn('Historial (DB):', e.message); }
+            } else {
+                try {
+                    let history = JSON.parse(localStorage.getItem('jheiler_history') || '[]');
+                    history = history.filter(h => h.video_id !== videoId);
+                    history.unshift({ video_id: videoId, watched_at: new Date().toISOString() });
+                    if (history.length > 50) history = history.slice(0, 50);
+                    localStorage.setItem('jheiler_history', JSON.stringify(history));
+                } catch (e) {}
+            }
+        }
+
+        // ============================================
+        // FAVORITOS
+        // ============================================
+        async function toggleFavorite(videoId) {
+            if (!currentUser) {
+                showToast('Inicia sesión para guardar favoritos', 'warning');
+                openLoginModal();
+                return;
+            }
+            if (!sb) return;
+            try {
+                if (favoriteIds.has(videoId)) {
+                    await sb.from('favorites').delete()
+                        .eq('user_id', currentUser.id).eq('video_id', videoId);
+                    favoriteIds.delete(videoId);
+                    showToast('Quitado de favoritos', 'info');
+                } else {
+                    await sb.from('favorites').insert({
+                        user_id: currentUser.id, video_id: videoId
+                    });
+                    favoriteIds.add(videoId);
+                    showToast('Añadido a favoritos', 'success');
+                }
+                if (currentSection === 'favoritos') {
+                    loadFavorites();
+                } else {
+                    const btn = document.querySelector(`.action-btn[onclick="toggleFavorite('${videoId}')"]`);
+                    if (btn) {
+                        btn.classList.toggle('active', favoriteIds.has(videoId));
+                        const icon = btn.querySelector('i');
+                        if (icon) icon.className = favoriteIds.has(videoId) ? 'fas fa-heart' : 'far fa-heart';
+                    }
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function loadFavoriteIds() {
+            favoriteIds.clear();
+            if (!currentUser || !sb) return;
+            try {
+                const { data } = await sb.from('favorites').select('video_id').eq('user_id', currentUser.id);
+                if (data) data.forEach(f => favoriteIds.add(f.video_id));
+            } catch (e) { console.warn('Favoritos IDs:', e.message); }
+        }
+
+        // ============================================
+        // VER DESPUÉS
+        // ============================================
+        async function toggleWatchLater(videoId) {
+            if (!currentUser) {
+                showToast('Inicia sesión para guardar videos', 'warning');
+                openLoginModal();
+                return;
+            }
+            if (!sb) return;
+            try {
+                if (watchLaterIds.has(videoId)) {
+                    await sb.from('watch_later').delete()
+                        .eq('user_id', currentUser.id).eq('video_id', videoId);
+                    watchLaterIds.delete(videoId);
+                    showToast('Quitado de Ver después', 'info');
+                } else {
+                    await sb.from('watch_later').insert({
+                        user_id: currentUser.id, video_id: videoId
+                    });
+                    watchLaterIds.add(videoId);
+                    showToast('Añadido a Ver después', 'success');
+                }
+                if (currentSection === 'ver-despues') {
+                    loadWatchLater();
+                } else {
+                    const btn = document.querySelector(`.action-btn[onclick="toggleWatchLater('${videoId}')"]`);
+                    if (btn) {
+                        btn.classList.toggle('active', watchLaterIds.has(videoId));
+                        const icon = btn.querySelector('i');
+                        if (icon) icon.className = watchLaterIds.has(videoId) ? 'fas fa-bookmark' : 'far fa-bookmark';
+                    }
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message, 'error');
+            }
+        }
+
+        async function loadWatchLaterIds() {
+            watchLaterIds.clear();
+            if (!currentUser || !sb) return;
+            try {
+                const { data } = await sb.from('watch_later').select('video_id').eq('user_id', currentUser.id);
+                if (data) data.forEach(w => watchLaterIds.add(w.video_id));
+            } catch (e) { console.warn('Ver después IDs:', e.message); }
+        }
+
+        // ============================================
+        // CARGADORES POR SECCIÓN (REALES, NO SIMULADOS)
+        // ============================================
+        function applyCategoryFilter(videos) {
+            if (currentCategory && currentCategory !== 'todos') {
+                return videos.filter(v => (v.category || '').toLowerCase() === currentCategory.toLowerCase());
+            }
+            return videos;
+        }
+
+        function applySort(videos) {
+            const sorted = [...videos];
+            switch (currentSort) {
+                case 'recientes':
+                    return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                case 'antiguos':
+                    return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                case 'vistos':
+                    return sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+                default:
+                    return sorted;
+            }
+        }
+
+        async function loadHomeVideos() {
+            renderSkeleton();
+            try {
+                let videos = sampleVideos;
+                if (sb) {
+                    const { data, error } = await sb
+                        .from('videos')
+                        .select(`*, profiles!inner(username)`)
+                        .order('created_at', { ascending: false });
+                    if (!error && data) {
+                        videos = data.map(v => ({ ...v, username: v.profiles?.username || 'usuario', channel: v.profiles?.username }));
+                    }
+                }
+                videos = applyCategoryFilter(videos);
+                videos = applySort(videos);
+                renderVideos(videos);
+            } catch (e) {
+                renderError('No se pudieron cargar los videos');
+            }
+        }
+
+        async function loadShorts() {
+            renderSkeleton();
+            try {
+                if (!sb) {
+                    renderEmpty('fas fa-bolt', 'No hay Shorts todavía', 'Conéctate a Supabase para ver contenido real');
+                    return;
+                }
+                const { data, error } = await sb
+                    .from('videos')
+                    .select(`*, profiles!inner(username)`)
+                    .eq('is_short', true)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                let videos = (data || []).map(v => ({ ...v, username: v.profiles?.username || 'usuario' }));
+                videos = applyCategoryFilter(videos);
+                videos = applySort(videos);
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-bolt', 'No hay Shorts todavía', 'Sé el primero en subir un Short');
+                } else {
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudieron cargar los Shorts');
+            }
+        }
+
+        async function loadSubscriptions() {
+            renderSkeleton();
+            if (!currentUser) {
+                renderAuthRequired('Inicia sesión para ver tus suscripciones',
+                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
+                return;
+            }
+            if (!sb) { renderError('Supabase no disponible'); return; }
+            try {
+                const { data: subs, error: subsErr } = await sb
+                    .from('subscriptions').select('channel_id').eq('subscriber_id', currentUser.id);
+                if (subsErr) throw subsErr;
+                if (!subs || subs.length === 0) {
+                    renderEmpty('fas fa-tv', 'Aún no estás suscrito a ningún canal',
+                        'Explora Inicio y suscríbete a tus creadores favoritos');
+                    return;
+                }
+                const channelIds = subs.map(s => s.channel_id);
+                const { data, error } = await sb
+                    .from('videos')
+                    .select(`*, profiles!inner(username)`)
+                    .in('user_id', channelIds)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                let videos = (data || []).map(v => ({ ...v, username: v.profiles?.username || 'usuario' }));
+                videos = applyCategoryFilter(videos);
+                videos = applySort(videos);
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-video', 'Tus canales no han subido videos', 'Vuelve pronto para ver contenido nuevo');
+                } else {
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudieron cargar tus suscripciones');
+            }
+        }
+
+        async function loadHistory() {
+            renderSkeleton();
+            try {
+                let videos = [];
+                if (currentUser && sb) {
+                    const { data, error } = await sb
+                        .from('watch_history')
+                        .select(`video_id, watched_at, videos(*, profiles!inner(username))`)
+                        .eq('user_id', currentUser.id)
+                        .order('watched_at', { ascending: false });
+                    if (error) throw error;
+                    videos = (data || []).filter(h => h.videos).map(h => ({
+                        ...h.videos,
+                        username: h.videos.profiles?.username || 'usuario',
+                        watched_at: h.watched_at
+                    }));
+                } else {
+                    const history = JSON.parse(localStorage.getItem('jheiler_history') || '[]');
+                    if (sb) {
+                        const ids = history.map(h => h.video_id);
+                        if (ids.length > 0) {
+                            const { data } = await sb
+                                .from('videos')
+                                .select(`*, profiles!inner(username)`)
+                                .in('id', ids);
+                            if (data) {
+                                const map = {};
+                                data.forEach(v => map[v.id] = { ...v, username: v.profiles?.username });
+                                videos = history.map(h => map[h.video_id]).filter(Boolean);
+                            }
+                        }
+                    }
+                }
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-clock', 'Tu historial está vacío', 'Empieza a ver videos para que aparezcan aquí');
+                } else {
+                    videos = applyCategoryFilter(videos);
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudo cargar tu historial');
+            }
+        }
+
+        async function loadMyVideos() {
+            renderSkeleton();
+            if (!currentUser) {
+                renderAuthRequired('Inicia sesión para ver tus videos',
+                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
+                return;
+            }
+            if (!sb) { renderError('Supabase no disponible'); return; }
+            try {
+                const { data, error } = await sb
+                    .from('videos')
+                    .select(`*, profiles!inner(username)`)
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                let videos = (data || []).map(v => ({ ...v, username: v.profiles?.username || 'usuario' }));
+                videos = applyCategoryFilter(videos);
+                videos = applySort(videos);
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-video', 'Aún no has subido ningún video',
+                        `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="document.getElementById('btnOpenModal').click()">Subir mi primer video</button>`);
+                } else {
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudieron cargar tus videos');
+            }
+        }
+
+        async function loadFavorites() {
+            renderSkeleton();
+            if (!currentUser) {
+                renderAuthRequired('Inicia sesión para ver tus favoritos',
+                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
+                return;
+            }
+            if (!sb) { renderError('Supabase no disponible'); return; }
+            try {
+                const { data, error } = await sb
+                    .from('favorites')
+                    .select(`video_id, created_at, videos(*, profiles!inner(username))`)
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
+                let videos = (data || []).filter(f => f.videos).map(f => ({
+                    ...f.videos,
+                    username: f.videos.profiles?.username || 'usuario'
+                }));
+                videos = applyCategoryFilter(videos);
+                videos = applySort(videos);
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-heart', 'No tienes videos favoritos todavía',
+                        'Explora Inicio y dale ❤️ a lo que te guste');
+                } else {
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudieron cargar tus favoritos');
+            }
+        }
+
+        async function loadWatchLater() {
+            renderSkeleton();
+            if (!currentUser) {
+                renderAuthRequired('Inicia sesión para guardar videos',
+                    `<button class="btn-primary" style="padding:10px 24px;border:none;border-radius:10px;cursor:pointer;font-weight:600;" onclick="openLoginModal()">Iniciar sesión</button>`);
+                return;
+            }
+            if (!sb) { renderError('Supabase no disponible'); return; }
+            try {
+                const { data, error } = await sb
+                    .from('watch_later')
+                    .select(`video_id, created_at, videos(*, profiles!inner(username))`)
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: true });
+                if (error) throw error;
+                let videos = (data || []).filter(w => w.videos).map(w => ({
+                    ...w.videos,
+                    username: w.videos.profiles?.username || 'usuario'
+                }));
+                videos = applyCategoryFilter(videos);
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-bookmark', 'No tienes videos guardados',
+                        'Guarda videos para verlos más tarde desde cualquier dispositivo');
+                } else {
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudieron cargar tus videos guardados');
+            }
+        }
+
+        function loadCurrentSection() {
+            const sectionMap = {
+                'inicio': loadHomeVideos,
+                'shorts': loadShorts,
+                'suscripciones': loadSubscriptions,
+                'historial': loadHistory,
+                'tus-videos': loadMyVideos,
+                'favoritos': loadFavorites,
+                'ver-despues': loadWatchLater
+            };
+            const loader = sectionMap[currentSection] || loadHomeVideos;
+            loader();
+        }
+
+        function goToHome() {
+            currentSection = 'inicio';
+            currentCategory = 'todos';
+            document.querySelectorAll('.sb-item').forEach(i => i.classList.toggle('active', i.dataset.section === 'inicio'));
+            document.querySelectorAll('.category-chip').forEach(c => c.classList.toggle('active', c.dataset.category === 'todos'));
+            updateSectionTitle();
+            loadHomeVideos();
+        }
+
+        function updateSectionTitle() {
             const sectionNames = {
-                'inicio': 'Inicio',
-                'shorts': 'Shorts',
-                'suscripciones': 'Suscripciones',
-                'historial': 'Historial',
-                'tus-videos': 'Tus videos',
-                'favoritos': 'Favoritos',
-                'ver-despues': 'Ver después'
+                'inicio': 'Inicio', 'shorts': 'Shorts', 'suscripciones': 'Suscripciones',
+                'historial': 'Historial', 'tus-videos': 'Tus videos',
+                'favoritos': 'Favoritos', 'ver-despues': 'Ver después'
             };
             const iconMap = {
-                'inicio': 'fa-home',
-                'shorts': 'fa-bolt',
-                'suscripciones': 'fa-tv',
-                'historial': 'fa-clock',
-                'tus-videos': 'fa-video',
-                'favoritos': 'fa-heart',
-                'ver-despues': 'fa-clock'
+                'inicio': 'fa-home', 'shorts': 'fa-bolt', 'suscripciones': 'fa-tv',
+                'historial': 'fa-clock', 'tus-videos': 'fa-video',
+                'favoritos': 'fa-heart', 'ver-despues': 'fa-bookmark'
             };
             sectionTitle.innerHTML = `<i class="fas ${iconMap[currentSection] || 'fa-home'}"></i> ${sectionNames[currentSection] || 'Inicio'}`;
         }
 
         // ============================================
-        // EVENT LISTENERS
+        // EVENT LISTENERS: NAVEGACIÓN
         // ============================================
-        // Sidebar
         document.querySelectorAll('.sb-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
                 document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
                 currentSection = this.dataset.section;
-                loadVideos();
-                showToast(this.textContent.trim().replace('Nuevo', '').trim(), 'info');
+                updateSectionTitle();
+                loadCurrentSection();
             });
         });
 
-        // Categorías
         document.querySelectorAll('.category-chip').forEach(chip => {
             chip.addEventListener('click', function() {
                 document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
                 this.classList.add('active');
                 currentCategory = this.dataset.category;
-                loadVideos();
+                loadCurrentSection();
             });
         });
 
-        // Ordenamiento
         sortSelect.addEventListener('change', function() {
             currentSort = this.value;
-            const filtered = filterVideos(allVideos, currentSection, currentCategory);
-            renderVideos(filtered);
+            loadCurrentSection();
         });
 
-        // Búsqueda
-        document.getElementById('btnSearch').addEventListener('click', function() {
-            const searchTerm = prompt('¿Qué estás buscando?');
-            if (searchTerm && searchTerm.trim()) {
-                const term = searchTerm.trim().toLowerCase();
-                const videos = allVideos.filter(v => {
-                    const title = (v.title || '').toLowerCase();
-                    const desc = (v.description || '').toLowerCase();
-                    const tags = Array.isArray(v.hashtags) ? v.hashtags.join(' ').toLowerCase() : '';
-                    return title.includes(term) || desc.includes(term) || tags.includes(term);
-                });
-                renderVideos(videos);
-                sectionTitle.innerHTML = `<i class="fas fa-search"></i> Resultados: "${searchTerm.trim()}"`;
-                showToast(`Se encontraron ${videos.length} video(s)`, 'info');
+        document.getElementById('btnSearch').addEventListener('click', async function() {
+            const term = prompt('¿Qué estás buscando?');
+            if (!term || !term.trim()) return;
+            const q = term.trim().toLowerCase();
+            renderSkeleton();
+            try {
+                let videos = [];
+                if (sb) {
+                    const { data } = await sb
+                        .from('videos')
+                        .select(`*, profiles!inner(username)`);
+                    if (data) {
+                        videos = data
+                            .map(v => ({ ...v, username: v.profiles?.username }))
+                            .filter(v => {
+                                const t = (v.title || '').toLowerCase();
+                                const d = (v.description || '').toLowerCase();
+                                const tags = Array.isArray(v.hashtags) ? v.hashtags.join(' ').toLowerCase() : '';
+                                return t.includes(q) || d.includes(q) || tags.includes(q);
+                            });
+                    }
+                } else {
+                    videos = sampleVideos.filter(v =>
+                        (v.title || '').toLowerCase().includes(q) ||
+                        (v.description || '').toLowerCase().includes(q)
+                    );
+                }
+                sectionTitle.innerHTML = `<i class="fas fa-search"></i> Resultados: "${escapeHtml(term.trim())}"`;
+                if (videos.length === 0) {
+                    renderEmpty('fas fa-search', 'Sin resultados', `No se encontraron videos para "${escapeHtml(term.trim())}"`);
+                } else {
+                    renderVideos(videos);
+                }
+            } catch (e) {
+                renderError('No se pudo realizar la búsqueda');
+            }
+        });
+
+        // ============================================
+        // AUTH: RENDER HEADER
+        // ============================================
+        function renderAuthHeader() {
+            if (currentUser && currentProfile) {
+                const initial = currentProfile.username.charAt(0).toUpperCase();
+                authContainer.innerHTML = `
+                    <div class="profile-wrapper">
+                        <button class="profile-btn" onclick="toggleProfileDropdown(event)">
+                            <div class="profile-avatar">${initial}</div>
+                            <span class="profile-username">${escapeHtml(currentProfile.username)}</span>
+                        </button>
+                        <div class="profile-dropdown" id="profileDropdown">
+                            <div class="profile-dropdown-item" onclick="navigateTo('tus-videos')">
+                                <i class="fas fa-video"></i> Mis videos
+                            </div>
+                            <div class="profile-dropdown-item" onclick="navigateTo('favoritos')">
+                                <i class="fas fa-heart"></i> Favoritos
+                            </div>
+                            <div class="profile-dropdown-item" onclick="navigateTo('historial')">
+                                <i class="fas fa-clock"></i> Historial
+                            </div>
+                            <div class="profile-dropdown-item" onclick="navigateTo('ver-despues')">
+                                <i class="fas fa-bookmark"></i> Ver después
+                            </div>
+                            <div class="profile-dropdown-item danger" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                authContainer.innerHTML = `
+                    <button class="auth-btn" onclick="openLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar sesión
+                    </button>
+                `;
+            }
+        }
+
+        function toggleProfileDropdown(e) {
+            e.stopPropagation();
+            document.getElementById('profileDropdown').classList.toggle('active');
+        }
+
+        document.addEventListener('click', () => {
+            const dd = document.getElementById('profileDropdown');
+            if (dd) dd.classList.remove('active');
+        });
+
+        function navigateTo(section) {
+            const item = document.querySelector(`.sb-item[data-section="${section}"]`);
+            if (item) item.click();
+            const dd = document.getElementById('profileDropdown');
+            if (dd) dd.classList.remove('active');
+        }
+
+        // ============================================
+        // AUTH: LOGIN MODAL
+        // ============================================
+        function openLoginModal() {
+            closeAllModals();
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'authModal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3><i class="fas fa-sign-in-alt"></i> Iniciar sesión</h3>
+                    <input type="text" id="loginUsername" placeholder="Nombre de usuario" autocomplete="username">
+                    <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
+                    <div class="input-error" id="loginError"></div>
+                    <div class="modal-actions">
+                        <button class="btn-primary" id="btnLogin">
+                            <i class="fas fa-check"></i> Entrar
+                        </button>
+                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                    <div class="modal-switch">
+                        ¿No tienes cuenta? <a onclick="openRegisterModal()">Crear cuenta</a>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('btnLogin').onclick = handleLogin;
+            document.getElementById('loginPassword').addEventListener('keydown', e => {
+                if (e.key === 'Enter') handleLogin();
+            });
+            document.getElementById('loginUsername').focus();
+        }
+
+        async function handleLogin() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const errEl = document.getElementById('loginError');
+            errEl.textContent = '';
+            
+            if (!username || !password) {
+                errEl.textContent = 'Completa todos los campos';
+                return;
+            }
+            if (!sb) { errEl.textContent = 'Supabase no disponible'; return; }
+            
+            const btn = document.getElementById('btnLogin');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+            
+            try {
+                const email = usernameToEmail(username);
+                const { error } = await sb.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                
+                closeAllModals();
+                showToast('¡Bienvenido de vuelta!', 'success');
+                await initAuth();
+                loadCurrentSection();
+            } catch (e) {
+                errEl.textContent = 'Nombre de usuario o contraseña incorrectos';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Entrar';
+            }
+        }
+
+        // ============================================
+        // AUTH: REGISTER MODAL
+        // ============================================
+        function openRegisterModal() {
+            closeAllModals();
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.id = 'authModal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3><i class="fas fa-user-plus"></i> Crear cuenta</h3>
+                    <input type="text" id="regUsername" placeholder="Nombre de usuario" autocomplete="username">
+                    <div class="input-error" id="regUsernameError"></div>
+                    <input type="password" id="regPassword" placeholder="Contraseña" autocomplete="new-password">
+                    <div class="input-error" id="regPasswordError"></div>
+                    <input type="password" id="regConfirm" placeholder="Confirmar contraseña" autocomplete="new-password">
+                    <div class="input-error" id="regConfirmError"></div>
+                    <div class="modal-actions">
+                        <button class="btn-primary" id="btnRegister">
+                            <i class="fas fa-check"></i> Crear cuenta
+                        </button>
+                        <button class="btn-secondary" onclick="this.closest('.modal').remove()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                    <div class="modal-switch">
+                        ¿Ya tienes cuenta? <a onclick="openLoginModal()">Iniciar sesión</a>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('btnRegister').onclick = handleRegister;
+            document.getElementById('regConfirm').addEventListener('keydown', e => {
+                if (e.key === 'Enter') handleRegister();
+            });
+            document.getElementById('regUsername').focus();
+        }
+
+        async function handleRegister() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirm = document.getElementById('regConfirm').value;
+            
+            document.getElementById('regUsernameError').textContent = '';
+            document.getElementById('regPasswordError').textContent = '';
+            document.getElementById('regConfirmError').textContent = '';
+            
+            let hasError = false;
+            const uErr = validateUsername(username);
+            if (uErr) { document.getElementById('regUsernameError').textContent = uErr; hasError = true; }
+            const pErr = validatePassword(password);
+            if (pErr) { document.getElementById('regPasswordError').textContent = pErr; hasError = true; }
+            if (password !== confirm) {
+                document.getElementById('regConfirmError').textContent = 'Las contraseñas no coinciden';
+                hasError = true;
+            }
+            if (hasError) return;
+            if (!sb) { showToast('Supabase no disponible', 'error'); return; }
+            
+            const btn = document.getElementById('btnRegister');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando...';
+            
+            try {
+                const { data: checkData } = await sb
+                    .from('profiles').select('username').eq('username', username).maybeSingle();
+                if (checkData) {
+                    document.getElementById('regUsernameError').textContent = 'Este nombre de usuario ya está en uso';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
+                    return;
+                }
+                
+                const email = usernameToEmail(username);
+                const { error: signUpErr } = await sb.auth.signUp({ email, password });
+                if (signUpErr) {
+                    if (signUpErr.message.includes('already registered') || signUpErr.code === 'user_already_exists') {
+                        document.getElementById('regUsernameError').textContent = 'Este nombre de usuario ya está en uso';
+                    } else {
+                        document.getElementById('regUsernameError').textContent = signUpErr.message;
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
+                    return;
+                }
+                
+                closeAllModals();
+                showToast('¡Cuenta creada correctamente!', 'success');
+                await initAuth();
+                loadCurrentSection();
+            } catch (e) {
+                showToast('Error: ' + e.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-check"></i> Crear cuenta';
+            }
+        }
+
+        function closeAllModals() {
+            document.querySelectorAll('.modal').forEach(m => m.remove());
+        }
+
+        async function logout() {
+            if (sb) await sb.auth.signOut();
+            currentUser = null;
+            currentProfile = null;
+            favoriteIds.clear();
+            watchLaterIds.clear();
+            renderAuthHeader();
+            showToast('Sesión cerrada', 'info');
+            goToHome();
+        }
+
+        // ============================================
+        // AUTH: INIT
+        // ============================================
+        async function initAuth() {
+            if (!sb) { renderAuthHeader(); return; }
+            try {
+                const { data: { user } } = await sb.auth.getUser();
+                currentUser = user;
+                if (user) {
+                    const { data } = await sb
+                        .from('profiles').select('username').eq('id', user.id).maybeSingle();
+                    currentProfile = data || { username: user.email?.split('@')[0] || 'usuario' };
+                    await loadFavoriteIds();
+                    await loadWatchLaterIds();
+                } else {
+                    currentProfile = null;
+                }
+            } catch (e) {
+                currentUser = null;
+                currentProfile = null;
+                console.warn('Auth init:', e.message);
+            }
+            renderAuthHeader();
+        }
+
+        sb?.auth.onAuthStateChange(async (event) => {
+            if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+                await initAuth();
             }
         });
 
@@ -1304,6 +2096,12 @@
         // SUBIR VIDEO
         // ============================================
         document.getElementById('btnOpenModal').onclick = () => {
+            if (!currentUser) {
+                showToast('Inicia sesión para subir videos', 'warning');
+                openLoginModal();
+                return;
+            }
+            closeAllModals();
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
@@ -1372,63 +2170,40 @@
                     let videoUrl = '';
                     let thumbUrl = '';
 
-                    if (sb) {
-                        const vName = `${Date.now()}_${videoFile.name}`;
-                        const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
-                        if (vErr) throw vErr;
-                        const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
-                        videoUrl = vData.publicUrl;
+                    const vName = `${Date.now()}_${videoFile.name}`;
+                    const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
+                    if (vErr) throw vErr;
+                    const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
+                    videoUrl = vData.publicUrl;
 
-                        if (thumbFile) {
-                            const tName = `${Date.now()}_${thumbFile.name}`;
-                            const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
-                            if (!tErr) {
-                                const { data: tData } = sb.storage.from('thumbnails').getPublicUrl(tName);
-                                thumbUrl = tData.publicUrl;
-                            }
+                    if (thumbFile) {
+                        const tName = `${Date.now()}_${thumbFile.name}`;
+                        const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
+                        if (!tErr) {
+                            const { data: tData } = sb.storage.from('thumbnails').getPublicUrl(tName);
+                            thumbUrl = tData.publicUrl;
                         }
-
-                        const newVideo = {
-                            title,
-                            description: desc || null,
-                            category: category || 'general',
-                            video_url: videoUrl,
-                            thumbnail_url: thumbUrl,
-                            views: 0,
-                            duration: 0,
-                            channel: 'JHEILER',
-                            hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
-                            is_short: isShort,
-                            created_at: new Date().toISOString()
-                        };
-
-                        const { error: insertErr } = await sb.from('videos').insert(newVideo);
-                        if (insertErr) throw insertErr;
-                        allVideos.unshift(newVideo);
-                    } else {
-                        const newVideo = {
-                            id: String(Date.now()),
-                            title,
-                            description: desc,
-                            category,
-                            video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                            thumbnail_url: thumbUrl || getDefaultThumbnail(category),
-                            views: 0,
-                            duration: 120,
-                            channel: 'JHEILER',
-                            hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
-                            is_short: isShort,
-                            created_at: new Date().toISOString()
-                        };
-                        allVideos.unshift(newVideo);
                     }
 
-                    modal.remove();
+                    const { error: insertErr } = await sb.from('videos').insert({
+                        title,
+                        description: desc || null,
+                        category: category || 'general',
+                        video_url: videoUrl,
+                        thumbnail_url: thumbUrl,
+                        views: 0,
+                        duration: 0,
+                        user_id: currentUser.id,
+                        hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
+                        is_short: isShort
+                    });
+                    if (insertErr) throw insertErr;
+
+                    closeAllModals();
                     showToast('¡Video publicado con éxito!', 'success');
-                    loadVideos();
+                    loadCurrentSection();
                 } catch (err) {
-                    console.error('Error al subir:', err);
-                    showToast('Error al publicar: ' + err.message, 'error');
+                    showToast('Error: ' + err.message, 'error');
                     btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Publicar';
                     btn.disabled = false;
                 }
@@ -1439,12 +2214,12 @@
         // PERSONALIZACIÓN
         // ============================================
         document.getElementById('btnCustomize').addEventListener('click', function() {
+            closeAllModals();
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
                     <h3><i class="fas fa-palette"></i> Personalizar JHEILER</h3>
-                    
                     <div>
                         <label style="font-weight:600;display:block;margin-bottom:8px;">Tema</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -1454,7 +2229,6 @@
                             <button class="btn-secondary" onclick="applyTheme('cyber');this.closest('.modal').remove();">Cyber</button>
                         </div>
                     </div>
-                    
                     <div>
                         <label style="font-weight:600;display:block;margin-bottom:8px;">Fuente</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -1465,12 +2239,10 @@
                             <button class="btn-secondary" onclick="applyFont('Orbitron');this.closest('.modal').remove();">Orbitron</button>
                         </div>
                     </div>
-                    
                     <div>
                         <label style="font-weight:600;display:block;margin-bottom:8px;">Color de acento</label>
                         <input type="color" id="accentColor" value="#ff304f" style="padding:4px;width:100%;height:50px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;">
                     </div>
-                    
                     <div class="modal-actions">
                         <button class="btn-primary" onclick="applyAccentColor();this.closest('.modal').remove();">
                             <i class="fas fa-check"></i> Aplicar color
@@ -1486,10 +2258,10 @@
 
         window.applyTheme = function(theme) {
             const themes = {
-                dark: { bg: '#0f0f0f', panel: '#181818', panel2: '#212121', border: '#303030', text: '#aaa', accent: '#ff304f', accent2: '#ff6b8a' },
-                light: { bg: '#f5f5f5', panel: '#ffffff', panel2: '#e8e8e8', border: '#ddd', text: '#666', accent: '#ff304f', accent2: '#ff6b8a' },
-                neon: { bg: '#0a0a1a', panel: '#111128', panel2: '#1a1a3a', border: '#333366', text: '#aaa', accent: '#00ff88', accent2: '#66ffbb' },
-                cyber: { bg: '#000000', panel: '#0a0a0a', panel2: '#1a1a1a', border: '#333333', text: '#aaa', accent: '#ff00ff', accent2: '#ff66ff' }
+                dark: { bg: '#0f0f0f', panel: '#181818', panel2: '#212121', border: '#303030', text: '#aaa', accent: '#ff304f', accent2: '#ff6b8a', bodyColor: '#fff' },
+                light: { bg: '#f5f5f5', panel: '#ffffff', panel2: '#e8e8e8', border: '#ddd', text: '#666', accent: '#ff304f', accent2: '#ff6b8a', bodyColor: '#111' },
+                neon: { bg: '#0a0a1a', panel: '#111128', panel2: '#1a1a3a', border: '#333366', text: '#aaa', accent: '#00ff88', accent2: '#66ffbb', bodyColor: '#fff' },
+                cyber: { bg: '#000000', panel: '#0a0a0a', panel2: '#1a1a1a', border: '#333333', text: '#aaa', accent: '#ff00ff', accent2: '#ff66ff', bodyColor: '#fff' }
             };
             const t = themes[theme];
             if (!t) return;
@@ -1500,11 +2272,7 @@
             document.documentElement.style.setProperty('--text-secondary', t.text);
             document.documentElement.style.setProperty('--accent', t.accent);
             document.documentElement.style.setProperty('--accent2', t.accent2);
-            if (theme === 'light') {
-                document.body.style.color = '#111';
-            } else {
-                document.body.style.color = '#fff';
-            }
+            document.body.style.color = t.bodyColor;
             showToast(`Tema ${theme} aplicado`, 'success');
         };
 
@@ -1529,7 +2297,10 @@
         // ============================================
         // INICIALIZAR
         // ============================================
-        loadVideos();
+        (async function init() {
+            await initAuth();
+            loadHomeVideos();
+        })();
     </script>
 </body>
 </html>
