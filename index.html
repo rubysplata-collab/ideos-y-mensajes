@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>JHEILER - Tu plataforma de videos</title>
     
-    <!-- ===== FONT AWESOME LOCAL ===== -->
-    <link rel="stylesheet" href="fontawesome/css/all.min.css">
+    <!-- ===== FONT AWESOME ===== -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- ===== GOOGLE FONTS ===== -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Press+Start+2P&family=Inter:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Roboto:wght@400;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://cdn-icons-png.flaticon.com/512/3670/3670147.png%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
+    <link rel="manifest" href="data:application/manifest+json;utf8,{%22name%22:%22JHEILER%22,%22short_name%22:%22JHEILER%22,%22start_url%22:%22./%22,%22display%22:%22standalone%22,%22background_color%22:%22%230f0f0f%22,%22theme_color%22:%22%23ff304f%22,%22icons%22:[{%22src%22:%22https://picsum.photos/512/512%22,%22sizes%22:%22512x512%22,%22type%22:%22image/png%22,%22purpose%22:%22any%22}]}"/>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
@@ -33,15 +33,15 @@
             --bg-image: none;
             --bg-overlay: rgba(0,0,0,0.85);
             --glass-effect: rgba(255,255,255,0.05);
-            --hover-scale: 1.02;
+            --hover-scale: 1.03;
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
         }
-
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: var(--font-family);
             background: var(--bg);
@@ -50,8 +50,8 @@
             overflow-x: hidden;
             font-size: var(--font-size-base);
             position: relative;
+            transition: background var(--transition-normal), color var(--transition-normal);
         }
-
         body::before {
             content: '';
             position: fixed;
@@ -63,14 +63,14 @@
             background-size: cover;
             background-position: center;
             z-index: -1;
-            opacity: 0.2;
+            opacity: 0.15;
+            pointer-events: none;
         }
-
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
-
+        
         /* ===== HEADER ===== */
         header {
             position: fixed;
@@ -78,17 +78,15 @@
             left: 0;
             right: 0;
             height: 60px;
-            background: var(--bg);
+            background: rgba(15,15,15,0.92);
+            backdrop-filter: blur(12px);
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 0 24px;
             border-bottom: 1px solid var(--border);
             z-index: 200;
-            backdrop-filter: blur(12px);
-            background: rgba(15,15,15,0.92);
         }
-
         .brand {
             font-size: 22px;
             font-weight: var(--font-weight-title);
@@ -97,19 +95,20 @@
             align-items: center;
             gap: 10px;
             letter-spacing: -0.5px;
+            text-decoration: none;
+            transition: transform var(--transition-fast);
         }
-
+        .brand:hover { transform: scale(1.02); }
         .brand i {
             font-size: 26px;
             color: var(--accent);
+            filter: drop-shadow(0 0 4px rgba(255,48,79,0.4));
         }
-
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
         }
-
         .header-btn {
             background: transparent;
             border: none;
@@ -118,21 +117,20 @@
             cursor: pointer;
             padding: 8px;
             border-radius: 50%;
-            transition: background 0.2s;
+            transition: all var(--transition-fast);
             width: 40px;
             height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .header-btn:hover {
             background: var(--panel2);
+            transform: scale(1.08);
         }
-
         .create-btn {
             padding: 10px 20px;
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
             border-radius: 24px;
             border: none;
             color: #fff;
@@ -143,17 +141,14 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 2px 8px rgba(255,48,79,0.2);
         }
-
-        .create-btn i {
-            font-size: 16px;
-        }
-
         .create-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 0 24px rgba(255,48,79,0.35);
+            box-shadow: 0 4px 20px rgba(255,48,79,0.4);
         }
-
+        .create-btn:active { transform: scale(0.98); }
+        
         /* ===== SIDEBAR ===== */
         aside {
             position: fixed;
@@ -167,12 +162,10 @@
             overflow-y: auto;
             z-index: 100;
         }
-
         .sb-section {
             padding: 6px 0 10px 0;
             border-bottom: 1px solid var(--border);
         }
-
         .sb-title {
             padding: 6px 24px 8px 24px;
             font-size: 11px;
@@ -181,7 +174,6 @@
             letter-spacing: 0.5px;
             font-weight: 600;
         }
-
         .sb-item {
             display: flex;
             align-items: center;
@@ -192,35 +184,37 @@
             text-decoration: none;
             border-radius: 8px;
             margin: 0 8px;
-            transition: all 0.15s ease;
+            transition: all var(--transition-fast);
             cursor: pointer;
             position: relative;
         }
-
         .sb-item:hover {
             background: var(--panel2);
+            transform: translateX(2px);
         }
-
         .sb-item i {
             font-size: 20px;
             width: 24px;
             text-align: center;
             color: var(--text-secondary);
-            transition: color 0.2s;
+            transition: color var(--transition-fast);
         }
-
-        .sb-item:hover i {
-            color: #fff;
-        }
-
+        .sb-item:hover i { color: #fff; }
         .sb-item.active {
-            background: var(--panel2);
+            background: linear-gradient(90deg, rgba(255,48,79,0.15), transparent);
         }
-
-        .sb-item.active i {
-            color: var(--accent);
+        .sb-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60%;
+            background: var(--accent);
+            border-radius: 0 3px 3px 0;
         }
-
+        .sb-item.active i { color: var(--accent); }
         .sb-item .badge {
             position: absolute;
             right: 24px;
@@ -230,8 +224,13 @@
             padding: 2px 8px;
             border-radius: 10px;
             font-weight: 700;
+            animation: pulse 2s infinite;
         }
-
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
         /* ===== MAIN ===== */
         main {
             margin-left: 220px;
@@ -240,171 +239,178 @@
             position: relative;
             z-index: 1;
         }
-
+        
         /* ===== CATEGORÍAS ===== */
         .categories {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             overflow-x: auto;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
             scrollbar-width: none;
         }
-
-        .categories::-webkit-scrollbar {
-            display: none;
-        }
-
+        .categories::-webkit-scrollbar { display: none; }
         .category-chip {
-            padding: 8px 20px;
+            padding: 8px 18px;
             background: var(--panel2);
             border-radius: 20px;
             font-size: 13px;
             font-weight: 500;
             white-space: nowrap;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
             border: 1px solid transparent;
         }
-
         .category-chip:hover {
             background: var(--border);
+            transform: translateY(-1px);
         }
-
         .category-chip.active {
             background: var(--accent);
             color: #fff;
+            box-shadow: 0 2px 8px rgba(255,48,79,0.3);
         }
-
+        
+        /* ===== ORDENAMIENTO ===== */
+        .sort-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .sort-select {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            color: #fff;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .sort-select:focus { outline: none; border-color: var(--accent); }
+        
         /* ===== SECTION TITLE ===== */
         .section-title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: var(--font-weight-title);
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
-
         .section-title i {
             color: var(--accent);
+            filter: drop-shadow(0 0 4px rgba(255,48,79,0.3));
         }
-
+        
         /* ===== VIDEO GRID ===== */
         .video-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 28px 20px;
         }
-
         .video-card {
-            transition: transform 0.2s ease;
+            transition: all var(--transition-normal);
             cursor: pointer;
+            border-radius: var(--radius);
         }
-
         .video-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-5px);
         }
-
         .thumb {
             width: 100%;
             aspect-ratio: 16/9;
-            background: var(--panel2);
+            background: linear-gradient(135deg, var(--panel2), var(--panel));
             border-radius: var(--radius);
             margin-bottom: 10px;
             overflow: hidden;
             position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-
         .thumb img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.4s ease;
         }
-
         .video-card:hover .thumb img {
             transform: scale(var(--hover-scale));
         }
-
         .thumb .duration {
             position: absolute;
             bottom: 8px;
             right: 8px;
             background: rgba(0,0,0,0.85);
-            padding: 2px 8px;
+            padding: 3px 8px;
             border-radius: 4px;
             font-size: 11px;
             font-weight: 600;
+            backdrop-filter: blur(4px);
         }
-
         .thumb .play-overlay {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: rgba(0,0,0,0.6);
-            width: 48px;
-            height: 48px;
+            width: 52px;
+            height: 52px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            backdrop-filter: blur(4px);
+            transition: opacity var(--transition-normal);
+            backdrop-filter: blur(6px);
         }
-
         .video-card:hover .play-overlay {
             opacity: 1;
         }
-
         .play-overlay i {
             font-size: 20px;
             color: #fff;
             margin-left: 4px;
         }
-
         .video-info {
             display: flex;
             gap: 12px;
         }
-
         .channel-avatar {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 14px;
             flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(255,48,79,0.25);
         }
-
         .video-details {
             flex: 1;
             min-width: 0;
         }
-
         .card-title {
             font-size: 15px;
-            font-weight: var(--font-weight-title);
+            font-weight: 600;
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+            transition: color var(--transition-fast);
         }
-
+        .video-card:hover .card-title { color: var(--accent); }
         .card-hashtags {
             display: flex;
             gap: 6px;
             flex-wrap: wrap;
             margin-top: 4px;
         }
-
         .card-hashtags span {
             font-size: 11px;
             color: var(--accent);
@@ -412,19 +418,16 @@
             padding: 2px 8px;
             border-radius: 12px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all var(--transition-fast);
         }
-
         .card-hashtags span:hover {
             background: rgba(255,48,79,0.2);
         }
-
         .channel-name {
             font-size: 13px;
             color: var(--text-secondary);
             margin-top: 2px;
         }
-
         .card-meta {
             font-size: 12px;
             color: var(--text-secondary);
@@ -433,32 +436,35 @@
             gap: 4px;
             flex-wrap: wrap;
         }
-
-        .card-meta i {
-            font-size: 11px;
-        }
-
-        /* ===== EMPTY STATE ===== */
-        .empty-state {
+        .card-meta i { font-size: 11px; }
+        
+        /* ===== EMPTY STATE & LOADING ===== */
+        .empty-state, .loading-state {
             grid-column: 1 / -1;
             text-align: center;
             padding: 80px 20px;
             color: var(--text-secondary);
         }
-
-        .empty-state i {
+        .empty-state i, .loading-state i {
             font-size: 64px;
             display: block;
             margin-bottom: 16px;
             color: var(--border);
         }
-
-        .empty-state h3 {
+        .empty-state h3, .loading-state h3 {
             font-size: 22px;
             margin-bottom: 8px;
             color: #fff;
         }
-
+        .loading-state i {
+            color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
         /* ===== REPRODUCTOR ===== */
         .player-overlay {
             position: fixed;
@@ -466,86 +472,82 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.96);
             z-index: 10000;
             display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             animation: fadeIn 0.3s ease;
+            padding: 20px;
         }
-
-        .player-overlay.active {
-            display: flex;
-        }
-
+        .player-overlay.active { display: flex; }
         .player-container {
-            width: 90%;
-            max-width: 900px;
+            width: 100%;
+            max-width: 960px;
             position: relative;
         }
-
         .player-container video {
             width: 100%;
             border-radius: 12px;
             background: #000;
-            max-height: 80vh;
+            max-height: 78vh;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
         }
-
         .player-close {
             position: absolute;
-            top: -50px;
+            top: -45px;
             right: 0;
             background: transparent;
             border: none;
             color: #fff;
-            font-size: 28px;
+            font-size: 26px;
             cursor: pointer;
             padding: 8px;
-            transition: transform 0.2s;
+            transition: all var(--transition-fast);
         }
-
         .player-close:hover {
-            transform: scale(1.1);
+            transform: scale(1.15);
+            color: var(--accent);
         }
-
         .player-info {
-            width: 90%;
-            max-width: 900px;
-            margin-top: 16px;
+            width: 100%;
+            max-width: 960px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
         }
-
         .player-title {
             font-size: 18px;
-            font-weight: var(--font-weight-title);
+            font-weight: 700;
+            line-height: 1.3;
         }
-
         .player-channel {
             color: var(--text-secondary);
             font-size: 14px;
+            margin-top: 4px;
         }
-
         .player-hashtags {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
+            margin-top: 8px;
         }
-
         .player-hashtags span {
             color: var(--accent);
             font-size: 13px;
+            background: rgba(255,48,79,0.15);
+            padding: 4px 10px;
+            border-radius: 12px;
         }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
+        
         /* ===== MODAL ===== */
         .modal {
             position: fixed;
@@ -553,21 +555,21 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
             animation: fadeIn 0.25s ease;
+            padding: 16px;
         }
-
         .modal-content {
             background: var(--panel);
             padding: 28px 32px;
             border-radius: 20px;
-            width: 90%;
-            max-width: 480px;
+            width: 100%;
+            max-width: 500px;
             display: flex;
             flex-direction: column;
             gap: 16px;
@@ -575,20 +577,20 @@
             box-shadow: var(--shadow);
             max-height: 90vh;
             overflow-y: auto;
+            animation: slideUp 0.3s ease;
         }
-
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .modal-content h3 {
             font-size: 22px;
-            font-weight: var(--font-weight-title);
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-
-        .modal-content h3 i {
-            color: var(--accent);
-        }
-
+        .modal-content h3 i { color: var(--accent); }
         .modal-content input,
         .modal-content textarea,
         .modal-content select {
@@ -598,33 +600,26 @@
             background: var(--panel2);
             color: #fff;
             font-size: 14px;
-            transition: border 0.2s ease;
+            transition: border var(--transition-fast), box-shadow var(--transition-fast);
             width: 100%;
         }
-
         .modal-content input:focus,
         .modal-content textarea:focus,
         .modal-content select:focus {
             outline: none;
             border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,48,79,0.1);
         }
-
         .modal-content textarea {
             resize: vertical;
-            min-height: 60px;
+            min-height: 80px;
             font-family: inherit;
         }
-
-        .modal-content select option {
-            background: var(--panel);
-        }
-
         .modal-actions {
             display: flex;
             gap: 12px;
-            margin-top: 4px;
+            margin-top: 8px;
         }
-
         .modal-actions button {
             flex: 1;
             padding: 12px;
@@ -633,50 +628,44 @@
             font-weight: 700;
             font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all var(--transition-fast);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
-
         .btn-primary {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
             color: #fff;
         }
-
         .btn-primary:hover {
-            box-shadow: 0 0 24px rgba(255,48,79,0.3);
+            box-shadow: 0 4px 16px rgba(255,48,79,0.35);
+            transform: translateY(-1px);
         }
-
         .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
-
         .btn-secondary {
             background: var(--panel2);
             color: #aaa;
         }
-
         .btn-secondary:hover {
             background: var(--border);
             color: #fff;
         }
-
-        .file-input-wrapper {
-            position: relative;
-        }
-
+        .file-input-wrapper { position: relative; }
         .file-input-wrapper input[type="file"] {
-            padding: 10px;
+            padding: 12px;
             background: var(--panel2);
             border-radius: 10px;
             border: 1px dashed var(--border);
             cursor: pointer;
             width: 100%;
+            transition: border var(--transition-fast);
         }
-
+        .file-input-wrapper input[type="file"]:hover { border-color: var(--accent); }
         .file-input-wrapper input[type="file"]::file-selector-button {
             background: var(--accent);
             color: #fff;
@@ -687,13 +676,13 @@
             cursor: pointer;
             margin-right: 12px;
         }
-
         .file-input-wrapper small {
-            color: #666;
+            color: #888;
             display: block;
-            margin-top: 4px;
+            margin-top: 6px;
+            font-size: 12px;
         }
-
+        
         /* ===== TOAST ===== */
         .toast {
             position: fixed;
@@ -702,32 +691,26 @@
             transform: translateX(-50%);
             background: var(--panel2);
             color: #fff;
-            padding: 14px 28px;
+            padding: 14px 24px;
             border-radius: 12px;
             border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            z-index: 2000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+            z-index: 20000;
             font-weight: 500;
             animation: slideUp 0.3s ease;
             display: flex;
             align-items: center;
             gap: 10px;
+            max-width: 90%;
         }
-
-        .toast i {
-            font-size: 20px;
-        }
-
         @keyframes slideUp {
             from { opacity: 0; transform: translateX(-50%) translateY(20px); }
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
-
+        
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            aside {
-                display: none;
-            }
+            aside { display: none; }
             main {
                 margin-left: 0;
                 padding: 76px 16px 24px 16px;
@@ -736,60 +719,40 @@
                 grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
                 gap: 16px;
             }
-            .brand {
-                font-size: 18px;
-            }
-            .brand i {
-                font-size: 20px;
-            }
+            .brand { font-size: 18px; }
+            .brand i { font-size: 20px; }
             .create-btn {
                 padding: 8px 14px;
                 font-size: 13px;
             }
-            .create-btn span {
-                display: none;
-            }
-            .modal-content {
-                padding: 20px;
-            }
-            .categories {
-                gap: 8px;
-            }
+            .create-btn span { display: none; }
+            .modal-content { padding: 20px; }
+            .categories { gap: 8px; }
             .category-chip {
                 font-size: 12px;
                 padding: 6px 14px;
             }
-            .player-container video {
-                max-height: 60vh;
-            }
+            .player-container video { max-height: 60vh; }
             .player-close {
                 top: -40px;
                 font-size: 24px;
             }
-            .player-title {
-                font-size: 15px;
-            }
+            .player-title { font-size: 15px; }
+            .sort-bar { flex-direction: column; align-items: flex-start; }
         }
-
         @media (max-width: 480px) {
             .video-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 12px;
             }
-            .card-title {
-                font-size: 13px;
-            }
+            .card-title { font-size: 13px; }
             .channel-avatar {
                 width: 28px;
                 height: 28px;
                 font-size: 11px;
             }
-            .channel-name {
-                font-size: 11px;
-            }
-            .card-meta {
-                font-size: 10px;
-            }
+            .channel-name { font-size: 11px; }
+            .card-meta { font-size: 10px; }
             .thumb .duration {
                 font-size: 9px;
                 padding: 1px 6px;
@@ -798,17 +761,16 @@
     </style>
 </head>
 <body>
-
     <!-- ===== HEADER ===== -->
     <header>
-        <div class="brand">
+        <a href="#" class="brand" onclick="location.reload()">
             <i class="fas fa-play"></i> JHEILER
-        </div>
+        </a>
         <div class="header-actions">
             <button class="header-btn" id="btnCustomize" title="Personalizar">
                 <i class="fas fa-palette"></i>
             </button>
-            <button class="header-btn" id="btnSearch">
+            <button class="header-btn" id="btnSearch" title="Buscar">
                 <i class="fas fa-search"></i>
             </button>
             <button class="create-btn" id="btnOpenModal">
@@ -853,18 +815,17 @@
     <!-- ===== REPRODUCTOR ===== -->
     <div class="player-overlay" id="playerOverlay">
         <div class="player-container">
-            <button class="player-close" id="playerClose">
+            <button class="player-close" id="playerClose" title="Cerrar (Esc)">
                 <i class="fas fa-times"></i>
             </button>
-            <video id="playerVideo" controls autoplay>
-                <source src="" type="video/mp4">
-                Tu navegador no soporta videos.
+            <video id="playerVideo" controls preload="metadata">
+                Tu navegador no soporta la reproducción de videos.
             </video>
         </div>
         <div class="player-info">
             <div>
                 <div class="player-title" id="playerTitle">Título del video</div>
-                <div class="player-channel" id="playerChannel">JHEILER</div>
+                <div class="player-channel" id="playerChannel">@JHEILER</div>
                 <div class="player-hashtags" id="playerHashtags"></div>
             </div>
         </div>
@@ -876,7 +837,7 @@
         <div class="categories" id="categoriesContainer">
             <span class="category-chip active" data-category="todos">Todos</span>
             <span class="category-chip" data-category="roblox">Roblox</span>
-            <span class="category-chip" data-category="ia">IA</span>
+            <span class="category-chip" data-category="ia">Inteligencia Artificial</span>
             <span class="category-chip" data-category="minecraft">Minecraft</span>
             <span class="category-chip" data-category="programacion">Programación</span>
             <span class="category-chip" data-category="musica">Música</span>
@@ -884,9 +845,17 @@
             <span class="category-chip" data-category="videojuegos">Videojuegos</span>
         </div>
 
-        <!-- ===== SECTION TITLE ===== -->
-        <div class="section-title" id="sectionTitle">
-            <i class="fas fa-home"></i> Inicio
+        <!-- ===== ORDENAMIENTO ===== -->
+        <div class="sort-bar">
+            <h2 class="section-title" id="sectionTitle" style="margin:0;">
+                <i class="fas fa-home"></i> Inicio
+            </h2>
+            <select class="sort-select" id="sortSelect">
+                <option value="recientes">Más recientes</option>
+                <option value="vistos">Más vistos</option>
+                <option value="antiguos">Más antiguos</option>
+                <option value="aleatorio">Aleatorio</option>
+            </select>
         </div>
 
         <!-- ===== VIDEO GRID ===== -->
@@ -899,7 +868,14 @@
         // ============================================
         const SUPABASE_URL = "https://zrpaigevkndivtfsnkbf.supabase.co";
         const SUPABASE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
-        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        let sb = null;
+        try {
+            if (window.supabase) {
+                sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            }
+        } catch (e) {
+            console.warn('Supabase no disponible, usando datos locales');
+        }
 
         const grid = document.getElementById('videoGrid');
         const sectionTitle = document.getElementById('sectionTitle');
@@ -909,22 +885,24 @@
         const playerChannel = document.getElementById('playerChannel');
         const playerHashtags = document.getElementById('playerHashtags');
         const playerClose = document.getElementById('playerClose');
+        const sortSelect = document.getElementById('sortSelect');
 
         let currentSection = 'inicio';
         let currentCategory = 'todos';
+        let currentSort = 'recientes';
         let allVideos = [];
 
         // ============================================
-        // DATOS DE EJEMPLO CON VISTAS REALES
+        // DATOS DE EJEMPLO
         // ============================================
         const sampleVideos = [
             {
                 id: '1',
                 title: 'ROBLOX: La mejor aventura épica',
-                description: 'Explorando el mundo de Roblox con amigos',
+                description: 'Explorando el mundo de Roblox con amigos y construyendo increíbles estructuras.',
                 category: 'roblox',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
+                thumbnail_url: 'https://picsum.photos/seed/roblox1/400/225',
                 views: 4700,
                 duration: 680,
                 channel: 'JHEILER',
@@ -934,99 +912,167 @@
             },
             {
                 id: '2',
-                title: 'IA: El futuro de la tecnología',
-                description: 'Inteligencia artificial explicada fácil',
+                title: 'IA: El futuro de la tecnología explicado',
+                description: 'Inteligencia artificial explicada de forma sencilla para todos.',
                 category: 'ia',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
+                thumbnail_url: 'https://picsum.photos/seed/ai1/400/225',
                 views: 4400,
                 duration: 526,
                 channel: 'JHEILER',
-                hashtags: ['#IA', '#Tecnología', '#Futuro'],
+                hashtags: ['#InteligenciaArtificial', '#Tecnología', '#Futuro'],
                 is_short: false,
-                created_at: '2026-08-17T00:00:00Z'
+                created_at: '2026-08-16T00:00:00Z'
             },
             {
                 id: '3',
-                title: 'MINECRAFT: Construyendo una ciudad',
-                description: 'Construcción masiva en Minecraft',
+                title: 'MINECRAFT: Construyendo una ciudad desde cero',
+                description: 'Construcción masiva en Minecraft — desde el suelo hasta las nubes.',
                 category: 'minecraft',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
+                thumbnail_url: 'https://picsum.photos/seed/minecraft1/400/225',
                 views: 3200,
                 duration: 930,
                 channel: 'JHEILER',
                 hashtags: ['#Minecraft', '#Construcción', '#Creativo'],
                 is_short: false,
-                created_at: '2026-08-16T00:00:00Z'
+                created_at: '2026-08-15T00:00:00Z'
             },
             {
                 id: '4',
-                title: 'Programación Web: Curso Completo',
-                description: 'Aprende a programar desde cero',
+                title: 'Programación Web: Curso Completo desde Cero',
+                description: 'Aprende HTML, CSS y JavaScript paso a paso.',
                 category: 'programacion',
                 video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
-                thumbnail_url: '',
+                thumbnail_url: 'https://picsum.photos/seed/code1/400/225',
                 views: 2800,
                 duration: 1335,
                 channel: 'JHEILER',
                 hashtags: ['#Programación', '#Web', '#Coding'],
                 is_short: false,
-                created_at: '2026-08-15T00:00:00Z'
+                created_at: '2026-08-14T00:00:00Z'
+            },
+            {
+                id: '5',
+                title: '🎵 Música electrónica — Sesión en vivo',
+                description: 'Mezclando los mejores temas del momento.',
+                category: 'musica',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://picsum.photos/seed/music1/400/225',
+                views: 5600,
+                duration: 245,
+                channel: 'JHEILER',
+                hashtags: ['#Música', '#Electrónica', '#Live'],
+                is_short: true,
+                created_at: '2026-08-13T00:00:00Z'
+            },
+            {
+                id: '6',
+                title: '⚽ Análisis del mejor partido del torneo',
+                description: 'Revisión táctica y jugadas destacadas.',
+                category: 'deportes',
+                video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                thumbnail_url: 'https://picsum.photos/seed/sports1/400/225',
+                views: 1800,
+                duration: 410,
+                channel: 'JHEILER',
+                hashtags: ['#Fútbol', '#Deportes', '#Análisis'],
+                is_short: false,
+                created_at: '2026-08-12T00:00:00Z'
             }
         ];
 
         // ============================================
-        // FUNCIONES PRINCIPALES
+        // FUNCIONES AUXILIARES
         // ============================================
-
-        // ===== FORMATO DE DURACIÓN (segundos → MM:SS) =====
         function formatDuration(seconds) {
-            if (!seconds || seconds === 0) return '0:00';
+            if (!seconds || seconds <= 0) return '0:00';
             const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
+            const secs = Math.floor(seconds % 60);
             return `${mins}:${String(secs).padStart(2, '0')}`;
         }
 
-        // ===== OBTENER MINIATURA POR DEFECTO =====
-        function getDefaultThumbnail(category) {
-            const defaults = {
-                'roblox': 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=225&fit=crop',
-                'ia': 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=225&fit=crop',
-                'minecraft': 'https://images.unsplash.com/photo-1558618666-fcd25c85f30a?w=400&h=225&fit=crop',
-                'programacion': 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=225&fit=crop',
-                'musica': 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=225&fit=crop',
-                'deportes': 'https://images.unsplash.com/photo-1518099074172-2e47d6cfdc28?w=400&h=225&fit=crop',
-                'videojuegos': 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=225&fit=crop',
-                'general': 'https://images.unsplash.com/photo-1611162616475-46b635cb6868?w=400&h=225&fit=crop'
-            };
-            return defaults[category] || defaults['general'];
+        function formatViews(views) {
+            if (!views || views === 0) return '0';
+            if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
+            if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
+            return views.toString();
         }
 
-        // ===== REPRODUCIR VIDEO =====
+        function formatDate(dateStr) {
+            if (!dateStr) return 'Fecha desconocida';
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            if (diffDays === 0) return 'Hoy';
+            if (diffDays === 1) return 'Ayer';
+            if (diffDays < 7) return `Hace ${diffDays} días`;
+            if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        }
+
+        function getDefaultThumbnail(category) {
+            const seeds = {
+                'roblox': 'roblox',
+                'ia': 'ai',
+                'minecraft': 'minecraft',
+                'programacion': 'code',
+                'musica': 'music',
+                'deportes': 'sports',
+                'videojuegos': 'games'
+            };
+            const seed = seeds[category] || 'video';
+            return `https://picsum.photos/seed/${seed}${Math.floor(Math.random() * 100)}/400/225`;
+        }
+
+        function showToast(message, type = 'info', duration = 3500) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            const iconMap = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                warning: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            const colors = {
+                success: '#22c55e',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            toast.innerHTML = `<i class="${iconMap[type] || iconMap.info}" style="color:${colors[type]}"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(-50%) translateY(10px)';
+                toast.style.transition = 'all 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ============================================
+        // REPRODUCTOR
+        // ============================================
         function playVideo(video) {
             if (!video || !video.video_url) {
                 showToast('Video no disponible', 'error');
                 return;
             }
-            
             playerVideo.src = video.video_url;
             playerVideo.load();
             playerTitle.textContent = video.title || 'Sin título';
-            playerChannel.textContent = video.channel || 'JHEILER';
-            playerHashtags.innerHTML = (video.hashtags || []).map(tag => 
-                `<span>${tag}</span>`
-            ).join('');
-            
+            playerChannel.textContent = `@${video.channel || 'JHEILER'}`;
+            playerHashtags.innerHTML = (video.hashtags || []).map(tag => `<span>${tag}</span>`).join('');
             playerOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-            
             playerVideo.play().catch(() => {
-                showToast('Toca play para reproducir', 'info');
+                showToast('Presiona ▶ para reproducir', 'info');
             });
         }
 
-        // ===== CERRAR REPRODUCTOR =====
         function closePlayer() {
             playerVideo.pause();
             playerVideo.src = '';
@@ -1041,82 +1087,57 @@
             }
         });
         playerOverlay.addEventListener('click', (e) => {
-            if (e.target === playerOverlay) {
-                closePlayer();
-            }
+            if (e.target === playerOverlay) closePlayer();
         });
 
-        // ===== TOAST =====
-        function showToast(message, type = 'info', duration = 3000) {
-            const existing = document.querySelector('.toast');
-            if (existing) existing.remove();
-
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            
-            const iconMap = {
-                success: 'fas fa-check-circle',
-                error: 'fas fa-exclamation-circle',
-                warning: 'fas fa-exclamation-triangle',
-                info: 'fas fa-info-circle'
-            };
-            
-            toast.innerHTML = `<i class="${iconMap[type] || iconMap.info}"></i> ${message}`;
-            document.body.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(-50%) translateY(20px)';
-                toast.style.transition = 'all 0.3s ease';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
-
-        // ===== FORMATOS =====
-        function formatDate(dateStr) {
-            if (!dateStr) return 'Fecha desconocida';
-            const date = new Date(dateStr);
-            return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
-        }
-
-        function formatViews(views) {
-            if (!views || views === 0) return '0';
-            if (views >= 1000000) return (views / 1000000).toFixed(1) + 'M';
-            if (views >= 1000) return (views / 1000).toFixed(1) + 'K';
-            return views;
-        }
-
-        // ===== OBTENER VIDEOS =====
+        // ============================================
+        // OBTENER Y PROCESAR VIDEOS
+        // ============================================
         async function getVideos() {
-            try {
-                const { data, error } = await sb
-                    .from('videos')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                if (data && data.length > 0) {
-                    allVideos = data;
-                    return data;
+            grid.innerHTML = `
+                <div class="loading-state">
+                    <i class="fas fa-spinner"></i>
+                    <h3>Cargando videos...</h3>
+                </div>
+            `;
+            if (sb) {
+                try {
+                    const { data, error } = await sb
+                        .from('videos')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (!error && data && data.length > 0) {
+                        allVideos = data;
+                        return data;
+                    }
+                } catch (err) {
+                    console.warn('Base de datos no disponible:', err.message);
                 }
-                
-                allVideos = sampleVideos;
-                return sampleVideos;
-            } catch (err) {
-                console.log('Usando datos de ejemplo');
-                allVideos = sampleVideos;
-                return sampleVideos;
+            }
+            allVideos = [...sampleVideos];
+            return sampleVideos;
+        }
+
+        function applySorting(videos, sortType) {
+            const sorted = [...videos];
+            switch (sortType) {
+                case 'recientes':
+                    return sorted.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                case 'antiguos':
+                    return sorted.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+                case 'vistos':
+                    return sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
+                case 'aleatorio':
+                    return sorted.sort(() => Math.random() - 0.5);
+                default:
+                    return sorted;
             }
         }
 
-        // ===== FILTRAR VIDEOS =====
         function filterVideos(videos, section, category) {
             let filtered = [...videos];
-            
-            switch(section) {
-                case 'inicio':
-                    break;
+            switch (section) {
+                case 'inicio': break;
                 case 'shorts':
                     filtered = filtered.filter(v => v.is_short === true);
                     if (filtered.length === 0) filtered = videos.slice(0, 3);
@@ -1128,53 +1149,49 @@
                     filtered = filtered.slice(0, 5);
                     break;
                 case 'tus-videos':
-                    filtered = filtered.filter(v => v.channel === 'JHEILER');
+                    filtered = filtered.filter(v => (v.channel || '').toLowerCase() === 'jheiler');
                     break;
                 case 'favoritos':
                     filtered = filtered.slice(0, 3);
                     break;
                 case 'ver-despues':
-                    filtered = filtered.slice().sort(() => Math.random() - 0.5).slice(0, 4);
-                    break;
-                default:
+                    filtered = filtered.sort(() => Math.random() - 0.5).slice(0, 4);
                     break;
             }
-            
             if (category && category !== 'todos') {
-                filtered = filtered.filter(v => v.category === category);
+                filtered = filtered.filter(v => (v.category || '').toLowerCase() === category.toLowerCase());
             }
-            
-            return filtered;
+            return applySorting(filtered, currentSort);
         }
-
         // ============================================
-        // ⭐ RENDER VIDEOS (CON VISTAS REALES) ⭐
+        // RENDERIZAR VIDEOS
         // ============================================
         function renderVideos(videos) {
             if (!videos || videos.length === 0) {
                 grid.innerHTML = `
                     <div class="empty-state">
-                        <i class="fas fa-video"></i>
+                        <i class="fas fa-video-slash"></i>
                         <h3>No hay videos aquí</h3>
-                        <p style="color:#666;margin-top:8px;">¡Sube tu primer video!</p>
+                        <p style="color:#888;margin-top:8px;">Intenta con otra categoría o sube tu primer video</p>
                     </div>
                 `;
                 return;
             }
-
             grid.innerHTML = videos.map(v => {
-                // ✅ VISTAS REALES (0 si no hay)
                 const views = v.views || 0;
                 const duration = formatDuration(v.duration || 0);
-                const hashtags = v.hashtags || ['#Video'];
+                const hashtags = Array.isArray(v.hashtags) && v.hashtags.length > 0 ? v.hashtags : ['#Video'];
                 const channel = v.channel || 'JHEILER';
                 const initial = channel.charAt(0).toUpperCase();
-
-                // ✅ CORREGIDO: startsWith (con S mayúscula)
-                let thumbUrl = v.thumbnail_url && v.thumbnail_url.startsWith('http') ? v.thumbnail_url : getDefaultThumbnail(v.category || 'general');
-
+                let thumbUrl = '';
+                if (v.thumbnail_url && typeof v.thumbnail_url === 'string' && v.thumbnail_url.startsWith('http')) {
+                    thumbUrl = v.thumbnail_url;
+                } else {
+                    thumbUrl = getDefaultThumbnail(v.category || 'general');
+                }
+                const videoData = encodeURIComponent(JSON.stringify(v).replace(/'/g, "\\'"));
                 return `
-                    <div class="video-card" onclick='playVideo(${JSON.stringify(v)})'>
+                    <div class="video-card" onclick='playVideo(JSON.parse(decodeURIComponent("${videoData}")))'>
                         <div class="thumb">
                             <img src="${thumbUrl}" 
                                  alt="${v.title || 'Video'}"
@@ -1205,12 +1222,14 @@
             }).join('');
         }
 
-        // ===== CARGAR VIDEOS =====
+        // ============================================
+        // CARGAR VIDEOS
+        // ============================================
         async function loadVideos() {
             const videos = await getVideos();
             const filtered = filterVideos(videos, currentSection, currentCategory);
             renderVideos(filtered);
-            
+
             const sectionNames = {
                 'inicio': 'Inicio',
                 'shorts': 'Shorts',
@@ -1235,8 +1254,7 @@
         // ============================================
         // EVENT LISTENERS
         // ============================================
-
-        // ===== SIDEBAR =====
+        // Sidebar
         document.querySelectorAll('.sb-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -1244,11 +1262,11 @@
                 this.classList.add('active');
                 currentSection = this.dataset.section;
                 loadVideos();
-                showToast(`📂 ${this.textContent.trim()}`, 'info');
+                showToast(this.textContent.trim().replace('Nuevo', '').trim(), 'info');
             });
         });
 
-        // ===== CATEGORÍAS =====
+        // Categorías
         document.querySelectorAll('.category-chip').forEach(chip => {
             chip.addEventListener('click', function() {
                 document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
@@ -1258,18 +1276,27 @@
             });
         });
 
-        // ===== BÚSQUEDA =====
+        // Ordenamiento
+        sortSelect.addEventListener('change', function() {
+            currentSort = this.value;
+            const filtered = filterVideos(allVideos, currentSection, currentCategory);
+            renderVideos(filtered);
+        });
+
+        // Búsqueda
         document.getElementById('btnSearch').addEventListener('click', function() {
-            const searchTerm = prompt('🔍 ¿Qué estás buscando?');
+            const searchTerm = prompt('¿Qué estás buscando?');
             if (searchTerm && searchTerm.trim()) {
                 const term = searchTerm.trim().toLowerCase();
-                const videos = allVideos.filter(v => 
-                    v.title?.toLowerCase().includes(term) || 
-                    v.description?.toLowerCase().includes(term) ||
-                    (v.hashtags || []).some(tag => tag.toLowerCase().includes(term))
-                );
+                const videos = allVideos.filter(v => {
+                    const title = (v.title || '').toLowerCase();
+                    const desc = (v.description || '').toLowerCase();
+                    const tags = Array.isArray(v.hashtags) ? v.hashtags.join(' ').toLowerCase() : '';
+                    return title.includes(term) || desc.includes(term) || tags.includes(term);
+                });
                 renderVideos(videos);
-                showToast(`🔍 Resultados para: "${searchTerm.trim()}"`, 'info');
+                sectionTitle.innerHTML = `<i class="fas fa-search"></i> Resultados: "${searchTerm.trim()}"`;
+                showToast(`Se encontraron ${videos.length} video(s)`, 'info');
             }
         });
 
@@ -1281,16 +1308,14 @@
             modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h3>
-                        <i class="fas fa-upload"></i> Subir video
-                    </h3>
+                    <h3><i class="fas fa-upload"></i> Subir video</h3>
                     <input type="text" id="upTitle" placeholder="Título del video" maxlength="100">
                     <textarea id="upDesc" placeholder="Descripción (opcional)" maxlength="500"></textarea>
                     <input type="text" id="upHashtags" placeholder="Hashtags (ej: #Roblox #Gaming)" maxlength="200">
                     <select id="upCategory">
                         <option value="general">General</option>
                         <option value="roblox">Roblox</option>
-                        <option value="ia">IA</option>
+                        <option value="ia">Inteligencia Artificial</option>
                         <option value="minecraft">Minecraft</option>
                         <option value="programacion">Programación</option>
                         <option value="musica">Música</option>
@@ -1326,7 +1351,8 @@
             document.getElementById('btnUpload').onclick = async () => {
                 const title = document.getElementById('upTitle').value.trim();
                 const desc = document.getElementById('upDesc').value.trim();
-                const hashtags = document.getElementById('upHashtags').value.trim().split(' ').filter(t => t.startsWith('#'));
+                const hashtagsRaw = document.getElementById('upHashtags').value.trim();
+                const hashtags = hashtagsRaw ? hashtagsRaw.split(/\s+/).filter(t => t.startsWith('#')) : [];
                 const category = document.getElementById('upCategory').value;
                 const isShort = document.getElementById('upIsShort').checked;
                 const videoFile = document.getElementById('upVideo').files[0];
@@ -1343,42 +1369,62 @@
                 btn.disabled = true;
 
                 try {
-                    const vName = `${Date.now()}_${videoFile.name}`;
-                    const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
-                    if (vErr) throw vErr;
-
-                    const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
+                    let videoUrl = '';
                     let thumbUrl = '';
 
-                    if (thumbFile) {
-                        const tName = `${Date.now()}_${thumbFile.name}`;
-                        const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
-                        if (!tErr) {
-                            const { data: tData } = sb.storage.from('thumbnails').getPublicUrl(tName);
-                            thumbUrl = tData.publicUrl;
+                    if (sb) {
+                        const vName = `${Date.now()}_${videoFile.name}`;
+                        const { error: vErr } = await sb.storage.from('videos').upload(vName, videoFile);
+                        if (vErr) throw vErr;
+                        const { data: vData } = sb.storage.from('videos').getPublicUrl(vName);
+                        videoUrl = vData.publicUrl;
+
+                        if (thumbFile) {
+                            const tName = `${Date.now()}_${thumbFile.name}`;
+                            const { error: tErr } = await sb.storage.from('thumbnails').upload(tName, thumbFile);
+                            if (!tErr) {
+                                const { data: tData } = sb.storage.from('thumbnails').getPublicUrl(tName);
+                                thumbUrl = tData.publicUrl;
+                            }
                         }
+
+                        const newVideo = {
+                            title,
+                            description: desc || null,
+                            category: category || 'general',
+                            video_url: videoUrl,
+                            thumbnail_url: thumbUrl,
+                            views: 0,
+                            duration: 0,
+                            channel: 'JHEILER',
+                            hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
+                            is_short: isShort,
+                            created_at: new Date().toISOString()
+                        };
+
+                        const { error: insertErr } = await sb.from('videos').insert(newVideo);
+                        if (insertErr) throw insertErr;
+                        allVideos.unshift(newVideo);
+                    } else {
+                        const newVideo = {
+                            id: String(Date.now()),
+                            title,
+                            description: desc,
+                            category,
+                            video_url: 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4',
+                            thumbnail_url: thumbUrl || getDefaultThumbnail(category),
+                            views: 0,
+                            duration: 120,
+                            channel: 'JHEILER',
+                            hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
+                            is_short: isShort,
+                            created_at: new Date().toISOString()
+                        };
+                        allVideos.unshift(newVideo);
                     }
 
-                    const newVideo = {
-                        title: title,
-                        description: desc || null,
-                        category: category || 'general',
-                        video_url: vData.publicUrl,
-                        thumbnail_url: thumbUrl || '',
-                        views: 0,
-                        duration: 0,
-                        channel: 'JHEILER',
-                        hashtags: hashtags.length > 0 ? hashtags : ['#Nuevo'],
-                        is_short: isShort,
-                        created_at: new Date().toISOString()
-                    };
-
-                    const { error: insertErr } = await sb.from('videos').insert(newVideo);
-                    if (insertErr) throw insertErr;
-
-                    allVideos.unshift(newVideo);
                     modal.remove();
-                    showToast('¡Video publicado con éxito! 🎉', 'success');
+                    showToast('¡Video publicado con éxito!', 'success');
                     loadVideos();
                 } catch (err) {
                     console.error('Error al subir:', err);
@@ -1397,39 +1443,37 @@
             modal.className = 'modal';
             modal.innerHTML = `
                 <div class="modal-content">
-                    <h3>
-                        <i class="fas fa-palette"></i> Personalizar JHEILER
-                    </h3>
+                    <h3><i class="fas fa-palette"></i> Personalizar JHEILER</h3>
                     
                     <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎨 Tema</label>
+                        <label style="font-weight:600;display:block;margin-bottom:8px;">Tema</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-secondary" onclick="applyTheme('dark')">Oscuro</button>
-                            <button class="btn-secondary" onclick="applyTheme('light')">Claro</button>
-                            <button class="btn-secondary" onclick="applyTheme('neon')">Neon</button>
-                            <button class="btn-secondary" onclick="applyTheme('cyber')">Cyber</button>
+                            <button class="btn-secondary" onclick="applyTheme('dark');this.closest('.modal').remove();">Oscuro</button>
+                            <button class="btn-secondary" onclick="applyTheme('light');this.closest('.modal').remove();">Claro</button>
+                            <button class="btn-secondary" onclick="applyTheme('neon');this.closest('.modal').remove();">Neón</button>
+                            <button class="btn-secondary" onclick="applyTheme('cyber');this.closest('.modal').remove();">Cyber</button>
                         </div>
                     </div>
                     
                     <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🔤 Fuente</label>
+                        <label style="font-weight:600;display:block;margin-bottom:8px;">Fuente</label>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                            <button class="btn-secondary" onclick="applyFont('Inter')">Inter</button>
-                            <button class="btn-secondary" onclick="applyFont('Poppins')">Poppins</button>
-                            <button class="btn-secondary" onclick="applyFont('Roboto')">Roboto</button>
-                            <button class="btn-secondary" onclick="applyFont('Montserrat')">Montserrat</button>
-                            <button class="btn-secondary" onclick="applyFont('Orbitron')">Orbitron</button>
+                            <button class="btn-secondary" onclick="applyFont('Inter');this.closest('.modal').remove();">Inter</button>
+                            <button class="btn-secondary" onclick="applyFont('Poppins');this.closest('.modal').remove();">Poppins</button>
+                            <button class="btn-secondary" onclick="applyFont('Roboto');this.closest('.modal').remove();">Roboto</button>
+                            <button class="btn-secondary" onclick="applyFont('Montserrat');this.closest('.modal').remove();">Montserrat</button>
+                            <button class="btn-secondary" onclick="applyFont('Orbitron');this.closest('.modal').remove();">Orbitron</button>
                         </div>
                     </div>
                     
                     <div>
-                        <label style="font-weight:600;display:block;margin-bottom:6px;">🎯 Color de acento</label>
+                        <label style="font-weight:600;display:block;margin-bottom:8px;">Color de acento</label>
                         <input type="color" id="accentColor" value="#ff304f" style="padding:4px;width:100%;height:50px;border-radius:10px;border:1px solid var(--border);background:transparent;cursor:pointer;">
                     </div>
                     
                     <div class="modal-actions">
                         <button class="btn-primary" onclick="applyAccentColor();this.closest('.modal').remove();">
-                            <i class="fas fa-check"></i> Aplicar
+                            <i class="fas fa-check"></i> Aplicar color
                         </button>
                         <button class="btn-secondary" onclick="this.closest('.modal').remove()">
                             <i class="fas fa-times"></i> Cerrar
@@ -1442,22 +1486,25 @@
 
         window.applyTheme = function(theme) {
             const themes = {
-                dark: { bg: '#0f0f0f', panel: '#181818', panel2: '#212121', border: '#303030' },
-                light: { bg: '#f5f5f5', panel: '#ffffff', panel2: '#e8e8e8', border: '#ddd', text: '#666' },
-                neon: { bg: '#0a0a1a', panel: '#111128', panel2: '#1a1a3a', border: '#333366', accent: '#00ff88' },
-                cyber: { bg: '#000000', panel: '#0a0a0a', panel2: '#1a1a1a', border: '#333333', accent: '#ff00ff' }
+                dark: { bg: '#0f0f0f', panel: '#181818', panel2: '#212121', border: '#303030', text: '#aaa', accent: '#ff304f', accent2: '#ff6b8a' },
+                light: { bg: '#f5f5f5', panel: '#ffffff', panel2: '#e8e8e8', border: '#ddd', text: '#666', accent: '#ff304f', accent2: '#ff6b8a' },
+                neon: { bg: '#0a0a1a', panel: '#111128', panel2: '#1a1a3a', border: '#333366', text: '#aaa', accent: '#00ff88', accent2: '#66ffbb' },
+                cyber: { bg: '#000000', panel: '#0a0a0a', panel2: '#1a1a1a', border: '#333333', text: '#aaa', accent: '#ff00ff', accent2: '#ff66ff' }
             };
-            
             const t = themes[theme];
             if (!t) return;
-            
             document.documentElement.style.setProperty('--bg', t.bg);
             document.documentElement.style.setProperty('--panel', t.panel);
             document.documentElement.style.setProperty('--panel2', t.panel2);
             document.documentElement.style.setProperty('--border', t.border);
-            if (t.text) document.documentElement.style.setProperty('--text-secondary', t.text);
-            if (t.accent) document.documentElement.style.setProperty('--accent', t.accent);
-            
+            document.documentElement.style.setProperty('--text-secondary', t.text);
+            document.documentElement.style.setProperty('--accent', t.accent);
+            document.documentElement.style.setProperty('--accent2', t.accent2);
+            if (theme === 'light') {
+                document.body.style.color = '#111';
+            } else {
+                document.body.style.color = '#fff';
+            }
             showToast(`Tema ${theme} aplicado`, 'success');
         };
 
@@ -1470,16 +1517,14 @@
             const color = document.getElementById('accentColor')?.value;
             if (color) {
                 document.documentElement.style.setProperty('--accent', color);
+                const r = parseInt(color.slice(1,3), 16);
+                const g = parseInt(color.slice(3,5), 16);
+                const b = parseInt(color.slice(5,7), 16);
+                const lighter = `rgb(${Math.min(255,r+60)}, ${Math.min(255,g+60)}, ${Math.min(255,b+60)})`;
+                document.documentElement.style.setProperty('--accent2', lighter);
                 showToast('Color de acento aplicado', 'success');
             }
         };
-
-        // ============================================
-        // SERVICE WORKER
-        // ============================================
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
-        }
 
         // ============================================
         // INICIALIZAR
