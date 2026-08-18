@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>JHEILER - Subir video</title>
+<title>JHEILER</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js">
 </script>
 <style>
@@ -11,707 +11,300 @@
    RESET Y BASE
 ============================================================ */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html,body{height:100%;}
-body{
-  font-family:'Segoe UI','Roboto',system-ui,sans-serif;
-  background:#0f0f0f;
-  color:#fff;
-  display:flex;
-  justify-content:center;
-  align-items:flex-start;
-  padding:20px;
-  min-height:100vh;
-}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:#0f0f0f;color:#fff;}
 ::-webkit-scrollbar{width:8px;}
 ::-webkit-scrollbar-track{background:#0f0f0f;}
 ::-webkit-scrollbar-thumb{background:#3a3a3a;border-radius:4px;}
 ::-webkit-scrollbar-thumb:hover{background:#065fd4;}
-
-:root{
-  --bg-primary:#0f0f0f;
-  --bg-secondary:#181818;
-  --bg-tertiary:#212121;
-  --bg-input:#0a0a0a;
-  --text-primary:#ffffff;
-  --text-secondary:#aaaaaa;
-  --text-muted:#606060;
-  --accent:#065fd4;
-  --accent-hover:#0b6fe0;
-  --border:#303030;
-  --danger:#ff304f;
-  --success:#2ecc71;
-  --warning:#f1c40f;
-  --radius:12px;
-  --shadow:0 8px 32px rgba(0,0,0,0.5);
-  --transition:all 0.25s ease;
-}
-
-/* ============================================================
-   CONTAINER
-============================================================ */
-.container{
-  max-width:1100px;
-  width:100%;
-  background:var(--bg-secondary);
-  border-radius:var(--radius);
-  padding:32px;
-  box-shadow:var(--shadow);
-  border:1px solid var(--border);
-  animation:fadeIn .3s ease;
-}
-@keyframes fadeIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+:root{--bg:#0f0f0f;--panel:#181818;--panel2:#212121;--text:#fff;--text-secondary:#aaa;--accent:#ff304f;--border:#303030;--header-h:56px;--sidebar-w:240px;}
 
 /* ============================================================
    HEADER
 ============================================================ */
-.header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:16px;
-  margin-bottom:28px;
-  padding-bottom:16px;
-  border-bottom:1px solid var(--border);
+#appHeader{
+  position:fixed;top:0;left:0;right:0;height:var(--header-h);
+  background:var(--bg);display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;z-index:200;border-bottom:1px solid var(--border);
 }
 .header-left{display:flex;align-items:center;gap:12px;}
-.header-left h1{font-size:24px;font-weight:700;letter-spacing:-0.3px;}
-.header-left .back-btn{
-  background:none;border:none;color:var(--text-secondary);
-  font-size:24px;cursor:pointer;padding:4px 8px;border-radius:8px;
-  transition:var(--transition);
-}
-.header-left .back-btn:hover{background:var(--bg-tertiary);color:#fff;}
-.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
-.btn{
-  padding:10px 24px;
-  border-radius:24px;
-  font-size:14px;
-  font-weight:600;
-  border:none;
-  cursor:pointer;
-  transition:var(--transition);
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-}
-.btn:disabled{opacity:0.5;cursor:not-allowed;}
-.btn-secondary{
-  background:var(--bg-tertiary);
-  color:var(--text-primary);
-}
-.btn-secondary:hover{background:#333;}
-.btn-primary{
-  background:var(--accent);
-  color:#fff;
-}
-.btn-primary:hover{background:var(--accent-hover);}
-.btn-danger{
-  background:transparent;
-  color:var(--danger);
-  border:1px solid var(--danger);
-}
-.btn-danger:hover{background:rgba(255,48,79,0.1);}
-.btn-success{
-  background:var(--success);
-  color:#fff;
-}
-.btn-success:hover{filter:brightness(1.1);}
+.icon-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .15s;background:none;border:none;color:#fff;cursor:pointer;}
+.icon-btn:hover{background:#3a3a3a;}
+.brand{font-size:20px;font-weight:700;display:flex;align-items:center;gap:6px;color:#fff;text-decoration:none;}
+.brand .play-ico{color:var(--accent);}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.create-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:20px;background:var(--panel2);font-size:14px;font-weight:500;border:none;color:#fff;cursor:pointer;}
+.create-btn:hover{background:#3a3a3a;}
+.avatar-circle{width:34px;height:34px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;overflow:hidden;flex-shrink:0;}
+.auth-btn{display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border);border-radius:20px;color:#3ea6ff;font-size:14px;font-weight:500;background:none;cursor:pointer;}
+.auth-btn:hover{background:rgba(62,166,255,0.1);}
 
 /* ============================================================
-   GRID DEL FORMULARIO
+   SIDEBAR
 ============================================================ */
-.form-grid{
-  display:grid;
-  grid-template-columns:2fr 1fr;
-  gap:28px;
+#sidebar{
+  position:fixed;top:var(--header-h);left:0;bottom:0;width:var(--sidebar-w);
+  background:var(--bg);overflow-y:auto;z-index:150;padding-bottom:24px;
+  transition:transform .2s ease;
 }
-@media(max-width:860px){.form-grid{grid-template-columns:1fr;}}
+.sb-section{padding:12px 0;border-bottom:1px solid var(--border);}
+.sb-title{padding:6px 24px;font-size:13px;font-weight:600;color:var(--text-secondary);}
+.sb-item{
+  display:flex;align-items:center;gap:20px;
+  padding:10px 24px;font-size:14px;border-radius:0 20px 20px 0;
+  color:#fff;text-decoration:none;cursor:pointer;
+}
+.sb-item .sb-ico{font-size:20px;width:24px;text-align:center;}
+.sb-item:hover{background:#3a3a3a;}
+.sb-item.active{background:var(--panel2);font-weight:600;}
+.sb-item.active .sb-ico{color:var(--accent);}
+#sidebarOverlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:140;display:none;}
 
-/* ============================================================
-   CAMPOS
-============================================================ */
-.field{margin-bottom:20px;}
-.field-label{
-  display:block;
-  font-size:13px;
-  font-weight:600;
-  color:var(--text-secondary);
-  margin-bottom:6px;
-}
-.field-label .required{color:var(--danger);margin-left:2px;}
-.field-label .counter{
-  float:right;
-  font-weight:400;
-  color:var(--text-muted);
-  font-size:12px;
-}
-.field-input{
-  width:100%;
-  padding:12px 16px;
-  background:var(--bg-input);
-  border:1px solid var(--border);
-  border-radius:8px;
-  color:var(--text-primary);
-  font-size:14px;
-  transition:var(--transition);
-  outline:none;
-  font-family:inherit;
-}
-.field-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(6,95,212,0.15);}
-.field-input::placeholder{color:var(--text-muted);}
-.field-textarea{
-  resize:vertical;
-  min-height:80px;
-  max-height:300px;
-  font-family:inherit;
-}
-.field-hint{
-  font-size:12px;
-  color:var(--text-muted);
-  margin-top:5px;
-}
-.field-hint a{color:var(--accent);text-decoration:none;}
-.field-hint a:hover{text-decoration:underline;}
-.field-error{
-  font-size:13px;
-  color:var(--danger);
-  margin-top:4px;
-  display:none;
+@media(max-width:900px){
+  #sidebar{transform:translateX(-100%);width:260px;}
+  #sidebar.show{transform:translateX(0);}
+  #sidebarOverlay.show{display:block;}
 }
 
 /* ============================================================
-   SELECT ESTILO YOUTUBE
+   MAIN CONTENT
 ============================================================ */
-.select-styled{
-  width:100%;
-  padding:12px 16px;
-  background:var(--bg-input);
-  border:1px solid var(--border);
-  border-radius:8px;
-  color:var(--text-primary);
-  font-size:14px;
-  appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' stroke-width='2' fill='none'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;
-  background-position:right 14px center;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.select-styled:focus{border-color:var(--accent);}
+#appBody{padding-top:var(--header-h);display:flex;min-height:100vh;}
+#mainContent{flex:1;margin-left:var(--sidebar-w);padding:24px;min-width:0;}
+@media(max-width:900px){#mainContent{margin-left:0;}}
 
 /* ============================================================
-   DROPZONE
+   PAGES - GENERAL
 ============================================================ */
-.dropzone{
-  border:2px dashed var(--border);
-  border-radius:var(--radius);
-  padding:40px 20px;
-  text-align:center;
-  cursor:pointer;
-  transition:var(--transition);
-  background:var(--bg-input);
-}
-.dropzone:hover{border-color:var(--accent);background:rgba(6,95,212,0.03);}
-.dropzone .dz-icon{font-size:56px;display:block;margin-bottom:10px;}
-.dropzone .dz-title{font-size:16px;font-weight:500;color:var(--text-secondary);}
-.dropzone .dz-sub{font-size:13px;color:var(--text-muted);margin-top:4px;}
-.dropzone .dz-input{display:none;}
-.dropzone.dragover{border-color:var(--accent);background:rgba(6,95,212,0.06);}
+.page{display:none;animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+.section-heading{font-size:20px;font-weight:700;margin-bottom:16px;}
+.section-sub{font-size:14px;color:var(--text-secondary);margin-bottom:20px;}
 
 /* ============================================================
-   PREVIEW DE VIDEO
+   HOME / DASHBOARD
 ============================================================ */
-.video-preview{
-  display:none;
-  background:var(--bg-input);
-  border-radius:var(--radius);
-  padding:12px;
-  margin-top:12px;
-  border:1px solid var(--border);
-  align-items:center;
-  gap:14px;
-}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-bottom:24px;}
+.dash-card{background:var(--panel2);border-radius:12px;padding:20px;border:1px solid var(--border);}
+.dash-card .num{font-size:28px;font-weight:700;}
+.dash-card .label{font-size:13px;color:var(--text-secondary);margin-top:4px;}
+.dash-card .icon{font-size:24px;margin-bottom:6px;}
+.dash-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:24px;}
+.dash-row .dash-card{flex:1;min-width:140px;}
+.video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+.video-card{cursor:pointer;background:var(--panel);border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:transform .15s;}
+.video-card:hover{transform:scale(1.01);}
+.thumb-wrap{width:100%;aspect-ratio:16/9;background:#1a1a1a;overflow:hidden;}
+.thumb-wrap img{width:100%;height:100%;object-fit:cover;}
+.card-info{padding:10px 12px;}
+.card-title{font-weight:600;font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-meta{font-size:12px;color:var(--text-secondary);margin-top:4px;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-secondary);}
+.empty-state .ico{font-size:48px;display:block;margin-bottom:12px;}
+.empty-state h3{color:#fff;font-size:18px;margin-bottom:6px;}
+
+/* ============================================================
+   UPLOAD PAGE (estilo YouTube)
+============================================================ */
+.upload-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px;}
+@media(max-width:768px){.upload-grid{grid-template-columns:1fr;}}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:500;color:#aaa;margin-bottom:4px;}
+.field input,.field textarea,.field select{width:100%;padding:12px 14px;background:#0f0f0f;border:1px solid #303030;border-radius:8px;color:#fff;font-size:14px;outline:none;}
+.field input:focus,.field textarea:focus{border-color:#065fd4;}
+.field textarea{resize:vertical;min-height:80px;font-family:inherit;}
+.counter{float:right;font-size:12px;color:#666;}
+.dropzone{border:2px dashed #303030;border-radius:8px;padding:32px;text-align:center;color:#aaa;cursor:pointer;transition:border-color .2s;}
+.dropzone:hover{border-color:#065fd4;}
+.dropzone .ico{font-size:48px;display:block;margin-bottom:8px;}
+.dropzone input{display:none;}
+.video-preview{display:none;background:#0f0f0f;border-radius:8px;padding:12px;margin-top:12px;align-items:center;gap:14px;border:1px solid #303030;flex-wrap:wrap;}
 .video-preview.active{display:flex;}
-.video-preview video{
-  width:140px;
-  height:80px;
-  object-fit:cover;
-  border-radius:6px;
-  background:#000;
-}
+.video-preview video{width:140px;height:80px;object-fit:cover;border-radius:6px;background:#000;}
 .video-preview .info{flex:1;min-width:0;}
-.video-preview .info .name{
-  font-weight:500;
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-.video-preview .info .size{font-size:12px;color:var(--text-muted);}
-.video-preview .info .duration{font-size:12px;color:var(--text-muted);}
-.video-preview .remove{
-  color:var(--danger);
-  font-size:20px;
-  cursor:pointer;
-  padding:4px 8px;
-  border-radius:50%;
-  transition:var(--transition);
-}
-.video-preview .remove:hover{background:rgba(255,48,79,0.1);}
-
-/* ============================================================
-   MINIATURA
-============================================================ */
-.thumb-box{
-  background:var(--bg-input);
-  border-radius:var(--radius);
-  padding:16px;
-  border:1px solid var(--border);
-}
-.thumb-preview{
-  width:100%;
-  aspect-ratio:16/9;
-  background:#1a1a1a;
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:56px;
-  color:var(--text-muted);
-  overflow:hidden;
-  margin-bottom:12px;
-}
-.thumb-preview img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.thumb-actions{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-}
-.thumb-actions button{
-  flex:1;
-  min-width:80px;
-  padding:8px 14px;
-  border-radius:16px;
-  border:none;
-  font-size:12px;
-  font-weight:500;
-  cursor:pointer;
-  transition:var(--transition);
-  background:var(--bg-tertiary);
-  color:var(--text-primary);
-}
-.thumb-actions button:hover{background:#333;}
-.thumb-actions .thumb-input{display:none;}
-
-/* ============================================================
-   PROGRESO
-============================================================ */
-.progress-wrap{
-  background:var(--bg-tertiary);
-  border-radius:4px;
-  height:6px;
-  overflow:hidden;
-  margin-top:12px;
-}
-.progress-fill{
-  height:100%;
-  background:linear-gradient(90deg,var(--accent),#4a9eff);
-  width:0%;
-  transition:width 0.4s ease;
-  border-radius:4px;
-}
-.progress-info{
-  display:flex;
-  justify-content:space-between;
-  font-size:12px;
-  color:var(--text-muted);
-  margin-top:4px;
-}
-.progress-info .percent{font-weight:600;color:var(--accent);}
-
-/* ============================================================
-   TOGGLES (estilo YouTube)
-============================================================ */
-.toggle-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 0;
-  border-bottom:1px solid var(--border);
-}
-.toggle-row:last-child{border-bottom:none;}
-.toggle-label .title{font-size:14px;}
-.toggle-label .desc{font-size:12px;color:var(--text-muted);}
-.toggle-switch{
-  position:relative;
-  width:44px;
-  height:24px;
-  flex-shrink:0;
-}
-.toggle-switch input{opacity:0;width:0;height:0;}
-.toggle-track{
-  position:absolute;
-  inset:0;
-  background:#3a3a3a;
-  border-radius:12px;
-  transition:var(--transition);
-  cursor:pointer;
-}
-.toggle-track::before{
-  content:"";
-  position:absolute;
-  width:18px;
-  height:18px;
-  left:3px;
-  bottom:3px;
-  background:#fff;
-  border-radius:50%;
-  transition:var(--transition);
-}
-.toggle-switch input:checked + .toggle-track{background:var(--accent);}
-.toggle-switch input:checked + .toggle-track::before{transform:translateX(20px);}
-
-/* ============================================================
-   STATUS / TOAST
-============================================================ */
-.status-msg{
-  padding:12px 16px;
-  border-radius:8px;
-  font-size:14px;
-  margin-top:12px;
-  display:none;
-}
+.video-preview .info .name{font-weight:500;}
+.video-preview .info .size{font-size:12px;color:#aaa;}
+.video-preview .remove{color:#ff304f;font-size:20px;cursor:pointer;}
+.thumb-box{background:#0f0f0f;border:1px solid #303030;border-radius:8px;padding:16px;}
+.thumb-preview{width:100%;aspect-ratio:16/9;background:#1a1a1a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:48px;color:#666;overflow:hidden;margin-bottom:12px;}
+.thumb-preview img{width:100%;height:100%;object-fit:cover;}
+.thumb-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.thumb-actions button{padding:8px 14px;border-radius:16px;border:none;font-size:12px;cursor:pointer;background:#3a3a3a;color:#fff;}
+.thumb-actions button:hover{background:#4a4a4a;}
+.thumb-actions input{display:none;}
+.progress-wrap{background:#222;border-radius:4px;height:4px;margin-top:12px;overflow:hidden;}
+.progress-fill{height:100%;background:#065fd4;width:0%;transition:width .3s;}
+.progress-info{display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-top:4px;}
+.status-msg{padding:12px;border-radius:8px;margin-top:12px;display:none;font-size:14px;}
 .status-msg.show{display:block;}
-.status-msg.success{background:rgba(46,204,113,0.15);border:1px solid var(--success);color:var(--success);}
-.status-msg.error{background:rgba(255,48,79,0.15);border:1px solid var(--danger);color:var(--danger);}
-.status-msg.info{background:rgba(6,95,212,0.15);border:1px solid var(--accent);color:var(--accent);}
-.status-msg.warning{background:rgba(241,196,15,0.15);border:1px solid var(--warning);color:var(--warning);}
+.status-msg.error{background:#2a0a0a;border:1px solid #ff304f;color:#ff304f;}
+.status-msg.success{background:#0a2a14;border:1px solid #2ecc71;color:#2ecc71;}
+.status-msg.info{background:#0a1a2a;border:1px solid #065fd4;color:#4a9eff;}
+.upload-actions{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap;}
 
 /* ============================================================
-   TAGS (como YouTube)
+   TOAST
 ============================================================ */
-.tags-container{
-  display:flex;
-  flex-wrap:wrap;
-  gap:8px;
-  padding:8px 12px;
-  background:var(--bg-input);
-  border:1px solid var(--border);
-  border-radius:8px;
-  min-height:48px;
-  align-items:center;
-}
-.tag-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-  background:var(--bg-tertiary);
-  padding:4px 10px;
-  border-radius:14px;
-  font-size:12px;
-  font-weight:500;
-}
-.tag-pill .remove-tag{
-  cursor:pointer;
-  color:var(--text-muted);
-  font-size:14px;
-}
-.tag-pill .remove-tag:hover{color:var(--danger);}
-.tags-input{
-  flex:1;
-  background:transparent;
-  border:none;
-  outline:none;
-  color:var(--text-primary);
-  font-size:14px;
-  min-width:80px;
-}
-.tags-input::placeholder{color:var(--text-muted);}
+#toastContainer{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:900;display:flex;flex-direction:column;gap:8px;align-items:center;width:100%;pointer-events:none;}
+.toast{background:#2a2a2a;color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,0.4);max-width:90vw;text-align:center;animation:toastIn .2s ease;}
+.toast.error{background:#3a1418;border:1px solid #ff304f;}
+.toast.success{background:#123a20;border:1px solid #2ecc71;}
+@keyframes toastIn{from{transform:translateY(10px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 
 /* ============================================================
-   PLAYER DE AUDIO (placeholder)
+   MODAL
 ============================================================ */
-.audio-selector{
-  display:flex;
-  gap:12px;
-  align-items:center;
-  flex-wrap:wrap;
-}
-.audio-selector button{
-  padding:6px 16px;
-  border-radius:16px;
-  border:1px solid var(--border);
-  background:var(--bg-input);
-  color:var(--text-secondary);
-  font-size:12px;
-  cursor:pointer;
-  transition:var(--transition);
-}
-.audio-selector button:hover{border-color:var(--accent);color:#fff;}
-.audio-selector button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
-
-/* ============================================================
-   RESPONSIVE
-============================================================ */
-@media(max-width:600px){
-  .container{padding:16px;}
-  .header{flex-direction:column;align-items:stretch;gap:12px;}
-  .header-right{justify-content:flex-end;}
-  .btn{padding:8px 16px;font-size:13px;}
-  .video-preview{flex-wrap:wrap;}
-  .video-preview video{width:100%;height:auto;aspect-ratio:16/9;}
-  .thumb-actions button{flex:1;min-width:60px;font-size:11px;}
-  .toggle-row{flex-wrap:wrap;gap:8px;}
-}
-
-/* ============================================================
-   SKELETON / LOADING
-============================================================ */
-.skeleton{background:linear-gradient(90deg,#1a1a1a 25%,#2a2a2a 37%,#1a1a1a 63%);background-size:400% 100%;animation:skeleton 1.4s ease infinite;}
-@keyframes skeleton{0%{background-position:100% 50%;}100%{background-position:0 50%;}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-box{background:var(--panel);border-radius:12px;width:100%;max-width:420px;padding:24px;max-height:90vh;overflow-y:auto;}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-head h2{font-size:18px;font-weight:600;}
+.modal-close{font-size:24px;background:none;border:none;color:#fff;cursor:pointer;padding:0 8px;}
+.modal-close:hover{color:#ff304f;}
 </style>
 </head>
 <body>
 
-<div class="container" id="app">
-
-  <!-- ==========================================================
-  HEADER
-  ========================================================== -->
-  <div class="header">
-    <div class="header-left">
-      <button class="back-btn" onclick="location.hash='#/home'" title="Volver">←</button>
-      <h1>📤 Subir video</h1>
-    </div>
-    <div class="header-right">
-      <button class="btn btn-secondary" id="draftBtn">💾 Guardar borrador</button>
-      <button class="btn btn-primary" id="publishBtn" disabled>Publicar</button>
+<!-- ============================================================
+   HEADER
+============================================================ -->
+<header id="appHeader">
+  <div class="header-left">
+    <button class="icon-btn" id="btnToggleSidebar" aria-label="Menú">☰</button>
+    <a href="#/home" class="brand"><span class="play-ico">▶</span> JHEILER</a>
+  </div>
+  <div class="header-right">
+    <button class="create-btn" id="headerUploadBtn">📤 Subir video</button>
+    <div id="authArea">
+      <button class="auth-btn" id="btnOpenLogin">👤 Iniciar sesión</button>
     </div>
   </div>
+</header>
 
-  <!-- ==========================================================
-  FORMULARIO
-  ========================================================== -->
-  <form id="uploadForm" novalidate>
+<!-- ============================================================
+   SIDEBAR
+============================================================ -->
+<div id="sidebarOverlay"></div>
+<nav id="sidebar">
+  <div class="sb-section">
+    <a class="sb-item active" data-route="home" href="#/home"><span class="sb-ico">🏠</span> Inicio</a>
+    <a class="sb-item" data-route="upload" href="#/upload"><span class="sb-ico">📤</span> Subir video</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Biblioteca</div>
+    <a class="sb-item" data-route="videos" href="#/videos"><span class="sb-ico">🎬</span> Mis videos</a>
+    <a class="sb-item" data-route="playlists" href="#/playlists"><span class="sb-ico">📋</span> Playlists</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-title">Gestión</div>
+    <a class="sb-item" data-route="analytics" href="#/analytics"><span class="sb-ico">📊</span> Analytics</a>
+    <a class="sb-item" data-route="comments" href="#/comments"><span class="sb-ico">💬</span> Comentarios</a>
+  </div>
+  <div class="sb-section">
+    <a class="sb-item" data-route="settings" href="#/settings"><span class="sb-ico">⚙️</span> Configuración</a>
+  </div>
+</nav>
 
-    <div class="form-grid">
+<!-- ============================================================
+   MAIN CONTENT
+============================================================ -->
+<div id="appBody">
+  <div id="mainContent">
 
-      <!-- ======================== -->
-      <!-- COLUMNA IZQUIERDA        -->
-      <!-- ======================== -->
-      <div class="form-left">
-
-        <!-- TÍTULO -->
-        <div class="field">
-          <label class="field-label">
-            Título <span class="required">*</span>
-            <span class="counter" id="titleCounter">0/100</span>
-          </label>
-          <input class="field-input" id="title" maxlength="100" placeholder="Escribe un título para tu video" required>
-          <div class="field-hint">Un buen título ayuda a que más personas encuentren tu video.</div>
-        </div>
-
-        <!-- DESCRIPCIÓN -->
-        <div class="field">
-          <label class="field-label">
-            Descripción
-            <span class="counter" id="descCounter">0/5000</span>
-          </label>
-          <textarea class="field-input field-textarea" id="description" maxlength="5000" placeholder="Cuéntale a los usuarios de qué va tu video (escribe @ seguido del nombre de un canal para mencionarlo)"></textarea>
-        </div>
-
-        <!-- TAGS (etiquetas) -->
-        <div class="field">
-          <label class="field-label">Etiquetas</label>
-          <div class="tags-container" id="tagsContainer">
-            <span class="tag-pill" data-tag="gaming">gaming <span class="remove-tag" data-remove-tag>×</span></span>
-            <span class="tag-pill" data-tag="tutorial">tutorial <span class="remove-tag" data-remove-tag>×</span></span>
-            <input class="tags-input" id="tagsInput" placeholder="Añadir etiqueta... (presiona Enter)">
-          </div>
-          <div class="field-hint">Las etiquetas ayudan a que tu video sea más fácil de encontrar.</div>
-        </div>
-
-        <!-- MINIATURA -->
-        <div class="field">
-          <label class="field-label">Miniatura</label>
-          <div class="thumb-box">
-            <div class="thumb-preview" id="thumbPreview">
-              <span>🖼️</span>
-            </div>
-            <div class="thumb-actions">
-              <button id="thumbUploadBtn">📤 Subir archivo</button>
-              <button id="thumbFromVideoBtn">🎬 Desde el vídeo</button>
-              <input type="file" id="thumbFileInput" accept="image/*" class="thumb-input">
-            </div>
-            <div class="field-hint" style="margin-top:8px;">Usa una miniatura que destaque y capte la atención de los usuarios.</div>
-          </div>
-        </div>
-
-        <!-- LISTAS DE REPRODUCCIÓN -->
-        <div class="field">
-          <label class="field-label">Listas de reproducción</label>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <select class="select-styled" id="playlistSelect" style="flex:1;">
-              <option value="">Seleccionar lista</option>
-              <option value="favoritos">⭐ Favoritos</option>
-              <option value="tutoriales">📚 Tutoriales</option>
-              <option value="gaming">🎮 Gaming</option>
-              <option value="musica">🎵 Música</option>
-            </select>
-            <button class="btn btn-secondary" id="createPlaylistBtn" style="padding:8px 16px;border-radius:8px;">+ Crear</button>
-          </div>
-          <div class="field-hint">Añade tu video a una lista de reproducción para organizar tu contenido.</div>
-        </div>
-
+    <!-- ========== HOME ========== -->
+    <div class="page active" id="page-home">
+      <h1 class="section-heading">🏠 Inicio</h1>
+      <div class="dash-grid" id="dashStats">
+        <div class="dash-card"><div class="icon">🎬</div><div class="num" id="statVideos">0</div><div class="label">Videos</div></div>
+        <div class="dash-card"><div class="icon">👁️</div><div class="num" id="statViews">0</div><div class="label">Visualizaciones</div></div>
+        <div class="dash-card"><div class="icon">👍</div><div class="num" id="statLikes">0</div><div class="label">Likes</div></div>
+        <div class="dash-card"><div class="icon">👤</div><div class="num" id="statSubs">0</div><div class="label">Suscriptores</div></div>
       </div>
+      <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+        <button class="create-btn" id="homeUploadBtn" style="padding:12px 24px;font-size:16px;">📤 Subir video</button>
+      </div>
+      <h2 class="section-heading" style="font-size:18px;">Videos recientes</h2>
+      <div id="recentVideos" class="video-grid"><div class="empty-state"><span class="ico">🎬</span><h3>Sin videos aún</h3><p>Sube tu primer video para empezar.</p></div></div>
+    </div>
 
-      <!-- ======================== -->
-      <!-- COLUMNA DERECHA          -->
-      <!-- ======================== -->
-      <div class="form-right">
-
-        <!-- DROPZONE VIDEO -->
-        <div class="field">
-          <label class="field-label">Archivo de video <span class="required">*</span></label>
-          <div class="dropzone" id="dropzone">
-            <span class="dz-icon">🎬</span>
-            <div class="dz-title">Haz clic o arrastra tu archivo aquí</div>
-            <div class="dz-sub">MP4, MOV, AVI, WEBM (máx. 500MB)</div>
-            <input type="file" class="dz-input" id="videoFileInput" accept="video/*">
+    <!-- ========== UPLOAD ========== -->
+    <div class="page" id="page-upload">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+        <h1 class="section-heading" style="margin-bottom:0;">📤 Subir video</h1>
+        <button class="icon-btn" onclick="navigateTo('home')" title="Volver" style="font-size:20px;">← Volver</button>
+      </div>
+      <form id="uploadForm">
+        <div class="upload-grid">
+          <div>
+            <div class="field"><label>Título <span class="counter" id="titleCounter">0/100</span></label><input type="text" id="title" maxlength="100" placeholder="Escribe un título" required></div>
+            <div class="field"><label>Descripción <span class="counter" id="descCounter">0/5000</span></label><textarea id="description" maxlength="5000" placeholder="Descripción del video"></textarea></div>
+            <div class="field"><label>Miniatura</label><div class="thumb-box"><div class="thumb-preview" id="thumbPreview"><span>🖼️</span></div><div class="thumb-actions"><button type="button" id="thumbUploadBtn">Subir archivo</button><button type="button" id="thumbFromVideoBtn">Desde el vídeo</button><input type="file" id="thumbFileInput" accept="image/*"></div></div></div>
           </div>
-
-          <!-- PREVIEW DEL VIDEO -->
-          <div class="video-preview" id="videoPreview">
-            <video id="previewVideo" controls></video>
-            <div class="info">
-              <div class="name" id="fileName">video.mp4</div>
-              <div class="size" id="fileSize">0 MB</div>
-              <div class="duration" id="fileDuration">Duración: 0:00</div>
-            </div>
-            <span class="remove" id="removeVideoBtn">✕</span>
-          </div>
-        </div>
-
-        <!-- VISIBILIDAD -->
-        <div class="field">
-          <label class="field-label">Visibilidad</label>
-          <select class="select-styled" id="visibility">
-            <option value="public">🌍 Público</option>
-            <option value="unlisted">🔗 No listado</option>
-            <option value="private">🔒 Privado</option>
-          </select>
-          <div class="field-hint">Elige quién puede ver tu video.</div>
-        </div>
-
-        <!-- CATEGORÍA -->
-        <div class="field">
-          <label class="field-label">Categoría</label>
-          <select class="select-styled" id="category">
-            <option value="Gaming">🎮 Gaming</option>
-            <option value="Música">🎵 Música</option>
-            <option value="Noticias">📰 Noticias</option>
-            <option value="Deportes">⚽ Deportes</option>
-            <option value="Educación">📚 Educación</option>
-            <option value="Entretenimiento">🎭 Entretenimiento</option>
-            <option value="Tecnología">💻 Tecnología</option>
-            <option value="Vlog">📹 Vlog</option>
-            <option value="Otros">📌 Otros</option>
-          </select>
-        </div>
-
-        <!-- OPCIONES AVANZADAS (toggles estilo YouTube) -->
-        <div class="field">
-          <label class="field-label">Opciones avanzadas</label>
-          <div style="background:var(--bg-input);border-radius:8px;border:1px solid var(--border);padding:0 16px;">
-
-            <div class="toggle-row">
-              <div class="toggle-label">
-                <div class="title">Comentarios</div>
-                <div class="desc">Permitir comentarios en este video</div>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="commentsToggle" checked>
-                <span class="toggle-track"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <div class="toggle-label">
-                <div class="title">Moderación de comentarios</div>
-                <div class="desc">Revisar comentarios antes de publicarlos</div>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="moderationToggle">
-                <span class="toggle-track"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <div class="toggle-label">
-                <div class="title">Edad restringida</div>
-                <div class="desc">Este contenido puede no ser apto para menores</div>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="ageRestrictedToggle">
-                <span class="toggle-track"></span>
-              </label>
-            </div>
-
-            <div class="toggle-row">
-              <div class="toggle-label">
-                <div class="title">Monetización</div>
-                <div class="desc">Permitir anuncios en este video</div>
-              </div>
-              <label class="toggle-switch">
-                <input type="checkbox" id="monetizationToggle">
-                <span class="toggle-track"></span>
-              </label>
-            </div>
-
+          <div>
+            <div class="field"><label>Archivo de video</label><div class="dropzone" id="dropzone"><span class="ico">🎬</span><div>Haz clic o arrastra tu archivo</div><input type="file" id="videoFileInput" accept="video/*"></div><div class="video-preview" id="videoPreview"><video id="previewVideo" controls></video><div class="info"><div class="name" id="fileName">video.mp4</div><div class="size" id="fileSize">0 MB</div></div><span class="remove" id="removeVideoBtn">✕</span></div></div>
+            <div class="field"><label>Visibilidad</label><select id="visibility"><option value="public">Público</option><option value="unlisted">No listado</option><option value="private">Privado</option></select></div>
+            <div class="field"><label>Categoría</label><select id="category"><option value="Gaming">Gaming</option><option value="Música">Música</option><option value="Noticias">Noticias</option><option value="Deportes">Deportes</option><option value="Educación">Educación</option><option value="Entretenimiento">Entretenimiento</option><option value="Tecnología">Tecnología</option><option value="Vlog">Vlog</option><option value="Otros">Otros</option></select></div>
+            <div class="progress-wrap" id="progressWrap"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-info" id="progressInfo" style="display:none;"><span id="progressLabel">Subiendo...</span><span id="progressPercent">0%</span></div>
+            <div class="status-msg" id="status"></div>
+            <div class="upload-actions"><button type="submit" class="create-btn" id="publishBtn" style="padding:12px 32px;font-size:16px;" disabled>Publicar</button></div>
           </div>
         </div>
+      </form>
+    </div>
 
-        <!-- MÚSICA / AUDIO (estilo YouTube) -->
-        <div class="field">
-          <label class="field-label">Música de fondo</label>
-          <div class="audio-selector">
-            <button class="active" data-audio="none">🔇 Sin música</button>
-            <button data-audio="chill">🎵 Chill</button>
-            <button data-audio="epic">🎵 Épico</button>
-            <button data-audio="lofi">🎵 Lo-fi</button>
-          </div>
-          <div class="field-hint">Selecciona una pista de fondo para tu video.</div>
-        </div>
+    <!-- ========== VIDEOS ========== -->
+    <div class="page" id="page-videos">
+      <h1 class="section-heading">🎬 Mis videos</h1>
+      <div id="myVideosGrid" class="video-grid"><div class="empty-state"><span class="ico">🎬</span><h3>No has subido videos</h3></div></div>
+    </div>
 
-        <!-- PROGRAMAR PUBLICACIÓN -->
-        <div class="field">
-          <label class="field-label">Programar publicación</label>
-          <input type="datetime-local" class="field-input" id="scheduleDate">
-          <div class="field-hint">Deja vacío para publicar inmediatamente.</div>
-        </div>
-
-        <!-- PROGRESO -->
-        <div id="progressContainer" style="display:none;">
-          <div class="progress-wrap">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <div class="progress-info">
-            <span id="progressLabel">Subiendo...</span>
-            <span class="percent" id="progressPercent">0%</span>
-          </div>
-        </div>
-
-        <!-- STATUS -->
-        <div class="status-msg" id="statusMsg"></div>
-
+    <!-- ========== ANALYTICS ========== -->
+    <div class="page" id="page-analytics">
+      <h1 class="section-heading">📊 Analytics</h1>
+      <div class="dash-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
+        <div class="dash-card"><div class="num" id="anaVideos">0</div><div class="label">Total videos</div></div>
+        <div class="dash-card"><div class="num" id="anaViews">0</div><div class="label">Visualizaciones</div></div>
+        <div class="dash-card"><div class="num" id="anaLikes">0</div><div class="label">Likes</div></div>
       </div>
     </div>
-  </form>
+
+    <!-- ========== PLAYLISTS ========== -->
+    <div class="page" id="page-playlists">
+      <h1 class="section-heading">📋 Playlists</h1>
+      <div class="empty-state"><span class="ico">📋</span><h3>Sin playlists</h3><p>Crea tu primera lista de reproducción.</p></div>
+    </div>
+
+    <!-- ========== COMMENTS ========== -->
+    <div class="page" id="page-comments">
+      <h1 class="section-heading">💬 Comentarios</h1>
+      <div class="empty-state"><span class="ico">💬</span><h3>Sin comentarios</h3></div>
+    </div>
+
+    <!-- ========== SETTINGS ========== -->
+    <div class="page" id="page-settings">
+      <h1 class="section-heading">⚙️ Configuración</h1>
+      <div style="max-width:500px;">
+        <div style="background:var(--panel2);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;"><span>Tema oscuro</span><input type="checkbox" id="themeToggle" checked></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;"><span>Autoplay</span><input type="checkbox" id="autoplayToggle" checked></div>
+        </div>
+        <button class="auth-btn" id="settingsLogoutBtn" style="width:100%;justify-content:center;padding:12px;border-radius:8px;color:#ff304f;border-color:#ff304f;">Cerrar sesión</button>
+      </div>
+    </div>
+
+  </div>
 </div>
+
+<!-- ============================================================
+   TOAST
+============================================================ -->
+<div id="toastContainer"></div>
+
+<!-- ============================================================
+   MODAL ROOT
+============================================================ -->
+<div id="modalRoot"></div>
 
 <script>
 "use strict";
@@ -724,14 +317,297 @@ const SUPABASE_KEY = "sb_publishable_ZNY7o83Xhn0ARxvH3_cxbw_AEyQah0q";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ============================================================
-// DOM REFS
+// STATE
 // ============================================================
+const STATE = {
+  session: null,
+  user: null,
+  profile: null,
+  currentPage: 'home',
+  videos: [],
+  stats: { videos: 0, views: 0, likes: 0, subs: 0 }
+};
+
+// ============================================================
+// UTILS
+// ============================================================
+function qs(sel, root){ return (root||document).querySelector(sel); }
+function qsa(sel, root){ return Array.from((root||document).querySelectorAll(sel)); }
+function escapeHTML(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatCount(n){ n=Number(n)||0; if(n>=1e6) return (n/1e6).toFixed(1).replace('.0','')+'M'; if(n>=1e3) return (n/1e3).toFixed(1).replace('.0','')+'K'; return String(n); }
+function timeAgo(d){ if(!d) return ''; const diff=(Date.now()-new Date(d).getTime())/1000; const units=[['año',31536000],['mes',2592000],['día',86400],['hora',3600],['minuto',60]]; for(const [l,s] of units){ const v=Math.floor(diff/s); if(v>=1) return `hace ${v} ${l}${v>1?'s':''}`; } return 'hace un momento'; }
+
+function toast(msg, type){
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' '+type : '');
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .25s'; setTimeout(()=>el.remove(),260); }, 3000);
+}
+function toastSuccess(msg){ toast(msg,'success'); }
+function toastError(msg){ toast(msg,'error'); }
+
+// ============================================================
+// NAVEGACIÓN SPA
+// ============================================================
+function navigateTo(page, data){
+  if(page === STATE.currentPage) return;
+  STATE.currentPage = page;
+  // Ocultar todas las páginas
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Mostrar la página seleccionada
+  const target = document.getElementById('page-'+page);
+  if(target) target.classList.add('active');
+  // Sidebar
+  document.querySelectorAll('.sb-item[data-route]').forEach(el => {
+    el.classList.toggle('active', el.dataset.route === page);
+  });
+  // Cerrar sidebar móvil
+  if(window.innerWidth <= 900){
+    document.getElementById('sidebar').classList.remove('show');
+    document.getElementById('sidebarOverlay').classList.remove('show');
+  }
+  // Renderizar contenido según página
+  switch(page){
+    case 'home': renderHome(); break;
+    case 'videos': renderMyVideos(); break;
+    case 'analytics': renderAnalytics(); break;
+    case 'upload': break; // Ya está renderizado
+    default: break;
+  }
+  // Actualizar hash sin disparar evento
+  if(location.hash !== '#/'+page){
+    history.pushState(null, '', '#/'+page);
+  }
+}
+
+// ============================================================
+// ROUTER
+// ============================================================
+function handleRoute(){
+  const hash = location.hash.replace('#','') || '/home';
+  const page = hash.replace('/','') || 'home';
+  const validPages = ['home','upload','videos','analytics','playlists','comments','settings'];
+  if(validPages.includes(page)){
+    navigateTo(page);
+  } else {
+    navigateTo('home');
+  }
+}
+window.addEventListener('hashchange', handleRoute);
+window.addEventListener('popstate', handleRoute);
+
+// ============================================================
+// AUTH
+// ============================================================
+async function initAuth(){
+  const { data:{ session } } = await supabase.auth.getSession();
+  STATE.session = session;
+  STATE.user = session ? session.user : null;
+  if(STATE.user) await loadProfile();
+  updateUI();
+  if(STATE.user) loadUserData();
+}
+
+async function loadProfile(){
+  if(!STATE.user) return;
+  const { data } = await supabase.from('profiles').select('*').eq('id', STATE.user.id).maybeSingle();
+  STATE.profile = data;
+  if(data?.subscribers_count !== undefined) STATE.stats.subs = data.subscribers_count;
+}
+
+function updateUI(){
+  const area = document.getElementById('authArea');
+  if(STATE.user){
+    const name = STATE.profile ? (STATE.profile.display_name || STATE.profile.username) : 'Usuario';
+    area.innerHTML = `<button class="icon-btn" id="btnUserMenu" style="width:auto;height:auto;border-radius:50%;padding:0;"><span class="avatar-circle">${(name[0]||'U').toUpperCase()}</span></button>`;
+    document.getElementById('btnUserMenu')?.addEventListener('click', ()=>{
+      if(confirm(`Cerrar sesión de ${name}?`)) doSignOut();
+    });
+  } else {
+    area.innerHTML = `<button class="auth-btn" id="btnOpenLogin">👤 Iniciar sesión</button>`;
+    document.getElementById('btnOpenLogin').addEventListener('click', ()=>openAuthModal('login'));
+  }
+}
+
+async function doSignOut(){
+  await supabase.auth.signOut();
+  STATE.user = null;
+  STATE.profile = null;
+  STATE.videos = [];
+  STATE.stats = { videos:0, views:0, likes:0, subs:0 };
+  updateUI();
+  toastSuccess('Sesión cerrada.');
+  renderHome();
+}
+
+// ============================================================
+// AUTH MODAL
+// ============================================================
+function openAuthModal(mode){
+  const html = `
+    <div class="modal-head"><h2>${mode==='login'?'Iniciar sesión':'Crear cuenta'}</h2><button class="modal-close" id="authModalClose">✕</button></div>
+    <form id="authForm">
+      ${mode==='signup' ? `<div class="field"><label>Nombre</label><input type="text" id="signupName" required></div><div class="field"><label>Usuario</label><input type="text" id="signupUsername" required></div>` : ''}
+      <div class="field"><label>Email</label><input type="email" id="authEmail" required></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="authPassword" required minlength="6"></div>
+      <div id="authError" style="color:#ff304f;font-size:13px;display:none;margin-bottom:8px;"></div>
+      <button type="submit" class="create-btn" style="width:100%;padding:12px;justify-content:center;font-size:16px;">${mode==='login'?'Iniciar sesión':'Crear cuenta'}</button>
+      <div style="margin-top:12px;font-size:13px;color:#aaa;text-align:center;">
+        ${mode==='login' ? '¿No tienes cuenta? <a href="#" id="switchToSignup" style="color:#3ea6ff;">Regístrate</a>' :
+        '¿Ya tienes cuenta? <a href="#" id="switchToLogin" style="color:#3ea6ff;">Inicia sesión</a>'}
+      </div>
+    </form>
+  `;
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'activeModalOverlay';
+  overlay.innerHTML = `<div class="modal-box">${html}</div>`;
+  document.getElementById('modalRoot').appendChild(overlay);
+  document.getElementById('authModalClose').addEventListener('click', ()=>overlay.remove());
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  document.getElementById('authForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const email = document.getElementById('authEmail').value.trim();
+    const password = document.getElementById('authPassword').value;
+    const err = document.getElementById('authError');
+    err.style.display='none';
+    try{
+      if(mode==='login'){
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if(error) throw error;
+        toastSuccess('Sesión iniciada');
+        overlay.remove();
+        await initAuth();
+        handleRoute();
+      } else {
+        const displayName = document.getElementById('signupName').value.trim();
+        const username = document.getElementById('signupUsername').value.trim().toLowerCase();
+        if(!/^[a-z0-9_.]+$/.test(username)){ throw new Error('Usuario solo letras, números, . y _'); }
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if(error) throw error;
+        if(data.user){
+          await supabase.from('profiles').insert({ id: data.user.id, username, display_name: displayName });
+        }
+        toastSuccess('Cuenta creada. Revisa tu correo.');
+        overlay.remove();
+        await initAuth();
+        handleRoute();
+      }
+    } catch(err){
+      err.textContent = err.message || 'Error';
+      err.style.display='block';
+    }
+  });
+  const switchLink = document.getElementById('switchToSignup') || document.getElementById('switchToLogin');
+  if(switchLink) switchLink.addEventListener('click', (e)=>{ e.preventDefault(); overlay.remove(); openAuthModal(mode==='login'?'signup':'login'); });
+}
+
+// ============================================================
+// HOME / DASHBOARD
+// ============================================================
+async function renderHome(){
+  if(!STATE.user){
+    document.getElementById('dashStats').innerHTML = `
+      <div class="dash-card"><div class="icon">👤</div><div class="num">-</div><div class="label">Inicia sesión</div></div>
+      <div class="dash-card" style="grid-column:span 2;"><div style="font-size:14px;color:#aaa;">Inicia sesión para ver tus estadísticas y videos.</div></div>
+    `;
+    document.getElementById('recentVideos').innerHTML = `<div class="empty-state"><span class="ico">🔒</span><h3>Inicia sesión</h3><button class="create-btn" onclick="openAuthModal('login')">Iniciar sesión</button></div>`;
+    return;
+  }
+  await loadUserData();
+  // Stats
+  document.getElementById('statVideos').textContent = STATE.stats.videos;
+  document.getElementById('statViews').textContent = formatCount(STATE.stats.views);
+  document.getElementById('statLikes').textContent = formatCount(STATE.stats.likes);
+  document.getElementById('statSubs').textContent = formatCount(STATE.stats.subs);
+  // Recent videos
+  const grid = document.getElementById('recentVideos');
+  if(!STATE.videos || STATE.videos.length===0){
+    grid.innerHTML = `<div class="empty-state"><span class="ico">🎬</span><h3>Sin videos aún</h3><p>Sube tu primer video.</p></div>`;
+    return;
+  }
+  const recent = STATE.videos.slice(0, 6);
+  grid.innerHTML = recent.map(v => `
+    <div class="video-card">
+      <div class="thumb-wrap">${v.thumbnail_url ? `<img src="${escapeHTML(v.thumbnail_url)}" loading="lazy">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:32px;color:#666;">🎬</div>'}</div>
+      <div class="card-info">
+        <div class="card-title">${escapeHTML(v.title)}</div>
+        <div class="card-meta">${formatCount(v.views||0)} vistas · ${timeAgo(v.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loadUserData(){
+  if(!STATE.user) return;
+  try{
+    const { data, error } = await supabase.from('videos').select('*').eq('user_id', STATE.user.id).order('created_at', {ascending:false});
+    if(error) throw error;
+    STATE.videos = data || [];
+    STATE.stats.videos = STATE.videos.length;
+    STATE.stats.views = STATE.videos.reduce((s,v) => s + (v.views||0), 0);
+    STATE.stats.likes = STATE.videos.reduce((s,v) => s + (v.likes_count||0), 0);
+  } catch(e){ console.error(e); }
+}
+
+// ============================================================
+// MIS VIDEOS
+// ============================================================
+async function renderMyVideos(){
+  const grid = document.getElementById('myVideosGrid');
+  if(!STATE.user){
+    grid.innerHTML = `<div class="empty-state"><span class="ico">🔒</span><h3>Inicia sesión</h3></div>`;
+    return;
+  }
+  await loadUserData();
+  if(!STATE.videos || STATE.videos.length===0){
+    grid.innerHTML = `<div class="empty-state"><span class="ico">🎬</span><h3>No has subido videos</h3><button class="create-btn" onclick="navigateTo('upload')">Subir video</button></div>`;
+    return;
+  }
+  grid.innerHTML = STATE.videos.map(v => `
+    <div class="video-card">
+      <div class="thumb-wrap">${v.thumbnail_url ? `<img src="${escapeHTML(v.thumbnail_url)}" loading="lazy">` : '<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:32px;color:#666;">🎬</div>'}</div>
+      <div class="card-info">
+        <div class="card-title">${escapeHTML(v.title)}</div>
+        <div class="card-meta">${formatCount(v.views||0)} vistas · ${timeAgo(v.created_at)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ============================================================
+// ANALYTICS
+// ============================================================
+async function renderAnalytics(){
+  if(!STATE.user){
+    document.getElementById('anaVideos').textContent = '-';
+    document.getElementById('anaViews').textContent = '-';
+    document.getElementById('anaLikes').textContent = '-';
+    return;
+  }
+  await loadUserData();
+  document.getElementById('anaVideos').textContent = STATE.stats.videos;
+  document.getElementById('anaViews').textContent = formatCount(STATE.stats.views);
+  document.getElementById('anaLikes').textContent = formatCount(STATE.stats.likes);
+}
+
+// ============================================================
+// UPLOAD - LÓGICA
+// ============================================================
+const uploadState = {
+  videoFile: null,
+  thumbFile: null,
+  duration: 0,
+  isUploading: false
+};
+
+// DOM refs upload
 const title = document.getElementById('title');
 const description = document.getElementById('description');
 const titleCounter = document.getElementById('titleCounter');
 const descCounter = document.getElementById('descCounter');
-const tagsContainer = document.getElementById('tagsContainer');
-const tagsInput = document.getElementById('tagsInput');
 const thumbPreview = document.getElementById('thumbPreview');
 const thumbUploadBtn = document.getElementById('thumbUploadBtn');
 const thumbFromVideoBtn = document.getElementById('thumbFromVideoBtn');
@@ -742,370 +618,224 @@ const videoPreview = document.getElementById('videoPreview');
 const previewVideo = document.getElementById('previewVideo');
 const fileName = document.getElementById('fileName');
 const fileSize = document.getElementById('fileSize');
-const fileDuration = document.getElementById('fileDuration');
 const removeVideoBtn = document.getElementById('removeVideoBtn');
 const visibility = document.getElementById('visibility');
 const category = document.getElementById('category');
-const playlistSelect = document.getElementById('playlistSelect');
-const createPlaylistBtn = document.getElementById('createPlaylistBtn');
-const commentsToggle = document.getElementById('commentsToggle');
-const moderationToggle = document.getElementById('moderationToggle');
-const ageRestrictedToggle = document.getElementById('ageRestrictedToggle');
-const monetizationToggle = document.getElementById('monetizationToggle');
-const scheduleDate = document.getElementById('scheduleDate');
-const progressContainer = document.getElementById('progressContainer');
 const progressFill = document.getElementById('progressFill');
+const progressInfo = document.getElementById('progressInfo');
 const progressLabel = document.getElementById('progressLabel');
 const progressPercent = document.getElementById('progressPercent');
-const statusMsg = document.getElementById('statusMsg');
+const status = document.getElementById('status');
 const publishBtn = document.getElementById('publishBtn');
-const draftBtn = document.getElementById('draftBtn');
 
-let selectedVideoFile = null;
-let selectedThumbFile = null;
-let videoDuration = 0;
-let tags = ['gaming', 'tutorial'];
-let isUploading = false;
+// Contadores
+title.addEventListener('input', ()=>{ titleCounter.textContent = `${title.value.length}/100`; validateUpload(); });
+description.addEventListener('input', ()=>{ descCounter.textContent = `${description.value.length}/5000`; });
 
-// ============================================================
-// CONTADORES
-// ============================================================
-title.addEventListener('input', ()=>{
-  titleCounter.textContent = `${title.value.length}/100`;
-  validateForm();
-});
-description.addEventListener('input', ()=>{
-  descCounter.textContent = `${description.value.length}/5000`;
-});
-
-// ============================================================
-// TAGS
-// ============================================================
-function renderTags(){
-  const pills = tagsContainer.querySelectorAll('.tag-pill');
-  pills.forEach(p => p.remove());
-  tags.forEach(tag => {
-    const pill = document.createElement('span');
-    pill.className = 'tag-pill';
-    pill.dataset.tag = tag;
-    pill.innerHTML = `${tag} <span class="remove-tag" data-remove-tag>×</span>`;
-    pill.querySelector('.remove-tag').addEventListener('click', ()=>{
-      tags = tags.filter(t => t !== tag);
-      renderTags();
-      validateForm();
-    });
-    tagsContainer.insertBefore(pill, tagsInput);
-  });
-}
-
-tagsInput.addEventListener('keydown', (e)=>{
-  if(e.key === 'Enter'){
-    e.preventDefault();
-    const val = tagsInput.value.trim().toLowerCase();
-    if(val && !tags.includes(val)){
-      tags.push(val);
-      renderTags();
-      tagsInput.value = '';
-      validateForm();
-    }
-  }
-});
-
-// ============================================================
-// DROPZONE - VIDEO
-// ============================================================
+// Dropzone
 dropzone.addEventListener('click', ()=> videoFileInput.click());
-
-['dragover','dragenter'].forEach(evt => {
-  dropzone.addEventListener(evt, (e)=>{
-    e.preventDefault();
-    dropzone.classList.add('dragover');
-  });
-});
-['dragleave','drop'].forEach(evt => {
-  dropzone.addEventListener(evt, (e)=>{
-    e.preventDefault();
-    dropzone.classList.remove('dragover');
-  });
-});
-dropzone.addEventListener('drop', (e)=>{
+dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.style.borderColor='#065fd4'; });
+dropzone.addEventListener('dragleave', ()=> dropzone.style.borderColor='#303030');
+dropzone.addEventListener('drop', e=>{
+  e.preventDefault();
+  dropzone.style.borderColor='#303030';
   if(e.dataTransfer.files[0]) handleVideoFile(e.dataTransfer.files[0]);
 });
-
-videoFileInput.addEventListener('change', (e)=>{
-  if(e.target.files[0]) handleVideoFile(e.target.files[0]);
-});
+videoFileInput.addEventListener('change', e=>{ if(e.target.files[0]) handleVideoFile(e.target.files[0]); });
 
 function handleVideoFile(file){
-  if(!file.type.startsWith('video/')){ setStatus('error','❌ Selecciona un archivo de video válido.'); return; }
-  if(file.size > 500*1024*1024){ setStatus('error','❌ El video es demasiado grande (máx. 500MB).'); return; }
-  
-  selectedVideoFile = file;
+  if(!file.type.startsWith('video/')){ setStatus('error','Selecciona un video válido.'); return; }
+  if(file.size > 500*1024*1024){ setStatus('error','Video muy grande (máx 500MB).'); return; }
+  uploadState.videoFile = file;
   const url = URL.createObjectURL(file);
-  
   previewVideo.src = url;
   fileName.textContent = file.name;
-  fileSize.textContent = (file.size/1024/1024).toFixed(1) + ' MB';
-  
-  // Obtener duración
-  const tempVideo = document.createElement('video');
-  tempVideo.preload = 'metadata';
-  tempVideo.src = url;
-  tempVideo.onloadedmetadata = ()=>{
-    videoDuration = Math.floor(tempVideo.duration) || 0;
-    const mins = Math.floor(videoDuration/60);
-    const secs = videoDuration%60;
-    fileDuration.textContent = `Duración: ${mins}:${String(secs).padStart(2,'0')}`;
-  };
-  
+  fileSize.textContent = (file.size/1024/1024).toFixed(1)+' MB';
   videoPreview.classList.add('active');
   dropzone.style.display = 'none';
-  setStatus('','');
-  validateForm();
+  const temp = document.createElement('video');
+  temp.preload = 'metadata';
+  temp.src = url;
+  temp.onloadedmetadata = ()=>{ uploadState.duration = Math.floor(temp.duration)||0; };
+  setStatus('');
+  validateUpload();
 }
 
 removeVideoBtn.addEventListener('click', ()=>{
-  selectedVideoFile = null;
+  uploadState.videoFile = null;
   videoPreview.classList.remove('active');
   dropzone.style.display = 'block';
   videoFileInput.value = '';
-  validateForm();
+  validateUpload();
 });
 
-// ============================================================
-// MINIATURA
-// ============================================================
+// Miniatura
 thumbUploadBtn.addEventListener('click', ()=> thumbFileInput.click());
-thumbFileInput.addEventListener('change', (e)=>{
-  if(e.target.files[0]) handleThumbFile(e.target.files[0]);
-});
-
+thumbFileInput.addEventListener('change', e=>{ if(e.target.files[0]) handleThumbFile(e.target.files[0]); });
 thumbFromVideoBtn.addEventListener('click', ()=>{
-  if(!selectedVideoFile){ setStatus('warning','⚠️ Primero selecciona un video.'); return; }
+  if(!uploadState.videoFile){ setStatus('error','Primero selecciona un video.'); return; }
   const canvas = document.createElement('canvas');
-  canvas.width = 320;
-  canvas.height = 180;
+  canvas.width=320; canvas.height=180;
   const ctx = canvas.getContext('2d');
   const vid = document.createElement('video');
-  vid.src = URL.createObjectURL(selectedVideoFile);
+  vid.src = URL.createObjectURL(uploadState.videoFile);
   vid.currentTime = 1;
   vid.onloadeddata = ()=>{
     ctx.drawImage(vid, 0, 0, canvas.width, canvas.height);
-    canvas.toBlob((blob)=>{
+    canvas.toBlob(blob=>{
       if(!blob) return;
-      const file = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' });
+      const file = new File([blob], 'thumb.jpg', { type: 'image/jpeg' });
       handleThumbFile(file);
     }, 'image/jpeg');
   };
 });
 
 function handleThumbFile(file){
-  if(!file.type.startsWith('image/')){ setStatus('error','❌ Selecciona una imagen válida.'); return; }
-  selectedThumbFile = file;
-  const url = URL.createObjectURL(file);
-  thumbPreview.innerHTML = `<img src="${url}" alt="Miniatura">`;
-  setStatus('success','✅ Miniatura subida correctamente.');
+  if(!file.type.startsWith('image/')){ setStatus('error','Selecciona una imagen.'); return; }
+  uploadState.thumbFile = file;
+  thumbPreview.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+  setStatus('success','Miniatura subida.');
 }
 
-// ============================================================
-// AUDIO SELECTOR
-// ============================================================
-document.querySelectorAll('[data-audio]').forEach(btn => {
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('[data-audio]').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
-
-// ============================================================
-// CREAR LISTA DE REPRODUCCIÓN
-// ============================================================
-createPlaylistBtn.addEventListener('click', ()=>{
-  const name = prompt('Nombre de la nueva lista de reproducción:');
-  if(name && name.trim()){
-    const opt = document.createElement('option');
-    opt.value = name.trim().toLowerCase().replace(/\s+/g,'-');
-    opt.textContent = `📂 ${name.trim()}`;
-    playlistSelect.add(opt, 0);
-    playlistSelect.value = opt.value;
-    setStatus('success','✅ Lista creada correctamente.');
-  }
-});
-
-// ============================================================
-// VALIDACIÓN
-// ============================================================
-function validateForm(){
-  const hasTitle = title.value.trim().length > 0;
-  const hasVideo = selectedVideoFile !== null;
-  publishBtn.disabled = !(hasTitle && hasVideo && !isUploading);
-}
-
-title.addEventListener('input', validateForm);
-
-// ============================================================
-// STATUS
-// ============================================================
 function setStatus(type, msg){
-  statusMsg.className = 'status-msg show ' + type;
-  statusMsg.textContent = msg;
-  if(!msg){ statusMsg.className = 'status-msg'; }
+  status.className = 'status-msg';
+  status.textContent = '';
+  if(!msg) return;
+  status.className = 'status-msg show ' + type;
+  status.textContent = msg;
 }
 
-// ============================================================
-// PUBLICAR
-// ============================================================
+function validateUpload(){
+  publishBtn.disabled = !(title.value.trim() && uploadState.videoFile && !uploadState.isUploading);
+}
+
+// Publicar
 document.getElementById('uploadForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
   if(publishBtn.disabled) return;
-  
-  isUploading = true;
+  if(!STATE.user){ toastError('Inicia sesión primero.'); return; }
+  uploadState.isUploading = true;
   publishBtn.disabled = true;
-  publishBtn.textContent = '⏳ Publicando...';
-  progressContainer.style.display = 'block';
-  setStatus('info','⏳ Iniciando subida...');
+  publishBtn.textContent = '⏳';
+  progressInfo.style.display = 'flex';
+  setStatus('info','Subiendo video...');
 
   try{
-    const { data: { user } } = await supabase.auth.getUser();
-    if(!user){ throw new Error('Inicia sesión primero.'); }
-
-    // Subir video
     progressFill.style.width = '20%';
     progressLabel.textContent = 'Subiendo video...';
     progressPercent.textContent = '20%';
-    setStatus('info','⏳ Subiendo video a la nube...');
-
-    const videoPath = `${user.id}/${Date.now()}_${selectedVideoFile.name.replace(/[^a-zA-Z0-9_.-]/g,'_')}`;
-    const { error: uploadErr } = await supabase.storage.from('videos').upload(videoPath, selectedVideoFile, {
-      cacheControl: '3600',
-      upsert: false
-    });
-    if(uploadErr) throw uploadErr;
-
+    const vPath = `${STATE.user.id}/${Date.now()}_${uploadState.videoFile.name.replace(/[^a-zA-Z0-9_.-]/g,'_')}`;
+    const { error: upErr } = await supabase.storage.from('videos').upload(vPath, uploadState.videoFile);
+    if(upErr) throw upErr;
     progressFill.style.width = '60%';
-    progressLabel.textContent = 'Procesando video...';
+    progressLabel.textContent = 'Procesando...';
     progressPercent.textContent = '60%';
-    const { data: videoPublic } = supabase.storage.from('videos').getPublicUrl(videoPath);
-    const videoUrl = videoPublic.publicUrl;
-
-    // Subir miniatura
-    let thumbnailUrl = null;
-    if(selectedThumbFile){
-      progressLabel.textContent = 'Subiendo miniatura...';
-      progressPercent.textContent = '75%';
-      const thumbPath = `${user.id}/thumb_${Date.now()}_${selectedThumbFile.name.replace(/[^a-zA-Z0-9_.-]/g,'_')}`;
-      const { error: thumbErr } = await supabase.storage.from('thumbnails').upload(thumbPath, selectedThumbFile, {
-        cacheControl: '3600',
-        upsert: false
-      });
-      if(thumbErr) throw thumbErr;
-      const { data: thumbPublic } = supabase.storage.from('thumbnails').getPublicUrl(thumbPath);
-      thumbnailUrl = thumbPublic.publicUrl;
+    const { data: vPub } = supabase.storage.from('videos').getPublicUrl(vPath);
+    const videoUrl = vPub.publicUrl;
+    let thumbUrl = null;
+    if(uploadState.thumbFile){
+      const tPath = `${STATE.user.id}/thumb_${Date.now()}_${uploadState.thumbFile.name.replace(/[^a-zA-Z0-9_.-]/g,'_')}`;
+      const { error: tErr } = await supabase.storage.from('thumbnails').upload(tPath, uploadState.thumbFile);
+      if(!tErr){ const { data: tPub } = supabase.storage.from('thumbnails').getPublicUrl(tPath); thumbUrl = tPub.publicUrl; }
     }
-
     progressFill.style.width = '90%';
     progressLabel.textContent = 'Publicando...';
     progressPercent.textContent = '90%';
-
-    // Guardar en DB
-    const { error: insertErr } = await supabase.from('videos').insert({
-      user_id: user.id,
+    const { error: insErr } = await supabase.from('videos').insert({
+      user_id: STATE.user.id,
       title: title.value.trim(),
       description: description.value.trim(),
       video_url: videoUrl,
-      thumbnail_url: thumbnailUrl,
-      duration: videoDuration,
+      thumbnail_url: thumbUrl,
+      duration: uploadState.duration,
       category: category.value,
       is_short: false,
       views: 0,
       likes_count: 0,
       visibility: visibility.value,
-      tags: tags,
-      comments_enabled: commentsToggle.checked,
-      age_restricted: ageRestrictedToggle.checked,
-      monetization_enabled: monetizationToggle.checked,
-      scheduled_for: scheduleDate.value || null,
-      playlist: playlistSelect.value || null,
     });
-    if(insertErr) throw insertErr;
-
+    if(insErr) throw insErr;
     progressFill.style.width = '100%';
-    progressLabel.textContent = '¡Publicado!';
+    progressLabel.textContent = '¡Listo!';
     progressPercent.textContent = '100%';
-    setStatus('success','✅ Video publicado correctamente.');
-    publishBtn.textContent = '✅ Publicado';
-
-    setTimeout(()=> location.hash = '#/home', 2000);
-
+    setStatus('success','Video publicado correctamente.');
+    publishBtn.textContent = '✅';
+    toastSuccess('Video publicado.');
+    setTimeout(()=>{
+      navigateTo('home');
+      publishBtn.textContent = 'Publicar';
+      uploadState.isUploading = false;
+      publishBtn.disabled = true;
+      progressInfo.style.display = 'none';
+      progressFill.style.width = '0%';
+      videoPreview.classList.remove('active');
+      dropzone.style.display = 'block';
+      uploadState.videoFile = null;
+      uploadState.thumbFile = null;
+      title.value = '';
+      description.value = '';
+      thumbPreview.innerHTML = '<span>🖼️</span>';
+      validateUpload();
+    }, 1500);
   } catch(err){
-    setStatus('error','❌ Error: ' + err.message);
+    setStatus('error','Error: ' + err.message);
+    toastError('Error: ' + err.message);
     publishBtn.textContent = 'Publicar';
     publishBtn.disabled = false;
-    isUploading = false;
+    uploadState.isUploading = false;
     console.error(err);
   }
 });
 
 // ============================================================
-// GUARDAR BORRADOR (localStorage)
+// SETTINGS
 // ============================================================
-draftBtn.addEventListener('click', ()=>{
-  const draft = {
-    title: title.value,
-    description: description.value,
-    tags: tags,
-    visibility: visibility.value,
-    category: category.value,
-    comments: commentsToggle.checked,
-    moderation: moderationToggle.checked,
-    ageRestricted: ageRestrictedToggle.checked,
-    monetization: monetizationToggle.checked,
-    schedule: scheduleDate.value,
-    playlist: playlistSelect.value,
-    savedAt: new Date().toISOString()
-  };
-  try{
-    localStorage.setItem('jheiler_draft', JSON.stringify(draft));
-    setStatus('success','✅ Borrador guardado correctamente.');
-  } catch(e){
-    setStatus('error','❌ No se pudo guardar el borrador.');
-  }
+document.getElementById('settingsLogoutBtn')?.addEventListener('click', doSignOut);
+document.getElementById('themeToggle')?.addEventListener('change', (e)=>{
+  document.body.style.background = e.target.checked ? '#0f0f0f' : '#f0f0f0';
+  document.body.style.color = e.target.checked ? '#fff' : '#111';
 });
 
 // ============================================================
-// CARGAR BORRADOR
+// HEADER BOTONES
 // ============================================================
-function loadDraft(){
-  try{
-    const raw = localStorage.getItem('jheiler_draft');
-    if(!raw) return;
-    const draft = JSON.parse(raw);
-    title.value = draft.title || '';
-    description.value = draft.description || '';
-    visibility.value = draft.visibility || 'public';
-    category.value = draft.category || 'Gaming';
-    commentsToggle.checked = draft.comments !== false;
-    moderationToggle.checked = draft.moderation || false;
-    ageRestrictedToggle.checked = draft.ageRestricted || false;
-    monetizationToggle.checked = draft.monetization || false;
-    scheduleDate.value = draft.schedule || '';
-    if(draft.playlist) playlistSelect.value = draft.playlist;
-    tags = draft.tags || [];
-    renderTags();
-    validateForm();
-    if(draft.title || draft.description || tags.length){
-      setStatus('info','💾 Se cargó un borrador guardado.');
-    }
-  } catch(e){}
-}
+document.getElementById('headerUploadBtn')?.addEventListener('click', ()=>navigateTo('upload'));
+document.getElementById('homeUploadBtn')?.addEventListener('click', ()=>navigateTo('upload'));
+document.getElementById('btnToggleSidebar')?.addEventListener('click', ()=>{
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebarOverlay');
+  if(window.innerWidth <= 900){
+    sb.classList.toggle('show');
+    ov.classList.toggle('show');
+  }
+});
+document.getElementById('sidebarOverlay')?.addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.remove('show');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+});
+document.querySelectorAll('.sb-item[data-route]').forEach(el=>{
+  el.addEventListener('click', (e)=>{
+    e.preventDefault();
+    const route = el.dataset.route;
+    if(route) navigateTo(route);
+  });
+});
 
 // ============================================================
-// INICIALIZAR
+// INIT
 // ============================================================
-renderTags();
-loadDraft();
-validateForm();
-console.log('📤 JHEILER - Subida de videos (estilo YouTube) cargada.');
+async function init(){
+  await initAuth();
+  // Si no hay hash o es #/, ir a home
+  if(!location.hash || location.hash === '#/' || location.hash === '#'){
+    history.replaceState(null, '', '#/home');
+  }
+  handleRoute();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+console.log('🚀 JHEILER SPA cargado correctamente.');
+console.log('📌 Rutas disponibles: #/home #/upload #/videos #/analytics #/playlists #/comments #/settings');
 </script>
 </body>
 </html>
