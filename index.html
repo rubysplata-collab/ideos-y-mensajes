@@ -986,7 +986,8 @@ async function handleSignupSubmit(e){
         display_name: displayName,
         avatar_url: null,
         banner_url: null,
-        description: ''
+        description: '',
+        subscribers_count: 0
       });
       if(profileErr){
         if(String(profileErr.message||'').toLowerCase().includes('duplicate')){
@@ -1409,15 +1410,9 @@ async function renderWatchPage(main, videoId){
 
     const channel = video.profiles || {};
     let isSubscribed = false;
-    let likeCount = 0;
     let userLiked = false;
-    let subsCount = 0;
-
-    const [{ count: lc }, { count: sc }] = await Promise.all([
-      supabase.from('video_likes').select('*', { count:'exact', head:true }).eq('video_id', video.id),
-      supabase.from('subscriptions').select('*', { count:'exact', head:true }).eq('channel_id', video.user_id)
-    ]);
-    likeCount = lc||0; subsCount = sc||0;
+    let likeCount = video.likes_count||0;
+    let subsCount = channel.subscribers_count||0;
 
     if(STATE.user){
       const [{ data: likeRow }, { data: subRow }] = await Promise.all([
@@ -1522,7 +1517,7 @@ async function registerWatchHistory(videoId){
     const { data: existing } = await supabase.from('watch_history')
       .select('id').eq('user_id', STATE.user.id).eq('video_id', videoId).maybeSingle();
     if(existing){
-      await supabase.from('watch_history').update({ created_at: new Date().toISOString() }).eq('id', existing.id);
+      await supabase.from('watch_history').update({ watched_at: new Date().toISOString() }).eq('id', existing.id);
     } else {
       await supabase.from('watch_history').insert({ user_id: STATE.user.id, video_id: videoId });
     }
@@ -1551,6 +1546,16 @@ function bindWatchPageEvents(video){
   if(loginPrompt) loginPrompt.addEventListener('click', (e)=>{ e.preventDefault(); openAuthModal('login'); });
 }
 
+// videos.likes_count / profiles.subscribers_count son contadores denormalizados.
+// Si el proyecto ya los mantiene con un trigger en video_likes/subscriptions, este
+// update es redundante pero inofensivo (mismo valor). Si no hay trigger, esto los mantiene sincronizados.
+async function syncLikesCount(videoId, newCount){
+  try{ await supabase.from('videos').update({ likes_count: newCount }).eq('id', videoId); }catch(e){ /* no crítico */ }
+}
+async function syncSubscribersCount(channelId, newCount){
+  try{ await supabase.from('profiles').update({ subscribers_count: newCount }).eq('id', channelId); }catch(e){ /* no crítico */ }
+}
+
 async function toggleLike(videoId, btn){
   if(!requireAuth('dar like')) return;
   const wasLiked = btn.classList.contains('liked');
@@ -1563,6 +1568,7 @@ async function toggleLike(videoId, btn){
       if(error) throw error;
       btn.classList.remove('liked');
       count = Math.max(0,count-1);
+      syncLikesCount(videoId, count);
     } else {
       const { data: existing } = await supabase.from('video_likes').select('id').eq('video_id',videoId).eq('user_id',STATE.user.id).maybeSingle();
       if(!existing){
@@ -1571,6 +1577,7 @@ async function toggleLike(videoId, btn){
       }
       btn.classList.add('liked');
       count = count+1;
+      syncLikesCount(videoId, count);
     }
     countEl.textContent = formatCount(count);
   }catch(err){
@@ -1605,6 +1612,7 @@ async function toggleSubscribe(channelId, btn){
       let n = parseInt((subsLabel.textContent||'0').replace(/[^0-9]/g,'')) || 0;
       n = wasSubbed ? Math.max(0,n-1) : n+1;
       subsLabel.textContent = formatCount(n) + ' suscriptores';
+      syncSubscribersCount(channelId, n);
     }
     toastSuccess(wasSubbed ? 'Te has dado de baja.' : '¡Suscripción exitosa!');
   }catch(err){
@@ -1645,9 +1653,9 @@ function commentHTML(c){
           <span class="comment-author">${escapeHTML(author.display_name||author.username||'Usuario')}</span>
           <span class="comment-date">${timeAgo(c.created_at)}</span>
         </div>
-        <div class="comment-text">${escapeHTML(c.content||c.text||c.comment||'')}</div>
+        <div class="comment-text">${escapeHTML(c.content||'')}</div>
         <div class="comment-actions">
-          <span class="comment-like-btn">👍 ${formatCount(c.likes||0)}</span>
+          <span class="comment-like-btn">👍 ${formatCount(c.likes_count||0)}</span>
         </div>
       </div>
     </div>`;
@@ -1779,6 +1787,11 @@ function renderUploadForm(isShort){
           ${CATEGORIES.map(c=>`<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('')}
         </select>
       </div>
+      <div class="field">
+        <label>Hashtags</label>
+        <input type="text" id="uploadHashtags" placeholder="roblox, gaming, tutorial (separados por coma)">
+        <div class="field-hint">Opcional. Sepáralos con comas.</div>
+      </div>
       <div id="uploadError" class="field-error hidden"></div>
       <div class="progress-track hidden" id="uploadProgressTrack"><div class="progress-fill" id="uploadProgressFill"></div></div>
       <div id="uploadStatusText" style="font-size:12px;color:var(--text-secondary);margin-top:6px;"></div>
@@ -1890,6 +1903,8 @@ function renderUploadForm(isShort){
       progressFill.style.width = '80%';
 
       statusText.textContent = 'Publicando...';
+      const hashtagsRaw = qs('#uploadHashtags').value.trim();
+      const hashtagsArr = hashtagsRaw ? hashtagsRaw.split(',').map(h=>h.trim().replace(/^#/,'')).filter(Boolean) : [];
       const { data: inserted, error: insertErr } = await supabase.from('videos').insert({
         user_id: userId,
         title: qs('#uploadTitle').value.trim(),
@@ -1899,7 +1914,10 @@ function renderUploadForm(isShort){
         duration: videoDuration,
         category: qs('#uploadCategory').value,
         is_short: isShort,
-        views: 0
+        views: 0,
+        likes_count: 0,
+        hashtags: hashtagsArr,
+        channel: (STATE.profile && (STATE.profile.display_name||STATE.profile.username)) || ''
       }).select().maybeSingle();
       if(insertErr) throw new Error('El archivo se subió pero no se pudo publicar: ' + insertErr.message);
 
@@ -2118,9 +2136,9 @@ async function renderHistoryPage(main){
   try{
     const { data, error } = await supabase
       .from('watch_history')
-      .select('created_at, videos(*, profiles!videos_user_id_fkey(*))')
+      .select('watched_at, videos(*, profiles!videos_user_id_fkey(*))')
       .eq('user_id', STATE.user.id)
-      .order('created_at', { ascending:false })
+      .order('watched_at', { ascending:false })
       .limit(60);
     if(error) throw error;
     const videos = (data||[]).map(r=>r.videos).filter(Boolean);
@@ -2242,7 +2260,7 @@ async function renderChannelPage(main, channelId, tab){
         </div>`;
       return;
     }
-    const { count: subsCount } = await supabase.from('subscriptions').select('*',{count:'exact',head:true}).eq('channel_id',channelId);
+    const subsCount = profile.subscribers_count||0;
     let isSubscribed = false;
     if(STATE.user && STATE.user.id!==channelId){
       const { data: subRow } = await supabase.from('subscriptions').select('id').eq('channel_id',channelId).eq('subscriber_id',STATE.user.id).maybeSingle();
